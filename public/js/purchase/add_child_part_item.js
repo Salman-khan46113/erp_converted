@@ -4,7 +4,6 @@ $( document ).ready(function() {
 const page = {
     init: function(){
         this.formValidation();
-        this.initPlugin()
     },
     formValidation: function(){
         $("#addchildpart").validate({
@@ -96,9 +95,9 @@ const page = {
                 success: function(result){
                   var data = JSON.parse(result);
                   if (data.success == 1) {
-                      // toastr.success(data.messages);
+                      toastr.success(data.messages);
                       setTimeout(function () {
-                        window.location.href = base_url+"child_part_view";
+                        window.location.href = "child_part_view";
                     }, 2000);
                   }else{
                     toastr.error(data.messages);
@@ -109,9 +108,6 @@ const page = {
             }
         }); 
     },
-    initPlugin: function(){
-        $(".item-category,.assets,.item-uom").select2()
-    }
     
 }
 

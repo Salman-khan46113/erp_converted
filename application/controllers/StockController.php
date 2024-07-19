@@ -41,194 +41,43 @@ class StockController extends CommonController
 			$data['child_part_list'] = $this->SupplierParts->readSupplierParts();
 			$fetchedList = true;
 		} 
-		$stock_column_name = $this->Unit->getStockColNmForClientUnit();
 
-		//FOR SHEET ONLY
-        $sheet_prod_column_name = $this->Unit->getProdColNmForClientUnit();
-
-		//FOR PLASTIC ONLY
-		$plastic_prod_column_name = $this->Unit->getPlasticProdColNmForClientUnit();
-
-		//Sharing_qty
-		$sharingQtyColName = $this->Unit->getSharingQtyColNmForClientUnit();
-
-        $column[] = [
-            "data" => "part_number",
-            "title" => "Part Number",
-            "width" => "16%",
-            "className" => "dt-left",
-        ];
-        $column[] = [
-            "data" => "part_description",
-            "title" => "Part Description",
-            "width" => "17%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "uom_name",
-            "title" => "UOM",
-            "width" => "10%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        $column[] = [
-            "data" => "safty_buffer_stk",
-            "title" => "Safety Buffer Stock",
-            "width" => "17%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "stock",
-            "title" => "Store Stock",
-            "width" => "17%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        $column[] = [
-            "data" => "sub_con_stock",
-            "title" => "Subcon Stock",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "onhold_stock",
-            "title" => "Stock Reserve against Job order",
-            "width" => "7%",
-            "className" => "dt-center status-row",
-        ];
-        $column[] = [
-            "data" => "store_scrap",
-            "title" => "Production Rejection Stock",
-            "width" => "17%",
-            "className" => "dt-center",
-			
-        ];
-       
-        $column[] = [
-            "data" => "rejection_stock",
-            "title" => "Store Rejection Stock",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "rejection_prodcution_qty",
-            "title" => "Production Stock",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        $column[] = [
-            "data" => "underinspection_stock",
-            "title" => "Under Inspection Stock",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        
-        $column[] = [
-            "data" => "scrap_stock",
-            "title" => "GRN Rejection Stock",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-
-		$column[] = [
-            "data" => "store_rack_location",
-            "title" => "Store Rack Location",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        
-          $column[] = [
-            "data" => "store_stock_rate",
-            "title" => "Store Stock Rate",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-
-		$column[] = [
-            "data" => "stock_value",
-            "title" => "Production Stock",
-            "width" => "17%",
-            "className" => "dt-center",
-			
-        ];
-        
-        $column[] = [
-            "data" => "stock_value",
-            "title" => "Store Stock Value",
-            "width" => "17%",
-            "className" => "dt-center",
-			
-        ];
-       
-        $column[] = [
-            "data" => "$sharingQtyColName",
-            "title" => "Sharing Stock",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-		$column[] = [
-            "data" => "$sharingQtyColName",
-            "title" => "Machine Mold Stock",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-
-        $column[] = [
-            "data" => "store_stock_rate",
-            "title" => "Production Scrap",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        $column[] = [
-            "data" => "production_rejection",
-            "title" => "Production Rejection",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        
-        $column[] = [
-            "data" => "deflashing_stock",
-            "title" => "Deflashing Location",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-
-		$column[] = [
-            "data" => "store_stock_rate",
-            "title" => "Transfer To FG",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        
-        
-        $data["data"] = $column;
-        $data["is_searching_enable"] = false;
-        $data["is_paging_enable"] = true;
-        $data["is_serverSide"] = true;
-        $data["is_ordering"] = true;
-        $data["is_heading_color"] = "#a18f72";
-        $data["no_data_message"] =
-            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
-            base_url() .
-            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
-        $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
-        $data["admin_url"] = base_url();
-        $data["base_url"] = base_url();
-        
-       
 
 		// pr($this->db->last_query(),1);
-		
+		foreach ($data['child_part_list'] as $key => $po) {
+			$stock = 0;
+			if($po->stock != ''){
+				$stock = $stock + $po->stock;
+			}
+            $data['child_part_list'][$key]->uom_data = $this->Crud->get_data_by_id("uom", $po->uom_id, "id");
+            $data['child_part_list'][$key]->child_part_id = $this->Crud->get_data_by_id("part_type", $po->child_part_id, "id");
+            $grn_details_data = $this->Crud->get_data_by_id("grn_details", $po->id, "part_id");
+            $job_card_details = $this->Crud->get_data_by_id("job_card_details", $po->part_number, "item_number");
+            $total_value += ($stock) * ($po->store_stock_rate);
+            $store_scrap = 0;
+			if ($job_card_details) {
+	            foreach ($job_card_details  as $jd) {
+					$store_scrap = $store_scrap + $jd->store_reject_qty;
+				}
+           	}
+                
+			$store_stock = 0;
+            $underinspection_stock = 0;
+            $scrap_stock = 0;
+            if ($grn_details_data) {
+            	foreach ($grn_details_data as $d) {
+					$scrap_stock = $scrap_stock + $d->reject_qty;
+                	if ($d->accept_qty == 0) {
+                    	$underinspection_stock = $underinspection_stock + $d->verified_qty;
+                   	} else {
+                    }
+                }
+            }
+            $data['child_part_list'][$key]->stock = $stock;
+            $data['child_part_list'][$key]->store_scrap = $store_scrap;
+            $data['child_part_list'][$key]->underinspection_stock = $underinspection_stock;
+            $data['child_part_list'][$key]->scrap_stock = $scrap_stock;
+		}
 		if(!empty($filter_part_id)) {
 			$data['filter_part_id'] = $filter_part_id;
 		}
@@ -240,47 +89,17 @@ class StockController extends CommonController
 			$data['supplier_part_select_list'] = $this->SupplierParts->readSupplierParts();
 		}
 
-		
+		$data['stock_column_name'] = $this->Unit->getStockColNmForClientUnit();
+
+		//FOR SHEET ONLY
+        $data['sheet_prod_column_name'] = $this->Unit->getProdColNmForClientUnit();
+
+		//FOR PLASTIC ONLY
+		$data['plastic_prod_column_name'] = $this->Unit->getPlasticProdColNmForClientUnit();
+
+		//Sharing_qty
+		$data['sharingQtyColName'] = $this->Unit->getSharingQtyColNmForClientUnit();
 		$this->loadView('store/part_stocks', $data);
-	}
-
-	public function getPartStockReportData(){
-		$customer_part_id  = $this->input->post("customer_part_id");
-		$post_data = $this->input->post();
-		
-        $column_index = array_column($post_data["columns"], "data");
-        $order_by = "";
-        foreach ($post_data["order"] as $key => $val) {
-			if ($key == 0) {
-				$order_by .= $column_index[$val["column"]] . " " . $val["dir"];
-            } else {
-				$order_by .=
-				"," . $column_index[$val["column"]] . " " . $val["dir"];
-            }
-        }
-		
-        $condition_arr["order_by"] = $order_by;
-        $condition_arr["start"] = $post_data["start"];
-        $condition_arr["length"] = $post_data["length"];
-        $base_url = $this->config->item("base_url");
-		
-		$data = $this->SupplierParts->getPartStockReportView($condition_arr,$post_data["search"]);
-		
-		
-		
-		foreach ($data as $key => $value) {
-			// $edit_data = base64_encode(json_encode($value)); 
-			// $data[$key]['action'] = "<i class='ti ti-edit edit-part' title='Edit' data-value='$edit_data'></i>";
-			$stock_val = $value['stock'] * $value['store_stock_rate'];
-			$data[$key]['stock_value'] = $stock_val;
-		}
-
-		$data["data"] = $data;
-        $total_record = $this->SupplierParts->getPartStockReportViewCount($condition_arr, $post_data["search"]);
-		
-        $data["recordsTotal"] = count($total_record);
-        $data["recordsFiltered"] = count($total_record);
-        echo json_encode($data);
 	}
 
 	/**

@@ -350,7 +350,6 @@ class Crud extends CI_Model
 
     public function get_data_by_id($table_name, $id, $column_name)
     {	
-		
 		$this->db->order_by("id", "desc");
 		$dateTime = time();
         if ($this->db->field_exists('admin_approve', $table_name)) {

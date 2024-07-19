@@ -1512,9 +1512,9 @@ class P_Molding extends CommonController
 		);
 		$data['mold_maintenance_data'] = $mold_maintenance_data;
 		$data['mold_maintenance_history'] = $this->Common_admin_model->get_data_by_id_multiple_condition("mold_maintenance", $data_old);
-		$data['mld_data'] = $this->Crud->get_data_by_id("mold_maintenance", $data['mold_maintenance_data'][0]->id, "id");
-		$data['customer_part_data'] = $this->Crud->get_data_by_id("customer_part", $data['mold_maintenance_data'][0]->customer_part_id, "id");;
-		$data['customer_data'] = $this->Crud->get_data_by_id("customer", $data['customer_part_data'][0]->customer_id, "id");
+		$data['mld_data'] = $this->crud->get_data_by_id("mold_maintenance", $data['mold_maintenance_data'][0]->id, "id");
+		$data['customer_part_data'] = $this->crud->get_data_by_id("customer_part", $data['mold_maintenance_data'][0]->customer_part_id, "id");;
+		$data['customer_data'] = $this->crud->get_data_by_id("customer", $data['customer_part_data'][0]->customer_id, "id");
 		foreach($data['mold_maintenance_history'] as $p){
 			$totalQuantity = 0;
 			$tot_qty_arr = [];

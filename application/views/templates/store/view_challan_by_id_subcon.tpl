@@ -15,7 +15,7 @@
             <%if ($new_po[0]->expiry_po_date > date('Y-m-d')) %>
                 <%assign var='expired' value="yes" %>
             <%else %>
-                 
+
             <%/if%>
           </div>
           <div class="col-sm-6">
@@ -37,40 +37,40 @@
             <div class="card">
               <div class="card-header">
                 <div class="row">
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <div class="form-group">
                       <label for="">Challan Number <span class="text-danger">*</span> </label>
                       <input type="text" readonly value="<%$challan_data[0]->challan_number %>" class="form-control">
                     </div>
                   </div>
-                  <div class="col-lg-4">
+                  <div class="col-lg-3">
                     <div class="form-group">
                       <label for="">Customer Name <span class="text-danger">*</span> </label>
                       <input type="text" readonly value="<%$customer[0]->customer_name %>" class="form-control">
                     </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <div class="form-group">
                       <label for="">Challan Date & Time <span class="text-danger">*</span>
                       </label>
                       <input type="text" readonly value="<%$challan_data[0]->created_date %> / <%$challan_data[0]->created_time %>" class="form-control">
                     </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <%if ($challan_data[0]->status != "completed") %>
-	                    <button type="submit" data-toggle="modal" class="btn btn-sm btn-dark mt-4" data-target="#challanCOmplete">
+	                    <button type="submit" data-bs-toggle="modal" class="btn btn-sm btn-dark mt-4" data-bs-target="#challanCOmplete">
 	                    Complete Challan
 	                    </button>
                     <%/if%>
                     <div class="modal fade" id="challanCOmplete" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                      <div class="modal-dialog modal-lg" role="document">
+                      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                         <div class="modal-content">
                           <div class="modal-header">
                             <h5 class="modal-title" id="exampleModalLabel">Change Status Of
-                              Challan 
+                              Challan
                             </h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+
                             </button>
                           </div>
                           <div class="modal-body">
@@ -85,7 +85,7 @@
                                 </div>
                               </div>
                               <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Save
                                 changes</button>
                               </div>
@@ -99,7 +99,7 @@
               </div>
               <div class="card-header">
                 <div class="row">
-                  <div class="col-lg-5">
+                  <div class="col-lg-3">
                     <div class="form-group">
                       <form action="<%base_url('add_challan_parts_subcon') %>" method="post">
                         <label for="">Select Part Number // Description // Current Stock<span class="text-danger">*</span> </label>
@@ -116,19 +116,19 @@
 				                            <%/if%>
 		                            <%/foreach%>
 		                        <%/if%>
-		                            
+
                          <%/if%>
                         </select>
                     </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                   <div class="form-group">
                   <label for="">Enter input Qty <span class="text-danger">*</span> </label>
                   <input type="number" step="any" name="qty" placeholder="Enter QTY " required class="form-control">
                   <input type="hidden" name="challan_id" value="<%$challan_data[0]->id %>" required class="form-control">
                   </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                   <div class="form-group">
                   <label for="">Select Process <span class="text-danger">*</span> </label>
                   <select name="process" required id="" class="form-control select2">
@@ -140,7 +140,7 @@
                   </select>
                   </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                   <div class="form-group">
                   <%if ($challan_data[0]->status == "completed") %>
                        Challan Completed
@@ -156,9 +156,9 @@
               <div class="card-header">
                 <%if ($po_parts) %>
                   	<%if ($new_po[0]->status == "pending") %>
-                  
+
                       	<%if ($this->session->userdata['type'] == 'admin' || $this->session->userdata['type'] == 'Admin') %>
-			                <button type="button" class="btn btn-danger ml-1" data-toggle="modal" data-target="#lock">
+			                <button type="button" class="btn btn-danger ml-1" data-bs-toggle="modal" data-bs-target="#lock">
 			                Lock PO
 			                </button>
 		                <%/if%>
@@ -166,16 +166,16 @@
                 <%/if%>
                 <%if ($new_po[0]->status == "lock") %>
 	                  <%if ($this->session->userdata['type'] == 'admin' || $this->session->userdata['type'] == 'Admin') %>
-	                  	<button type="button" class="btn btn-success ml-1" data-toggle="modal" data-target="#accpet">
+	                  	<button type="button" class="btn btn-success ml-1" data-bs-toggle="modal" data-bs-target="#accpet">
 		                Accept (Released) PO
 		                </button>
-		                <button type="button" class="btn btn-danger ml-1" data-toggle="modal" data-target="#delete">
+		                <button type="button" class="btn btn-danger ml-1" data-bs-toggle="modal" data-bs-target="#delete">
 		                Reject (delete) PO
 		                </button>
 		              <%/if%>
                 <%else %>
                   <%if ($new_po[0]->status != "pending") %>
-	                <%* <!-- <button type="button" disabled class="btn btn-success ml-1" data-toggle="modal" data-target="#accpet">
+	                <%* <!-- <button type="button" disabled class="btn btn-success ml-1" data-bs-toggle="modal" data-bs-target="#accpet">
 	                  PO Already Released
 	                  </button> -->
 	                <!-- <a href="<?php echo base_url('download_my_pdf/') . $new_po[0]->id ?>" class="btn btn-primary" href="">Download</a> --> *%>
@@ -183,11 +183,11 @@
                 <%/if%>
                 <!-- Modal -->
                 <div class="modal fade" id="accpet" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                  <div class="modal-dialog">
+                  <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Update</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                         </button>
                       </div>
@@ -205,7 +205,7 @@
                         </div>
                       </div>
                       <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                       <button type="submit" class="btn btn-primary">Update</button>
                       </div>
                     </div>
@@ -213,12 +213,12 @@
                   </div>
                 </div>
                 <div class="modal fade" id="lock" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                  <div class="modal-dialog">
+                  <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Update</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+
                         </button>
                       </div>
                       <div class="modal-body">
@@ -235,7 +235,7 @@
                         </div>
                       </div>
                       <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                       <button type="submit" class="btn btn-primary">Update</button>
                       </div>
                     </div>
@@ -243,12 +243,12 @@
                   </div>
                 </div>
                 <div class="modal fade" id="delete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                  <div class="modal-dialog">
+                  <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+
                         </button>
                       </div>
                       <div class="modal-body">
@@ -266,7 +266,7 @@
                         </div>
                       </div>
                       <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                       <button type="submit" class="btn btn-primary">Update</button>
                       </div>
                     </div>
@@ -308,21 +308,21 @@
 			                      <td>
 			                        <%if ($challan_data[0]->status != "completed") %>
 			                         	 <!-- Button trigger modal -->
-					                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModa123123123123l<%$i %>">
+					                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModa123123123123l<%$i %>">
 					                        Edit
 					                        </button>
-					                        <button type="button" class="btn btn-danger ml-1" data-toggle="modal" data-target="#exampleModaldelet213123e<%$i %>">
+					                        <button type="button" class="btn btn-danger ml-1" data-bs-toggle="modal" data-bs-target="#exampleModaldelet213123e<%$i %>">
 					                        Delete
 					                        </button>
 					                        <!-- Modal -->
 					                        <div class="modal fade" id="exampleModa123123123123l<%$i %>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-					                          <div class="modal-dialog">
+					                          <div class="modal-dialog modal-dialog-centered">
 					                            <div class="modal-content">
 					                              <div class="modal-header">
 					                                <h5 class="modal-title" id="exampleModalLabel">Update
 					                                </h5>
-					                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					                                <span aria-hidden="true">&times;</span>
+					                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+
 					                                </button>
 					                              </div>
 					                              <div class="modal-body">
@@ -339,7 +339,7 @@
 					                                </div>
 					                              </div>
 					                              <div class="modal-footer">
-					                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 					                              <button type="submit" class="btn btn-primary">Update</button>
 					                              </div>
 					                            </div>
@@ -348,13 +348,13 @@
 					                        </div>
 					                        <!-- Modal -->
 					                        <div class="modal fade" id="exampleModaldelet213123e<%$i %>" tabindex="-1" aria-labelledby="" aria-hidden="true">
-					                          <div class="modal-dialog">
+					                          <div class="modal-dialog modal-dialog-centered">
 					                            <div class="modal-content">
 					                              <div class="modal-header">
 					                                <h5 class="modal-title" id="exampleModalLabel">Delete
 					                                </h5>
-					                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					                                <span aria-hidden="true">&times;</span>
+					                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+
 					                                </button>
 					                              </div>
 					                              <div class="modal-body">
@@ -371,7 +371,7 @@
 					                                </div>
 					                              </div>
 					                              <div class="modal-footer">
-					                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 					                              <button type="submit" class="btn btn-primary">Update</button>
 					                              </div>
 					                            </div>
@@ -387,26 +387,26 @@
 			                              <%if ($p->challan_parts_history_status == "completed") %>
 			                                  Stock updated
 			                              <%else %>
-					                        <button type="submit" data-toggle="modal" class="btn btn-sm btn-danger" data-target="#exampleModal2123<%$i %>">
+					                        <button type="submit" data-bs-toggle="modal" class="btn btn-sm btn-danger" data-bs-target="#exampleModal2123<%$i %>">
 					                        Accept Challan Qty
 					                        </button>
 				                          <%/if%>
 			                        <%else %>
 			                          	<%if ($p->remaning_qty > 1) %>
-				                        <button type="submit" data-toggle="modal" class="btn btn-sm btn-primary" data-target="#exampleModal2<%$i %>">
+				                        <button type="submit" data-bs-toggle="modal" class="btn btn-sm btn-primary" data-bs-target="#exampleModal2<%$i %>">
 				                        Challan Return Qty
 				                        </button>
 				                        <%/if%>
 			                        <%/if%>
 			                        <div class="modal fade" id="exampleModal2123<%$i %>" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-			                          <div class="modal-dialog modal-lg" role="document">
+			                          <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 			                            <div class="modal-content">
 			                              <div class="modal-header">
 			                                <h5 class="modal-title" id="exampleModalLabel">Accept
-			                                  Qty 
+			                                  Qty
 			                                </h5>
-			                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-			                                <span aria-hidden="true">&times;</span>
+			                                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+
 			                                </button>
 			                              </div>
 			                              <div class="modal-body">
@@ -431,7 +431,7 @@
 			                                    </div>
 			                                  </div>
 			                                  <div class="modal-footer">
-			                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 			                                    <button type="submit" class="btn btn-primary">Save
 			                                    changes</button>
 			                                  </div>
@@ -441,14 +441,14 @@
 			                          </div>
 			                        </div>
 			                        <div class="modal fade" id="exampleModal2<%$i %>" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-			                          <div class="modal-dialog modal-lg" role="document">
+			                          <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 			                            <div class="modal-content">
 			                              <div class="modal-header">
 			                                <h5 class="modal-title" id="exampleModalLabel">Return
-			                                  Qty 
+			                                  Qty
 			                                </h5>
-			                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-			                                <span aria-hidden="true">&times;</span>
+			                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+
 			                                </button>
 			                              </div>
 			                              <div class="modal-body">
@@ -472,7 +472,7 @@
 			                                    </div>
 			                                  </div>
 			                                  <div class="modal-footer">
-			                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 			                                    <button type="submit" class="btn btn-primary">Save
 			                                    changes</button>
 			                                  </div>

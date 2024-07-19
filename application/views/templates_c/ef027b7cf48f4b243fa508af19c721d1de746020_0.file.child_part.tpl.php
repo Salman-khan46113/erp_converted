@@ -1,18 +1,18 @@
 <?php
-/* Smarty version 4.3.2, created on 2024-06-27 19:25:35
+/* Smarty version 4.3.2, created on 2024-06-25 18:23:57
   from '/var/www/html/extra_work/erp_converted/application/views/templates/purchase/child_part.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '4.3.2',
-  'unifunc' => 'content_667d6f57ccd3a8_76077017',
+  'unifunc' => 'content_667abde556e003_79944258',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
     'ef027b7cf48f4b243fa508af19c721d1de746020' => 
     array (
       0 => '/var/www/html/extra_work/erp_converted/application/views/templates/purchase/child_part.tpl',
-      1 => 1719496535,
+      1 => 1719320009,
       2 => 'file',
     ),
   ),
@@ -20,45 +20,25 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_667d6f57ccd3a8_76077017 (Smarty_Internal_Template $_smarty_tpl) {
+function content_667abde556e003_79944258 (Smarty_Internal_Template $_smarty_tpl) {
 $_smarty_tpl->_assignInScope('entitlements', $_smarty_tpl->tpl_vars['session_data']->value['entitlements']);?>
 <!-- Content wrapper -->
+<div class="content-wrapper">
+  <!-- Content -->
 
   <div class="container-xxl flex-grow-1 container-p-y">
     <nav aria-label="breadcrumb">
-      <div class="sub-header-left pull-left breadcrumb">
-        <h1>
-          Master
-          <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link" title="Back to Issue Request Listing" >
-            <i class="ti ti-chevrons-right" ></i>
-            <em >Item</em></a>
-        </h1>
-        <br>
-        <?php if ($_smarty_tpl->tpl_vars['type']->value == "direct") {?>
-          <span >Add Direct Regular Item</span>
-        <?php } elseif (($_smarty_tpl->tpl_vars['type']->value == "subcon_item")) {?>
-           <span >Add Direct Subcon Item</span>
-        <?php } elseif (($_smarty_tpl->tpl_vars['type']->value == "subcon_regular")) {?>
-          <span >Add Direct Subcon Regular</span>
-        <?php } elseif (($_smarty_tpl->tpl_vars['type']->value == "consumable_item")) {?>
-          <span >Add Indirect Consumable Item</span>
-        <?php } elseif (($_smarty_tpl->tpl_vars['type']->value == "indirect_assets")) {?>
-          <span >Add Indirect Asset</span>
-        <?php } elseif (($_smarty_tpl->tpl_vars['type']->value == "customer_bom")) {?>
-          <span > Add Customer Bom Asset</span>
-        <?php }?>
-      </div>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Item part List</li>
+      </ol>
     </nav>
-    <div class="dt-top-btn d-grid gap-2 d-md-flex  mb-5 listing-btn">
-      <a class="btn btn-seconday" type="button" href="<?php echo base_url('child_part_view');?>
-"><i class="ti ti-arrow-left" title="Back To Item Part List"></i></a>
-    </div>
     <!-- <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Forms/</span> Vertical Layouts</h4> -->
     <div class="row">
       <div class="col-xl-12">
 
         <div class="nav-align-top mb-3">
-          <ul class="nav nav-pills mb-1 justify-content-center hide" role="tablist">
+          <ul class="nav nav-pills mb-1 justify-content-center" role="tablist">
             <li class="nav-item">
               <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-top-home" aria-controls="navs-pills-top-home" aria-selected="false">
                 Add Direct Regular Item
@@ -163,32 +143,22 @@ jelly-o tart brownie jelly.
             <div class="col-lg-6">
               <div class="form-group mb-3">
                 <label> Purchase Item Category </label><span class="text-danger">*</span>
-                <select class="form-control select2 item-category" name="sub_type">
+                <select class="form-control select2" name="sub_type">
                   <?php if ($_smarty_tpl->tpl_vars['type']->value == "direct") {?>
                   <option value="Regular grn">Regular grn</option>
                   <option value="RM">RM</option>
-                  <?php } elseif (($_smarty_tpl->tpl_vars['type']->value == "subcon_item")) {?>
-                    <option value="Subcon grn">Subcon grn</option>4
-                  <?php } elseif (($_smarty_tpl->tpl_vars['type']->value == "subcon_regular")) {?>
-                    <option value="Subcon Regular">Subcon Regular</option>
-                  <?php } elseif (($_smarty_tpl->tpl_vars['type']->value == "consumable_item")) {?>
-                    <option value="consumable">Consumable</option>
-                  <?php } elseif (($_smarty_tpl->tpl_vars['type']->value == "indirect_assets")) {?>
-                    <option value="asset">asset</option>
-                  <?php } elseif (($_smarty_tpl->tpl_vars['type']->value == "customer_bom")) {?>
-                    <option value="customer_bom">customer bom</option>
                   <?php }?>
                 </select>
               </div>
             </div>
 
-              <?php if ($_smarty_tpl->tpl_vars['type']->value == "customer_bom" || $_smarty_tpl->tpl_vars['type']->value == "indirect_assets") {?>
+
+              <?php if ($_smarty_tpl->tpl_vars['type']->value != "direct") {?>
               <div class="col-lg-6">
               <div class="form-group mb-3">
                 <label> Asset </label>
-                <select class="form-control select2 assets" name="asset" style="width: 100%;">
-                  <option value="consumable">Consumable</option>
-                  <?php if ($_smarty_tpl->tpl_vars['asset']->value) {?>
+                <select class="form-control select2" name="asset" style="width: 100%;">
+                  <option value="NA">NA</option>
                   <?php
 $_from = $_smarty_tpl->smarty->ext->_foreach->init($_smarty_tpl, $_smarty_tpl->tpl_vars['asset']->value, 'a');
 $_smarty_tpl->tpl_vars['a']->do_else = true;
@@ -199,10 +169,9 @@ $_smarty_tpl->tpl_vars['a']->do_else = false;
 ">
                     <?php echo $_smarty_tpl->tpl_vars['a']->value->name;?>
 </option>
-                  <?php
+                    <?php
 }
 $_smarty_tpl->smarty->ext->_foreach->restore($_smarty_tpl, 1);?>
-                  <?php }?>
                   </select>
                 </div>
               </div>
@@ -244,7 +213,7 @@ $_smarty_tpl->smarty->ext->_foreach->restore($_smarty_tpl, 1);?>
               <div class="col-lg-6">
                 <div class="form-group mb-3">
                   <label> UOM </label><span class="text-danger">*</span>
-                  <select class="form-control select2 item-uom" name="uom_id" style="width: 100%;">
+                  <select class="form-control select2" name="uom_id" style="width: 100%;">
                     <?php
 $_from = $_smarty_tpl->smarty->ext->_foreach->init($_smarty_tpl, $_smarty_tpl->tpl_vars['uom']->value, 'c1');
 $_smarty_tpl->tpl_vars['c1']->do_else = true;
@@ -286,12 +255,7 @@ $_smarty_tpl->smarty->ext->_foreach->restore($_smarty_tpl, 1);?>
 
 
   <div class="content-backdrop fade"></div>
-<style type="text/css">
-  .select2-container--default .select2-selection.select2-selection--single {
-    height: 37px !important;
-    border: var(--bs-border-width) solid #d9dee3;
-}
-</style>
+</div>
 <?php echo '<script'; ?>
  type="text/javascript">
   var base_url = <?php echo json_encode($_smarty_tpl->tpl_vars['base_url']->value);?>

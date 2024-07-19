@@ -1,18 +1,18 @@
 <?php
-/* Smarty version 4.3.2, created on 2024-06-26 20:48:08
+/* Smarty version 4.3.2, created on 2024-06-25 22:11:02
   from '/var/www/html/extra_work/erp_converted/application/views/templates/header.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '4.3.2',
-  'unifunc' => 'content_667c31309019b9_20219668',
+  'unifunc' => 'content_667af31e34fed6_43930693',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
     'bd2986b00e1c34c93f8703313b64a0d9aabedfb9' => 
     array (
       0 => '/var/www/html/extra_work/erp_converted/application/views/templates/header.tpl',
-      1 => 1719415083,
+      1 => 1719333661,
       2 => 'file',
     ),
   ),
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_667c31309019b9_20219668 (Smarty_Internal_Template $_smarty_tpl) {
+function content_667af31e34fed6_43930693 (Smarty_Internal_Template $_smarty_tpl) {
 if (!($_smarty_tpl->tpl_vars['session_data']->value['user_id'] > 0)) {
 echo redirect('login');?>
 
@@ -64,8 +64,7 @@ public/assets/img/favicon/favicon.png" />
       <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
 public/assets/vendor/fonts/boxicons.css" />
       <!-- tabler css -->
-      <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/css/plugin/tabler_css/tabler_icons.css">
+      <link rel="stylesheet" href="public/css/plugin/tabler_css/tabler_icons.css">
       <!-- Core CSS -->
       <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
 public/assets/vendor/css/core.css" class="template-customizer-core-css" />
@@ -143,8 +142,7 @@ public/js/admin/plugin/jquery.validate.js"><?php echo '</script'; ?>
 >
       <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
       <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedcolumns/3.3.3/css/fixedColumns.dataTables.min.css">
-      <link rel="stylesheet" type="text/css" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/css/data_table/datatable.css">
+      <link rel="stylesheet" type="text/css" href="public/css/data_table/datatable.css">
       <!-- select2 -->
       <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
       <?php echo '<script'; ?>

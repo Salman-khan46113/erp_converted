@@ -1,79 +1,5 @@
-<div class="wrapper container-xxl flex-grow-1 container-p-y">
+<div class="wrapper">
     <!-- Content Wrapper. Contains page content -->
-
-    <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme filter-popup-block" style="width: 0px;">
-    <div class="app-brand demo justify-content-between">
-        <a href="javascript:void(0)" class="app-brand-link">
-            <span class="app-brand-text demo menu-text fw-bolder ms-2">Filter</span>
-        </a>
-        <div class="close-filter-btn d-block filter-popup cursor-pointer">
-                <i class="ti ti-x fs-8"></i>
-            </div>
-    </div>
-    <nav class="sidebar-nav scroll-sidebar filter-block" data-simplebar="init">
-      <div class="simplebar-content" >
-        <ul class="menu-inner py-1">
-            <!-- Dashboard -->
-            <div class="filter-row">
-              <li class="nav-small-cap">
-                <span class="hide-menu">Select Month</span>
-                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
-              </li>
-              <li class="sidebar-item">
-                <div class="input-group">
-                <select required name="created_month" id="months" class="form-control select2">
-                <%foreach $month_data as $key => $val%>
-                <option <%if $month_number[$key] eq $created_month%>selected<%/if%>
-                    value="<%$month_number[$key]%>"><%$val%></option>
-            <%/foreach%>
-                </select>
-                </div>
-              </li>
-            </div>
-            <div class="filter-row">
-              <li class="nav-small-cap">
-                <span class="hide-menu">Select Year</span>
-                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
-              </li>
-              <li class="sidebar-item">
-              <div class="input-group">
-              <select required name="created_year" id="year" class="form-control select2">
-              <%for $i = 2022 to 2027%>
-                  <option <%if $i eq $created_year%>selected<%/if%> value="<%$i%>"><%$i%></option>
-              <%/for%>
-          </select>
-              </div>
-            </li>
-            </div>  
-            
-
-        </ul>
-      </div>
-    </nav>
-    <div class="filter-popup-btn">
-            <button class="btn btn-outline-danger reset-filter">Reset</button>
-            <button class="btn btn-primary search-filter">Search</button>
-        </div>
-</aside>
-
-    <nav aria-label="breadcrumb">
-      <div class="sub-header-left pull-left breadcrumb">
-        <h1>
-          Reports
-          <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link" title="Back to Issue Request Listing" >
-            <i class="ti ti-chevrons-right" ></i>
-            <em >GRN Report</em></a>
-        </h1>
-        <br>
-        <span >GRN Report</span>
-      </div>
-    </nav>
-    <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
-      <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
-      <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
-    </div>
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <!-- 
@@ -96,14 +22,41 @@
 
         <!-- Main content -->
         <section class="content">
-            <div class="">
+            <div class="container-fluid">
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
                                 <div class="row">
+                                    <div class="col-lg-2">
+                                        <form action="<%$base_url%>reports_grn" method="post">
+                                            <div class="form-group">
+                                                <label for="">Select Month <span class="text-danger">*</span></label>
+                                                <select required name="created_month" id="" class="form-control select2">
+                                                <%foreach $month_data as $key => $val%>
+                                                <option <%if $month_number[$key] eq $created_month%>selected<%/if%>
+                                                    value="<%$month_number[$key]%>"><%$val%></option>
+                                            <%/foreach%>
+                                                </select>
+                                            </div>
+                                            
+                                    </div>
+                                    <div class="col-lg-1">
+                                        <div class="form-group">
+                                            <label for="">Select Year <span class="text-danger">*</span></label>
+                                            <select required name="created_year" id="" class="form-control select2">
+                                                <%for $i = 2022 to 2027%>
+                                                    <option <%if $i eq $created_year%>selected<%/if%> value="<%$i%>"><%$i%></option>
+                                                <%/for%>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <input type="submit" class="btn btn-primary mt-4" value="Search">
+                                    </div>
+                                    </form>
                                     <div class="col-lg-3">
-                                        <button type="button" class="btn btn-dark mt-4" data-bs-toggle="modal" data-bs-target="#exportForTally">Export For Tally</button>
+                                        <button type="button" class="btn btn-dark mt-4" data-toggle="modal" data-target="#exportForTally">Export For Tally</button>
                                     </div>
                                     <div class="col-lg-1"></div>
                                     <div class="col-sm-2">
@@ -121,8 +74,8 @@
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="exampleModalLabel">Export Criteria</h5>
-                                        <button type="button" class="close btn-close" data-bs-dismiss="modal" aria-label="Close">
-                                            <%* <span aria-hidden="true">&times;</span> *%>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
                                     <form action="<%$base_url%>grn_excel_export" method="POST">
@@ -159,7 +112,7 @@
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                             <button type="submit" name="export" class="btn btn-primary" value="XML Export">Export</button>
                                         </div>
                                         </div>
@@ -183,7 +136,7 @@
                                                     <div class="col-lg-12">
                                                         <div class="form-group">
                                                             <label for="po_num">Select Customer Name / Customer Code / Part Number / Description </label><span class="text-danger">*</span>
-                                                            <select name="customer_part_id" id="customer_part_id" class="from-control select2">
+                                                            <select name="customer_part_id" id="" class="from-control select2">
                                                                 <%if $customer_part%>
                                                                     <%foreach $customer_part as $c%>
                                                                         <%assign var="customer" value=$Crud->get_data_by_id("customer", $c->customer_id, "id")%>
@@ -209,11 +162,10 @@
                             </div>
 
                             <div class="card-body">
-                            <div class="table-responsive text-nowrap">
-                                <table id="gn_report" class="table table-bordered table-striped">
+                                <table id="example1" class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
-                                            
+                                            <th>Sr. No.</th>
                                             <th>Supplier name</th>
                                             <th>Part No</th>
                                             <th>Part Description</th>
@@ -238,10 +190,42 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                    
+                                    <%assign var="i" value=1 %>
+                                        <%foreach $grn_details as $g%>
+                                            <%assign var="gst_amount" value=$g->sgst_amount + $g->cgst_amount + $g->igst_amount + $g->tcs_amount%>
+                                            <%assign var="total_with_gst" value=$gst_amount + $g->base_amount%>
+                                            <%assign var="tcs_amount" value=0%>
+                                            <%if !empty($g->tcs_amount)%>
+                                                <%assign var="tcs_amount" value=$g->tcs_amount%>
+                                            <%/if%>
+                                            <tr>
+                                                <td><%$i%></td>
+                                                <td><%$g->supplier_name%></td>
+                                                <td><%$g->part_number%></td>
+                                                <td><%$g->part_description%></td>
+                                                <td><%$g->rate%></td>
+                                                <td><%$g->hsn_code%></td>
+                                                <td><%$g->uom_name%></td>
+                                                <td style="white-space: nowrap;"><%$g->poNumber%></td>
+                                                <td style="white-space: nowrap;"><%$po_date[$g->poNumber]%></td>
+                                                <td style="white-space: nowrap;"><%$g->grn_number%></td>
+                                                <td style="white-space: nowrap;"><%$g->grn_created_date%></td>
+                                                <td><%$g->invoice_number%></td>
+                                                <td style="white-space: nowrap;"><%$invoice_date[$g->invoice_date]%></td>
+                                                <td><%$g->po_qty%></td>
+                                                <td><%$g->accept_qty%></td>
+                                                <td><%$g->base_amount%></td>
+                                                <td><%$g->sgst_amount%></td>
+                                                <td><%$g->cgst_amount%></td>
+                                                <td><%$g->igst_amount%></td>
+                                                <td><%$tcs_amount%></td>
+                                                <td><%$gst_amount%></td>
+                                                <td><%$total_with_gst%></td>
+                                            </tr>
+                                            <%assign var="i" value=$i+1 %>
+                                        <%/foreach%>
                                     </tbody>
                                 </table>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -250,17 +234,3 @@
         </section>
     </div>
 </div>
-<script>
-    var column_details =  <%$data|json_encode%>;
-    var page_length_arr = <%$page_length_arr|json_encode%>;
-    var is_searching_enable = <%$is_searching_enable|json_encode%>;
-    var is_top_searching_enable =  <%$is_top_searching_enable|json_encode%>;
-    var is_paging_enable =  <%$is_paging_enable|json_encode%>;
-    var is_serverSide =  <%$is_serverSide|json_encode%>;
-    var no_data_message =  <%$no_data_message|json_encode%>;
-    var is_ordering =  <%$is_ordering|json_encode%>;
-    var sorting_column = <%$sorting_column%>;
-    var api_name =  <%$api_name|json_encode%>;
-    var base_url = <%$base_url|json_encode%>;
-</script>
-<script src="<%$base_url%>/public/js/reports/gn_report.js"></script>

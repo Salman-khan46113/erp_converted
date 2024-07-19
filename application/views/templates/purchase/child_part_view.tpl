@@ -44,7 +44,7 @@
                   <input type="text" id="part_description_search" class="form-control" placeholder="Name">
                 </div>
               </li>
-            </div>  
+            </div>
             <div class="filter-row">
               <li class="nav-small-cap">
                 <span class="hide-menu">Name</span>
@@ -102,19 +102,7 @@
     </nav>
     <!-- <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4> -->
 
-    <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5 listing-btn">
-      <div class="btn-group">
-        <a type="button" class="btn btn-danger" href="<%base_url('child_part/direct')%>">Add Direct Regular Item</a>
-        <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false"  data-bs-reference="parent">
-        </button>
-        <ul class="dropdown-menu dropdown-menu-start" >
-          <li><a class="dropdown-item" href="<%base_url('child_part/subcon_item')%>"> Add Direct Subcon Item</a></li>
-          <li><a class="dropdown-item" href="<%base_url('child_part/subcon_regular')%>">Add Direct Subcon Regular</a></li>
-          <li><a class="dropdown-item" href="<%base_url('child_part/consumable_item')%>">Add Indirect Consumable Item</a></li>
-          <li><a class="dropdown-item" href="<%base_url('child_part/indirect_assets')%>">Add Indirect Asset</a></li>
-          <li><a class="dropdown-item" href="<%base_url('child_part/customer_bom')%>"> Add Customer Bom Asset</a></li>
-        </ul>
-      </div>
+    <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
       <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
       <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
       <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>

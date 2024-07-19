@@ -37,14 +37,7 @@
       <!-- Icons. Uncomment required icon fonts -->
       <link rel="stylesheet" href="<%$base_url%>public/assets/vendor/fonts/boxicons.css" />
       <!-- tabler css -->
-<<<<<<< Updated upstream
       <link rel="stylesheet" href="<%$base_url%>public/css/plugin/tabler_css/tabler_icons.css">
-=======
-      <link rel="stylesheet" href="public/css/plugin/tabler_css/tabler_icons.css">
-
-      
-
->>>>>>> Stashed changes
       <!-- Core CSS -->
       <link rel="stylesheet" href="<%$base_url%>public/assets/vendor/css/core.css" class="template-customizer-core-css" />
       <link rel="stylesheet" href="<%$base_url%>public/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />

@@ -1,40 +1,21 @@
 <%assign var="entitlements" value=$session_data['entitlements']%>
 <!-- Content wrapper -->
+<div class="content-wrapper">
+  <!-- Content -->
 
   <div class="container-xxl flex-grow-1 container-p-y">
     <nav aria-label="breadcrumb">
-      <div class="sub-header-left pull-left breadcrumb">
-        <h1>
-          Master
-          <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link" title="Back to Issue Request Listing" >
-            <i class="ti ti-chevrons-right" ></i>
-            <em >Item</em></a>
-        </h1>
-        <br>
-        <%if $type == "direct"%>
-          <span >Add Direct Regular Item</span>
-        <%else if ($type == "subcon_item") %>
-           <span >Add Direct Subcon Item</span>
-        <%else if ($type == "subcon_regular" ) %>
-          <span >Add Direct Subcon Regular</span>
-        <%else if ($type == "consumable_item") %>
-          <span >Add Indirect Consumable Item</span>
-        <%else if ($type == "indirect_assets") %>
-          <span >Add Indirect Asset</span>
-        <%else if ($type == "customer_bom") %>
-          <span > Add Customer Bom Asset</span>
-        <%/if%>
-      </div>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Item part List</li>
+      </ol>
     </nav>
-    <div class="dt-top-btn d-grid gap-2 d-md-flex  mb-5 listing-btn">
-      <a class="btn btn-seconday" type="button" href="<%base_url('child_part_view')%>"><i class="ti ti-arrow-left" title="Back To Item Part List"></i></a>
-    </div>
     <!-- <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Forms/</span> Vertical Layouts</h4> -->
     <div class="row">
       <div class="col-xl-12">
 
         <div class="nav-align-top mb-3">
-          <ul class="nav nav-pills mb-1 justify-content-center hide" role="tablist">
+          <ul class="nav nav-pills mb-1 justify-content-center" role="tablist">
             <li class="nav-item">
               <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-top-home" aria-controls="navs-pills-top-home" aria-selected="false">
                 Add Direct Regular Item
@@ -139,37 +120,26 @@ jelly-o tart brownie jelly.
             <div class="col-lg-6">
               <div class="form-group mb-3">
                 <label> Purchase Item Category </label><span class="text-danger">*</span>
-                <select class="form-control select2 item-category" name="sub_type">
+                <select class="form-control select2" name="sub_type">
                   <%if $type == "direct"%>
                   <option value="Regular grn">Regular grn</option>
                   <option value="RM">RM</option>
-                  <%else if ($type == "subcon_item") %>
-                    <option value="Subcon grn">Subcon grn</option>4
-                  <%else if ($type == "subcon_regular" ) %>
-                    <option value="Subcon Regular">Subcon Regular</option>
-                  <%else if ($type == "consumable_item") %>
-                    <option value="consumable">Consumable</option>
-                  <%else if ($type == "indirect_assets") %>
-                    <option value="asset">asset</option>
-                  <%else if ($type == "customer_bom") %>
-                    <option value="customer_bom">customer bom</option>
                   <%/if%>
                 </select>
               </div>
             </div>
 
-              <%if $type == "customer_bom" || $type == "indirect_assets"%>
+
+              <%if $type != "direct"%>
               <div class="col-lg-6">
               <div class="form-group mb-3">
                 <label> Asset </label>
-                <select class="form-control select2 assets" name="asset" style="width: 100%;">
-                  <option value="consumable">Consumable</option>
-                  <%if $asset %>
+                <select class="form-control select2" name="asset" style="width: 100%;">
+                  <option value="NA">NA</option>
                   <%foreach from=$asset item=a%>
                   <option value="<%$a->id %>">
                     <%$a->name %></option>
-                  <%/foreach%>
-                  <%/if%>
+                    <%/foreach%>
                   </select>
                 </div>
               </div>
@@ -211,7 +181,7 @@ jelly-o tart brownie jelly.
               <div class="col-lg-6">
                 <div class="form-group mb-3">
                   <label> UOM </label><span class="text-danger">*</span>
-                  <select class="form-control select2 item-uom" name="uom_id" style="width: 100%;">
+                  <select class="form-control select2" name="uom_id" style="width: 100%;">
                     <%foreach from=$uom item=c1%>
                     <option value="<%$c1->id %>">
                       <%$c1->uom_name %></option>
@@ -244,12 +214,7 @@ jelly-o tart brownie jelly.
 
 
   <div class="content-backdrop fade"></div>
-<style type="text/css">
-  .select2-container--default .select2-selection.select2-selection--single {
-    height: 37px !important;
-    border: var(--bs-border-width) solid #d9dee3;
-}
-</style>
+</div>
 <script type="text/javascript">
   var base_url = <%$base_url|@json_encode%>
 </script>

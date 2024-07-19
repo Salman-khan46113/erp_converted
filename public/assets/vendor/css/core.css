@@ -137,20 +137,20 @@
     }
 }
 @font-face {
-    font-family: 'gilroy';
-    src: url('./fonts/Gilroy-Light 300.ttf');
+    font-family: 'Gilroy';
+    src: url('../fonts/Gilroy-Light 300.ttf');
     font-weight: 900;
     font-style: normal;
 }
 @font-face {
-    font-family: 'gilroysemibold';
+    font-family: 'GilroySemibold';
     src:url('./fonts/Gilroy-SemiBold.ttf') format('truetype'),
     font-weight: 500;
     font-style: normal;
     font-display: swap;
 }
 @font-face {
-    font-family: 'gilroymedium';
+    font-family: 'GilroyMedium';
     src: url('./fonts/Gilroy-Medium.eot');
     src: url('./fonts/Gilroy-Medium.eot?#iefix') format('embedded-opentype'),
         url('./fonts/Gilroy-Medium.woff2') format('woff2'),
@@ -164,7 +164,7 @@
 
 body {
     margin: 0;
-    font-family: 'gilroymedium' !important;
+    font-family: var(--bs-body-font-family);
     font-size: var(--bs-body-font-size);
     font-weight: var(--bs-body-font-weight);
     line-height: var(--bs-body-line-height);

@@ -251,11 +251,6 @@ table .ti-edit {
     color: var(--bs-theme-color);
     cursor: pointer;
 }
-table .ti{
-    font-size: 30px;
-    color: var(--bs-theme-color);
-    cursor: pointer;
-}
 
 /*.dt-left, .dt-center, .dt-right {
     white-space: normal !important; 
@@ -277,21 +272,4 @@ table.dataTable tbody td {
 }
 .modal-body .form-group label:first-child{
     margin-bottom: 5px;
-}
-
-
-/* list btn */
-
-.listing-btn .btn-group .btn {
-    color: #fff !important;
-    background-color: var(--bs-theme-color) !important;
-    border-color: #788393 !important;
-    transform: unset !important;
-    height: 44px;
-}
-
-
-/* error message */
-form .error:not(li):not(input) {
-    font-size: 100%;
 }

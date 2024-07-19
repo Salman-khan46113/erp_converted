@@ -1,131 +1,171 @@
 <%assign var='isMultiClient' value=$session_data['isMultipleClientUnits'] %>
-<div class="wrapper">
-<!-- Navbar -->
-<!-- /.navbar -->
-<!-- Main Sidebar Container -->
-<!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
-   <!-- Content Header (Page header) -->
-   <section class="content-header">
-      <div class="container-fluid">
-         <div class="row mb-2">
-            <div class="col-sm-6">
-               <h1>GRN Validation</h1>
-            </div>
-            <div class="col-sm-6">
-               <ol class="breadcrumb float-sm-right">
-                  <li class="breadcrumb-item"><a href="#">Home</a></li>
-                  <li class="breadcrumb-item active">Insert List</li>
-               </ol>
-            </div>
-         </div>
+  <!-- Content -->
+
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme filter-popup-block" style="width: 0px;">
+      <div class="app-brand demo justify-content-between">
+        <a href="javascript:void(0)" class="app-brand-link">
+          <span class="app-brand-text demo menu-text fw-bolder ms-2">Filter</span>
+        </a>
+        <div class="close-filter-btn d-block filter-popup cursor-pointer">
+          <i class="ti ti-x fs-8"></i>
+        </div>
       </div>
-      <!-- /.container-fluid -->
-   </section>
-   <!-- Main content -->
-   <section class="content">
-      <div class="container-fluid">
-         <div class="row">
-            <div class="col-12">
-               <!-- /.card -->
-               <div class="card">
-                  <div class="card-header">
-                     <!-- Modal -->
-                     <div class="modal fade" id="exampleModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                        <div class="modal-dialog " role="document">
-                           <div class="modal-content">
-                              <div class="modal-header">
-                                 <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                 <span aria-hidden="true">&times;</span>
-                                 </button>
-                              </div>
-                              <div class="modal-body">
-                                 <form action="<%base_url('add_invoice_number') %>" method="POST">
-                                    <div class="row">
-                                       <div class="col-lg-12">
-                                          <div class="form-group">
-                                             <label for="tool_number">Invoice Number </label><span class="text-danger">*</span>
-                                             <input type="text" name="invoice_number" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter Invoice Number">
-                                             <input type="hidden" name="new_po_id" value="<%$new_po_id %>" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter Invoice Number">
-                                          </div>
-                                          <div class="form-group">
-                                             <label for="tool_number">Invoice Date </label><span class="text-danger">*</span>
-                                             <input type="date" name="invoice_date" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter Invoice Number">
-                                          </div>
-                                       </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                       <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                       <button type="submit" class="btn btn-primary">Save changes</button>
-                                    </div>
-                                 </form>
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-                  <!-- /.card-header -->
-                  <div class="card-body">
-                     <table id="example1" class="table table-bordered table-striped">
-                        <thead>
-                           <tr>
-                              <th>Sr No</th>
-                              <th>PO Number</th>
-                              <th>Supplier Name </th>
-                              <th>Invoice Number</th>
-                              <th>Invoice Date</th>
-                              <th>GRN  Number </th>
-                              <th>GRN  Date </th>
-                              <%if ($isMultiClient == "true") %>
-                                 <th>Delivery Unit</th>
-                              <%/if%>    
-                              <th>View Details</th>
-                           </tr>
-                        </thead>
-                        <tbody>
-                           <%assign var='i' value=1 %>
-                              <%if ($inwarding_data) %>
-                                 <%foreach from=$inwarding_data item=t %>
-                                 
-                                 <tr>
-                                    <td><%$t->po_id %></td>
-                                    <td><%$t->po_number %></td>
-                                    <td><%$t->supplier_name %></td>
-                                    <td><%$t->invoice_number %></td>
-                                    <td><%$t->invoice_date %></td>
-                                    <td><%$t->grn_number %></td>
-                                    <td><%$t->grn_date %></td>
-                                    <%if ($isMultiClient == "true") %>
-                                       <td><%$t->delivery_unit %></td>
-                                    <%/if%>
-                                    <td>
-                                       <a href="<%base_url('inwarding_details_validation/') %><%$t->id %>/<%$t->po_id %>" class="btn btn-danger" href="">Validation Details</a></td>
-                                 </tr>
-                                 <%assign var='i' value=$i+1 %>
-                                 <%/foreach%>
-                              <%/if%>
-                        </tbody>
-                     </table>
-                  </div>
-                  <!-- /.card-body -->
-               </div>
-               <!-- /.card -->
+      <nav class="sidebar-nav scroll-sidebar filter-block" data-simplebar="init">
+        <div class="simplebar-content" >
+          <ul class="menu-inner py-1">
+            <!-- Dashboard -->
+            <div class="filter-row">
+              <li class="nav-small-cap">
+                <span class="hide-menu">Part Number</span>
+                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+              </li>
+              <li class="sidebar-item">
+                <div class="input-group">
+                  <select name="child_part_id" class="form-control select2" id="part_number_search">
+                    <option value="">Select Part Number</option>
+                    <%foreach from=$supplier_part_list item=parts%>
+                    <option value="<%$parts->id%>"><%$parts->part_number %></option>
+                    <%/foreach%>
+                  </select>
+                </div>
+              </li>
             </div>
-            <!-- /.col -->
-         </div>
-         <!-- /.row -->
+            <div class="filter-row">
+              <li class="nav-small-cap">
+                <span class="hide-menu">Part Description</span>
+                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+              </li>
+              <li class="sidebar-item">
+                <div class="input-group">
+                  <input type="text" id="part_description_search" class="form-control" placeholder="Name">
+                </div>
+              </li>
+            </div>
+            <div class="filter-row">
+              <li class="nav-small-cap">
+                <span class="hide-menu">Name</span>
+                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+              </li>
+              <li class="sidebar-item">
+                <div class="input-group">
+                  <input type="text" id="employee_name_search" class="form-control" placeholder="Name">
+                </div>
+              </li>
+            </div>
+            <div class="filter-row">
+              <li class="nav-small-cap">
+                <span class="hide-menu">Name</span>
+                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+              </li>
+              <li class="sidebar-item">
+                <div class="input-group">
+                  <input type="text" id="employee_name_search" class="form-control" placeholder="Name">
+                </div>
+              </li>
+            </div>
+            <div class="filter-row">
+              <li class="nav-small-cap">
+                <span class="hide-menu">Name</span>
+                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+              </li>
+              <li class="sidebar-item">
+                <div class="input-group">
+                  <input type="text" id="employee_name_search" class="form-control" placeholder="Name">
+                </div>
+              </li>
+            </div>
+
+          </ul>
+        </div>
+      </nav>
+      <div class="filter-popup-btn">
+        <button class="btn btn-outline-danger reset-filter">Reset</button>
+        <button class="btn btn-primary search-filter">Search</button>
       </div>
-      <!-- /.container-fluid -->
-   </section>
-   <!-- /.content -->
-</div>
-<!-- /.content-wrapper -->
-<style type="text/css">
-   .dataTables_scrollHeadInner table,.dataTables_scrollBody table{
-      width: 100% !important;
-   }
-   .dataTables_scrollHeadInner{
-          width: 99.1%;
-   }
-</style>
+    </aside>
+
+    <nav aria-label="breadcrumb">
+      <div class="sub-header-left pull-left breadcrumb">
+        <h1>
+          Store
+          <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link" title="Back to Issue Request Listing" >
+            <i class="ti ti-chevrons-right" ></i>
+            <em >Inwarding</em></a>
+          </h1>
+          <br>
+          <span >GRN Validation</span>
+        </div>
+      </nav>
+      <!-- <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4> -->
+
+      <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
+        <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+        <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
+        <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
+      </div>
+
+      <!-- Main content -->
+      <div class="card p-0 mt-4">
+        <div class="table-responsive text-nowrap">
+          <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="grn_validation">
+            <thead>
+               <tr>
+                  <th>Sr No</th>
+                  <th>PO Number</th>
+                  <th>Supplier Name </th>
+                  <th>Invoice Number</th>
+                  <th>Invoice Date</th>
+                  <th>GRN  Number </th>
+                  <th>GRN  Date </th>
+                  <%if ($isMultiClient == "true") %>
+                     <th>Delivery Unit</th>
+                  <%/if%>
+                  <th>View Details</th>
+               </tr>
+            </thead>
+            <tbody>
+               <%assign var='i' value=1 %>
+                  <%if ($inwarding_data) %>
+                     <%foreach from=$inwarding_data item=t %>
+
+                     <tr>
+                        <td><%$t->po_id %></td>
+                        <td><%$t->po_number %></td>
+                        <td><%$t->supplier_name %></td>
+                        <td><%$t->invoice_number %></td>
+                        <td><%$t->invoice_date %></td>
+                        <td><%$t->grn_number %></td>
+                        <td><%$t->grn_date %></td>
+                        <%if ($isMultiClient == "true") %>
+                           <td><%$t->delivery_unit %></td>
+                        <%/if%>
+                        <td>
+                           <a href="<%base_url('inwarding_details_validation/') %><%$t->id %>/<%$t->po_id %>" class="btn btn-danger" href="">Validation Details</a></td>
+                     </tr>
+                     <%assign var='i' value=$i+1 %>
+                     <%/foreach%>
+                  <%/if%>
+            </tbody>
+         </table>
+
+        </div>
+      </div>
+      <!--/ Responsive Table -->
+    </div>
+    <!-- /.col -->
+
+
+    <div class="content-backdrop fade"></div>
+  </div>
+  <style type="text/css">
+     .dataTables_scrollHeadInner table,.dataTables_scrollBody table{
+        width: 100% !important;
+     }
+     .dataTables_scrollHeadInner{
+            width: 99.1%;
+     }
+  </style>
+  <script src="<%$base_url%>public/js/store/grn_validation.js"></script>

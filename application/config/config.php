@@ -23,7 +23,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://localhost/extra/erp_converted/';
+$config['base_url'] = 'http://localhost/extra_work/gayu/erp_converted_old/';
 //$config['base_url'] = 'https://arominfotech.com/erp/demo/plastic';
 //$config['base_url'] = 'https://arominfotech.com/erp/teplerp';
 //$config['base_url'] = 'https://arominfotech.com/erp/sperp';

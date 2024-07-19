@@ -14,23 +14,6 @@ function pr($data,$exit = 0)
 function convertDateTime($value =''){
 	return new DateTime($value);
 }
-
-function display_no_character($value = ''){
-	if($value == "" ||  $value == null ){
-		$value = "--";
-	}
-	return $value;
-}
-
-
-function is_valid_array($data = []){
-	if(count($data) > 0 && is_array($data)){
-		return true;
-	}
-	return false;
-}
-
-
 function digitalSignature($file_path = '',$location = '',$signer = '',$certpwd ='',$certid='',$customerPrefix='',$digital_signature_url = ''){
 	// checksum = sha256 (APIKEY + timestamp)
 	// uuid = generate unique in your system

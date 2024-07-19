@@ -1,38 +1,26 @@
-<div class="wrapper container-xxl flex-grow-1 container-p-y">
-<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme filter-popup-block" style="width: 0px;">
-    <div class="app-brand demo justify-content-between">
-        <a href="javascript:void(0)" class="app-brand-link">
-            <span class="app-brand-text demo menu-text fw-bolder ms-2">Filter</span>
-        </a>
-        <div class="close-filter-btn d-block filter-popup cursor-pointer">
-                <i class="ti ti-x fs-8"></i>
-            </div>
-    </div>
-</aside>
-
-    <nav aria-label="breadcrumb">
-      <div class="sub-header-left pull-left breadcrumb">
-        <h1>
-          Reports
-          <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link" title="Back to Issue Request Listing" >
-            <i class="ti ti-chevrons-right" ></i>
-            <em >Rejection report</em></a>
-        </h1>
-        <br>
-        <span >Rejection report</span>
-      </div>
-    </nav>
+<div class="wrapper">
 <!-- Navbar -->
-<div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
-    </div>
 <div class="content-wrapper">
    <!-- Content Header (Page header) -->
-
+   <section class="content-header">
+      <div class="container-fluid">
+         <div class="row mb-2">
+            <div class="col-sm-6">
+               <h1>Production Rejection Report</h1>
+            </div>
+            <div class="col-sm-6">
+               <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="<%base_url('dashboard') %>">Home</a></li>
+                  <li class="breadcrumb-item active">Report</li>
+               </ol>
+            </div>
+         </div>
+      </div>
+      <!-- /.container-fluid -->
+   </section>
    <!-- Main content -->
    <section class="content">
-      <div class="">
+      <div class="container-fluid">
          <div class="row">
             <div class="col-12">
                <!-- /.card -->
@@ -111,7 +99,6 @@
                      </div>
                   </div>
                   <div class="card-body">
-                  <div class="table-responsive text-nowrap">
                      <table id="example1" class="table table-bordered table-striped">
                         <thead>
                            <tr>
@@ -144,7 +131,6 @@
                             <%/if%>
                         </tbody>
                      </table>
-                     </div>
                   </div>
                   <!-- /.card-body -->
                </div>
@@ -160,8 +146,6 @@
 </div>
 <!-- /.content-wrapper -->
 <script>
-var file_name = "report_prod_rejection";
-var pdf_title = "Rejection Report";
    document.getElementById("showIcon").addEventListener("click", function() {
        document.getElementById("dataAnalysis").style.display = "none";
        document.getElementById("showIcon").style.display = "none";
@@ -172,66 +156,6 @@ var pdf_title = "Rejection Report";
        document.getElementById("dataAnalysis").style.display = "block";
        document.getElementById("showIcon").style.display = "inline";
        document.getElementById("hideIcon").style.display = "none";
-   });
-   // datatable initilization.
-   new DataTable('#example1',{
-      dom: 'Bfrtip',
-      buttons: [
-              {     
-                    extend: 'csv',
-                      text: '<i class="ti ti-file-type-csv"></i>',
-                      init: function(api, node, config) {
-                      $(node).attr('title', 'Download CSV');
-                      },
-                      customize: function (csv) {
-                            var lines = csv.split('\n');
-                            var modifiedLines = lines.map(function(line) {
-                                var values = line.split(',');
-                                values.splice(13, 1);
-                                return values.join(',');
-                            });
-                            return modifiedLines.join('\n');
-                        },
-                        filename : file_name
-                    },
-                
-                  {
-                    extend: 'pdf',
-                    text: '<i class="ti ti-file-type-pdf"></i>',
-                    init: function(api, node, config) {
-                        $(node).attr('title', 'Download Pdf');
-                        
-                    },
-                    filename: file_name,
-                   
-                    customize: function (doc) {
-                      doc.pageMargins = [15, 15, 15, 15];
-                      doc.content[0].text = pdf_title;
-                      doc.content[0].color = theme_color;
-                        // doc.content[1].table.widths = ['15%', '19%', '13%', '13%','15%', '15%', '10%'];
-                        doc.content[1].table.body[0].forEach(function(cell) {
-                            cell.fillColor = theme_color;
-                        });
-                        doc.content[1].table.body.forEach(function(row, rowIndex) {
-                            row.forEach(function(cell, cellIndex) {
-                                var alignmentClass = $('#example1 tbody tr:eq(' + rowIndex + ') td:eq(' + cellIndex + ')').attr('class');
-                                var alignment = '';
-                                if (alignmentClass && alignmentClass.includes('dt-left')) {
-                                    alignment = 'left';
-                                } else if (alignmentClass && alignmentClass.includes('dt-center')) {
-                                    alignment = 'center';
-                                } else if (alignmentClass && alignmentClass.includes('dt-right')) {
-                                    alignment = 'right';
-                                } else {
-                                    alignment = 'left';
-                                }
-                                cell.alignment = alignment;
-                            });
-                            row.splice(14, 1);
-                        });
-                    }
-                },
-            ],
    });
 </script>
 </body>

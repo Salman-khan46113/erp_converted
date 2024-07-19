@@ -1,18 +1,18 @@
 <?php
-/* Smarty version 4.3.2, created on 2024-07-01 11:49:40
+/* Smarty version 4.3.2, created on 2024-06-20 13:54:35
   from '/var/www/html/extra/erp_converted/application/views/templates/header.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '4.3.2',
-  'unifunc' => 'content_66824a7cb57ca2_41845295',
+  'unifunc' => 'content_6673e743579ca3_10391645',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
     'c6f0070f8c39c98022c6bd96365b9efcfa222eef' => 
     array (
       0 => '/var/www/html/extra/erp_converted/application/views/templates/header.tpl',
-      1 => 1719812319,
+      1 => 1718605193,
       2 => 'file',
     ),
   ),
@@ -20,12 +20,13 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_66824a7cb57ca2_41845295 (Smarty_Internal_Template $_smarty_tpl) {
+function content_6673e743579ca3_10391645 (Smarty_Internal_Template $_smarty_tpl) {
 if (!($_smarty_tpl->tpl_vars['session_data']->value['user_id'] > 0)) {
 echo redirect('login');?>
 
-<?php }
-$_smarty_tpl->_assignInScope('role', trim($_smarty_tpl->tpl_vars['session_data']->value['type']));
+<?php }?>
+
+<?php $_smarty_tpl->_assignInScope('role', trim($_smarty_tpl->tpl_vars['session_data']->value['type']));
 $_smarty_tpl->_assignInScope('Commodity', $_smarty_tpl->tpl_vars['session_data']->value['Commodity']);
 $_smarty_tpl->_assignInScope('entitlements', $_smarty_tpl->tpl_vars['session_data']->value['entitlements']);
 $_smarty_tpl->_assignInScope('base_url', base_url(''));
@@ -33,606 +34,476 @@ if ($_smarty_tpl->tpl_vars['title']->value == null) {
 $_smarty_tpl->_assignInScope('title', "ERP-Management");
 }?>
 <!DOCTYPE html>
-<html
-   lang="en"
-   class="light-style layout-menu-fixed layout-menu-collapsed  layout-navbar-fixed layout-menu-hover"
-   dir="ltr"
-   data-theme="theme-default"
-   data-assets-path="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/"
-   data-template="vertical-menu-template-free"
-   >
+<html lang="en">
    <head>
-      <meta charset="utf-8" />
-      <meta
-         name="viewport"
-         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
-         />
-      <title>AROM</title>
-      <meta name="description" content="" />
-      <!-- Favicon -->
-      <link rel="icon" type="image/x-icon" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/img/favicon/favicon.png" />
-      <!-- Fonts -->
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-      <link
-         href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-         rel="stylesheet"
-         />
-      <!-- Icons. Uncomment required icon fonts -->
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title><?php echo $_smarty_tpl->tpl_vars['title']->value;?>
+</title>
+      <link rel="apple-touch-icon" sizes="57x57" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/apple-icon-57x57.png">
+      <link rel="apple-touch-icon" sizes="60x60" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/apple-icon-60x60.png">
+      <link rel="apple-touch-icon" sizes="72x72" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/apple-icon-72x72.png">
+      <link rel="apple-touch-icon" sizes="76x76" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/apple-icon-76x76.png">
+      <link rel="apple-touch-icon" sizes="114x114" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/apple-icon-114x114.png">
+      <link rel="apple-touch-icon" sizes="120x120" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/apple-icon-120x120.png">
+      <link rel="apple-touch-icon" sizes="144x144" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/apple-icon-144x144.png">
+      <link rel="apple-touch-icon" sizes="152x152" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/apple-icon-152x152.png">
+      <link rel="apple-touch-icon" sizes="180x180" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/apple-icon-180x180.png">
+      <link rel="icon" type="image/png" sizes="192x192"
+         href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/android-icon-192x192.png">
+      <link rel="icon" type="image/png" sizes="32x32" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/favicon-32x32.png">
+      <link rel="icon" type="image/png" sizes="96x96" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/favicon-96x96.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/favicon-16x16.png">
+      <link rel="manifest" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/manifest.json">
+      <meta name="msapplication-TileColor" content="#ffffff">
+      <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+      <meta name="theme-color" content="#ffffff">
+      <?php echo '<script'; ?>
+ src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"
+         integrity="sha512-cLuyDTDg9CSseBSFWNd4wkEaZ0TBEpclX0zD3D6HjI19pO39M58AgJ1SjHp6c7ZOp0/OCRcC2BCvvySU9KJaGw=="
+         crossorigin="anonymous"><?php echo '</script'; ?>
+>
+      <?php echo '<script'; ?>
+ src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"><?php echo '</script'; ?>
+>
+      <!-- <meta name="viewport" content="width=device-width, initial-scale=1" /> -->
+      <?php echo '<script'; ?>
+ src="html2pdf.bundle.min.js"><?php echo '</script'; ?>
+>
+      <!-- Google Font: Source Sans Pro -->
+      <link rel="stylesheet"
+         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+      <!-- Font Awesome -->
       <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/vendor/fonts/boxicons.css" />
-      <!-- tabler css -->
-      <link rel="stylesheet" href="public/css/plugin/tabler_css/tabler_icons.css">
-
-      
-
-      <!-- Core CSS -->
+plugins/fontawesome-free/css/all.min.css">
+      <!-- Ionicons -->
+      <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+      <!-- Tempusdominus Bootstrap 4 -->
+      <link rel="stylesheet"
+         href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+      <!-- iCheck -->
       <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/vendor/css/core.css" class="template-customizer-core-css" />
+plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+      <!-- JQVMap -->
       <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+plugins/jqvmap/jqvmap.min.css">
       <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/css/demo.css" />
+plugins/select2/css/select2.min.css">
       <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/css/theme.css" />
-      <!-- Vendors CSS -->
+plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+      <!-- Theme style -->
       <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+dist/css/adminlte.min.css">
       <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/vendor/libs/apex-charts/apex-charts.css" />
+dist/css/arom.css">
+      <!-- overlayScrollbars -->
       <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/css/common.css" />
-      <!-- Page CSS -->
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
-      <!-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css"> -->
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-      <!-- <link rel="stylesheet" type="text/css" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/css/data_table/select.dataTables.min.css"> -->
-      <!-- <link rel="stylesheet" type="text/css" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/css/data_table/jquery.dataTables.min.css"> -->
-      <link rel="stylesheet" type="text/css" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/css/data_table/searchPanes.dataTables.min.css">
-      <!-- Helpers -->
+plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+      <!-- Daterange picker -->
+      <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+plugins/daterangepicker/daterangepicker.css">
+      <!-- summernote -->
+      <link rel="stylesheet" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+plugins/summernote/summernote-bs4.min.css">
+      <link rel="stylesheet"
+         href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
       <?php echo '<script'; ?>
- src="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/vendor/js/helpers.js"><?php echo '</script'; ?>
+ src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"><?php echo '</script'; ?>
 >
       <?php echo '<script'; ?>
- src="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/js/config.js"><?php echo '</script'; ?>
+ src="jquery-3.5.1.min.js"><?php echo '</script'; ?>
 >
-      <?php echo '<script'; ?>
- src="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/vendor/js/bootstrap.js"><?php echo '</script'; ?>
->
-      <?php echo '<script'; ?>
- src="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"><?php echo '</script'; ?>
->
-      <?php echo '<script'; ?>
- src="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/js/admin/plugin/jquery.min.js"><?php echo '</script'; ?>
->
-      <?php echo '<script'; ?>
- src="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/js/admin/plugin/jquery.validate.js"><?php echo '</script'; ?>
->
-      <?php echo '<script'; ?>
- src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"><?php echo '</script'; ?>
->
-      <?php echo '<script'; ?>
- src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"><?php echo '</script'; ?>
->
-      <?php echo '<script'; ?>
- src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"><?php echo '</script'; ?>
->
-      <?php echo '<script'; ?>
- src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"><?php echo '</script'; ?>
->
-      <?php echo '<script'; ?>
- src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/pdfmake.min.js"><?php echo '</script'; ?>
->
-      <?php echo '<script'; ?>
- src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/vfs_fonts.js"><?php echo '</script'; ?>
->
-      <?php echo '<script'; ?>
- src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"><?php echo '</script'; ?>
->
-      <?php echo '<script'; ?>
- type="text/javascript" charset="utf8" src="https://cdn.datatables.net/fixedcolumns/3.3.3/js/dataTables.fixedColumns.min.js"><?php echo '</script'; ?>
->
-      <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-      <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedcolumns/3.3.3/css/fixedColumns.dataTables.min.css">
-      <link rel="stylesheet" type="text/css" href="public/css/data_table/datatable.css">
-      <!-- select2 -->
-      <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-      <?php echo '<script'; ?>
- src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"><?php echo '</script'; ?>
->
-      <?php echo '<script'; ?>
- type="text/javascript">
-         var theme_color = "#ea1c31";
-      <?php echo '</script'; ?>
->
+      <style>
+         /* Overlay CSS */
+         #loading-overlay {
+         display: none; /* Hidden by default */
+         position: fixed; /* Stay in place */
+         width: 100%;
+         height: 100%;
+         top: 0;
+         left: 0;
+         right: 0;
+         bottom: 0;
+         background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+         z-index: 10000; /* Specify a stack order */
+         cursor: wait; /* Add a pointer on hover */
+         }
+         /* Centered spinner */
+         #loading-spinner {
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         width: 50px;
+         height: 50px;
+         border: 5px solid #f3f3f3; /* Light grey */
+         border-top: 5px solid #3498db; /* Blue */
+         border-radius: 50%;
+         animation: spin 1s linear infinite; /* Spinner animation */
+         }
+         @keyframes spin {
+         0% { transform: rotate(0deg); }
+         100% { transform: rotate(360deg); }
+         }
+         .wrapper, body, html {
+         min-height: 0%;
+         }
+         .dataTables_scrollHeadInner .table-bordered {
+            margin-bottom: -2px !important;
+         }
+         .dataTables_wrapper .dataTables_info ,.dataTables_wrapper .dataTables_paginate{
+            margin-top: 18px;
+         }
+         /*.dataTables_wrapper .dataTables_paginate{
+                float: right;
+         }*/
+         
+      </style>
    </head>
-   <body>
-      <!-- Layout wrapper -->
-      <div class="layout-wrapper layout-content-navbar">
-      <div class="layout-container">
-      <!-- Menu -->
-      <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme hide">
-         <div class="app-brand demo">
-            <a href="index.html" class="app-brand-link">
-            <span class="app-brand-logo demo">
-            <img src="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/img/logo.png" alt="" width="30">
-            </span>
-            <span class="app-brand-text demo menu-text fw-bolder ms-2">AROM</span>
-            </a>
-            <a href="javascript:void(0);" class="layout-menu-toggle layout-menu-toggle-popup menu-link text-large ms-auto d-block">
-            <i class="bx bx-chevron-right bx-sm align-middle"></i>
-            </a>
-         </div>
-         <div class="menu-inner-shadow"></div>
-         <ul class="menu-inner py-1">
-            <!-- Dashboard -->
-            <li class="menu-item active">
-               <a href="home" class="menu-link">
-                  <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                  <div data-i18n="Analytics">Dashboard</div>
-               </a>
-            </li>
-            <!-- Layouts -->
-            <li class="menu-item">
-               <a href="javascript:void(0);" class="menu-link menu-toggle">
-                  <i class="menu-icon tf-icons bx bx-layout"></i>
-                  <div data-i18n="Layouts">Home</div>
-               </a>
-               <ul class="menu-sub">
-                  <li class="menu-item">
-                     <a href="sidemap" class="menu-link">
-                        <div data-i18n="Without menu">Sitemap</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="form" class="menu-link">
-                        <div data-i18n="Without navbar">Form</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="listing" class="menu-link">
-                        <div data-i18n="Without navbar">Listing</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="form" class="menu-link">
-                        <div data-i18n="Without navbar">Shortcuts</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="layouts-container.html" class="menu-link">
-                        <div data-i18n="Container">Custom Dashboard</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="layouts-fluid.html" class="menu-link">
-                        <div data-i18n="Fluid">Watchlist</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="layouts-blank.html" class="menu-link">
-                        <div data-i18n="Blank">Smart Dashboard</div>
-                     </a>
-                  </li>
-               </ul>
-            </li>
-            <li class="menu-header small text-uppercase">
-               <span class="menu-header-text">Management</span>
-            </li>
-            <li class="menu-item">
-               <a href="javascript:void(0);" class="menu-link menu-toggle">
-                  <i class="menu-icon tf-icons bx bx-dock-top"></i>
-                  <div data-i18n="Account Settings">Item Category</div>
-               </a>
-               <ul class="menu-sub">
-                  <li class="menu-item">
-                     <a href="pages-account-settings-account.html" class="menu-link">
-                        <div data-i18n="Account">Manufacture</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="pages-account-settings-notifications.html" class="menu-link">
-                        <div data-i18n="Notifications">Brand Master</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="pages-account-settings-connections.html" class="menu-link">
-                        <div data-i18n="Connections">Activity Master</div>
-                     </a>
-                  </li>
-               </ul>
-            </li>
-            <li class="menu-item">
-               <a href="javascript:void(0);" class="menu-link menu-toggle">
-                  <i class="menu-icon tf-icons bx bx-lock-open-alt"></i>
-                  <div data-i18n="Authentications">Authentications</div>
-               </a>
-               <ul class="menu-sub">
-                  <li class="menu-item">
-                     <a href="login" class="menu-link" target="_blank">
-                        <div data-i18n="Basic">Login</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="register" class="menu-link" target="_blank">
-                        <div data-i18n="Basic">Register</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="forget-password" class="menu-link" target="_blank">
-                        <div data-i18n="Basic">Forgot Password</div>
-                     </a>
-                  </li>
-               </ul>
-            </li>
-            <li class="menu-item">
-               <a href="javascript:void(0);" class="menu-link menu-toggle">
-                  <i class="menu-icon tf-icons bx bx-cube-alt"></i>
-                  <div data-i18n="Misc">Finance</div>
-               </a>
-               <ul class="menu-sub">
-                  <li class="menu-item">
-                     <a href="pages-misc-error.html" class="menu-link">
-                        <div data-i18n="Error">Finance Vouches</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="pages-misc-under-maintenance.html" class="menu-link">
-                        <div data-i18n="Under Maintenance">Asset Classification</div>
-                     </a>
-                  </li>
-               </ul>
-            </li>
-            <!-- Components -->
-            <li class="menu-header small text-uppercase"><span class="menu-header-text">Report</span></li>
-            <!-- Cards -->
-            <li class="menu-item">
-               <a href="cards-basic.html" class="menu-link">
-                  <i class="menu-icon tf-icons bx bx-collection"></i>
-                  <div data-i18n="Basic">Item Attribute Reports</div>
-               </a>
-            </li>
-            <!-- User interface -->
-            <li class="menu-item">
-               <a href="javascript:void(0)" class="menu-link menu-toggle">
-                  <i class="menu-icon tf-icons bx bx-box"></i>
-                  <div data-i18n="User interface">Batch Report</div>
-               </a>
-               <ul class="menu-sub">
-                  <li class="menu-item">
-                     <a href="ui-accordion.html" class="menu-link">
-                        <div data-i18n="Accordion">Stock Log Report</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="ui-alerts.html" class="menu-link">
-                        <div data-i18n="Alerts">Activity Log</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="ui-badges.html" class="menu-link">
-                        <div data-i18n="Badges">Big Transaction Report</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="ui-buttons.html" class="menu-link">
-                        <div data-i18n="Buttons">User Activity</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="ui-carousel.html" class="menu-link">
-                        <div data-i18n="Carousel">Import logs</div>
-                     </a>
-                  </li>
-               </ul>
-            </li>
-            <!-- Extended components -->
-            <li class="menu-item">
-               <a href="javascript:void(0)" class="menu-link menu-toggle">
-                  <i class="menu-icon tf-icons bx bx-copy"></i>
-                  <div data-i18n="Extended UI">Currencies</div>
-               </a>
-               <ul class="menu-sub">
-                  <li class="menu-item">
-                     <a href="extended-ui-perfect-scrollbar.html" class="menu-link">
-                        <div data-i18n="Perfect Scrollbar">Currency master</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="extended-ui-text-divider.html" class="menu-link">
-                        <div data-i18n="Text Divider">Currency Conversion Master</div>
-                     </a>
-                  </li>
-               </ul>
-            </li>
-            <li class="menu-item">
-               <a href="icons-boxicons.html" class="menu-link">
-                  <i class="menu-icon tf-icons bx bx-crown"></i>
-                  <div data-i18n="Boxicons">Imports</div>
-               </a>
-            </li>
-            <!-- Forms & Tables -->
-            <li class="menu-header small text-uppercase"><span class="menu-header-text">Resourse & Deliveries</span></li>
-            <!-- Forms -->
-            <li class="menu-item">
-               <a href="javascript:void(0);" class="menu-link menu-toggle">
-                  <i class="menu-icon tf-icons bx bx-detail"></i>
-                  <div data-i18n="Form Elements">Resourse</div>
-               </a>
-               <ul class="menu-sub">
-                  <li class="menu-item">
-                     <a href="forms-basic-inputs.html" class="menu-link">
-                        <div data-i18n="Basic Inputs">Sync API logs</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="forms-input-groups.html" class="menu-link">
-                        <div data-i18n="Input groups">System Emails</div>
-                     </a>
-                  </li>
-               </ul>
-            </li>
-            <li class="menu-item">
-               <a href="javascript:void(0);" class="menu-link menu-toggle">
-                  <i class="menu-icon tf-icons bx bx-detail"></i>
-                  <div data-i18n="Form Layouts">Assign & Track Deliveries</div>
-               </a>
-               <ul class="menu-sub">
-                  <li class="menu-item">
-                     <a href="form-layouts-vertical.html" class="menu-link">
-                        <div data-i18n="Vertical Form">Delivery Request</div>
-                     </a>
-                  </li>
-                  <li class="menu-item">
-                     <a href="form-layouts-horizontal.html" class="menu-link">
-                        <div data-i18n="Horizontal Form">Delivery Status</div>
-                     </a>
-                  </li>
-               </ul>
-            </li>
-            <!-- Tables -->
-            <li class="menu-item">
-               <a href="tables-basic.html" class="menu-link">
-                  <i class="menu-icon tf-icons bx bx-table"></i>
-                  <div data-i18n="Tables">Reports</div>
-               </a>
-            </li>
-            <!-- Misc -->
-            <li class="menu-header small text-uppercase"><span class="menu-header-text">Misc</span></li>
-            <li class="menu-item">
-               <a
-                  href="https://github.com/themeselection/AROM-html-admin-template-free/issues"
-                  target="_blank"
-                  class="menu-link"
-                  >
-                  <i class="menu-icon tf-icons bx bx-support"></i>
-                  <div data-i18n="Support">Support</div>
-               </a>
-            </li>
-            <li class="menu-item">
-               <a
-                  href="https://themeselection.com/demo/AROM-bootstrap-html-admin-template/documentation/"
-                  target="_blank"
-                  class="menu-link"
-                  >
-                  <i class="menu-icon tf-icons bx bx-file"></i>
-                  <div data-i18n="Documentation">Documentation</div>
-               </a>
-            </li>
-         </ul>
-      </aside>
-      <!-- / Menu -->
-      <!-- Layout container -->
-      <div class="layout-page">
-      <!-- Navbar -->
-      <!-- / Navbar -->
-      <nav class="navbar navbar-expand-lg bg-navbar-theme">
-         <div class="container-fluid">
-            <a href="home" class="app-brand-link navbar-brand">
-            <span class="app-brand-logo demo">
-            <img src="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-public/img/logo.png" alt="" width="30">
-            </span>
-            <span class="stat-cards-info__num fw-bolder ms-2 pt-1">AROM</span>
-            </a>
-            <!-- <a class="navbar-brand" href="#">Navbar</a> -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNavDropdown">
-               <ul class="navbar-nav">
-                  <li class="nav-item">
-                     <a class="nav-link active" aria-current="page" href="<?php echo base_url('dashboard');?>
-">Dashboard</a>
-                  </li>
-                  <li class="nav-item">
-                     <a class="nav-link" href="<?php echo base_url('home_2');?>
-">Charts</a>
-                  </li>
-                  <?php if (($_smarty_tpl->tpl_vars['role']->value == "Purchase" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
-                  <li class="nav-item dropdown">
-                     <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdownMenuLinkPurchase" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                     Purchase
-                     </a>
-                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkPurchaseSubmenu">
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Item Master</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('child_part/direct');?>
-" class="dropdown-item">Add Item</a></li>
-                              <li><a href="<?php echo base_url('child_part_view');?>
-" class="dropdown-item">View Item</a></li>
-                           </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Supplier Parts</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('child_part_supplier');?>
-" class="dropdown-item">Add Supplier Parts price</a></li>
-                              <li><a href="<?php echo base_url('child_part_supplier_view');?>
-" class="dropdown-item">View Supplier Parts price</a></li>
-                           </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Supplier</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('supplier');?>
-" class="dropdown-item">Add Supplier</a></li>
-                              <li><a href="<?php echo base_url('approved_supplier');?>
-" class="dropdown-item">View Supplier</a></li>
-                           </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Regular PO</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('new_po');?>
-" class="dropdown-item">Generate PO</a></li>
-                              <li><a href="<?php echo base_url('new_po_list_supplier');?>
-" class="dropdown-item">Supplierwise PO List</a></li>
-                              <li><a href="<?php echo base_url('pending_po');?>
-" class="dropdown-item">Pending PO</a></li>
-                              <li><a href="<?php echo base_url('rejected_po');?>
-" class="dropdown-item">Reject PO</a></li>
-                              <li><a href="<?php echo base_url('expired_po');?>
-" class="dropdown-item">Expired PO</a></li>
-                              <li><a href="<?php echo base_url('closed_po');?>
-" class="dropdown-item">Closed PO</a></li>
-                           </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Sub Con</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('new_po_sub');?>
-" class="dropdown-item">Generate subcon PO</a></li>
-                              <li><a href="<?php echo base_url('new_po_list_supplier');?>
-" class="dropdown-item">view subcon po list </a></li>
-                              <li><a href="<?php echo base_url('routing');?>
-" class="dropdown-item">subcon routing</a></li>
-                              <li><a href="<?php echo base_url('routing_customer');?>
-" class="dropdown-item">customer subcon routing</a></li>
-                              <li><a href="<?php echo base_url('pending_po');?>
-" class="dropdown-item">Pending PO</a></li>
-                              <li><a href="<?php echo base_url('rejected_po');?>
-" class="dropdown-item">Reject PO</a></li>
-                              <li><a href="<?php echo base_url('expired_po');?>
-" class="dropdown-item">Expired PO</a></li>
-                              <li><a href="<?php echo base_url('closed_po');?>
-" class="dropdown-item">Closed PO</a></li>
-                           </ul>
-                        </li>
-                     </ul>
-                  </li>
-                  <?php }?>
-                  <?php if (($_smarty_tpl->tpl_vars['role']->value == "stores" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
-                  <li class="nav-item dropdown">
-                     <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdownMenuLinkStore" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                     Store
-                     </a>
-                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkStoreSubmenu">
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Inwarding</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('inwarding');?>
-" class="dropdown-item">Part GRN</a></li>
-                              <li><a href="<?php echo base_url('grn_validation');?>
-" class="dropdown-item">GRN Qty validation</a></li>
-                           </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Challan</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('view_add_challan');?>
-" class="dropdown-item">Create Challan</a></li>
-                              <li><a href="<?php echo base_url('view_supplier_challan');?>
-" class="dropdown-item">Supplierwise challan list</a></li>
-                              <li><a href="<?php echo base_url('view_add_challan_subcon');?>
-" class="dropdown-item">Create challan subcon</a></li>
-                              <li><a href="<?php echo base_url('view_supplier_challan_subcon');?>
-" class="dropdown-item">Customerwise Challan List</a></li>
-                           </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Stock</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('part_stocks');?>
-" class="dropdown-item">Supplier Part stocks</a></li>
-                              <li><a href="<?php echo base_url('part_stocks_inhouse');?>
-" class="dropdown-item">Inhouse Part stocks</a></li>
-                              <li><a href="<?php echo base_url('fw_stock');?>
-" class="dropdown-item">FG Stock</a></li>
-                           </ul>
-                        </li>
-                        <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isSheetMetal'] != null)) {?>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Material Requisition</a>
-                           <ul class="dropdown-menu">
-                               <li><a href="<?php echo base_url('stock_down');?>
-" class="dropdown-item">Material issue</a></li>
-                               <?php if (($_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
-                               <li><a href="<?php echo base_url('stock_up');?>
-" class="dropdown-item">Stock Up/Return</a></li>
-                               <?php }?>
-                               <li><a href="<?php echo base_url('sharing_issue_request_store');?>
-" class="dropdown-item">Sharing Isuue Request - Pending</a></li>
-                               <li><a href="<?php echo base_url('sharing_issue_request_store_completed');?>
-" class="dropdown-item">Sharing Isuue Request - Complete</a></li>
-                           
-                           </ul>
+   <body class="hold-transition layout-top-nav" style="line-height:1">
+      <div class="wrapper">
+         <!-- Navbar -->
+         <nav class=" main-header navbar navbar-expand-md navbar-light navbar-dark text-right" style="margin-left:-20%">
+            <!-- <nav class="main-header navbar navbar-expand-md navbar-light navbar-dark text-right"> -->
+            <div class="container ">
+               <!-- <h1></h1> -->
+               <div style="padding-right:0.5em;color:white;"><?php echo $_smarty_tpl->tpl_vars['session_data']->value['clientUnitName'];?>
+</div>
+               <div style="padding-top:0.5em;padding-left:0.5em;">
+                  <a href="<?php echo base_url('index');?>
+" class="navbar-brand ">
+                     <!-- <img src="../../dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8"> -->
+                     <img src="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
+/dist/img/softech.jpeg" alt="AROM Technology"
+                        class="brand-image img-circle elevation-3" style="opacity: .8">
+                     <!-- <span class="brand-text font-weight-light">AdminLTE 3</span> -->
+                  </a>
+               </div>
+               <div class=" row collapse navbar-collapse order-3" id="navbarCollapse">
+                  <!-- Left navbar links -->
+                  <ul class="navbar-nav" style="text-align:right;padding-left: 3em; font-size:15px">
+                     <li class="nav-item">
+                        <div style="padding-top:0.5em;"></div>
+                        <a href="<?php echo base_url('dashboard');?>
+" class="nav-link">DASHBOARD</a>
+                     </li>
+                     <li class="nav-item">
+                        <div style="padding-top:0.5em;"></div>
+                        <a href="<?php echo base_url('home_2');?>
+" class="nav-link">CHARTS</a>
+                     </li>
+                     <?php if (($_smarty_tpl->tpl_vars['role']->value == "Purchase" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                     <li class="dropdown-submenu dropdown-hover">
+                        <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true"
+                           aria-expanded="false" class="nav-link dropdown-toggle">PURCHASE </a>
+                        <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "Purchase" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Item Master</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('child_part/direct');?>
+"
+                                    class="dropdown-item">Add Item</a></li>
+                                 <li><a href="<?php echo base_url('child_part_view');?>
+"
+                                    class="dropdown-item">View Item</a></li>
+                              </ul>
                            </li>
-                        <?php }?>
-                        <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isJobRoot'] != null)) {?> 
-                        <li><a class="dropdown-item" href="<?php echo base_url('job_card_issued');?>
-">Issue Released Job Card</a></li>
-                        <?php }?>
-                         <?php if (($_smarty_tpl->tpl_vars['role']->value == "stores" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
-                        <li><a class="dropdown-item" href="<?php echo base_url('stock_rejection');?>
-">Stock Rejection</a></li>
-                        <li><a class="dropdown-item" href="<?php echo base_url('short_receipt');?>
-">MRD Short Receipts</a></li>
-                         <?php }?>
-                     </ul>
-                  </li>
-                  <?php }?>
-                  <?php if (($_smarty_tpl->tpl_vars['role']->value == "production" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
-                  <li class="nav-item dropdown">
-                     <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdownMenuLinkProduction" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                     Production
-                     </a>
-                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkProductionSubmenu">
-                        <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isPlastic'] != null)) {?>
-                          <li><a href="<?php echo base_url('machine_request');?>
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "Purchase" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Supplier Part</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('child_part_supplier');?>
+"
+                                    class="dropdown-item">Add Supplier Part Price</a></li>
+                                 <li><a href="<?php echo base_url('child_part_supplier_view');?>
+"
+                                    class="dropdown-item">View Supplier Part Price</a></li>
+                              </ul>
+                           </li>
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "Purchase" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Supplier</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <?php if (($_smarty_tpl->tpl_vars['role']->value == "Purchase" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                                 <li><a href="<?php echo base_url('supplier');?>
+" class="dropdown-item">Add
+                                    Supplier</a>
+                                 </li>
+                                 <?php }?>
+                                 <li><a href="<?php echo base_url('approved_supplier');?>
+"
+                                    class="dropdown-item">View Supplier </a></li>
+                              </ul>
+                           </li>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Regular Po</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('new_po');?>
+" class="dropdown-item">Generate
+                                    PO</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('new_po_list_supplier');?>
+"
+                                    class="dropdown-item">Supplierwise PO List </a></li>
+                                 <li><a href="<?php echo base_url('pending_po');?>
+" class="dropdown-item">Pending
+                                    PO </a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('rejected_po');?>
+"
+                                    class="dropdown-item">Rejected PO
+                                    </a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('expired_po');?>
+" class="dropdown-item">Expired
+                                    PO </a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('closed_po');?>
+" class="dropdown-item">Closed
+                                    PO </a>
+                                 </li>
+                              </ul>
+                           </li>
+                           <?php }?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Sub Con</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('new_po_sub');?>
+"
+                                    class="dropdown-item">Generate Subcon
+                                    PO</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('new_po_list_supplier');?>
+"
+                                    class="dropdown-item">View
+                                    Subcon PO list</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('routing');?>
+" class="dropdown-item">Subcon
+                                    routing </a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('routing_customer');?>
+"
+                                    class="dropdown-item">Customer Subcon routing </a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('pending_po');?>
+" class="dropdown-item">Pending
+                                    PO</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('expired_po');?>
+" class="dropdown-item">Expired
+                                    PO </a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('rejected_po');?>
+"
+                                    class="dropdown-item">Rejected PO </a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('closed_po');?>
+" class="dropdown-item">Closed
+                                    PO </a>
+                                 </li>
+                              </ul>
+                           </li>
+                        </ul>
+                     </li>
+                     <?php }?>
+                     <?php if (($_smarty_tpl->tpl_vars['role']->value == "stores" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                     <li class="dropdown-submenu dropdown-hover">
+                        <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true"
+                           aria-expanded="false" class="nav-link dropdown-toggle">STORE</a>
+                        <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Inwarding</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('inwarding');?>
+" class="dropdown-item">Part
+                                    GRN</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('grn_validation');?>
+" class="dropdown-item">
+                                    GRN
+                                    Qty Validation </a>
+                                 </li>
+                              </ul>
+                           </li>
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "stores" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Challan</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('view_add_challan');?>
+"
+                                    class="dropdown-item">Create challan</a></li>
+                                 <li><a href="<?php echo base_url('view_supplier_challan');?>
+"
+                                    class="dropdown-item">
+                                    Supplierwise challan list </a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('view_add_challan_subcon');?>
+"
+                                    class="dropdown-item">Create challan Subcon</a></li>
+                                 <li><a href="<?php echo base_url('view_supplier_challan_subcon');?>
+"
+                                    class="dropdown-item">
+                                    Customerwise challan list </a>
+                                 </li>
+                              </ul>
+                           </li>
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "stores" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Stock</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('part_stocks');?>
+"
+                                    class="dropdown-item">Supplier part
+                                    stocks</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('part_stocks_inhouse');?>
+"
+                                    class="dropdown-item">Inhouse
+                                    part
+                                    stocks</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('fw_stock');?>
+" class="dropdown-item">FG
+                                    Stock</a>
+                                 </li>
+                              </ul>
+                           </li>
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isSheetMetal'] != null)) {?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded=""
+                                 class="dropdown-item dropdown-toggle">Material
+                              Requisition</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('stock_down');?>
+"
+                                    class="dropdown-item">Material
+                                    Issue</a>
+                                 </li>
+                                 <?php if (($_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                                 <li><a href="<?php echo base_url('stock_up');?>
+" class="dropdown-item">Stock
+                                    Up/return</a>
+                                 </li>
+                                 <?php }?>
+                                 <li><a href="<?php echo base_url('sharing_issue_request_store');?>
+"
+                                    class="dropdown-item">Sharing Issue Request - Pending
+                                    </a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('sharing_issue_request_store_completed');?>
+"
+                                    class="dropdown-item">Sharing Issue Request - Completed
+                                    </a>
+                                 </li>
+                              </ul>
+                           </li>
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isJobRoot'] != null)) {?> 
+                           <li><a href="<?php echo base_url('job_card_issued');?>
+" class="dropdown-item">Issue
+                              Released
+                              Job Card</a>
+                           </li>
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "stores" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <li><a href="<?php echo base_url('stock_rejection');?>
+" class="dropdown-item">Stock
+                              Rejection</a>
+                           </li>
+                           <li><a href="<?php echo base_url('short_receipt');?>
+" class="dropdown-item">MDR/Short
+                              Receipt</a>
+                           </li>
+                           <!-- <li><a href="<?php echo '<?php'; ?>
+ echo base_url('grn_rejection') <?php echo '?>'; ?>
+" class="dropdown-item">GRN
+                              Rejection</a></li> -->
+                           <?php }?>
+                           <!-- 
+                              <li><a href="<?php echo '<?php'; ?>
+ echo base_url('stock_variance') <?php echo '?>'; ?>
+" class="dropdown-item">Stock
+                                      Variance</a></li> -->
+                        </ul>
+                     </li>
+                     <?php }?>
+                     <?php if (($_smarty_tpl->tpl_vars['role']->value == "production" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                     <li class="dropdown-submenu dropdown-hover">
+                        <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true"
+                           aria-expanded="false" class="nav-link dropdown-toggle">PRODUCTION</a>
+                        <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
+                           <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isPlastic'] != null)) {?>
+                           <li><a href="<?php echo base_url('machine_request');?>
 " class="dropdown-item">Material
                               Request: Add</a>
                            </li>
-                          <li><a href="<?php echo base_url('machine_request_completed');?>
+                           <li><a href="<?php echo base_url('machine_request_completed');?>
 " class="dropdown-item">Material
                               Request Report</a>
                            </li>
-                        <?php }?>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Stock</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('part_stocks');?>
-" class="dropdown-item">Supplier Part stocks</a></li>
-                              <li><a href="<?php echo base_url('part_stocks_inhouse');?>
-" class="dropdown-item">Inhouse Part stocks</a></li>
-                              <li><a href="<?php echo base_url('fw_stock');?>
-" class="dropdown-item">FG Stock</a></li>
-                           </ul>
-                        </li>
-                         <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isSheetMetal'] != null)) {?>
+                           <?php }?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Stock</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('part_stocks');?>
+"
+                                    class="dropdown-item">Supplier part
+                                    stocks</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('part_stocks_inhouse');?>
+"
+                                    class="dropdown-item">Inhouse
+                                    part
+                                    stocks</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('fw_stock');?>
+" class="dropdown-item">FG
+                                    Stock</a>
+                                 </li>
+                              </ul>
+                           </li>
+                           <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isSheetMetal'] != null)) {?>
                            <li><a href="<?php echo base_url('stock_down');?>
 "
                               class="dropdown-item">Material
@@ -648,13 +519,14 @@ public/img/logo.png" alt="" width="30">
                               Production
                               </a>
                            </li>
-                        <?php }?>
-                        <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isSheetMetal'] != null)) {?>
-                           <li class="dropdown-submenu ">
-                              <a href="javascript:void(0)" role="button" data-toggle="dropdown"
-                                aria-expanded="false"
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "production" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isSheetMetal'] != null)) {?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
                                  class="dropdown-item dropdown-toggle">Production QTY</a>
-                              <ul class="dropdown-menu">
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
                                  <li><a href="<?php echo base_url('p_q');?>
 " class="dropdown-item">
                                     Add</a>
@@ -664,13 +536,14 @@ public/img/logo.png" alt="" width="30">
                                  </li>
                               </ul>
                            </li>
-                        <?php }?>
-                        <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isPlastic'] != null)) {?>
-                           <li class="dropdown-submenu ">
-                              <a  href="javascript:void(0)" role="button" data-toggle="dropdown"  aria-expanded="false"
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isPlastic'] != null)) {?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
                                  class="dropdown-item dropdown-toggle">
                               Molding Production </a>
-                              <ul  class="dropdown-menu ">
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
                                  <li><a href="<?php echo base_url('p_q_molding_production');?>
 "
                                     class="dropdown-item">
@@ -684,27 +557,54 @@ public/img/logo.png" alt="" width="30">
                            <li><a href="<?php echo base_url('molding_stock_transfer ');?>
 "
                               class="dropdown-item">Molding Stock Transfer </a></li>
+                           <!-- <li>
+                              <a href="<?php echo '<?php'; ?>
+ echo base_url('deflashing_rqeust') <?php echo '?>'; ?>
+"
+                              class="dropdown-item">Deflashing
+                              Request </a>
+                              </li>
+                              <li>
+                              <a href="<?php echo '<?php'; ?>
+ echo base_url('p_q_deflashing') <?php echo '?>'; ?>
+" class="dropdown-item">Deflashing
+                              Production </a>
+                              </li>
+                              -->
                            <li>
                               <a href="<?php echo base_url('final_inspection');?>
 " class="dropdown-item">Final
                               Inspection
                               </a>
                            </li>
-                      <?php }?>
-                      <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isJobRoot'] != null)) {?> 
-                        <li><a href="<?php echo base_url('job_card_issued');?>
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isJobRoot'] != null)) {?> 
+                           <li><a href="<?php echo base_url('job_card_issued');?>
 " class="dropdown-item">WIP Job
                               Card</a>
                            </li>
-                      <?php }?>
-                     </ul>
-                  </li>
-                  <li class="nav-item dropdown">
-                     <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdownMenuLinkQuality" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                     Quality
-                     </a>
-                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkQualitySubmenu">
-                        <li><a href="<?php echo base_url('accept_reject_validation');?>
+                           <?php }?>
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <!-- <li><a href="<?php echo '<?php'; ?>
+ echo base_url('job_card_issued') <?php echo '?>'; ?>
+" class="dropdown-item">Operation BOM</a></li> -->
+                           <?php }?>
+                           <!-- <li><a href="<?php echo '<?php'; ?>
+ echo base_url('planning_year_page') <?php echo '?>'; ?>
+" class="dropdown-item">Add FG
+                              Stock</a></li> -->
+                           <!-- <li><a href="<?php echo '<?php'; ?>
+ echo base_url('stock_up') <?php echo '?>'; ?>
+" class="dropdown-item">Stock Up/Return</a> -->
+                           </li>
+                        </ul>
+                        <?php if (($_smarty_tpl->tpl_vars['role']->value == "Quality" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                     <li class="dropdown-submenu dropdown-hover">
+                        <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true"
+                           aria-expanded="false" class="nav-link dropdown-toggle">QUALITY</a>
+                        <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
+                           <li><a href="<?php echo base_url('accept_reject_validation');?>
 " class="dropdown-item">Inward Inspection</a></li>
                            <li><a href="<?php echo base_url('remarks');?>
 " class="dropdown-item">Rejection Reasons</a>
@@ -729,67 +629,113 @@ public/img/logo.png" alt="" width="30">
                               class="dropdown-item">Rejection
                               Invoices</a>
                            </li>
-                     </ul>
-                  </li>
-                  <?php }?>
-                  
-                   <?php if (($_smarty_tpl->tpl_vars['role']->value == "Sales" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
-                  <li class="nav-item dropdown">
-                     <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdownMenuLinkPnS" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                     Planning & Sales
-                     </a>
-                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkPnSSubmenu">
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Sale Invoice</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('new_sales');?>
-" class="dropdown-item">Create Sale Invoice</a></li>
-                              <li><a href="<?php echo base_url('sales_invoice_released');?>
-" class="dropdown-item">View sale Invoice</a></li>
-                              <li><a href="<?php echo base_url('rejection_invoices');?>
-" class="dropdown-item">Rejection Invoice</a></li>
-                              <li><a href="<?php echo base_url('rejection_flow');?>
-" class="dropdown-item">Rejection Flow</a></li>
-                           </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Customer</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('customer_parts_master');?>
-" class="dropdown-item">Part Master</a></li>
-                              <li><a href="<?php echo base_url('customer');?>
-" class="dropdown-item">Customers</a></li>
-                              <li><a href="<?php echo base_url('customer_master');?>
-" class="dropdown-item">Customer Master</a></li>
-                              <li><a href="<?php echo base_url('consignee');?>
-" class="dropdown-item">Consignee</a></li>
-                           </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Customer PO QTY Tracking</a>
-                           <ul class="dropdown-menu">
-                              <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['po_import_export'] != null)) {?>
+                        </ul>
+                     </li>
+                     <?php }?>
+                     <?php if (($_smarty_tpl->tpl_vars['role']->value == "Sales" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                     <li class="dropdown-submenu dropdown-hover">
+                        <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true"
+                           aria-expanded="false" class="nav-link dropdown-toggle">PLANNING & SALES</a>
+                        <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">SALES INVOICE</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('new_sales');?>
+" class="dropdown-item">Create Sales
+                                    Invoice</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('sales_invoice_released');?>
+"
+                                    class="dropdown-item">View
+                                    Sales Invoice</a>
+                                 </li>
+                                 <!--<li><a href="<?php echo '<?php'; ?>
+ echo base_url('new_sales_rejection') <?php echo '?>'; ?>
+"
+                                    class="dropdown-item">Create
+                                    Scrap Sales Invoice</a></li> -->
+                                 <li><a href="<?php echo base_url('rejection_invoices');?>
+"
+                                    class="dropdown-item">Rejection
+                                    Invoices</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('rejection_flow');?>
+"
+                                    class="dropdown-item">Rejection
+                                    Flow</a>
+                                 </li>
+                                 <!-- <li><a href="<?php echo '<?php'; ?>
+ echo base_url('new_sales_subcon') <?php echo '?>'; ?>
+"
+                                    class="dropdown-item">Create
+                                    Customer Subcon Sales
+                                    Invoice</a></li>
+                                    <li><a href="<?php echo '<?php'; ?>
+ echo base_url('sales_invoice_released_subcon') <?php echo '?>'; ?>
+"
+                                    class="dropdown-item">View
+                                    Customer Subcon Sales Invoice</a></li> -->
+                              </ul>
+                           </li>
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "Sales" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Customer</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('customer_parts_master');?>
+"
+                                    class="dropdown-item">Part Master</a></li>
+                                 <li><a href="<?php echo base_url('customer');?>
+" class="dropdown-item">Customers</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('customer_master');?>
+"
+                                    class="dropdown-item">Customer
+                                    Master</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('consignee');?>
+"
+                                    class="dropdown-item">Consignee</a></li>
+                              </ul>
+                           </li>
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "Sales" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Customer PO QTY Tracking</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['po_import_export'] != null)) {?>
                                  <li><a href="<?php echo base_url('customer_po_tracking_importExport');?>
 "
                                     class="dropdown-item">Import/Export PO Tracking</a></li>
-                              <?php }?>
-                              <li><a href="<?php echo base_url('customer_po_tracking');?>
-" class="dropdown-item">create Po QTY Tracking</a></li>
-                              <li><a href="<?php echo base_url('customer_po_tracking_all');?>
-" class="dropdown-item">View pending</a></li>
-                              <li><a href="<?php echo base_url('customer_po_tracking_all_closed');?>
-" class="dropdown-item">View Closed</a></li>
-                           </ul>
-                        </li>
-                        <?php if (($_smarty_tpl->tpl_vars['role']->value == "Sales" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Customer Scheduling</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('planning_year_page');?>
+                                 <?php }?>
+                                 <li><a href="<?php echo base_url('customer_po_tracking');?>
+"
+                                    class="dropdown-item">Create PO QTY Tracking</a></li>
+                                 <li><a href="<?php echo base_url('customer_po_tracking_all');?>
+"
+                                    class="dropdown-item">View Pending</a></li>
+                                 <li><a href="<?php echo base_url('customer_po_tracking_all_closed');?>
+"
+                                    class="dropdown-item">View Closed</a></li>
+                              </ul>
+                           </li>
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "Sales" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Customer Scheduling</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('planning_year_page');?>
 " class="dropdown-item">Monthly Plan</a></li>
-                              <li><a href="<?php echo base_url('planning_shop_order_details');?>
-" class="dropdown-item">Shop Order details</a></li>
-                              <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isJobRoot'] != null)) {?> 
+                                 <li><a href="<?php echo base_url('planning_shop_order_details');?>
+" class="dropdown-item">Shop Order Details</a></li>
+                                 <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isJobRoot'] != null)) {?> 
                                  <li><a href="<?php echo base_url('job_card');?>
 " class="dropdown-item">Create
                                     JOB
@@ -802,30 +748,37 @@ public/img/logo.png" alt="" width="30">
 " class="dropdown-item">Closed
                                     JOB Card</a>
                                  </li>
-                              <?php }?>
-                           </ul>
-                        </li>
-                        <?php }?>
-                        <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isSheetMetal'] != null)) {?>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Inhouse Parts</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('inhouse_parts');?>
-" class="dropdown-item">Add Item</a></li>
-                              <li><a href="<?php echo base_url('inhouse_parts_view');?>
-" class="dropdown-item">View Item</a></li>
-                           </ul>
-                        </li>
-                        <?php }?>
-                     </ul>
-                  </li>
-                  <?php }?>
-                  <li class="nav-item dropdown">
-                     <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdownMenuLinkReport" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                     Reports
-                     </a>
-                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkReportSubmenu">
-                        <li><a href="<?php echo base_url('sales_report');?>
+                                 <?php }?>
+                              </ul>
+                           </li>
+                           <?php }?>
+                           <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isSheetMetal'] != null)) {?>
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "Sales" || $_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Inhouse Parts</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('inhouse_parts');?>
+" class="dropdown-item">Add
+                                    Item</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('inhouse_parts_view');?>
+"
+                                    class="dropdown-item">View Item</a></li>
+                              </ul>
+                           </li>
+                           <?php }?>
+                           <?php }?>
+                           </li>
+                        </ul>
+                     </li>
+                     <?php }?>
+                     <li class="dropdown-submenu dropdown-hover">
+                        <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true"
+                           aria-expanded="false" class="nav-link dropdown-toggle">REPORT </a>
+                        <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
+                           <li><a href="<?php echo base_url('sales_report');?>
 " class="dropdown-item">Sales Report </a></li>
                            <li><a href="<?php echo base_url('receivable_report');?>
 " class="dropdown-item">Receivable Report </a></li>
@@ -886,35 +839,48 @@ public/img/logo.png" alt="" width="30">
                            <li><a href="<?php echo base_url('mold_maintenance_report');?>
 " 
                               class="dropdown-item">Mold Life report </a></li>
-                     </ul>
-                  </li>
-                  <?php if (($_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
-                  <li class="nav-item dropdown">
-                     <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdownMenuLinkAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                     Admin
-                     </a>
-                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkAdminSubmenu">
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Approval</a>
-                           <ul class="dropdown-menu">
-                              <li><a href="<?php echo base_url('supplier');?>
-" class="dropdown-item">Supplier</a></li>
-                              <li><a href="<?php echo base_url('child_part_supplier_admin');?>
-" class="dropdown-item">Supplier Part Price</a></li>
-                              <li><a href="<?php echo base_url('pending_po');?>
-" class="dropdown-item">Po Approval</a></li>
-                              <li><a href="<?php echo base_url('child_parts');?>
-" class="dropdown-item">Child Part Stock Update</a></li>
-                              <li><a href="<?php echo base_url('inhouse_parts_admin');?>
-" class="dropdown-item">Inhouse Part Stock Update</a></li>
-                              <li><a href="<?php echo base_url('customer_parts_admin');?>
-" class="dropdown-item">Customer Part Stock Update</a></li>
-                           </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                           <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Master</a>
-                           <ul class="dropdown-menu">
-                              <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isPlastic'])) {?>
+                        </ul>
+                     </li>
+                     <?php if (($_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                     <li class="dropdown-submenu dropdown-hover">
+                        <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true"
+                           aria-expanded="false" class="nav-link dropdown-toggle">ADMIN</a>
+                        <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Approval</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo base_url('supplier');?>
+" class="dropdown-item">Supplier</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('child_part_supplier_admin');?>
+"
+                                    class="dropdown-item">Supplier Part Price</a></li>
+                                 <li><a href="<?php echo base_url('pending_po');?>
+" class="dropdown-item">PO
+                                    Approval</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('child_parts');?>
+" class="dropdown-item">Child
+                                    Parts Stock Update</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('inhouse_parts_admin');?>
+"
+                                    class="dropdown-item">Inhouse
+                                    Parts Stock Update</a>
+                                 </li>
+                                 <li><a href="<?php echo base_url('customer_parts_admin');?>
+"
+                                    class="dropdown-item">Customer Parts Stock Update</a>
+                              </ul>
+                           </li>
+                           <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
+                                 aria-haspopup="true" aria-expanded="false"
+                                 class="dropdown-item dropdown-toggle">Masters</a>
+                              <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                 <?php if (($_smarty_tpl->tpl_vars['entitlements']->value['isPlastic'])) {?>
                                  <li><a href="<?php echo base_url('grades');?>
 " class="dropdown-item">Grades
                                     Master</a>
@@ -955,7 +921,19 @@ public/img/logo.png" alt="" width="30">
 " class="dropdown-item">Mold Master
                                     </a>
                                  </li>
+                                 <!-- <li>
+                                    <a href="<?php echo '<?php'; ?>
+ echo base_url('deflashing_operation') <?php echo '?>'; ?>
+"
+                                        class="dropdown-item">Deflashing
+                                        Operation
+                                    </a></li>
+                                    -->
                                  <?php }?>
+                                 <!-- <li><a href="<?php echo '<?php'; ?>
+ echo base_url('machine_mold') <?php echo '?>'; ?>
+" class="dropdown-item">Machine
+                                    Mold</a></li> -->
                                  <li><a href="<?php echo base_url('client');?>
 " class="dropdown-item">Client</a></li>
                                  <li><a href="<?php echo base_url('uom');?>
@@ -965,26 +943,41 @@ public/img/logo.png" alt="" width="30">
                                  <li><a href="<?php echo base_url('transporter');?>
 " class="dropdown-item">Transporter</a>
                                  </li>
-                           </ul>
-                        </li>
-                        <!-- <li><a class="dropdown-item" href="#">Approval</a></li>
-                           <li><a class="dropdown-item" href="#">Master</a></li> -->
-                        <li><a class="dropdown-item" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-">User</a></li>
-                        <li><a class="dropdown-item" href="<?php echo $_smarty_tpl->tpl_vars['base_url']->value;?>
-">Configurations</a></li>
-                     </ul>
+                              </ul>
+                           </li>
+                           <li><a href="<?php echo base_url('erp_users');?>
+" class="dropdown-item">Users</a></li>
+                           <li><a href="<?php echo base_url('configs');?>
+" class="dropdown-item">Configurations</a></li>
+                           <?php if (($_smarty_tpl->tpl_vars['role']->value == "Admin")) {?>
+                           <!-- <li class="dropdown-submenu dropdown-hover">
+                              <a id="dropdownAromMenu" href="#" role="button" data-toggle="dropdown"
+                                  aria-haspopup="true" aria-expanded="false"
+                                  class="dropdown-item dropdown-toggle">AROM Configuration</a>
+                                 <ul aria-labelledby="dropdownAromMenu" class="dropdown-menu border-0 shadow">
+                                 <li><a href="<?php echo '<?php'; ?>
+ echo base_url('transporter') <?php echo '?>'; ?>
+" class="dropdown-item">Table</a>
+                                  </li>
+                              </ul>
+                              </li> -->
+                           <?php }?>
+                           </li>
+                        </ul>
+                     </li>
+                     <?php }?>
+                     <li>
+                        <div style="padding-top:0.5em;"></div>
+                        <a href="<?php echo base_url('logout');?>
+" class="nav-link">LOGOUT</a>
+                     </li>
+                  </ul>
                   </li>
                   <?php }?>
-                  <li class="nav-item">
-                    <a href="<?php echo base_url('logout');?>
-" class="nav-link">Logout</a>
-                  </li>
-               </ul>
+                  </ul>
+               </div>
+               <!-- Right navbar links -->
             </div>
-         </div>
-      </nav>
-      <!-- Content wrapper -->
-      <div class="content-wrapper">
-      <!-- Content --><?php }
+         </nav>
+      </div><?php }
 }

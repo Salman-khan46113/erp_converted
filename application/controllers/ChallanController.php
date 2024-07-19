@@ -3,71 +3,71 @@ defined('BASEPATH') or exit('No direct script access allowed');
 require_once('CommonController.php');
 
 class ChallanController extends CommonController {
-	
+
 	const VIEW_CHALLAN_PATH = "challan/";
-	
+
 	function _construct()
     {
         parent::_construct();
 		$this->load->model('SupplierParts');
     }
-	
+
 	private function getPath(){
 		return self::VIEW_CHALLAN_PATH;
 	}
 
 	private function test()	{
 	$this->getPage('sales_reports.php', $data);
-		
+
 	}
-	
+
 	public function view_add_challan()
 	{
 		$this->challan_search();
 	}
-	
+
 	public function challan_search()
 	{
 		$challanId = $this->input->post('challan_id');
 		$supplierId = $this->input->post('supplier_id');
-		
+
 		$queryList = "SELECT c.id, c.challan_number FROM `challan` as c WHERE c.clientId =  ".$this->Unit->getSessionClientId()." order by c.id desc";
 		$data['challanNo_list'] = $this->Crud->customQuery($queryList);
 		$data['supplier'] = $this->Crud->read_data("supplier");
-		
+
 		if($challanId == "ALL"){
-			$query ="SELECT c.*,s.supplier_name,s.id as sup_id 
-						FROM `supplier` as s, `challan` as c 
+			$query ="SELECT c.*,s.supplier_name,s.id as sup_id
+						FROM `supplier` as s, `challan` as c
 						WHERE
-						c.clientId =  ".$this->Unit->getSessionClientId()." 
-						AND c.supplier_id = s.id 
+						c.clientId =  ".$this->Unit->getSessionClientId()."
+						AND c.supplier_id = s.id
 						order by c.id desc";
 		}else if(empty($challanId) && empty($supplierId)) {
-			$query ="SELECT c.*,s.supplier_name,s.id as sup_id 
-						FROM `supplier` as s, `challan` as c 
-						WHERE 
-						c.clientId =  ".$this->Unit->getSessionClientId()." 
-						AND c.supplier_id = s.id 
+			$query ="SELECT c.*,s.supplier_name,s.id as sup_id
+						FROM `supplier` as s, `challan` as c
+						WHERE
+						c.clientId =  ".$this->Unit->getSessionClientId()."
+						AND c.supplier_id = s.id
 						order by c.id desc limit 10 ";
 		}else{
 			$suppCriteria = empty($supplierId)? " c.supplier_id is NOT NULL " : "c.supplier_id = ".$supplierId;
 			$chalCriteria = empty($challanId)  ? "c.id is NOT NULL " : " c.id =".$challanId;
-			$query = "SELECT c.*,s.supplier_name,s.id as sup_id 
+			$query = "SELECT c.*,s.supplier_name,s.id as sup_id
 					FROM `supplier` as s, `challan` as c
-		    		WHERE 
-					c.clientId =  ".$this->Unit->getSessionClientId()." 
+		    		WHERE
+					c.clientId =  ".$this->Unit->getSessionClientId()."
 					AND c.supplier_id = s.id and ( ".$suppCriteria." AND ".$chalCriteria." ) order by c.id asc";
 		}
 		$data['challan'] = $this->Crud->customQuery($query);
 		$data['consignee_list'] = $this->Crud->read_data_acc("consignee");
-	
-		//set search selection 
+
+		//set search selection
 		$data['challan_id']=$challanId;
 		$data['supplier_id']=$supplierId;
-		
+
 		$this->loadView('store/view_add_challan', $data);		
 	}
-	
+
 	public function view_challan_by_id()
 	{
 		$challan_id = $this->uri->segment('2');
@@ -90,22 +90,22 @@ class ChallanController extends CommonController {
 		}
 		// pr($data['challan_parts'],1);
 		$data['supplier'] = $this->Crud->get_data_by_id("supplier", $data['challan_data'][0]->supplier_id, "id");
-	
+
 		$this->loadView('store/view_challan_by_id', $data);
 	}
-	
-	
+
+
 	public function add_challan_parts()
 	{
 		$challan_id = $this->input->post('challan_id');
-		
+
 		$challanPartCount = $this->db->query('SELECT COUNT(*) as count FROM `challan_parts` where challan_id = ' . $challan_id)->row();
 		if($challanPartCount->count >= 7) {
-			$this->addWarningMessage("Already 7 parts added. No more parts are allowed."); 
+			$this->addWarningMessage("Already 7 parts added. No more parts are allowed.");
 			$this->redirectMessage();
 			exit();
 		}
-		
+
 		$qty = $this->input->post('qty');
 		$part_id = $this->input->post('part_id');
 		$process = $this->input->post('process');
@@ -117,9 +117,9 @@ class ChallanController extends CommonController {
 		);
 
 		$challan_parts = $this->Crud->get_data_by_id_multiple_condition("challan_parts", $uniqueCheck);
-	
+
 		if ($challan_parts) {
-			$this->addWarningMessage("Part already present."); 
+			$this->addWarningMessage("Part already present.");
 			$this->redirectMessage();
 		} else {
 			$child_part_data = $this->SupplierParts->getSupplierPartById($this->input->post('part_id'));
@@ -137,24 +137,24 @@ class ChallanController extends CommonController {
 				"month" => $this->month,
 				"year" => $this->year,
 			);
-			
+
 			$current_stock = $child_part_data[0]->stock;
-			
+
 			if ((float)$qty > (float)$current_stock) {
-				$this->addWarningMessage("Store stock quantity is less than entered quantity."); 
+				$this->addWarningMessage("Store stock quantity is less than entered quantity.");
 				$this->redirectMessage();
 			} else {
 				$inser_query = $this->Crud->insert_data("challan_parts", $data);
 				if ($inser_query) {
-					$updateResult = $this->db->query("update child_part set stock = stock - ".$qty.", sub_con_stock = sub_con_stock + ".$qty." 
+					$updateResult = $this->db->query("update child_part set stock = stock - ".$qty.", sub_con_stock = sub_con_stock + ".$qty."
 					where child_part.id =".$part_id);
 					if($updateResult){
-						$this->addSuccessMessage("Part added."); 
+						$this->addSuccessMessage("Part added.");
 					}else{
-						$this->addErrorMessage("Error while adding quantity to stock."); 
+						$this->addErrorMessage("Error while adding quantity to stock.");
 					}
 					$this->redirectMessage();
-					
+
 						/*
 						$current_stock = $child_part_data[0]->stock;
 						old code $new_stock = $current_stock - $qty;
@@ -165,57 +165,57 @@ class ChallanController extends CommonController {
 							'stock' => $new_stock,
 							'sub_con_stock' => $newsubcon,
 						);
-						
+
 						$update = $this->Crud->update_data("child_part", $stockUpdate, $part_id);
 						if ($update) {
-							$this->addSuccessMessage("Part added successfully"); 
+							$this->addSuccessMessage("Part added successfully");
 						} else {
-							$this->addErrorMessage("Error while updating Qty to stock"); 
+							$this->addErrorMessage("Error while updating Qty to stock");
 						}*/
-						
+
 				} else {
-					$this->addErrorMessage("Error while adding quantity."); 
+					$this->addErrorMessage("Error while adding quantity.");
 					$this->redirectMessage();
 				}
 			}
 		}
 	}
-	
+
 	public function delete_challan_part()
 	{
 		$id = $this->input->post('id');
 		$partQty = $this->input->post('partQty');
 		$part_id = $this->input->post('part_id');
-		
+
 		$table_name = $this->input->post('table_name');
-		
+
 		$data = array(
 			"id" => $id
 		);
 		$result = $this->Crud->delete_data($table_name, $data);
-		
+
 		if ($result) {
 			//select stock,sub_con_stock from child_part where id = 1
 			//97,1003
-			$updateResult = $this->db->query("update child_part set stock = stock + ".$partQty.", sub_con_stock = sub_con_stock - ".$partQty." 
+			$updateResult = $this->db->query("update child_part set stock = stock + ".$partQty.", sub_con_stock = sub_con_stock - ".$partQty."
 			where child_part.id =".$part_id);
 			if($updateResult){
-				$this->addSuccessMessage("Part successfully deleted."); 
+				$this->addSuccessMessage("Part successfully deleted.");
 			}else{
-				$this->addErrorMessage("Error while updating Qty to stock."); 
+				$this->addErrorMessage("Error while updating Qty to stock.");
 			}
 		} else {
-			$this->addErrorMessage("Failed to delete part."); 
+			$this->addErrorMessage("Failed to delete part.");
 		}
 		$this->redirectMessage();
 	}
-	
+
 	private function getPage($viewPage,$viewData){
 		$this->getHeaderPage();
 		$this->load->view($this->getPath().$viewPage,$viewData);
 		$this->load->view('footer.php');
 	}
-	
+
 
 	public function generate_challan()
 	{

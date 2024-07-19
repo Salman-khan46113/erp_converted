@@ -7,11 +7,10 @@ class SalesController extends CommonController
 
 	const VIEW_PATH = "sales/";
 
-	function __construct()
+	function _construct()
 	{
-		parent::__construct();
+		parent::_construct();
 		$this->load->model('CustomerPart');
-		$this->load->model('SalesModel');
 	}
 
 	private function getViewPath()
@@ -600,9 +599,8 @@ class SalesController extends CommonController
 
 	public function sales_report()
 	{
-		
 		if (isset($_POST['export'])) {
-			
+
 			$searchYear = $this->input->post('search_year');
 			$searchMonth = $this->input->post('search_month');
 			$sales_ids = $this->input->post('sale_numbers');
@@ -675,7 +673,7 @@ class SalesController extends CommonController
 			$where_condition.
 			' GROUP BY parts.sales_id '
 			);
-			// pr($this->db->last_query(),1);
+
 			if(empty($sales_details)){
 				$this->addWarningMessage('No records found for this export criteria.');
 				$this->redirectMessage();
@@ -708,7 +706,6 @@ class SalesController extends CommonController
 			//$formattedXml = $dom->saveXML();
 
 			$filename = 'tally_sales-'.$this->current_date_time.'.xml';
-			
 			header('Content-Type: application/xml');
 			header('Content-Disposition: attachment; filename="' . $filename . '"');
 
@@ -733,7 +730,31 @@ class SalesController extends CommonController
 			$created_month = $this->month;
 		}
 
-		$data['sales_parts'] = 
+		$data['sales_parts'] = $this->Crud->customQuery("
+		SELECT 
+			cp.part_number, 
+			cp.part_description, 
+			c.customer_name, 
+			sales.status, 
+			sales.sales_number as salesNumber,
+			sales.created_date AS sales_date, 
+			parts.* 
+		FROM 
+			`new_sales` AS sales
+		INNER JOIN 
+			`sales_parts` AS parts ON sales.id = parts.sales_id
+		INNER JOIN 
+			customer AS c ON parts.customer_id = c.id
+		INNER JOIN 
+			customer_part AS cp ON parts.part_id = cp.id
+		WHERE 
+			sales.clientId = ".$this->Unit->getSessionClientId()."
+			AND sales.sales_number NOT LIKE 'TEMP%' 
+			AND sales.status NOT IN ('pending')
+			AND sales.created_month = " . $created_month . "
+			AND sales.created_year = " . $created_year . "
+		ORDER BY 
+			parts.id DESC");
 
 		$data['created_year'] = $created_year;
 		$data['created_month'] = $created_month;
@@ -742,185 +763,9 @@ class SalesController extends CommonController
 			$data['month_data'][$i] = $this->Common_admin_model->get_month($i);
 			$data['month_number'][$i] = $this->Common_admin_model->get_month_number($data['month_data'][$i]);
 		}
-		
-		$column[] = [
-            "data" => "customer_name",
-            "title" => "CUSTOMER NAME",
-            "width" => "14%",
-            "className" => "dt-left",
-        ];
-        $column[] = [
-            "data" => "po_number",
-            "title" => "Customer PO No",
-            "width" => "16%",
-            "className" => "dt-left",
-        ];
-        $column[] = [
-            "data" => "salesNumber",
-            "title" => "SALES INV NO",
-            "width" => "17%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "sales_date",
-            "title" => "SALES INV DATE",
-            "width" => "10%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "status",
-            "title" => "SALES STATUS",
-            "width" => "17%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "part_number",
-            "title" => "PART NO",
-            "width" => "17%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "part_description",
-            "title" => "PART NAME",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "hsn_code",
-            "title" => "HSN",
-            "width" => "7%",
-            "className" => "dt-center status-row",
-        ];
-        $column[] = [
-            "data" => "qty",
-            "title" => "QTY",
-            "width" => "17%",
-            "className" => "dt-center",
-        ];
-       
-        $column[] = [
-            "data" => "uom_id",
-            "title" => "UOM",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "rate",
-            "title" => "Part Price",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "subtotal",
-            "title" => "Subtotal",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        
-        $column[] = [
-            "data" => "sgst_amount",
-            "title" => "SGST",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "cgst_amount",
-            "title" => "SGST",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-		$column[] = [
-            "data" => "igst_amount",
-            "title" => "IGST",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-		
-		$column[] = [
-            "data" => "tcs_amount",
-            "title" => "TCS",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-		$column[] = [
-            "data" => "gst_amount",
-            "title" => "GST TOTAL AMOUNT",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-		$column[] = [
-            "data" => "row_total",
-            "title" => "TOTAL AMOUNT WITH GST",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-		
-
-        $data["data"] = $column;
-        $data["is_searching_enable"] = false;
-        $data["is_paging_enable"] = true;
-        $data["is_serverSide"] = true;
-        $data["is_ordering"] = true;
-        $data["is_heading_color"] = "#a18f72";
-        $data["no_data_message"] =
-            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
-            base_url() .
-            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
-        $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
-        $data["admin_url"] = base_url();
-        $data["base_url"] = base_url();
+		// pr($data,1);
 		$this->loadView('reports/sales_reports', $data);
 	}
-
-	public function salesReportsAjax()
-	{
-		$post_data = $this->input->post();
-        $column_index = array_column($post_data["columns"], "data");
-        $order_by = "";
-        foreach ($post_data["order"] as $key => $val) {
-            if ($key == 0) {
-                $order_by .= $column_index[$val["column"]] . " " . $val["dir"];
-            } else {
-                $order_by .=
-                    "," . $column_index[$val["column"]] . " " . $val["dir"];
-            }
-        }
-        $condition_arr["order_by"] = $order_by;
-        $condition_arr["start"] = $post_data["start"];
-        $condition_arr["length"] = $post_data["length"];
-        $base_url = $this->config->item("base_url");
-		$data = $this->SalesModel->getSalesReportViewData($condition_arr,$post_data["search"]);
-		foreach ($data as $key => $val) {
-			if ($val['basic_total'] > 0) {
-				$subtotal = $val['basic_total'];
-			} else {
-				$subtotal = round($val['total_rate'] - $val['gst_amount'], 2);
-			}
-			
-			if ($val['part_price'] > 0) {
-				$rate = $val['part_price'];
-			} else {
-				$rate = round($subtotal / $val['qty'], 2);
-			}
-			$row_total =  round($val['total_rate'], 2) + round($val['tcs_amount'], 2);
-			$data[$key]['subtotal'] = $subtotal;
-			$data[$key]['rate'] =  $rate;
-			$data[$key]['row_total'] = $row_total;
-			
-		}
-		$data["data"] = $data;
-		
-        $total_record = $this->SalesModel->getSalesReportViewCount([], $post_data["search"]);
-        $data["recordsTotal"] = $total_record['total_record'];
-        $data["recordsFiltered"] = $total_record['total_record'];
-        echo json_encode($data);
-        exit();
-		
-	}
-
-
 
 	private function getPage($viewPage, $viewData)
 	{
@@ -999,7 +844,6 @@ class SalesController extends CommonController
 	}
 
 
-	
 	public function view_rejection_sales_invoice_by_id()
 	{
 		$sales_id = $this->uri->segment('2');
@@ -1630,169 +1474,34 @@ class SalesController extends CommonController
 
 	public function receivable_report()
 	{
-
+		$customer_part_id  = $this->input->post("customer_part_id");
+		if(!empty($customer_part_id))
+		{
+			$data['sales_parts']  = $this->Crud->customQuery(
+				"SELECT s.*, SUM(s.gst_amount) as gst, SUM(s.total_rate) as ttlrt, SUM(s.gst_amount) as gstamnt, 
+				SUM(s.tcs_amount) as tcsamnt ,cus.customer_name,cus.payment_terms,rrp.payment_receipt_date
+				,rrp.amount_received,rrp.transaction_details,ns.created_date
+				FROM `sales_parts` s 
+				INNER JOIN new_sales n ON s.sales_id = n.id AND n.clientId = ".$this->Unit->getSessionClientId()."
+				left JOIN customer cus ON s.customer_id = cus.id  
+				left JOIN receivable_report rrp ON s.sales_number = rrp.sales_number  
+				left JOIN new_sales ns ON s.sales_id = ns.id  
+				WHERE s.customer_id = ".$customer_part_id." group by s.sales_number ORDER BY s.id DESC");
+		}
+		
+		
 		$data['customers'] = $this->Crud->read_data("customer");
 		$data['selected_customer_part_id'] = $customer_part_id;
-
-		$column[] = [
-            "data" => "customer_name",
-            "title" => "CUSTOMER NAME",
-            "width" => "14%",
-            "className" => "dt-left",
-        ];
-        $column[] = [
-            "data" => "sales_number",
-            "title" => "Sales Inv No",
-            "width" => "16%",
-            "className" => "dt-left",
-        ];
-        $column[] = [
-            "data" => "created_date",
-            "title" => "Sales Inv Date",
-            "width" => "17%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "subtotal",
-            "title" => "Basic Amount Total",
-            "width" => "10%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        $column[] = [
-            "data" => "gst",
-            "title" => "GST Total Amount",
-            "width" => "17%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "row_total",
-            "title" => "Total Amount With GST",
-            "width" => "17%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        $column[] = [
-            "data" => "payment_terms",
-            "title" => "Payment Terms in Days",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "due_date",
-            "title" => "Due Date",
-            "width" => "7%",
-            "className" => "dt-center status-row",
-        ];
-        $column[] = [
-            "data" => "due_days",
-            "title" => "Due Days",
-            "width" => "17%",
-            "className" => "dt-center",
-			
-        ];
-       
-        $column[] = [
-            "data" => "payment_receipt_date_formated",
-            "title" => "Payment Receipt Date",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "amount_received",
-            "title" => "Amount Received",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        $column[] = [
-            "data" => "transaction_details",
-            "title" => "Transaction Details",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        
-        $column[] = [
-            "data" => "bal_amnt",
-            "title" => "Balance Amount to Receive",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-
-		$column[] = [
-            "data" => "action",
-            "title" => "Action",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-       
 		
-		
-		$data["data"] = $column;
-        $data["is_searching_enable"] = false;
-        $data["is_paging_enable"] = true;
-        $data["is_serverSide"] = true;
-        $data["is_ordering"] = true;
-        $data["is_heading_color"] = "#a18f72";
-        $data["no_data_message"] =
-            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
-            base_url() .
-            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
-        $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
-        $data["admin_url"] = base_url();
-        $data["base_url"] = base_url();
-		
-		$this->loadView('reports/receivable_report',$data);
-	}
-
-
-	public function getReceivableReportData(){
-		$customer_part_id  = $this->input->post("customer_part_id");
-		$post_data = $this->input->post();
-
-        $column_index = array_column($post_data["columns"], "data");
-        $order_by = "";
-        foreach ($post_data["order"] as $key => $val) {
-			if ($key == 0) {
-				$order_by .= $column_index[$val["column"]] . " " . $val["dir"];
-            } else {
-				$order_by .=
-				"," . $column_index[$val["column"]] . " " . $val["dir"];
-            }
-        }
-		
-        $condition_arr["order_by"] = $order_by;
-        $condition_arr["start"] = $post_data["start"];
-        $condition_arr["length"] = $post_data["length"];
-        $base_url = $this->config->item("base_url");
-		
-		$data = $this->SalesModel->getReceivableReportView($condition_arr,$post_data["search"]);
-		
-		foreach ($data as $key => $objs) {
-			$created_date_str = $objs['created_date'];
-            
-			$payment_receipt_date_formated  = '';
-			$subtotal = round($objs['ttlrt'] - $objs['gstamnt'], 2);
-			$row_total = round($objs['ttlrt'], 2) + round($val['tcsamnt'], 2);
-			if (($objs['payment_receipt_date'] != '')) {
-				$payment_receipt_date_formated =  date("d/m/Y", strtotime($objs['payment_receipt_date']));
-			}
-			$data[$key]['subtotal'] = $subtotal;
-			$data[$key]['row_total'] = $row_total;
-			$data[$key]['payment_receipt_date_formated'] = $payment_receipt_date_formated;
-			$data[$key]['bal_amnt'] = $row_total - $val['amount_received'];
-
+		foreach ($data['sales_parts'] as $key => $objs) {
+			$created_date_str = $objs->created_date;
+                                                
 			// Create a DateTime object by specifying the format
 			$dateTime = DateTime::createFromFormat('d/m/Y', $created_date_str);
 		
-			if ($dateTime && is_numeric($objs['payment_terms'])) {
+			if ($dateTime && is_numeric($objs->payment_terms)) {
 				// Convert payment_terms to an integer for days
-				$payment_terms_days = (int)$objs['payment_terms'];
+				$payment_terms_days = (int)$objs->payment_terms;
 		
 				// Add payment_terms (in days) to the created date
 				$dateTime->add(new DateInterval('P' . $payment_terms_days . 'D'));
@@ -1816,21 +1525,14 @@ class SalesController extends CommonController
 			// Get the difference in days
 			$due_days = $interval->format('%r%a');
 
-			$data[$key]['due_date'] = $due_date;
-			$data[$key]['due_days'] = $due_days;
+			$data['sales_parts'][$key]->due_date = $due_date;
+			$data['sales_parts'][$key]->due_days = $due_days;
 		}
-		
-		foreach ($data as $key => $value) {
-			$edit_data = base64_encode(json_encode($value)); 
-			$data[$key]['action'] = "<i class='ti ti-edit edit-part' title='Edit' data-value='$edit_data'></i>";
-		}
-
-		$data["data"] = $data;
-        $total_record = $this->SalesModel->getReceivableReportCount([], $post_data["search"]);
-		
-        $data["recordsTotal"] = count($total_record);
-        $data["recordsFiltered"] = count($total_record);
-        echo json_encode($data);
+		// pr($data['sales_parts'],1);
+		// $this->load->view('header.php');
+		// $this->load->view('receivable_report.php', $data);
+		// $this->load->view('footer.php');
+		$this->loadView('reports/receivable_report',$data);
 	}
 
 
@@ -1856,15 +1558,15 @@ class SalesController extends CommonController
 		} 
 		else 
 		{
-			$data = array(
-				"sales_number" => $sales_number,
-				"payment_receipt_date" => $payment_receipt_date,
-				"amount_received" => $amount_received,
-				"transaction_details" => $transaction_details,
-				
-			);
-			$result = $this->Crud->update_data_column("receivable_report", $data, $sales_number, "sales_number");
-		echo "<script>alert('Updated Sucessfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+					$data = array(
+						"sales_number" => $sales_number,
+						"payment_receipt_date" => $payment_receipt_date,
+						"amount_received" => $amount_received,
+						"transaction_details" => $transaction_details,
+						
+					);
+					$result = $this->Crud->update_data_column("receivable_report", $data, $sales_number, "sales_number");
+				echo "<script>alert('Updated Sucessfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
 			
 		}
 	}

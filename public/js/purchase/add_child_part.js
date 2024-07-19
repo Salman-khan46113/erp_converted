@@ -12,7 +12,7 @@ const page = {
         this.formValidation();
         $(document).on("click",".edit-part",function(){
             var data = $(this).attr("data-value");
-            data = JSON.parse(atob(data)); 
+            data = JSON.parse(atob(data));
             console.log(data)
             var option = '';
             if(data.sub_type == 'Regular grn' || data.sub_type == 'RM' ){
@@ -52,7 +52,7 @@ const page = {
         table = new DataTable("#child_part_view", {
             dom: "Bfrtilp",
             buttons: [
-              {     
+              {
                     extend: 'csv',
                       text: '<i class="ti ti-file-type-csv"></i>',
                       init: function(api, node, config) {
@@ -69,7 +69,7 @@ const page = {
                         },
                         filename : file_name
                     },
-                
+
                   {
                     extend: 'pdf',
                     text: '<i class="ti ti-file-type-pdf"></i>',
@@ -131,7 +131,7 @@ const page = {
                 // end: 1
             },
             ajax: {
-                data: {'search':data},    
+                data: {'search':data},
                 url: "supplierPartsController/get_child_part_view",
                 type: "POST",
             },
@@ -234,9 +234,9 @@ const page = {
                     //   setTimeout(function () {
                     //     window.location.href = "dashboard";
                     // }, 2000);
-                    table.destroy(); 
-                    that.dataTable(); 
-                    myModal.hide();  
+                    table.destroy();
+                    that.dataTable();
+                    myModal.hide();
                   }else{
                     // toastr.error("Invalid data");
                   }
@@ -244,13 +244,13 @@ const page = {
                 }
               });
             }
-        }); 
+        });
     },
     filter: function(){
         let that = this;
         $('#part_number_search').select2();
         $(".search-filter").on("click",function(){
-            table.destroy(); 
+            table.destroy();
             that.dataTable();
             $(".close-filter-btn").trigger( "click" )
         })
@@ -267,8 +267,7 @@ const page = {
     resetFilter: function(){
         $("#part_number_search").val('').trigger('change');
         $("#part_description_search").val('');
-        table.destroy(); 
+        table.destroy();
         this.dataTable();
     }
 }
-

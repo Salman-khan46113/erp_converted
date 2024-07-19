@@ -1,71 +1,22 @@
-<div class="wrapper container-xxl flex-grow-1 container-p-y">
-
-<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme filter-popup-block" style="width: 0px;">
-<div class="app-brand demo justify-content-between">
-    <a href="javascript:void(0)" class="app-brand-link">
-        <span class="app-brand-text demo menu-text fw-bolder ms-2">Filter</span>
-    </a>
-    <div class="close-filter-btn d-block filter-popup cursor-pointer">
-            <i class="ti ti-x fs-8"></i>
-        </div>
-</div>
-<nav class="sidebar-nav scroll-sidebar filter-block" data-simplebar="init">
-  <div class="simplebar-content" >
-    <ul class="menu-inner py-1">
-        <!-- Dashboard -->
-        <div class="filter-row">
-          <li class="nav-small-cap">
-            <span class="hide-menu">Select Month</span>
-            <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
-          </li>
-          <li class="sidebar-item">
-            <div class="input-group">
-            <select name="customer_part_id" id="customer_part_id" class="form-control select2" required>
-            <option value="">Select Customer</option>
-                            <%if $customers%>
-                                <%foreach from=$customers item=c%>
-                                <option value="<%$c->id%>"
-                                    <%if $selected_customer_part_id === $c->id%>selected<%/if%>
-                                ><%$c->customer_name%></option>
-                                <%/foreach%>
-                            <%/if%>
-                        </select>
-            </div>
-          </li>
-        </div>
-        
-        
-
-    </ul>
-  </div>
-</nav>
-<div class="filter-popup-btn">
-        <button class="btn btn-outline-danger reset-filter">Reset</button>
-        <button class="btn btn-primary search-filter">Search</button>
-    </div>
-</aside>
-<nav aria-label="breadcrumb">
-      <div class="sub-header-left pull-left breadcrumb">
-        <h1>
-          Reports
-          <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link" title="Back to Issue Request Listing" >
-            <i class="ti ti-chevrons-right" ></i>
-            <em >Receivable Reports</em></a>
-        </h1>
-        <br>
-        <span >Receivable Reports</span>
-      </div>
-    </nav>
-    <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
-      <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
-      <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
-    </div>
-
+<div class="wrapper" style="width:2500px">
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
-       
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>Receivable Reports</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="<%$base_url%>dashboard">Home</a></li>
+                            <li class="breadcrumb-item active">Receivable Reports</li>
+                        </ol>
+                    </div>
+                </div>
+            </div><!-- /.container-fluid -->
+        </section>
+
         <!-- Main content -->
         <section class="content">
             <div class="container-fluid">
@@ -76,7 +27,30 @@
 
                         <div class="card">
                         <div class="card-header">
-                               
+                                <div class="row">
+                                    <div class="col-lg-2">
+                                        <form action="<%$base_url%>receivable_report" method="post">
+                                        <div class="form-group">
+                                            <label for="">Select Customer  <span class="text-danger">*</span></label>
+                                            <select name="customer_part_id" id="" class="form-control select2" required>
+                                                <option value="">Select Customer</option>
+                                                                <%if $customers%>
+                                                                    <%foreach from=$customers item=c%>
+                                                                    <option value="<%$c->id%>"
+                                                                        <%if $selected_customer_part_id === $c->id%>selected<%/if%>
+                                                                    ><%$c->customer_name%></option>
+                                                                    <%/foreach%>
+                                                                <%/if%>
+                                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-1">
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <input type="submit" class="btn btn-primary mt-4" value="Search">
+                                     </form>
+                                    </div>
+                                </div>
                                 <!-- Button trigger modal -->
                                 <!-- <button type="button" class="btn btn-primary float-left" data-toggle="modal" data-target="#exampleModal">
                                     Add </button> -->
@@ -85,90 +59,136 @@
 
                             <!-- /.card-header -->
                             <div class="card-body">
-                            <div class="table-responsive text-nowrap">
-                                <table id="receivable_report" class="table table-bordered table-striped">
+                                <table id="example1" class="table table-bordered table-striped">
                                     <thead>
-                                        <%foreach from=$data key=key item=val%>
-                                        <th><b>Search <%$val['title']%></b></th>
-                                        <%/foreach%>
-                                    </tr>
+
+                                        <tr>
+                                            <th>Sr. No.</th>
+                                            <th>Customer Name</th>
+                                            <th>Sales Inv No</th>
+                                            <th>Sales Inv Date</th>
+                                            <th>Basic Amount Total</th>
+                                            <th>GST Total Amount</th>
+                                            <th>Total Amount With GST</th>
+                                            <th>Payment Terms in Days</th>
+                                            <th>Due Date</th>
+                                            <th>Due Days</th>
+                                            <th>Payment Receipt Date</th>
+                                            <th>Amount Received</th>
+                                            <th>Transaction Details</th>
+                                            <th>Balance Amount to Receive</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                    </div>
+                                        <%if $sales_parts%>
+                                            <%foreach from=$sales_parts item=po name=report%>
+                                               
+                                                <%assign var="subtotal" value=round($po->ttlrt - $po->gstamnt,2)%>
+                                                <%assign var="row_total" value=round($po->ttlrt,2) + round($po->tcsamnt,2)%>
+                                                <tr>
+                                                    <td><%$smarty.foreach.report.iteration%></td>
+                                                    <td><%$po->customer_name%></td>
+                                                    <td><%$po->sales_number%></td>
+                                                    <td><%$po->created_date%></td>
+                                                    <td><%$subtotal%></td>
+                                                    <td><%number_format($po->gst, 2)%></td>
+                                                    <td><%number_format($row_total, 2)%></td>
+                                                    <td><%$po->payment_terms%></td>
+                                                    <td>
+                                                        <%$po->due_date%>
+                                                    </td>
+                                                  
+                                                    <%if $po->due_days <= 0 && !$po->payment_receipt_date%>
+                                                        <td style="background-color: red;"><%$po->due_days%></td>
+                                                    <%else%>
+                                                        <td><%$po->due_days%></td>
+                                                    <%/if%>
+                                                    <td><%if $po->payment_receipt_date%><%$po->payment_receipt_date|date_format:"%d/%m/%Y"%><%/if%></td>
+                                                    <td><%$po->amount_received%></td>
+                                                    <td><%$po->transaction_details%></td>
+                                                    <td>
+                                                        <%assign var="bal_amnt" value=$row_total - $po->amount_received%>
+                                                        <%number_format($bal_amnt, 2)%>
+                                                    </td>
+                                                    <td>
+                                                        <button type="submit" data-toggle="modal" class="btn btn-sm btn-primary"
+                                                            data-target="#exampleModal2<%$smarty.foreach.report.iteration%>"> <i class="fas fa-edit"></i></button>
+
+                                                        <div class="modal fade" id="exampleModal2<%$smarty.foreach.report.iteration%>" role="dialog"
+                                                            aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog modal-lg" role="document">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="exampleModalLabel">Update
+                                                                        </h5>
+                                                                        <button type="button" class="close" data-dismiss="modal"
+                                                                            aria-label="Close">
+                                                                            <span aria-hidden="true">&times;</span>
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+
+                                                                        <form action="<%$base_url%>update_receivable_report" method="POST">
+                                                                            <input type="hidden" name="sales_number" required value="<%$po->sales_number%>">
+                                                                            <div class="row">
+                                                                                <div class="col-lg-12">
+                                                                                    <div class="form-group">
+                                                                                        <label for="payment_receipt_date">Payment Receipt Date</label><span
+                                                                                            class="text-danger">*</span>
+                                                                                        <input type="date" name="payment_receipt_date" required
+                                                                                            class="form-control"
+                                                                                            id="exampleInputEmail1"
+                                                                                            aria-describedby="emailHelp"
+                                                                                            placeholder="Payment Receipt Date" value="<%$po->payment_receipt_date%>">
+                                                                                    </div>
+
+                                                                                    <div class="form-group">
+                                                                                        <label for="amount_received">Amount Received</label><span
+                                                                                            class="text-danger">*</span>
+                                                                                        <input type="text"
+                                                                                            name="amount_received" required
+                                                                                            class="form-control"
+                                                                                            id="exampleInputEmail1"
+                                                                                            aria-describedby="emailHelp"
+                                                                                            placeholder="Amount Received" value="<%$po->amount_received%>" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
+                                                                                    </div>
+
+                                                                                    <div class="form-group">
+                                                                                        <label for="transaction_details">Trans. Details</label><span
+                                                                                            class="text-danger"></span>
+                                                                                        <input type="text"
+                                                                                            name="transaction_details"
+                                                                                            class="form-control"
+                                                                                            id="exampleInputEmail1"
+                                                                                            aria-describedby="emailHelp"
+                                                                                            placeholder="Transaction Details" value="<%$po->transaction_details%>">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="modal-footer">
+                                                                                <button type="button" class="btn btn-secondary"
+                                                                                    data-dismiss="modal">Close</button>
+                                                                                <button type="submit"
+                                                                                    class="btn btn-primary">Save
+                                                                                    changes</button>
+                                                                            </div>
+                                                                        </form>
+
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <%/foreach%>
+                                        <%/if%>
                                     </tbody>
                                 </table>
-                                </div>
+                            </div>
                             <!-- /.card-body -->
                         </div>
-                        <button type="submit" data-bs-toggle="modal" class="btn btn-sm btn-primary"
-                                                            data-bs-target="#exampleModal2"> <i class="fas fa-edit"></i></button>
-
-                        <div class="modal fade" id="update_report_data" role="dialog"
-                        aria-labelledby="exampleModalLabel" aria-hidden="true" style="display: none;">
-                        <div class="modal-dialog modal-lg" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Update
-                                    </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close">
-                                        <%* <span aria-hidden="true">&times;</span> *%>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-
-                                    <form action="<%$base_url%>update_receivable_report" method="POST">
-                                        <input type="hidden" name="sales_number" required value="<%$po->sales_number%>">
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <div class="form-group">
-                                                    <label for="payment_receipt_date">Payment Receipt Date</label><span
-                                                        class="text-danger">*</span>
-                                                    <input type="date" name="payment_receipt_date" required
-                                                        class="form-control"
-                                                        id="payment_date_modal"
-                                                        aria-describedby="emailHelp"
-                                                        placeholder="Payment Receipt Date" value="">
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label for="amount_received">Amount Received</label><span
-                                                        class="text-danger">*</span>
-                                                    <input type="text"
-                                                        name="amount_received" required
-                                                        class="form-control"
-                                                        id="receivable_amount_modal"
-                                                        aria-describedby="emailHelp"
-                                                        placeholder="Amount Received" value="" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label for="transaction_details">Trans. Details</label><span
-                                                        class="text-danger"></span>
-                                                    <input type="text"
-                                                        name="transaction_details"
-                                                        class="form-control"
-                                                        id="transection_detail_modal"
-                                                        aria-describedby="emailHelp"
-                                                        placeholder="Transaction Details" value="">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Close</button>
-                                            <button type="submit"
-                                                class="btn btn-primary">Save
-                                                changes</button>
-                                        </div>
-                                    </form>
-
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
                         <!-- /.card -->
                     </div>
                     <!-- /.col -->
@@ -181,17 +201,3 @@
     </div>
     <!-- /.content-wrapper -->
 </div>
-<script>
-    var column_details =  <%$data|json_encode%>;
-    var page_length_arr = <%$page_length_arr|json_encode%>;
-    var is_searching_enable = <%$is_searching_enable|json_encode%>;
-    var is_top_searching_enable =  <%$is_top_searching_enable|json_encode%>;
-    var is_paging_enable =  <%$is_paging_enable|json_encode%>;
-    var is_serverSide =  <%$is_serverSide|json_encode%>;
-    var no_data_message =  <%$no_data_message|json_encode%>;
-    var is_ordering =  <%$is_ordering|json_encode%>;
-    var sorting_column = <%$sorting_column%>;
-    var api_name =  <%$api_name|json_encode%>;
-    var base_url = <%$base_url|json_encode%>;
-</script>
-<script src="<%$base_url%>/public/js/reports/receivable_report.js"></script>
