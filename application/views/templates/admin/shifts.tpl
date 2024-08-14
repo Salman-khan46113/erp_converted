@@ -105,136 +105,138 @@
         <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
         <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
         <button type="button" class="btn btn-seconday float-left" data-bs-toggle="modal"
-           data-bs-target="#exampleModal" title="Add Shift">
-         <i class="ti ti-plus"></i></button>
+        data-bs-target="#exampleModal" title="Add Shift">
+        <i class="ti ti-plus"></i></button>
 
       </div>
       <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel" aria-hidden="true">
-         <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-               <div class="modal-header">
-                  <h5 class="modal-title" id="exampleModalLabel">Add shift</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"
-                     aria-label="Close">
+      aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Add shift</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"
+            aria-label="Close">
 
-                  </button>
-               </div>
-               <div class="modal-body">
-                  <form action="<%base_url('addShift') %>" method="POST">
-                     <div class="row">
-                        <div class="col-lg-6">
-                           <!-- Example single danger button -->
-                           <div class="form-group">
-                              <label> Shift Name </label>
-                              <select required class="form-control select2"
-                                 id="shiftName" name="shiftName"
-                                 style="width: 100%;">
-                                 <option value="8">8-hour</option>
-                                 <option value="12">12-hour</option>
-                              </select>
-                           </div>
-                           <div class="form-group">
-                              <label for="shiftStart">Start Time</label><span
-                                 class="text-danger">*</span>
-                              <input type="time" name="shiftStart" required
-                                 class="form-control" id="exampleInputEmail1"
-                                 aria-describedby="emailHelp"
-                                 placeholder="Shift Start Time">
-                           </div>
-                        </div>
-                        <div class="col-lg-6">
-                           <div class="form-group">
-                              <label> Shift Type </label>
-                              <select required class="form-control select2"
-                                 name="shiftType" style="width: 100%;">
-                                 <option value="1<sup>st</sup>" selected="selected">
-                                    1<sup>st</sup>
-                                 </option>
-                                 <option value="2<sup>nd</sup>">2<sup>nd</sup>
-                                 </option>
-                                 <option id='option_3' value="3<sup>rd</sup>">
-                                    3<sup>rd</sup>
-                                 </option>
-                              </select>
-                           </div>
-                           <div class="form-group">
-                              <label for="shiftStart">End Time</label><span
-                                 class="text-danger">*</span>
-                              <input type="time" name="shiftEnd" required
-                                 class="form-control" id="exampleInputEmail1"
-                                 aria-describedby="emailHelp"
-                                 placeholder="Shift End Time">
-                           </div>
-                        </div>
-                        <div class="col-lg-6">
-                           <div class="form-group">
-                              <label> PPT in min </label><span
-                                 class="text-danger">*</span>
-                              <input type="number" name="ppt" min="0" value="0" required
-                                 class="form-control">
-                           </div>
-                        </div>
-                     </div>
-                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary"
-                           data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save
-                        changes</button>
-                     </div>
-                  </form>
-               </div>
+          </button>
+        </div>
+        <form action="javascript:void(0)" class="addShift custom-form " method="POST">
+          <div class="modal-body">
+
+            <div class="row">
+              <div class="col-lg-6">
+
+                <div class="form-group">
+                  <label> Shift Name </label>
+                  <select  class="form-control select2 required-input"
+                  id="shiftName" name="shiftName"
+                  style="width: 100%;">
+                  <option value="8">8-hour</option>
+                  <option value="12">12-hour</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="shiftStart">Start Time</label><span
+                class="text-danger">*</span>
+                <input type="time" name="shiftStart"
+                class="form-control required-input" id="exampleInputEmail1"
+                aria-describedby="emailHelp"
+                placeholder="Shift Start Time">
+              </div>
             </div>
-         </div>
-      </div>
-
-      <!-- Main content -->
-      <div class="card p-0 mt-4">
-        <div class="p-3">
-
-          <div class="table-responsive text-nowrap">
-            <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="shifts">
-              <thead>
-                 <tr>
-                    <th>Sr. No.</th>
-                    <th>Shift Name</th>
-                    <th>Shift Type</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                    <th>PPT in min</th>
-                 </tr>
-              </thead>
-              <tbody>
-                  <%assign var='i' value=1 %>
-                  <%if ($shifts)  %>
-                      <%foreach from=$shifts item=m %>
-                     <tr>
-                        <td><%$i %></td>
-                        <td><%$m->name %></td>
-                        <td><%$m->shift_type %></td>
-                        <td><%$m->start_time %></td>
-                        <td><%$m->end_time %></td>
-                        <td><%$m->ppt %></td>
-                     </tr>
-                  <%assign var='i' value=$i+1 %>
-                  <%/foreach%>
-
-                  <%/if%>
-              </tbody>
-           </table>
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label> Shift Type </label>
+                <select  class="form-control select2 required-input"
+                name="shiftType" style="width: 100%;">
+                <option value="1<sup>st</sup>" selected="selected">
+                  1<sup>st</sup>
+                </option>
+                <option value="2<sup>nd</sup>">2<sup>nd</sup>
+                </option>
+                <option id='option_3' value="3<sup>rd</sup>">
+                  3<sup>rd</sup>
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="shiftStart">End Time</label><span
+              class="text-danger">*</span>
+              <input type="time" name="shiftEnd"
+              class="form-control required-input" id="exampleInputEmail1"
+              aria-describedby="emailHelp"
+              placeholder="Shift End Time">
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="form-group">
+              <label> PPT in min </label><span
+              class="text-danger">*</span>
+              <input type="number" name="ppt" min="0" value="0"
+              class="form-control required-input">
+            </div>
           </div>
         </div>
-        <!--/ Responsive Table -->
       </div>
-      <!-- /.col -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary"
+        data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save
+          changes</button>
+        </div>
+      </form>
 
-
-      <div class="content-backdrop fade"></div>
     </div>
+  </div>
+</div>
+
+<!-- Main content -->
+<div class="card p-0 mt-4">
+  <div class="p-3">
+
+    <div class="table-responsive text-nowrap">
+      <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="shifts">
+        <thead>
+          <tr>
+            <th>Sr. No.</th>
+            <th>Shift Name</th>
+            <th>Shift Type</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>PPT in min</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%assign var='i' value=1 %>
+          <%if ($shifts)  %>
+          <%foreach from=$shifts item=m %>
+          <tr>
+            <td><%$i %></td>
+            <td><%$m->name %></td>
+            <td><%$m->shift_type %></td>
+            <td><%$m->start_time %></td>
+            <td><%$m->end_time %></td>
+            <td><%$m->ppt %></td>
+          </tr>
+          <%assign var='i' value=$i+1 %>
+          <%/foreach%>
+
+          <%/if%>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!--/ Responsive Table -->
+</div>
+<!-- /.col -->
 
 
-    <script type="text/javascript">
-    var base_url = <%$base_url|@json_encode%>
-    </script>
+<div class="content-backdrop fade"></div>
+</div>
 
-    <script src="<%$base_url%>public/js/admin/shifts.js"></script>
+
+<script type="text/javascript">
+var base_url = <%$base_url|@json_encode%>
+</script>
+
+<script src="<%$base_url%>public/js/admin/shifts.js"></script>

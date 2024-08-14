@@ -105,37 +105,39 @@
         <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
         <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
         <button type="button" class="btn btn-seconday" data-bs-toggle="modal" data-bs-target="#addPromo" title="Add Transporter">
-         <i class="ti ti-plus"></i>
+          <i class="ti ti-plus"></i>
         </button>
 
       </div>
       <div class="modal fade" id="addPromo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-         <div class="modal-dialog" role="document">
-            <form action="<%base_url('add_transporter') %>" method="POST" enctype="multipart/form-data">
-               <div class="modal-content">
-                  <div class="modal-header">
-                     <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+        <div class="modal-dialog" role="document">
 
-                     </button>
-                  </div>
-                  <div class="modal-body">
-                     <div class="form-group">
-                        <label for="on click url">Transporter Name <span class="text-danger">*</span></label> <br>
-                        <input required type="text" name="name" placeholder="Enter Transporter" class="form-control" value="" id="">
-                     </div>
-                     <div class="form-group">
-                        <label for="on click url">Transporter ID<span class="text-danger">*</span></label> <br>
-                        <input required type="text" name="transporter_id" placeholder="Enter Transporter ID" class="form-control" pattern="^([0-9]{2}[0-9A-Z]{13})$" oninvalid="this.setCustomValidity('Please enter a valid Transporter no')" onchange="this.setCustomValidity('')" value="" id="">
-                     </div>
-                  </div>
-                  <div class="modal-footer">
-                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                     <button type="submit" class="btn btn-primary">Save changes</button>
-                  </div>
-               </div>
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Add</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+
+              </button>
+            </div>
+            <form action="javascript:void(0)" class="custom-form add_transporter" method="POST" enctype="multipart/form-data">
+              <div class="modal-body">
+                <div class="form-group">
+                  <label for="on click url">Transporter Name <span class="text-danger">*</span></label> <br>
+                  <input  type="text" name="name" placeholder="Enter Transporter" class="form-control required-input">
+                </div>
+                <div class="form-group">
+                  <label for="on click url">Transporter ID<span class="text-danger">*</span></label> <br>
+                  <input type="text" name="transporter_id" placeholder="Enter Transporter ID" class="form-control required-input" pattern="^([0-9]{2}[0-9A-Z]{13})$" oninvalid="this.setCustomValidity('Please enter a valid Transporter no')" onchange="this.setCustomValidity('')" >
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+              </div>
             </form>
-         </div>
+          </div>
+
+        </div>
       </div>
 
 
@@ -146,25 +148,25 @@
           <div class="table-responsive text-nowrap">
             <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="transporter">
               <thead>
-                 <tr>
-                    <th>Sr No</th>
-                    <th>Transporter Name</th>
-                    <th>Transporter ID</th>
-                    <!-- <th>Action</th> -->
-                 </tr>
+                <tr>
+                  <th>Sr No</th>
+                  <th>Transporter Name</th>
+                  <th>Transporter ID</th>
+                  <!-- <th>Action</th> -->
+                </tr>
               </thead>
               <tbody>
-                    <%assign var='i' value=1 %>
-                    <%foreach from=$transporter item=u %>
-                     <tr>
-                        <td><%$i %></td>
-                        <td><%$u->name %></td>
-                        <td><%$u->transporter_id %></td>
-                     </tr>
-                    <%assign var='i' value=$i+1 %>
-                    <%/foreach%>
+                <%assign var='i' value=1 %>
+                <%foreach from=$transporter item=u %>
+                <tr>
+                  <td><%$i %></td>
+                  <td><%$u->name %></td>
+                  <td><%$u->transporter_id %></td>
+                </tr>
+                <%assign var='i' value=$i+1 %>
+                <%/foreach%>
               </tbody>
-           </table>
+            </table>
           </div>
         </div>
         <!--/ Responsive Table -->

@@ -105,35 +105,33 @@
         <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
         <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
         <button type="button" class="btn btn-seconday" data-bs-toggle="modal" data-bs-target="#addPromo" title="Add process">
-       <i class="ti ti-plus"></i>
+          <i class="ti ti-plus"></i>
         </button>
 
       </div>
       <div class="modal fade" id="addPromo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-            <div class="modal-content">
-               <div class="modal-header">
-                  <h5 class="modal-title" id="exampleModalLabel">Add Process</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Add Process</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
 
-                  </button>
-               </div>
-               <div class="modal-body">
-                  <div class="form-group">
-                     <form action="<%base_url('add_process_name') %>" method="POST" enctype="multipart/form-data">
-                  </div>
-                  <div class="form-group">
-                  <label for="on click url">Process Name<span class="text-danger">*</span></label> <br>
-                  <input required type="text" name="name" placeholder="Enter Name" class="form-control" value="" id="">
-                  </div>
-               </div>
-               <div class="modal-footer">
-               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-               <button type="submit" class="btn btn-primary">Save changes</button>
-               </form>
-               </div>
+              </button>
             </div>
-         </div>
+            <div class="modal-body">
+              <form action="javascript:void(0)" class="add_process_name custom-form" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                  <label for="on click url">Process Name<span class="text-danger">*</span></label> <br>
+                  <input  type="text" name="name" placeholder="Enter Name" class="form-control required-input" >
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+            </form>
+          </div>
+        </div>
       </div>
 
 
@@ -144,24 +142,24 @@
           <div class="table-responsive text-nowrap">
             <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="process">
               <thead>
-                 <tr>
-                    <th>Sr No</th>
-                    <th> Name</th>
-                 </tr>
+                <tr>
+                  <th>Sr No</th>
+                  <th> Name</th>
+                </tr>
               </thead>
               <tbody>
-                 <%if ($process) %>
-                      <%assign var='i' value= 1 %>
-                      <%foreach from=$process item=u %>
-                     <tr>
-                        <td><%$i %></td>
-                        <td><%$u->name %></td>
-                     </tr>
-                  <%assign var='i' value=$i+1 %>
-                  <%/foreach%>
-                  <%/if%>
+                <%if ($process) %>
+                <%assign var='i' value= 1 %>
+                <%foreach from=$process item=u %>
+                <tr>
+                  <td><%$i %></td>
+                  <td><%$u->name %></td>
+                </tr>
+                <%assign var='i' value=$i+1 %>
+                <%/foreach%>
+                <%/if%>
               </tbody>
-           </table>
+            </table>
           </div>
         </div>
         <!--/ Responsive Table -->

@@ -8,14 +8,14 @@ class MasterController extends CommonController {
 		parent::__construct();
 		$this->load->model('UomModel');
 	}
-	
+
 	public function users() {
 		$data['user_info'] = $this->Crud->read_data("userinfo");
 		$this->load->view('header');
 		$this->load->view('users', $data);
 		$this->load->view('footer');
 	}
-	
+
 	public function client()
 	{
 		$data['client_list'] = $this->Crud->read_data_acc("client");
@@ -26,7 +26,7 @@ class MasterController extends CommonController {
 		// $this->load->view('header');
 		$this->loadView('admin/client', $data);
 		// $this->load->view('footer');
-		
+
 	}
 
 
@@ -87,8 +87,8 @@ class MasterController extends CommonController {
 			$this->redirectToParent();
 		}
 	}
-	
-	
+
+
 	public function updateClient()
 	{
 		$clientUnit = $this->input->post('uclientUnit');
@@ -109,32 +109,32 @@ class MasterController extends CommonController {
 		$pin = $this->input->post('pin');
 
 		$data = array(
-				"client_unit" => $clientUnit,
-				"client_name " => $clientName,
-				"contact_person" => $contactPerson,
-				"billing_address" => $clientBaddress,
-				"shifting_address" => $clientSaddress,
-				"gst_number" => $gst_no,
-				"phone_no" => $phone_no,
-				"pan_no" => $pan_no,
-				"state" => $state,
-				"state_no" => $state_no,
-				"bank_details" => $bank_details,
-				"address1" => $address1,
-				"location" => $location,
-				"pin" => $pin,
-				"created_id" => $this->user_id,
-				"date" => $this->current_date,
-				"time" => $this->current_time,
-			);
+			"client_unit" => $clientUnit,
+			"client_name " => $clientName,
+			"contact_person" => $contactPerson,
+			"billing_address" => $clientBaddress,
+			"shifting_address" => $clientSaddress,
+			"gst_number" => $gst_no,
+			"phone_no" => $phone_no,
+			"pan_no" => $pan_no,
+			"state" => $state,
+			"state_no" => $state_no,
+			"bank_details" => $bank_details,
+			"address1" => $address1,
+			"location" => $location,
+			"pin" => $pin,
+			"created_id" => $this->user_id,
+			"date" => $this->current_date,
+			"time" => $this->current_time,
+		);
 
-			$result = $this->Crud->update_data("client", $data, $id);
-			if ($result) {
-				$this->addSuccessMessage('Client updated');
-			} else {
-				$this->addErrorMessage('Failed to update or similar data exists.');
-			}
-			$this->redirectToParent();
+		$result = $this->Crud->update_data("client", $data, $id);
+		if ($result) {
+			$this->addSuccessMessage('Client updated');
+		} else {
+			$this->addErrorMessage('Failed to update or similar data exists.');
+		}
+		$this->redirectToParent();
 	}
 
 	public function update_session_unit() {
@@ -147,7 +147,7 @@ class MasterController extends CommonController {
 	}
 
 	/*
-	 UOM Workflows
+	UOM Workflows
 	*/
 	public function uom()
 	{
@@ -156,7 +156,7 @@ class MasterController extends CommonController {
 		$this->loadView('admin/uom', $data);
 		// $this->load->view('footer');
 	}
-	
+
 	public function adduom()
 	{
 		$name = $this->input->post('uomName');
@@ -167,8 +167,10 @@ class MasterController extends CommonController {
 		);
 
 		if ($this->UomModel->isRecordExists($data)) {
-			$this->addWarningMessage('UOM already exists.');
-			$this->redirectToParent();
+			$success = 0;
+			$messages = "UOM already exists.";
+			// $this->addWarningMessage('UOM already exists.');
+			// $this->redirectToParent();
 		} else {
 			$data = array(
 				"uom_name" => $name,
@@ -179,15 +181,23 @@ class MasterController extends CommonController {
 			);
 
 			$result = $this->UomModel->createUOM($data);
-			if ($result>0) {
-				$this->addSuccessMessage('UOM created');
+
+
+			if ($result) {
+				$success = 1;
+				$messages = "UOM added successfully.";
 			} else {
-				$this->addErrorMessage('Failed to create UOM');
+				$success = 0;
+				$messages = "Unable to add transporter details. Please try again.";
 			}
-			$this->redirectToParent();
+
 		}
+		$return_arr['success']=$success;
+		$return_arr['messages']=$messages;
+		echo json_encode($return_arr);
+		exit;
 	}
-	
+
 	public function updateuom()
 	{
 		$id = $this->input->post('id');
@@ -198,23 +208,30 @@ class MasterController extends CommonController {
 			"uom_name" => $name,
 			"uom_description" => $description
 		);
-		
+
 		if ($this->UomModel->isRecordExists($data)) {
-			$this->addErrorMessage('UOM already exists');
-			$this->redirectToParent();
+
+			$success = 0;
+			$messages = "UOM already exists.";
 		} else {
+
 			if ($this->UomModel->updateUOM($data, $id)) {
-				$this->addSuccessMessage('UOM Updated');
+				$success = 1;
+				$messages = "UOM Updated.";
 			} else {
-				$this->addErrorMessage('Failed to update UOM');
+				$success = 0;
+				$messages = "Failed to update UOM.";
 			}
-			$this->redirectToParent();
 		}
+		$return_arr['success']=$success;
+		$return_arr['messages']=$messages;
+		echo json_encode($return_arr);
+		exit;
 	}
-	
-	
+
+
 	// TAX Structure
-	
+
 	public function tax()
 	{
 		$data['gst'] = $this->Crud->read_data_by_column("gst_structure","gst_structureky");
@@ -222,7 +239,7 @@ class MasterController extends CommonController {
 		$this->load->view('tax', $data);
 		$this->load->view('footer');
 	}
-	
+
 	public function add_tax()
 	{
 		$code = $this->input->post('code');
@@ -249,7 +266,7 @@ class MasterController extends CommonController {
 				"tcs_on_tax" => $tcs_on_tax,
 				"in_state" => $with_in_state,
 				"created_by" => $this->user_id,
-//				"created_dttm" => $this->current_date,
+				//				"created_dttm" => $this->current_date,
 			);
 
 			$result = $this->Crud->insert_data("gst_structure", $data);
@@ -261,8 +278,8 @@ class MasterController extends CommonController {
 			$this->redirectToParent();
 		}
 	}
-	
-	
+
+
 	public function update_tax() {
 		$code = $this->input->post('code');
 		$cgst = $this->input->post('cgst');
@@ -271,7 +288,7 @@ class MasterController extends CommonController {
 		$tcs = $this->input->post('tcs');
 		$with_in_state = $this->input->post('with_in_state');
 		$tcs_on_tax = $this->input->post('tcs_on_tax');
-		
+
 		$data = array(
 			"cgst" => $cgst,
 			"sgst" => $sgst,
@@ -290,11 +307,11 @@ class MasterController extends CommonController {
 		}
 		$this->redirectToParent();
 	}
-	
+
 	/*
-	 * Transporter
+	* Transporter
 	*/
-	
+
 	public function transporter()
 	{
 		$data['transporter'] = $this->Common_admin_model->get_all_data("transporter");
@@ -302,38 +319,38 @@ class MasterController extends CommonController {
 		$this->load->view('transporter.php', $data);
 		$this->load->view('footer.php');
 	}
-	
+
 	public function add_transporter()
 	{
-// 		$transporter_count = $this->Common_admin_model->get_data_by_id_count("transporter", $this->input->post('name'), "name");
-// 		if ($customer_count > 0) {
-// 			echo "<script>alert('Transporter already Present!!!!');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
-// 		} else {
-	
+		// 		$transporter_count = $this->Common_admin_model->get_data_by_id_count("transporter", $this->input->post('name'), "name");
+		// 		if ($customer_count > 0) {
+		// 			echo "<script>alert('Transporter already Present!!!!');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+		// 		} else {
+
 		$data = array(
-				'name' => $this->input->post('name'),
-				'transporter_id' => $this->input->post('transporter_id'),
-				'created_by' => $this->user_id
-			);
-			$insert = $this->Common_admin_model->insert('transporter', $data);
-			if ($insert) {
-				$this->addSuccessMessage('Transporter added');
-			} else {
-				$this->addSuccessMessage('Error while updating transporter');
-			}
+			'name' => $this->input->post('name'),
+			'transporter_id' => $this->input->post('transporter_id'),
+			'created_by' => $this->user_id
+		);
+		$insert = $this->Common_admin_model->insert('transporter', $data);
+		if ($insert) {
+			$this->addSuccessMessage('Transporter added');
+		} else {
+			$this->addSuccessMessage('Error while updating transporter');
+		}
 		$this->redirectToParent();
 	}
-	
+
 	public function update_transporter()
 	{
 		$id = $this->input->post('id');
 		$name = $this->input->post('name');
 		$transporterId = $this->input->post('transporter_id');
-		
+
 		$data = array(
 			"name" => $name,
 			"transporter_id" => $transporterId
-			
+
 		);
 		$check = $this->Crud->read_data_where("transporter", $data);
 		if ($check != 0) {
@@ -346,7 +363,7 @@ class MasterController extends CommonController {
 				$this->addErrorMessage('Failed to update transporter');
 			}
 		}
-		$this->redirectToParent();	
+		$this->redirectToParent();
 	}
 
 
@@ -354,132 +371,132 @@ class MasterController extends CommonController {
 
 	public function consignee()
 	{
-		$data['consignee_list'] = $this->Crud->CustomQuery("SELECT c.id as c_id, c.*,a.* FROM consignee c, 
+		$data['consignee_list'] = $this->Crud->CustomQuery("SELECT c.id as c_id, c.*,a.* FROM consignee c,
 			address_master a where c.address_id = a.id");
-		$this->load->view('header');
-		$this->load->view('consignee', $data);
-		$this->load->view('footer');
-		
-	}
-	
-	
-	public function add_consignee()
-	{
-		$consignee_name = $this->input->post('cconsignee_name');
-		$location = $this->input->post('clocation');
-		$address = $this->input->post('caddress');
-		$state = $this->input->post('cstate');
-		$state_no = $this->input->post('cstate_no');
-		$pin_code = $this->input->post('cpin_code');
-		$gst_number = $this->input->post('gst_number');
-		$pan_no = $this->input->post('cpan_no');
-		$phone_no = $this->input->post('cphone_no');
+			$this->load->view('header');
+			$this->load->view('consignee', $data);
+			$this->load->view('footer');
 
-		$data = array(
-			"consignee_name" => $consignee_name,
-			"location" => $location
-		);
-		
-		$check = $this->Crud->read_data_where("consignee", $data);
-		if ($check != 0) {
-			$this->addWarningMessage('Record already exists with Consignee Name and Location');
-			$this->redirectToParent();
-		} else {
-			$address_data = array(
-				"address" => $address,
-				"location" => $location,
-				"state" => $state,
-				"state_no" => $state_no,
-				"pin_code" => $pin_code,
-				"addressType" => 'consignee',
-				"created_dttm" => $this->current_dttm,
-				"updated_user" => $this->user_name
+		}
+
+
+		public function add_consignee()
+		{
+			$consignee_name = $this->input->post('cconsignee_name');
+			$location = $this->input->post('clocation');
+			$address = $this->input->post('caddress');
+			$state = $this->input->post('cstate');
+			$state_no = $this->input->post('cstate_no');
+			$pin_code = $this->input->post('cpin_code');
+			$gst_number = $this->input->post('gst_number');
+			$pan_no = $this->input->post('cpan_no');
+			$phone_no = $this->input->post('cphone_no');
+
+			$data = array(
+				"consignee_name" => $consignee_name,
+				"location" => $location
 			);
-			$result = $this->Crud->insert_data("address_master", $address_data);
-			if ($result) {
-				$consignee_data = array(
-					"address_id" => $result,
+
+			$check = $this->Crud->read_data_where("consignee", $data);
+			if ($check != 0) {
+				$this->addWarningMessage('Record already exists with Consignee Name and Location');
+				$this->redirectToParent();
+			} else {
+				$address_data = array(
+					"address" => $address,
 					"location" => $location,
-					"consignee_name" => $consignee_name,
-					"pan_no" => $pan_no,
-					"phone_no" => $phone_no,
-					"gst_number" => $gst_number,
-					"deleted" => 0,
+					"state" => $state,
+					"state_no" => $state_no,
+					"pin_code" => $pin_code,
+					"addressType" => 'consignee',
 					"created_dttm" => $this->current_dttm,
-					"updated_user" => $this->user_name,
+					"updated_user" => $this->user_name
 				);
-			
-				$result = $this->Crud->insert_data("consignee", $consignee_data);
+				$result = $this->Crud->insert_data("address_master", $address_data);
 				if ($result) {
-					$this->addSuccessMessage('Consignee added successfully.');
+					$consignee_data = array(
+						"address_id" => $result,
+						"location" => $location,
+						"consignee_name" => $consignee_name,
+						"pan_no" => $pan_no,
+						"phone_no" => $phone_no,
+						"gst_number" => $gst_number,
+						"deleted" => 0,
+						"created_dttm" => $this->current_dttm,
+						"updated_user" => $this->user_name,
+					);
+
+					$result = $this->Crud->insert_data("consignee", $consignee_data);
+					if ($result) {
+						$this->addSuccessMessage('Consignee added successfully.');
+					} else {
+						$this->addErrorMessage('Failed to add Consignee. Please try again.');
+					}
 				} else {
 					$this->addErrorMessage('Failed to add Consignee. Please try again.');
 				}
-			} else {
-				$this->addErrorMessage('Failed to add Consignee. Please try again.');
+				$this->redirectToParent();
 			}
-			$this->redirectToParent();
 		}
-	}
-	
-	
-	public function update_consignee()
-	{
-		$id = $this->input->post('consignee_id');
-		$address_id = $this->input->post('address_id');
 
-		$consignee_name = $this->input->post('uconsignee_name');
-		$location = $this->input->post('ulocation');
-		$address = $this->input->post('uaddress');
-		$state = $this->input->post('ustate');
-		$state_no = $this->input->post('ustate_no');
-		$pin_code = $this->input->post('upin_code');
-		$gst_number = $this->input->post('ugst_number');
-		$pan_no = $this->input->post('upan_no');
-		$phone_no = $this->input->post('uphone_no');
 
-		$data = array(
-			"consignee_name" => $consignee_name,
-			"location" => $location
-		);
+		public function update_consignee()
+		{
+			$id = $this->input->post('consignee_id');
+			$address_id = $this->input->post('address_id');
 
-		$data_result = $this->Crud->read_data_where_result("consignee", $data)->result();
-		if(!empty($data_result) && $data_result[0]->id != $id) {
-			$this->addWarningMessage('Record already exists with Consignee Name and Location. Can not add duplicate entry.');
-			$this->redirectToParent();
-		} else {
+			$consignee_name = $this->input->post('uconsignee_name');
+			$location = $this->input->post('ulocation');
+			$address = $this->input->post('uaddress');
+			$state = $this->input->post('ustate');
+			$state_no = $this->input->post('ustate_no');
+			$pin_code = $this->input->post('upin_code');
+			$gst_number = $this->input->post('ugst_number');
+			$pan_no = $this->input->post('upan_no');
+			$phone_no = $this->input->post('uphone_no');
 
-			$address_data = array(
-				"address" => $address,
-				"location" => $location,
-				"state" => $state,
-				"state_no" => $state_no,
-				"pin_code" => $pin_code,
-				"updated_user" => $this->user_name
+			$data = array(
+				"consignee_name" => $consignee_name,
+				"location" => $location
 			);
 
-			$result = $this->Crud->update_data("address_master", $address_data, $address_id);
-			if ($result) {
-				$consignee_data = array(
-					"consignee_name" => $consignee_name,
+			$data_result = $this->Crud->read_data_where_result("consignee", $data)->result();
+			if(!empty($data_result) && $data_result[0]->id != $id) {
+				$this->addWarningMessage('Record already exists with Consignee Name and Location. Can not add duplicate entry.');
+				$this->redirectToParent();
+			} else {
+
+				$address_data = array(
+					"address" => $address,
 					"location" => $location,
-					"pan_no" => $pan_no,
-					"phone_no" => $phone_no,
-					"gst_number" => $gst_number,
-					"created_dttm" => $this->current_dttm,
-					"updated_user" => $this->user_name,
+					"state" => $state,
+					"state_no" => $state_no,
+					"pin_code" => $pin_code,
+					"updated_user" => $this->user_name
 				);
 
-				$result = $this->Crud->update_data("consignee", $consignee_data, $id);
+				$result = $this->Crud->update_data("address_master", $address_data, $address_id);
 				if ($result) {
-					$this->addSuccessMessage('Consignee updated successfully.');
+					$consignee_data = array(
+						"consignee_name" => $consignee_name,
+						"location" => $location,
+						"pan_no" => $pan_no,
+						"phone_no" => $phone_no,
+						"gst_number" => $gst_number,
+						"created_dttm" => $this->current_dttm,
+						"updated_user" => $this->user_name,
+					);
+
+					$result = $this->Crud->update_data("consignee", $consignee_data, $id);
+					if ($result) {
+						$this->addSuccessMessage('Consignee updated successfully.');
+					} else {
+						$this->addErrorMessage('Failed to update. Please try again.');
+					}
 				} else {
 					$this->addErrorMessage('Failed to update. Please try again.');
 				}
-			} else {
-				$this->addErrorMessage('Failed to update. Please try again.');
+				$this->redirectToParent();
 			}
-			$this->redirectToParent();
 		}
 	}
-}

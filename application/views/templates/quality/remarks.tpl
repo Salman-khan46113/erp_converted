@@ -122,7 +122,7 @@
                   <form action="javascript:void(0)" method="POST" class="custom-form add_rejection_remark" enctype="multipart/form-data">
                      <div class="form-group">
                         <label for="on click url">Rejection Remark <span class="text-danger">*</span></label> <br>
-                        <input type="text" name="name" placeholder="Enter Operation Number" class="form-control required-input" value="" id="">
+                        <input type="text" name="name" placeholder="Enter Operation Number" class="form-control required-input">
                      </div>
                </div>
                <div class="modal-footer">

@@ -119,38 +119,40 @@
 
                   </button>
                </div>
+               <form action="javascript:void(0)" class="add_operations_data custom-form" method="POST" enctype="multipart/form-data">
+
                <div class="modal-body">
-                  <form action="<%base_url('add_operations_data') %>" method="POST" enctype="multipart/form-data">
-                     <div class="form-group">
+                   <div class="form-group">
                         <label for="on click url">Product <span class="text-danger">*</span></label> <br>
-                        <input required type="text" name="product" placeholder="Enter Oproduct" class="form-control" value="" id="">
+                        <input  type="text" name="product" placeholder="Enter Oproduct" class="form-control required-input" >
                      </div>
                      <div class="form-group">
                         <label for="on click url">Process <span class="text-danger">*</span></label> <br>
-                        <input required type="text" name="process" placeholder="Enter Process" class="form-control" value="" id="">
+                        <input  type="text" name="process" placeholder="Enter Process" class="form-control required-input">
                      </div>
                      <div class="form-group">
                         <label for="on click url">Specification Tolerance <span class="text-danger">*</span></label> <br>
-                        <input required type="text" name="specification_tolerance" placeholder="Enter" class="form-control" value="" id="">
+                        <input  type="text" name="specification_tolerance" placeholder="Enter" class="form-control required-input" >
                      </div>
                      <div class="form-group">
                         <label for="on click url">Evalution <span class="text-danger">*</span></label> <br>
-                        <input required type="text" name="evalution" placeholder="Enter" class="form-control" value="" id="">
+                        <input  type="text" name="evalution" placeholder="Enter" class="form-control required-input" >
                      </div>
                      <div class="form-group">
                         <label for="on click url">Size <span class="text-danger">*</span></label> <br>
-                        <input required type="text" name="size" placeholder="Enter" class="form-control" value="" id="">
+                        <input  type="text" name="size" placeholder="Enter" class="form-control required-input" >
                      </div>
                      <div class="form-group">
                         <label for="on click url">Frequency <span class="text-danger">*</span></label> <br>
-                        <input required type="text" name="frequency" placeholder="Enter" class="form-control" value="" id="">
+                        <input  type="text" name="frequency" placeholder="Enter" class="form-control required-input" >
                      </div>
                </div>
                <div class="modal-footer">
                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                <button type="submit" class="btn btn-primary">Save changes</button>
-               </form>
+
                </div>
+                </form>
             </div>
          </div>
       </div>

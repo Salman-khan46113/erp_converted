@@ -121,24 +121,24 @@
 
           </button>
         </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <form action="<%base_url('add_machine') %>" method="POST"
-              enctype="multipart/form-data">
-            </div>
+
+
+        <form action="javascript:void(0)" class="add_machine custom-form" method="POST"
+          enctype="multipart/form-data">
+          <div class="modal-body">
             <div class="form-group">
               <label for="on click url">Name<span class="text-danger">*</span></label>
               <br>
-              <input required type="text" name="name" placeholder="Enter Name"
-              class="form-control" value="" id="">
+              <input  type="text" name="name" placeholder="Enter Name"
+              class="form-control required-input">
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary"
             data-bs-dismiss="modal">Close</button>
             <button type="submit" class="btn btn-primary">Save changes</button>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   </div>

@@ -111,28 +111,30 @@
       </div>
 
       <div class="modal fade" id="addPromo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-         <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-               <div class="modal-header">
-                  <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Add</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
 
-                  </button>
-               </div>
-               <div class="modal-body">
-                  <form action="<%base_url('add_operations') %>" method="POST" enctype="multipart/form-data">
-                     <div class="form-group">
-                        <label for="on click url">Operation Number <span class="text-danger">*</span></label> <br>
-                        <input required type="text" name="name" placeholder="Enter Operation Number" class="form-control" value="" id="">
-                     </div>
-               </div>
-               <div class="modal-footer">
-               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-               <button type="submit" class="btn btn-primary">Save changes</button>
-               </form>
-               </div>
+              </button>
             </div>
-         </div>
+            <form action="javascript:void(0)" class="custom-form add_operations " method="POST" enctype="multipart/form-data">
+
+              <div class="modal-body">
+                <div class="form-group">
+                  <label for="on click url">Operation Number <span class="text-danger">*</span></label> <br>
+                  <input type="text" name="name" placeholder="Enter Operation Number" class="form-control required-input" >
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
 
 
@@ -140,84 +142,84 @@
       <div class="card p-0 mt-4">
 
 
-          <div class="table-responsive text-nowrap">
-            <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="operations">
-              <thead>
-                 <tr>
-                    <th>Sr No</th>
-                    <th> Operation Number</th>
-                    <th>Actions</th>
-                 </tr>
-              </thead>
-              <tbody>
-                 <%assign var='i'  value=1 %>
-                  <%foreach from=$operations item=u %>
-                 <tr>
-                    <td><%$i %></td>
-                    <td><%$u->name %></td>
-                    <td>
-                       <!-- Button trigger modal -->
-                       <button type="button" class="btn no-btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit<%$i %>">
-                       <i class="ti ti-edit"></i>
-                       </button>
-                       <!-- edit Modal -->
-                       <div class="modal fade" id="edit<%$i %>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                          <div class="modal-dialog modal-dialog-centered" role="document">
-                             <div class="modal-content">
-                                <div class="modal-header">
-                                   <h5 class="modal-title" id="exampleModalLabel">Update</h5>
-                                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+        <div class="table-responsive text-nowrap">
+          <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="operations">
+            <thead>
+              <tr>
+                <th>Sr No</th>
+                <th> Operation Number</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%assign var='i'  value=1 %>
+              <%foreach from=$operations item=u %>
+              <tr>
+                <td><%$i %></td>
+                <td><%$u->name %></td>
+                <td>
+                  <!-- Button trigger modal -->
+                  <button type="button" class="btn no-btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit<%$i %>">
+                    <i class="ti ti-edit"></i>
+                  </button>
+                  <!-- edit Modal -->
+                  <div class="modal fade" id="edit<%$i %>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel">Update</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
 
-                                   </button>
-                                </div>
-                                <div class="modal-body">
-                                   <form action="<%base_url('update_operations') %>" method="POST" enctype="multipart/form-data">
-                                      <div class="form-group">
-                                         <label for="">Operation Number <span class="text-danger">*</span></label>
-                                         <input required value="<%$u->name %>" type="text" class="form-control" name="name">
-                                         <input required value="<%$u->id %>" type="hidden" class="form-control" name="id">
-                                      </div>
-                                </div>
-                                <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Save changes</button>
-                                </form>
-                                </div>
-                             </div>
+                          </button>
+                        </div>
+                        <form action="javascript:void(0)" class="update_operations custom-form" method="POST" enctype="multipart/form-data">
+                          <div class="modal-body">
+                            <div class="form-group">
+                              <label for="">Operation Number <span class="text-danger">*</span></label>
+                              <input  value="<%$u->name %>" type="text" class="form-control required-input" name="name">
+                              <input  value="<%$u->id %>" type="hidden" class="form-control" name="id">
+                            </div>
                           </div>
-                       </div>
-                       <!-- edit Modal -->
-                       <!-- delete Modal -->
-                       <div class="modal fade" id="delete<%$i %>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                          <div class="modal-dialog" role="document">
-                             <div class="modal-content">
-                                <div class="modal-header">
-                                   <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
-                                   <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                   <span aria-hidden="true">&times;</span>
-                                   </button>
-                                </div>
-                                <div class="modal-body">
-                                   <form action="<%base_url('delete_customer') %>" method="POST" enctype="multipart/form-data">
-                                      Are You Sure Want To Delete This?
-                                      <input required value="<%$u->id %>" type="hidden" class="form-control" name="id">
-                                </div>
-                                <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Save changes</button>
-                                </form>
-                                </div>
-                             </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
                           </div>
-                       </div>
-                       <!-- delete Modal -->
-                    </td>
-                 </tr>
-                  <%assign var='i'  value=$i+1 %>
-                  <%/foreach%>
-              </tbody>
-           </table>
-          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- edit Modal -->
+                  <!-- delete Modal -->
+                  <div class="modal fade" id="delete<%$i %>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
+                          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          <form action="<%base_url('delete_customer') %>" method="POST" enctype="multipart/form-data">
+                            Are You Sure Want To Delete This?
+                            <input required value="<%$u->id %>" type="hidden" class="form-control" name="id">
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- delete Modal -->
+                </td>
+              </tr>
+              <%assign var='i'  value=$i+1 %>
+              <%/foreach%>
+            </tbody>
+          </table>
+        </div>
 
         <!--/ Responsive Table -->
       </div>
