@@ -29426,7 +29426,8 @@ a.bg-vimeo:hover,a.bg-vimeo:focus {
     padding: 1rem 0.5rem !important;
 }
 .scrollable tbody{
-        max-height: 200px !important;
+        /*max-height: 200px !important;*/
+            max-height: 30em !important;
 }
 
 .dataTables_scrollBody tbody{
@@ -29556,4 +29557,15 @@ table.dataTable.no-footer {
     box-shadow: 0 0 1px rgba(60, 66, 87, .05), 0 3px 6px rgba(60, 66, 87, .1), 0 9px 24px rgba(60, 66, 87, .2);
     border-radius: .5rem;
     z-index: 1040;
+}
+
+.modal-dialog button[type="submit"]:focus-visible ,form button:focus-visible {
+        animation: tilt-shaking 0.3s infinite !important;
+}
+@keyframes tilt-shaking {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  50% { transform: rotate(0eg); }
+  75% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
 }

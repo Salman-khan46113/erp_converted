@@ -8,22 +8,10 @@
           Master
           <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link" title="Back to Issue Request Listing" >
             <i class="ti ti-chevrons-right" ></i>
-            <em >Item</em></a>
+            <em >Purchase</em></a>
         </h1>
         <br>
-        <%if $type == "direct"%>
-          <span >Add Direct Regular Item</span>
-        <%else if ($type == "subcon_item") %>
-           <span >Add Direct Subcon Item</span>
-        <%else if ($type == "subcon_regular" ) %>
-          <span >Add Direct Subcon Regular</span>
-        <%else if ($type == "consumable_item") %>
-          <span >Add Indirect Consumable Item</span>
-        <%else if ($type == "indirect_assets") %>
-          <span >Add Indirect Asset</span>
-        <%else if ($type == "customer_bom") %>
-          <span > Add Customer Bom Asset</span>
-        <%/if%>
+          <span >Add Item</span>
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex  mb-5 listing-btn">
@@ -137,41 +125,22 @@ jelly-o tart brownie jelly.
             <div class="col-lg-6">
               <div class="form-group mb-3">
                 <label class="form-label"> Purchase Item Category </label><span class="text-danger">*</span>
-                <select class="form-control select2 item-category" name="sub_type">
-                  <%if $type == "direct"%>
-                  <option value="Regular grn">Regular grn</option>
-                  <option value="RM">RM</option>
-                  <%else if ($type == "subcon_item") %>
-                    <option value="Subcon grn">Subcon grn</option>4
-                  <%else if ($type == "subcon_regular" ) %>
-                    <option value="Subcon Regular">Subcon Regular</option>
-                  <%else if ($type == "consumable_item") %>
-                    <option value="consumable">Consumable</option>
-                  <%else if ($type == "indirect_assets") %>
-                    <option value="asset">asset</option>
-                  <%else if ($type == "customer_bom") %>
-                    <option value="customer_bom">customer bom</option>
-                  <%/if%>
+                <select class="form-control select2 item-category parent-category" name="sub_type">
+                  <%foreach from=$category_list item=a%>
+                      <%if (!($a->parent_id > 0)) %>
+                        <option value="<%$a->category_name%>"><%$a->category_name %></option>
+                      <%/if%>
+                  <%/foreach%>
                 </select>
               </div>
             </div>
-
-              <%if $type == "customer_bom" || $type == "indirect_assets"%>
-              <div class="col-lg-6">
+            <div class="col-lg-6">
               <div class="form-group mb-3">
-                <label class="form-label"> Asset </label>
-                <select class="form-control select2 assets" name="asset" style="width: 100%;">
-                  <option value="consumable">Consumable</option>
-                  <%if $asset %>
-                  <%foreach from=$asset item=a%>
-                  <option value="<%$a->id %>">
-                    <%$a->name %></option>
-                  <%/foreach%>
-                  <%/if%>
+                <label class="form-label"> Sub Item Category </label><span class="text-danger">*</span>
+                  <select class="form-control select2 sub_category_type" name="sub_category_type" style="width: 100%;">
                   </select>
-                </div>
               </div>
-                <%/if%>
+            </div>
 
               <div class="col-lg-6">
                 <div class="form-group mb-3">

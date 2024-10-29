@@ -220,6 +220,8 @@ $route['addPurchaseOrder'] = 'welcome/addPurchaseOrder';
 $route['updatePurchaseOrder'] = 'welcome/updatePurchaseOrder';
 $route['change_challan_status'] = 'welcome/change_challan_status';
 $route['change_challan_status_subcon'] = 'welcome/change_challan_status_subcon';
+$route['category'] = 'welcome/category';
+$route['add_category'] = 'welcome/add_category';
 
 // $route['add_part'] = 'welcome/add_part';
 
@@ -249,7 +251,7 @@ $route['gst'] = 'welcome/gst';
 $route['add_gst'] = 'welcome/add_gst';
 
 $route['pdfg'] = 'welcome/pdfg';
-	$route['child_part/(:any)'] = 'welcome/child_part';
+	$route['child_part'] = 'welcome/child_part';
 $route['operation_bom'] = 'welcome/operation_bom';
 $route['inhouse_parts'] = 'welcome/inhouse_parts';
 

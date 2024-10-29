@@ -50,6 +50,7 @@ const page = {
                 },
                 gst_no: {
                     required: true,
+                    remote: base_url+"welcome/checkDublicateGstNumber?id="+id
                 },
                 pan_card: {
                     required: false
@@ -64,9 +65,9 @@ const page = {
                     required:true,
                     minlength:0
                 },
-                discount_type:{
-                    required:true
-                },
+                // discount_type:{
+                //     required:true
+                // },
                 discount:{
                     'required': function(element) {
                         let form_type = $("#discount_type").val();
@@ -97,6 +98,7 @@ const page = {
                 },
                 gst_no: {
                     required: "Please enter GST Number",
+                    remote: "GST Number aleady exist"
                 },
                 pan_card: "Please enter Supplier Pan",
                 paymentTerms: "Please enter Payment Terms",

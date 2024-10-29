@@ -123,16 +123,33 @@ const app = {
   },
   allowNumber:function(){
     $('.onlyNumericInput').on('keypress', function(event) {
-        var charCode = (event.which) ? event.which : event.keyCode;
+      var charCode = (event.which) ? event.which : event.keyCode;
 
-       var value = $(this).val();
-       if (value.includes('.')  && charCode == 46 ) {
+      var value = $(this).val();
+      if (value.includes('.')  && charCode == 46 ) {
           event.preventDefault();
-       }
+      }
         // Allow only digits (0-9) and some specific control keys
-          if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 46) {
+      if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 46) {
               event.preventDefault();
-          }
+      }
+      $(this).val(this.value.replace(/[^0-9.]/g, ''));
+      console.log(this.value.replace(/[^0-9.]/g, ''));
+        
+    });
+    $('.onlyNumericInput').on('input', function(event) {
+      var charCode = (event.which) ? event.which : event.keyCode;
+
+      var value = $(this).val();
+      if (value.includes('.')  && charCode == 46 ) {
+          event.preventDefault();
+      }
+        // Allow only digits (0-9) and some specific control keys
+      if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 46) {
+              event.preventDefault();
+      }
+      $(this).val(this.value.replace(/[^0-9.]/g, ''));
+      console.log(this.value.replace(/[^0-9.]/g, ''));
         
     });
   },

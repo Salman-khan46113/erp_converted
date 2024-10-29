@@ -94,10 +94,10 @@
           Master
           <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link" title="Back to Issue Request Listing" >
             <i class="ti ti-chevrons-right" ></i>
-            <em >Item</em></a>
+            <em >Purchase</em></a>
         </h1>
         <br>
-        <span >Item Part List</span>
+        <span >Item Master</span>
       </div>
     </nav>
     <!-- <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4> -->
@@ -105,16 +105,7 @@
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5 listing-btn">
       <%if checkGroupAccess("child_part_view","add",false)%>
       <div class="btn-group">
-        <a type="button" class="btn btn-seconday" href="<%base_url('child_part/direct')%>">Add Direct Regular Item</a>
-        <button type="button" class="btn btn btn-seconday dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false"  data-bs-reference="parent">
-        </button>
-        <ul class="dropdown-menu dropdown-menu-start" >
-          <li><a class="dropdown-item" href="<%base_url('child_part/subcon_item')%>"> Add Direct Subcon Item</a></li>
-          <li><a class="dropdown-item" href="<%base_url('child_part/subcon_regular')%>">Add Direct Subcon Regular</a></li>
-          <li><a class="dropdown-item" href="<%base_url('child_part/consumable_item')%>">Add Indirect Consumable Item</a></li>
-          <li><a class="dropdown-item" href="<%base_url('child_part/indirect_assets')%>">Add Indirect Asset</a></li>
-          <li><a class="dropdown-item" href="<%base_url('child_part/customer_bom')%>"> Add Customer Bom Asset</a></li>
-        </ul>
+        <a type="button" class="btn btn-seconday" href="<%base_url('child_part')%>">Add Item</a>
       </div>
       <%/if%>
       <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
@@ -146,7 +137,7 @@
   <!-- / Content -->
 
  <div class="modal fade" id="child_part_update" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Update</h5>
@@ -185,16 +176,23 @@
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label>Purchase Item Category</label><span class="text-danger">*</span>
-                                    <select class="form-control select2-init" name="sub_type" id="sub_type" style="width: 100%;">
-                                        <option value="Regular grn">Regular GRN</option>
-                                        <option value="RM">RM</option>
-                                        <option value="Subcon grn">Subcon GRN</option>
-                                        <option value="Subcon Regular">Subcon Regular</option>
-                                        <option value="consumable">Consumable</option>
-                                        <option value="customer_bom">Customer BOM</option>
-                                        <option value="asset">Asset</option>
+                                    <select class="form-control select2-init parent-category" name="sub_type" id="sub_type" style="width: 100%;">
+                                        <option value="">Selecte Purchase Item Category</option>
+                                        <%foreach from=$category_list item=a %>
+                                            <%if (!($a->parent_id > 0)) %>
+                                                <option  value="<%$a->category_name %>"><%$a->category_name %></option>
+                                            <%/if%>
+                                        <%/foreach%>
                                     </select>
                                 </div>
+                            </div>
+                            <div class="col-lg-6">
+                              <div class="form-group">
+                                  <label> Sub Item Category </label><span class="text-danger">*</span>
+                                      <select class="form-control select2 sub_category_type" id="sub_category_type" name="sub_category_type" style="width: 100%;" data-selected="">
+                                          <option value="">Select Sub Item Category</option>
+                                      </select>
+                              </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group">
@@ -255,7 +253,7 @@
                     </div>
 
                     </div>
-                    <div class="modal-footer m-auto">
+                    <div class="modal-footer ">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Save changes</button>
                     </div>

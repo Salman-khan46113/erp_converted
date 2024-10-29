@@ -111,7 +111,23 @@ const page = {
         }); 
     },
     initPlugin: function(){
-        $(".item-category,.assets,.item-uom").select2()
+        $(".item-category,.assets,.item-uom").select2();
+        $(".parent-category").on("change",function(){
+                // sub_category_type
+                var parent_category = $(this).val();
+                 $.ajax({
+                  type: "POST",
+                  url: base_url+"welcome/getSubCategory",
+                  data: {parent_category:parent_category},
+                  success: function (response) {
+                    var responseObject = JSON.parse(response);
+                    $(".sub_category_type").html(responseObject.html)
+                  },
+                  error: function (error) {
+                    console.error("Error:", error);
+                  },
+                });
+        })
     }
     
 }

@@ -214,7 +214,8 @@
 <!-- / Content -->
 <div class="content-backdrop fade"></div>
 <script type="text/javascript">
-   var base_url = <%$base_url|@json_encode%>
+   var base_url = <%$base_url|@json_encode%>;
+   var id = <%$id|@json_encode%>;
 </script>
 <script src="<%$base_url%>public/js/purchase/add_supplier.js"></script>
-<!-- Content wrapper -->																											
+<!-- Content wrapper -->																											mode

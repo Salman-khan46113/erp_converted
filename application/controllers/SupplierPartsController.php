@@ -44,6 +44,7 @@ class SupplierPartsController extends CommonController
 		$asset = $this->input->post('asset');
 		$max_uom = $this->input->post('max_uom');
 		$min_uom = $this->input->post('min_uom');
+		$sub_category_type = $this->input->post('sub_category_type');
 
 		$weight = $this->input->post('weight');
 		$grade = $this->input->post('grade');
@@ -151,6 +152,7 @@ class SupplierPartsController extends CommonController
 					"created_id" => $this->user_id,
 					"date" => $this->current_date,
 					"time" => $this->current_time,
+					"sub_category" => $sub_category_type
 				);
 				$result = $this->SupplierParts->createSupplierPart($data);
 				if ($result) {
@@ -220,13 +222,13 @@ class SupplierPartsController extends CommonController
         $column[] = [
             "data" => "part_description",
             "title" => "Part Description",
-            "width" => "20%",
+            "width" => "17%",
             "className" => "dt-left",
         ];
         $column[] = [
             "data" => "buffer_stock",
             "title" => "Safety/buffer <br>Stock",
-            "width" => "17%",
+            "width" => "10%",
             "className" => "dt-center",
         ];
         $column[] = [
@@ -237,14 +239,20 @@ class SupplierPartsController extends CommonController
         ];
         $column[] = [
             "data" => "sub_type",
-            "title" => "Purchase Item Category",
+            "title" => "Category",
             "width" => "17%",
+            "className" => "dt-center",
+        ];
+        $column[] = [
+            "data" => "sub_category",
+            "title" => "Sub Category",
+            "width" => "12%",
             "className" => "dt-center",
         ];
         $column[] = [
             "data" => "store_rack_location",
             "title" => "Store Rack Location",
-            "width" => "17%",
+            "width" => "15%",
             "className" => "dt-center",
         ];
         $column[] = [
@@ -256,7 +264,7 @@ class SupplierPartsController extends CommonController
         $column[] = [
             "data" => "max_uom",
             "title" => "Max PO QTY",
-            "width" => "7%",
+            "width" => "80px",
             "className" => "dt-center status-row",
         ];
         $column[] = [
@@ -314,6 +322,8 @@ class SupplierPartsController extends CommonController
         $data["base_url"] = base_url();
         // $ajax_json['teacher_data'] = $this->session->userdata();
         // pr($ajax_json['designation'],1);
+        $category_list = $this->db->query("SELECT * FROM `category` ");
+		$data['category_list'] = $category_list->result();
 		$this->getPage('purchase/child_part_view', $data,"Yes","Yes");
 		// $this->getPage('purchase/test', $data,"NO","NO");
 	}
@@ -346,6 +356,7 @@ class SupplierPartsController extends CommonController
 			} 
 			$data[$key]['action'] .= "<a href=".base_url('raw_material_inspection/').$value['part_id']."><i class='ti ti-eye ' title='View Inward Inspection' ></i></a>
 			";
+			$data[$key]['sub_category'] = display_no_character($value['sub_category']);
 			
 		}
 		$data["data"] = $data;
@@ -385,6 +396,7 @@ class SupplierPartsController extends CommonController
 		$table_id = $this->input->post('table_id');
 		$grade = $this->input->post('grade');
 		$safty_buffer_stk = $this->input->post('saft__stk');
+		$sub_category_type = $this->input->post('sub_category_type');
 
 			$data = array(
 				"part_description" => $part_description,
@@ -401,6 +413,7 @@ class SupplierPartsController extends CommonController
 				"sub_type" => $sub_type,
 				"max_uom" => $max_uom,
 				"min_uom" => $child_part_data[0]->min_uom,
+				"sub_category" => $sub_category_type
 			);
 			
 		$message = "";

@@ -2,6 +2,7 @@
 <%redirect('login')%>
 <%/if%>
 <%assign var="role" value=trim($session_data['type'])%>
+<%assign var="user_role" value=trim($session_data['role'])%>
 <%assign var="Commodity" value=$session_data['Commodity']%>
 <%assign var="entitlements" value=$session_data['entitlements']%>
 <%assign var="base_url" value=base_url('')%>
@@ -757,6 +758,10 @@
                                  <li><a href="<%base_url('gst')%>" class="dropdown-item">Tax Structure</a>
                                  <li><a href="<%base_url('transporter')%>" class="dropdown-item">Transporter</a>
                                  </li>
+                                 <%if ($user_role == "AROM") %>
+                                        <li><a href="<%base_url('category') %>" class="dropdown-item">Category</a>
+                                       </li>
+                                 <%/if%>
                            </ul>
                         </li>
                         <!-- <li><a class="dropdown-item" href="#">Approval</a></li>

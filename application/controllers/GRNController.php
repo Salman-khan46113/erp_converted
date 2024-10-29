@@ -370,7 +370,6 @@ class GRNController extends CommonController
 				$tax_id = $this->input->post('tax_id');
 				$pending_qty = $this->input->post('pending_qty');
 				$inwarding_price = ($part_rate * round($qty,2));
-
 				$gst_structure = $this->Crud->get_data_by_id("gst_structure", $tax_id, "id");
 				$cgst_amount = ($inwarding_price * $gst_structure[0]->cgst) / 100;
 				$sgst_amount = ($inwarding_price * $gst_structure[0]->sgst) / 100;

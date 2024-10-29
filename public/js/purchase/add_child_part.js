@@ -7,25 +7,13 @@ var pdf_title = "Item part List";
 var myModal = new bootstrap.Modal(document.getElementById('child_part_update'))
 const page = {
     init: function(){
+        let that = this;
         this.dataTable();
         this.filter();
         this.formValidation();
         $(document).on("click",".edit-part",function(){
             var data = $(this).attr("data-value");
             data = JSON.parse(atob(data)); 
-            var option = '';
-            if(data.sub_type == 'Regular grn' || data.sub_type == 'RM' ){
-                option = '<option  value="Regular grn">Regular GRN</option><option  value="RM">RM</option>';
-            }else if(data.sub_type == 'Subcon grn' || data.sub_type == 'Subcon Regular'){
-                option = '<option  value="Subcon grn">Subcon GRN</option> <option value="Subcon Regular">Subcon Regular</option>';
-            }else if(data.sub_type == 'consumable'){
-                option = '<option sub_type value="consumable" >Consumable</option>';
-            }else if(data.sub_type == 'customer_bom'){
-                option = '<option sub_type value="customer_bom">Customer BOM</option>';
-            }else if(data.sub_type == 'asset'){
-                option = '<option sub_type value="asset" >Asset</option>';
-            }
-            $("#sub_type").html(option).select2();
             $("label.error").remove();
             $("input.error").removeClass('error');
             $("#part_id").val(data.part_id);
@@ -42,8 +30,26 @@ const page = {
             $("#uom_id").val(data.uom_id).trigger("change");
             $("#max_uom").val(data.max_uom);
             $("#grade").val(data.grade);
+            $("#sub_category_type").attr("data-selected",data.sub_category)
+            var target = $("#child_part_update");
+            that.getSubCategory(target)
             myModal.show();
         })
+        $(".parent-category").on("change",function(){
+                var parent_category = $(this).val();
+                 $.ajax({
+                  type: "POST",
+                  url: base_url+"welcome/getSubCategory",
+                  data: {parent_category:parent_category},
+                  success: function (response) {
+                    var responseObject = JSON.parse(response);
+                    $(".sub_category_type").html(responseObject.html)
+                  },
+                  error: function (error) {
+                    console.error("Error:", error);
+                  },
+                });
+            })
 
     },
     dataTable: function(){
@@ -278,5 +284,21 @@ const page = {
         $("#part_description_search").val('');
         table.destroy(); 
         this.dataTable();
+    },
+    getSubCategory: function(target){
+        var parent_category = $(target).find(".parent-category").val();
+        var sub_category = $(target).find(".sub_category_type").attr("data-selected");
+        $.ajax({
+            type: "POST",
+            url: base_url+"welcome/getSubCategory",
+            data: {parent_category:parent_category,sub_category:sub_category},
+            success: function (response) {
+                var responseObject = JSON.parse(response);
+                $(target).find(".sub_category_type").html(responseObject.html)
+            },
+            error: function (error) {
+                console.error("Error:", error);
+            },
+        });
     }
 }

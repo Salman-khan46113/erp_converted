@@ -254,7 +254,7 @@
                                     <label for=""><br>Select Customer Part Number /
                                     Customer Name </label>
                                     <select name="customer_part_number" 
-                                       id="" class="form-control select2 onlyNumericInput required-input" style="width: 100%;">
+                                       id="" class="form-control select2  required-input" style="width: 100%;">
                                     <option value="">Select Part</option>
                                     <%if ($transfer_part_list) %>
                                            <%foreach from=$transfer_part_list item=t %>

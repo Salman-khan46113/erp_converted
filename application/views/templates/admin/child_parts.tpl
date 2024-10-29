@@ -146,10 +146,10 @@
                                                 <div class="form-group">
                                                    <label for="safty_buffer_stk"> Stock</label><span
                                                       class="text-danger">*</span>
-                                                   <input type="number" step="any"
+                                                   <input type="text" step="any"
                                                       value="<%$po->stock  %>"
                                                       name="stock" required
-                                                      class="form-control"
+                                                      class="form-control onlyNumericInput"
                                                       id="exampleInputEmail1"
                                                       aria-describedby="emailHelp"
                                                       placeholder="Part Specification">

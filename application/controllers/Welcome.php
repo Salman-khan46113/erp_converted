@@ -1176,6 +1176,10 @@ class Welcome extends CommonController
 		);
 		$po_parts = $data['po_parts'] = $this->Crud->get_data_by_id("po_parts", $new_po_id, "po_id");
 
+        /* for part wise discount */
+        $part_wise_dicount = array_column($po_parts,"discount","id");
+        /* for part wise discount */
+
 		foreach ($data['po_parts'] as $key => $p) {
 			$data_where = array(
 				"child_part_id" => $p->part_id,
@@ -1214,9 +1218,25 @@ class Welcome extends CommonController
         $grn_details_data = $this->Crud->get_data_by_id_multiple("grn_details", $arr);
         $actual_price = 0;
         foreach ($grn_details_data as $g) {
-            $actual_price = $actual_price + $g->inwarding_price;
+            $inwarding_price = $g->inwarding_price;
+            if($new_po[0]->po_discount_type == "Part Level" && isset($part_wise_dicount[$g->po_part_id])){
+                $part_level_dis = $part_wise_dicount[$g->po_part_id] != "" && $part_wise_dicount[$g->po_part_id] != null ? $part_wise_dicount[$g->po_part_id] : 0;
+                $inwarding_price = $inwarding_price - ($inwarding_price*$part_level_dis)/100;
+            }
+            $actual_price = $actual_price + $inwarding_price;
         }
-       
+        // pr($grn_details_data,1);
+        if($new_po[0]->po_discount_type == "PO Level"){
+            $discount_amount = 0;
+            if($new_po[0]->discount_type == "Number"){
+                $discount_amount = $new_po[0]->discount;
+            }else{
+                $discount_amount = $actual_price*$new_po[0]->discount/100;
+            }
+            $actual_price -= $discount_amount;
+            $actual_price = $actual_price + $cgst_amount + $sgst_amount + $igst_amount + $tcs_amount;
+
+        }
         $actual_price = $actual_price + $new_po[0]->final_amount;
     
         // pr($actual_price,1);
@@ -1237,7 +1257,7 @@ class Welcome extends CommonController
 	   } else {
 	       $status = "not-verifed";
 	   }
-	   $data['actual_price'] = $actual_price;
+	   $data['actual_price'] = number_format($actual_price,2,".","");
 	   $data['minus_price'] = $minus_price;
 	   $data['plus_price'] = $plus_price;
 	   $data['status'] = $status;
@@ -2936,10 +2956,12 @@ class Welcome extends CommonController
 		$data['child_part_list'] = "";
 		$type = $this->uri->segment('2');
 		$data['type'] = $type != '' && $type != null ? $type : 'direct';
-		$item_category = ['direct','subcon_item','subcon_regular','consumable_item','indirect_assets','customer_bom'];
-		if(!in_array($type, $item_category)){
-			$data['type'] = 'direct';
-		}
+		// $item_category = ['direct','subcon_item','subcon_regular','consumable_item','indirect_assets','customer_bom'];
+		// if(!in_array($type, $item_category)){
+		// 	$data['type'] = 'direct';
+		// }
+        $category_list = $this->db->query("SELECT * FROM `category` ");
+        $data['category_list'] = $category_list->result();
 
 		// $this->load->view('header');
 		$this->loadView('purchase/child_part', $data);
@@ -8103,6 +8125,7 @@ class Welcome extends CommonController
 				$message = "Error 405: Supplier With In state and Tax Strucutre With In State Does Not Matched, Please select another tax Strucutre";
 			}
 		}else if($mode == 'Update'){
+
 			$data = array(
 				"part_rate" => $part_rate,
 				"uom_id" => $child_part_data[0]->uom_id,
@@ -8110,13 +8133,27 @@ class Welcome extends CommonController
 				"gst_id" => $gst_id
 			);
 			$supplier_child_part_id = $this->input->post('supplier_child_part_id');
-			$result = $this->welcome_model->update_child_part_data($data, $supplier_child_part_id);
-			if ($result) {
-				$success = 1;
-				$message ="Supplier part price updated Sucessfully";
-			}else {
-				$message ="'Unable to update";
-			}
+            $child_part_master  = $this->Crud->customQuery("
+            SELECT s.with_in_state as with_in_state_val
+            FROM `child_part_master` c 
+            JOIN supplier as s ON s.id = c.supplier_id 
+            WHERE c.id = $supplier_child_part_id");
+            $with_in_state = $child_part_master[0]->with_in_state_val;
+            $data3 = array(
+                "id" => $gst_id,
+            );
+            $gst_structure_data = $this->Crud->get_data_by_id_multiple_condition("gst_structure", $data3);
+            if ($gst_structure_data[0]->with_in_state == $with_in_state) {
+    			$result = $this->welcome_model->update_child_part_data($data, $supplier_child_part_id);
+    			if ($result) {
+    				$success = 1;
+    				$message ="Supplier part price updated Sucessfully";
+    			}else {
+    				$message ="'Unable to update";
+    			}
+            }else{
+                $message = "Error 405: Supplier With In state and Tax Strucutre With In State Does Not Matched, Please select another tax Strucutre";
+            }
 		}
 
 
@@ -8572,7 +8609,23 @@ class Welcome extends CommonController
 	}
 
 
-
+    public function checkDublicateGstNumber(){
+        
+        $gst_number = $this->input->get("gst_no");
+        $id =  $this->input->get("id");
+        $where = "";
+        if($id > 0){
+            $where = " AND id != $id";
+        }
+        $supplier = $this->db->query("SELECT id FROM `supplier`  WHERE gst_number = '$gst_number' $where");
+        $supplier = $supplier->result();
+        $return = true;
+        if(count($supplier) > 0){
+            $return = false;
+        }
+        echo json_encode($return);
+        exit;
+    }
 	public function addSupplier()
 	{
 
@@ -10845,5 +10898,72 @@ class Welcome extends CommonController
          $previous_page = $this->session->userdata("previous_page");
         $data['previous_page'] = $previous_page != "" &&  $previous_page != null ? $previous_page : base_url('dashboard');
         $this->loadView('page_not_found',$data);
+    }
+    public function category()
+    {
+        $category_list = $this->db->query('SELECT * FROM `category`');
+        $data['category_list'] = $category_list->result();
+        // $this->load->view('header');
+        $this->loadView('admin/category', $data);
+        // $this->load->view('footer');
+    }
+    public function add_category()
+    {
+        $post_data = $this->input->post();
+        $category_name = trim($post_data['category_name']);
+        $category_list = $this->db->query("SELECT * FROM `category` WHERE category_name = '".$category_name."'");
+        $category_list = $category_list->result();
+        $messages = "Something went wrong";
+        $success = 0;
+        if(count($category_list) == 0){
+            $data = array(
+                "parent_id" => $post_data['parent_id'],
+                "category_name" => $category_name,
+                "added_by" => $this->user_id,
+                "added_date" => date("Y-m-d H:i:s") 
+            );
+            $result = $this->Crud->insert_data("category", $data);
+            if ($result) {
+                $messages = "Category added successfully.";
+                $success = 1;
+                // echo "<script>alert('Category added successfully.');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+            } else {
+                $messages = "Unable to Add";
+                // echo "<script>alert('Unable to Add');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+            }
+        }else{
+            $messages = "Category already exist.";
+            // echo "<script>alert('Category already exist');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+        }
+        $return_arr['success']=$success;
+        $return_arr['messages']=$messages;
+        echo json_encode($return_arr);
+        exit;
+    }
+    public function getSubCategory(){
+        $post_data = $this->input->post();
+        $category_list = $this->db->query("
+            SELECT c.* 
+            FROM category as p
+            JOIN category c ON c.parent_id = p.category_id
+            WHERE p.category_name = '".$post_data['parent_category']."'");
+        $category_list = $category_list->result();
+        $html = '<option value="">Select Sub Item Category</option>';
+        foreach ($category_list as $key => $value) {
+            $selected = "";
+            if(isset($post_data['sub_category'])){
+                if($post_data['sub_category'] == $value->category_name){
+                    $selected = "selected";
+                }
+                
+            }
+            $html .= '<option value="'.$value->category_name.'"  '.$selected.'>'.$value->category_name.'</option>';
+        }
+
+        $return = [
+            "html" => $html
+        ];
+        echo json_encode($return);
+        exit();
     }
 }

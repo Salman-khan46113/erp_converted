@@ -158,7 +158,7 @@
                                                 <div class="col-lg-6">
                                                   <div class="form-group">
                                                      <label for="payment_terms">Payment Terms</label><span class="text-danger">*</span>
-                                                     <input type="number" min="0" name="paymentTerms" class="form-control" id="payment_terms" placeholder="Payment Terms">
+                                                     <input type="number" min="0" name="paymentTerms" class="form-control onlyNumericInput" id="payment_terms" placeholder="Payment Terms">
                                                   </div>
                                                 </div>
                                                 <div class="col-lg-6">
@@ -341,7 +341,7 @@
                     <div class="col-lg-6">
                         <div class="form-group">
                             <label for="payment_terms">Payment Terms</label><span class="text-danger">*</span>
-                            <input type="text" value="<%$t->payment_terms%>" name="upaymentTerms"  class="form-control" id="upayment_terms" aria-describedby="emailHelp" placeholder="Payment Terms">
+                            <input type="text" value="<%$t->payment_terms%>" name="upaymentTerms"  class="form-control onlyNumericInput" id="upayment_terms" aria-describedby="emailHelp" placeholder="Payment Terms">
                         </div>
                     </div>
                     <div class="col-lg-6">

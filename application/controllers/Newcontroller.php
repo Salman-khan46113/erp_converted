@@ -448,7 +448,7 @@ class Newcontroller extends CommonController
             $po_part[$key]->total_rate = $total_rate = $total_rate_old + $cgst_amount + $sgst_amount + $igst_amount;
             $final_po_amount = $final_po_amount + $total_rate;
         }
-        // pr($po_part,1);
+        // pr($new_po,1);
 
         $data['po_parts'] = $po_part;
         $data['final_po_amount'] = $final_po_amount;
@@ -1799,6 +1799,8 @@ public function rejected_po()
 				"created_year" => $this->year,
 				"discount" => $discount_value
 			);
+
+			// pr($data,1);
 
 			$result = $this->Crud->insert_data("po_parts", $data);
 			if ($result) {

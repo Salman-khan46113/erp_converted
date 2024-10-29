@@ -207,6 +207,7 @@ class SupplierParts extends CI_Model {
                 "created_id" => $this->user_id,
                 "date" => $this->current_date,
                 "time" => $this->current_time,
+                "sub_category" => $data['sub_category']
             );
             $newRecordId = $this->Crud->insert_data("child_part", $data);
            
@@ -265,7 +266,7 @@ class SupplierParts extends CI_Model {
     ) {
         $clientId = $this->Unit->getSessionClientId();
         $this->db->select(
-            'cp.id as part_id,cp.part_number as part_number,cp.part_description as part_description,cs.safty_buffer_stk as buffer_stock,cp.hsn_code as hsn_code,cp.sub_type as sub_type,cp.store_rack_location as store_rack_location,u.uom_name as uom_name,cp.max_uom as max_uom,cp.store_stock_rate as store_stock_rate,cp.weight as weight,cp.size as size,cp.thickness as thickness,cp.grade as grade,cp.uom_id as uom_id'
+            'cp.id as part_id,cp.part_number as part_number,cp.part_description as part_description,cs.safty_buffer_stk as buffer_stock,cp.hsn_code as hsn_code,cp.sub_type as sub_type,cp.store_rack_location as store_rack_location,u.uom_name as uom_name,cp.max_uom as max_uom,cp.store_stock_rate as store_stock_rate,cp.weight as weight,cp.size as size,cp.thickness as thickness,cp.grade as grade,cp.uom_id as uom_id,cp.sub_category as sub_category'
         );
         $this->db->from("child_part as cp");
         $this->db->join("child_part_stock as cs", "cp.id = cs.childPartId AND cs.clientId = $clientId ",'left');

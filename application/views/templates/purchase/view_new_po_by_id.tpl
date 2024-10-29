@@ -429,7 +429,7 @@
                            <thead>
                               <tr>
                                  <!-- <th>Sr No</th> -->
-                                 <th>Part Number</th>
+                                 <th width="10%">Part Number</th>
                                  <th>Part Description</th>
                                  <th>GST Strucutre Code</th>
                                  <th>UOM</th>
@@ -441,15 +441,19 @@
                                  <th>Process</th>
                                  <%/if%>
                                  <th>Price</th>
+                                 <%if ($new_po[0]->po_discount_type == "Part Level") %>
+                                   <th width="8%">Price After Discount</th>
+                                 <%/if%>
                                  <!-- <th>Created Date</th> -->
-                                 <th>Actions</th>
+                                 <th width="15%">Actions</th>
                                  <th>Sub Total</th>
                                  <th>GST</th>
-                                 <th>Total Price</th>
+                                 <th width="8%">Total Price</th>
                               </tr>
                            </thead>
                            <tbody>
                               <%if ($po_parts) %>
+                              <%assign var='final_po_amount' value=0%>
                                  <%assign var=i value=1%>
                                  <%foreach from=$po_parts item=p %>
                                     <%assign var='child_part_data' value=$p->child_part_data%>
@@ -462,10 +466,16 @@
                                     <%assign var='gst_amount' value=$p->gst_amount%>
                                     <%assign var='total_rate' value=$p->total_rate%>
                                     <%assign var='part_rate_new' value=$p->part_rate_new%>
+                                    <%if ($new_po[0]->po_discount_type == "Part Level") %>
+                                       <%assign var='part_rate_discount_amount' value=($part_rate_new*$p->discount)/100%>
+                                       <%assign var='after_dicount_part_rate' value=$part_rate_new-$part_rate_discount_amount%>
+                                       <%assign var='total_rate' value=$after_dicount_part_rate*$p->qty%>
+                                    <%/if%>
+                                    <%assign var='final_po_amount' value=$final_po_amount+$total_rate%>
                                  
                                        <tr>
                                           <!-- <td><%$i%></td> -->
-                                          <td><%$child_part_data[0]->part_number%></td>
+                                          <td width="10%"><%$child_part_data[0]->part_number%></td>
                                           <td><%$child_part_data[0]->part_description%></td>
                                           <td><%$gst_structure[0]->code %></td>
                                           <td><%$uom_data[0]->uom_name %></td>
@@ -477,6 +487,9 @@
                                           <td><%$p->process %></td>
                                           <%/if%>
                                           <td><%$part_rate_new%></td>
+                                          <%if ($new_po[0]->po_discount_type == "Part Level") %>
+                                             <td><%$after_dicount_part_rate%></td>
+                                           <%/if%>
                                           <!-- <td><?php echo $p->created_date; ?></td> -->
                                           <td>
                                              <%if ($new_po[0]->status == "pending") %>
@@ -698,7 +711,7 @@
                                           </td>
                                           <td><%$total_rate_old%></td>
                                           <td><%$gst_amount%></td>
-                                          <td><%$total_rate%></td>
+                                          <td width="8%"><%$total_rate%></td>
                                        </tr>
                                       <%assign var=i value=$i+1%>
                                  <%/foreach%>
@@ -707,8 +720,12 @@
                            <tfoot>
                               <%if ($po_parts) %>
                               <tr>
-                                 <th colspan="10">Total</th>
-                                 <th class="text-left"><%$final_po_amount%></th>
+                                <%if ($new_po[0]->po_discount_type == "Part Level") %>
+                                 <th colspan="10" class="text-right">Total</th>
+                                <%else%>
+                                  <th colspan="9" class="text-right">Total</th>
+                                <%/if%>
+                                 <th class="text-left" width="8%"><%$final_po_amount%></th>
                               </tr>
                               <%/if%>
                            </tfoot>

@@ -776,5 +776,8 @@ a.nav-active-link {
 
 /* modal scroll bar */
 .modal-body {
-    max-height: 800px; overflow-y: auto;
+    overflow-y: auto;
+    max-height: calc(100vh - 162px) !important;
 }
+
+

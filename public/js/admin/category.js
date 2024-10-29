@@ -1,20 +1,10 @@
+var table = '';
+var file_name = "process";
+var pdf_title = "Process";
 
 $(document).ready(function() {
-    page.init();
-});
-
-var table = '';
-var file_name = "accept_reject_validation";
-var pdf_title = "accept_reject_validation";
-
-const page = {
-    init: function() {
-        this.dataTable();
-        this.filter();
-    },
-    dataTable: function() {
-        var data = {};
-        table = $("#accept_reject_validation").DataTable({
+    // Initialize the DataTable
+    table = $("#categor_table").DataTable({
         dom: "Bfrtilp",
         buttons: [
             {
@@ -27,7 +17,7 @@ const page = {
                         var lines = csv.split('\n');
                         var modifiedLines = lines.map(function(line) {
                             var values = line.split(',');
-                            values.splice(8, 1);
+                            // values.splice(7, 1);
                             return values.join(',');
                         });
                         return modifiedLines.join('\n');
@@ -46,12 +36,12 @@ const page = {
                     doc.pageMargins = [15, 15, 15, 15];
                     doc.content[0].text = pdf_title;
                     doc.content[0].color = theme_color;
-                    // doc.content[1].table.widths = ["19%", "19%", "13%", "13%", "15%", "15%"];
+                    doc.content[1].table.widths = ["50%", "50%"];
                     doc.content[1].table.body[0].forEach(function (cell) {
                         cell.fillColor = theme_color;
                     });
                     doc.content[1].table.body.forEach(function (row, index) {
-                        row.splice(8, 1);
+                        // row.splice(7, 1);
                         row.forEach(function (cell) {
                             // Set alignment for each cell
                             cell.alignment = "center"; // Change to 'left' or 'right' as needed
@@ -64,10 +54,13 @@ const page = {
         // scrollX: true,
         scrollY: true,
         bScrollCollapse: true,
-        columnDefs: isMultiClient ? [{ sortable: false, targets: 8}] : [{ sortable: false, targets: 7 }],
+        // columnDefs: [{ sortable: false, targets: 7 }],
         pagingType: "full_numbers",
        
         
+        });
+        $('#serarch-filter-input').on('keyup', function() {
+            table.search(this.value).draw();
         });
         $('.dataTables_length').find('label').contents().filter(function() {
                 return this.nodeType === 3; // Filter out text nodes
@@ -77,33 +70,58 @@ const page = {
                 minimumResultsForSearch: Infinity
             });
         },1000)
-        this.serachParams();
-        // global searching for datable 
-        $('#serarch-filter-input').on('keyup', function() {
-            table.search(this.value).draw();
-        });
-            // table = $('#example1').DataTable();
-    },
-    filter: function(){
-        let that = this;
-        $(".search-filter").on("click",function(){
-            that.serachParams();
-            $(".close-filter-btn").trigger( "click" )
-        })
-        $(".reset-filter").on("click",function(){
-            that.resetFilter();
-        })
-    },
-    serachParams: function(){
-        let status= $('#status_search').val();
-        // Ensure that the table and column exist before applying the search
-        if (table && status) {
-            table.column(6).search(status).draw();
+
+    $('#add_category').validate({
+        rules: {
+            category_name: {
+                required: true
+            }
+        },
+        messages: {
+            category_name: {
+                required: "Please enter the category name."
+            }
+        },
+        submitHandler: function(form) {
+            // Submit the form via AJAX
+            $.ajax({
+                url: $(form).attr('action'), // Use the form's action attribute as the URL
+                type: 'POST',
+                data: new FormData(form), // Send the form data
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    // Parse the JSON response
+                    let res = JSON.parse(response);
+                    let msg = res.messages;
+                    if(res.success == 1){
+                        // Show success message
+                        toastr.success(msg);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                        // Optionally close the modal
+                        $('#addPromo').modal('hide');
+                        // Optionally reset the form
+                        form.reset();
+                    } else {
+                        // Show error message
+                        toastr.error(msg);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    // Handle the error
+                    toastr.error('An error occurred: ' + errorThrown);
+                }
+            });
+            return false; // Prevent the default form submission
         }
-    },
-    resetFilter: function(){
-        $('#status_search').val('');
-        table.column(6).search('').draw();
-        $('.close-filter-btn').trigger('click');
-    }
-};
+    });
+
+    // Custom search filter event
+  
+   
+
+
+
+});

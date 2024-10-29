@@ -123,6 +123,8 @@
   </div>
 
 
-
+<script type="text/javascript">
+  var isMultiClient = <%$isMultiClient|@json_encode%>
+</script>
 
   <script src="<%$base_url%>public/js/quality/accept_reject_validation.js"></script>

@@ -36,22 +36,38 @@
                   </div>
                   <div class="col-lg-4">
                      <div class="form-group mb-3">
-                        <label for="" class="form-label">PO Date</label>
-                        <input type="date" readonly value="<%date('Y-m-d') %>"  name="po_date" class="form-control">
+                        <label for="" class="form-label">Billing Address <span class="text-danger">*</span> </label>
+                        <select name="billing_address"   class="form-control select2-init">
+                           <option value="">Select Billing Address</option>
+                           <%foreach from=$client item=cli %>
+                           <option value="<%$cli->billing_address %>">
+                              <%$cli->client_unit %>/ <%$cli->billing_address %>
+                           </option>
+                           <%/foreach%>
+                        </select>
                      </div>
                   </div>
                   <div class="col-lg-4">
                      <div class="form-group mb-3">
-                        <label for="" class="form-label">Expiry Date <span class="text-danger">*</span> </label>
-                        <input type="date" min="<%date('Y-m-d', strtotime('+ 1 day')) %>"  name="expiry_po_date" class="form-control">
+                        <label for="" class="form-label">Shipping Address <span class="text-danger">*</span></label>
+                        <select name="shipping_address"  class="form-control select2-init">
+                           <option value="">Select Shipping Address</option>
+                           <%foreach from=$client item=cli %>
+                           <option value="<%$cli->shifting_address %>">
+                              <%$cli->client_unit %>/<%$cli->shifting_address %>
+                           </option>
+                           <%/foreach%>
+                           <%if count($supplier) gt 0 %>
+                           <%foreach from=$supplier item=s %>
+                           <option value="<%$s->location %>">
+                              <%$s->supplier_name %>/<%$s->location %>
+                           </option>
+                           <%/foreach%>
+                           <%/if%>
+                        </select>
                      </div>
-                  </div>
-                  <div class="col-lg-4">
-                     <div class="form-group mb-3">
-                        <label for="" class="form-label">Remark </label>
-                        <input type="text" placeholder="Enter Remark" value="" name="remark" class="form-control">
-                     </div>
-                  </div>
+                  </div>   
+                 
                
                   <div class="col-lg-4">
                      <div class="form-group mb-3">
@@ -92,39 +108,7 @@
                         </select>
                      </div>
                   </div>
-                  <div class="col-lg-4">
-                     <div class="form-group mb-3">
-                        <label for="" class="form-label">Billing Address <span class="text-danger">*</span> </label>
-                        <select name="billing_address"   class="form-control select2-init">
-                           <option value="">Select Billing Address</option>
-                           <%foreach from=$client item=cli %>
-                           <option value="<%$cli->billing_address %>">
-                              <%$cli->client_unit %>/ <%$cli->billing_address %>
-                           </option>
-                           <%/foreach%>
-                        </select>
-                     </div>
-                  </div>
-                  <div class="col-lg-4">
-                     <div class="form-group mb-3">
-                        <label for="" class="form-label">Shipping Address <span class="text-danger">*</span></label>
-                        <select name="shipping_address"  class="form-control select2-init">
-                           <option value="">Select Shipping Address</option>
-                           <%foreach from=$client item=cli %>
-                           <option value="<%$cli->shifting_address %>">
-                              <%$cli->client_unit %>/<%$cli->shifting_address %>
-                           </option>
-                           <%/foreach%>
-                           <%if count($supplier) gt 0 %>
-                           <%foreach from=$supplier item=s %>
-                           <option value="<%$s->location %>">
-                              <%$s->supplier_name %>/<%$s->location %>
-                           </option>
-                           <%/foreach%>
-                           <%/if%>
-                        </select>
-                     </div>
-                  </div>
+                  
                   <div class="col-lg-4">
                      <div class="form-group mb-3">
                         <label for="" class="form-label">Discount Type<span class="text-danger">*</span> </label>
@@ -135,15 +119,33 @@
                         </select>
                      </div>
                   </div>
-                  <div class="col-lg-9">
+                   <div class="col-lg-4 hide">
+                     <div class="form-group mb-3">
+                        <label for="" class="form-label">PO Date</label>
+                        <input type="date" readonly value="<%date('Y-m-d') %>"  name="po_date" class="form-control">
+                     </div>
+                  </div>
+                  <div class="col-lg-4">
+                     <div class="form-group mb-3">
+                        <label for="" class="form-label">Expiry Date <span class="text-danger">*</span> </label>
+                        <input type="date" min="<%date('Y-m-d', strtotime('+ 1 day')) %>"  name="expiry_po_date" class="form-control">
+                     </div>
+                  </div>
+                  <div class="col-lg-4 hide">
+                     <div class="form-group mb-3">
+                        <label for="" class="form-label">Remark </label>
+                        <input type="text" placeholder="Enter Remark" value="" name="remark" class="form-control">
+                     </div>
+                  </div>
+                  <div class="col-lg-12">
                      <div class="form-group mb-3">
                         <label class="form-label" for="">Notes </label>
-                        <textarea cols="50" rows="4" name="notes" class="form-control">1.PDIR & MTC Required with each lot. Pls mention PO No. on Invoice.<br>
-                        2.Rejection if any will be debited to suppliers account<br>
-                        3. Inspection & Testing Requirements as per Customer drawing/ standard/ quality plan will be done at your end and reports will share to us.<br>
-                        <b> G. S. T.: </b> GST Extra. <br>
-                        <b> Delivery :</b>   Door Delivery. <br>
-                        <b> Validity :</b>  30 Days from date of purchase order
+                        <textarea cols="50" rows="8" name="notes" class="form-control">1.PDIR & MTC Required with each lot. Pls mention PO No. on Invoice.<br>
+2.Rejection if any will be debited to suppliers account<br>
+3. Inspection & Testing Requirements as per Customer drawing/ standard/ quality plan will be done at your end and reports will share to us.<br>
+<b>GST Extra.</b><br>
+<b> Delivery :</b>   Door Delivery. <br>
+<b> Validity :</b>  30 Days from date of purchase order
                         </textarea>
                      </div>
                   </div>
