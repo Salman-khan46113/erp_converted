@@ -30,6 +30,7 @@ class LogonDashboard extends CommonController
 		$this->year = $d["year"];
 		$this->load->model('SupplierParts');	
 		$this->load->model('CustomerPart');
+		$this->load->model('GlobalConfigModel');
 	}
 	
 	private function getPage($viewPage,$viewData){
@@ -83,6 +84,7 @@ class LogonDashboard extends CommonController
 			'user_password' => $password
 		);
 		$result = $this->Crud->get_data_by_id_multiple("userinfo", $arr);
+		$redirect_url = "";
 		if (empty($result)) {
 			$success = 0;
 			$messages = "Email and Password Invalid.";
@@ -113,18 +115,26 @@ class LogonDashboard extends CommonController
 					$clientUnit = 1;
 				}
 
+				$group_rights = $this->GlobalConfigModel->getGroupRightData($result[0]->groups,"");
+				$this->session->set_userdata('group_rights_arr', base64_encode(json_encode($group_rights)));
 				$this->session->set_userdata('clientUnit', $clientUnit);
 				$clientDetails = $this->getClientUnitDetails($clientUnit);
 				$this->session->set_userdata('clientUnitName', $clientDetails[0]->client_unit); //set the clientUnit to session..
 				$this->session->set_userdata('isMultipleClientUnits',$this->isMultiClientSupport()); //Update client unit for session.
 				$this->session->set_userdata('noOfClients',$this->getNoOfClients()); //Total no of client in DB
 				$this->session->set_flashdata('login', 'success');
+				if(checkGroupAccess("dashboard","list","No")){
+					$redirect_url = "dashboard";
+				}else{
+					$redirect_url = "sitemap";
+				}
 				// redirect('index');
 				// pr($this->session->userdata,1);
 				$success = 1;
 				$messages = "User Login successfully";
 			}
 		}
+		$return_arr['redirect_url']=$redirect_url;
 		$return_arr['success']=$success;
 		$return_arr['messages']=$messages;
 		echo json_encode($return_arr);
@@ -326,5 +336,10 @@ class LogonDashboard extends CommonController
 		$data['selected_year']  = $selected_year;
 
 		$this->getPage('chart', $data);
+	}
+
+	public function sitemap(){
+		$data['sitemap'] = true;
+		$this->loadView('admin/sitemap', $data,"Yes","Yes");
 	}
 }

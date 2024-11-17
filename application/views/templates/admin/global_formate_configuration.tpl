@@ -13,9 +13,11 @@
         </div>
       </nav>
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
+         <%if (checkGroupAccess("global_formate_config","add","No")) %>
        <button type="button" class="btn btn-seconday" data-bs-toggle="modal" data-bs-target="#addConfig">
                      Add New Config
                      </button>
+         <%/if%>
       </div>
    <!-- Main content -->
    <section class="content">
@@ -166,10 +168,13 @@
                               <td><%$config->status %></td>
                                <%/if%>
                               <td>
-                              	<%if ($config->acces_to_modify) %>
+
+                              	<%if ($config->acces_to_modify && checkGroupAccess("global_formate_config","update","No")) %>
                                  <a type="button" class=" " title="Update" data-bs-toggle="modal" data-bs-target="#exampleModa<%$i%>l">
                                  <i class="ti ti-edit"></i>
                                  </a>
+                                 <%else%>
+                                    <%display_no_character("")%>
                                  <%/if%>
                                  <div class="modal fade" id="exampleModa<%$i%>l" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">

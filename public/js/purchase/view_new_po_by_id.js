@@ -20,8 +20,9 @@ const page = {
         scrollX: true,
         scrollY: true,
         bScrollCollapse: true,
+        "paging": false, 
         // columnDefs: [{ sortable: false, targets: 7 }],
-        pagingType: "full_numbers",
+        // pagingType: "full_numbers",
         "ordering": false
        
         

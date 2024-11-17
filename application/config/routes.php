@@ -8,6 +8,7 @@ $route['logout'] = 'LogonDashboard/logout';
 $route['signin'] = 'LogonDashboard/signin';
 $route['index'] = 'LogonDashboard/index';
 $route['dashboard'] = 'Dashboard/dashboard';
+$route['sitemap'] = 'LogonDashboard/sitemap';
 // $route['dashboard_new'] = 'Dashboard/dashboard';
 $route['home_2'] = 'LogonDashboard/home_2';
 
@@ -222,6 +223,7 @@ $route['change_challan_status'] = 'welcome/change_challan_status';
 $route['change_challan_status_subcon'] = 'welcome/change_challan_status_subcon';
 $route['category'] = 'welcome/category';
 $route['add_category'] = 'welcome/add_category';
+$route['update_category'] = 'welcome/update_category';
 
 // $route['add_part'] = 'welcome/add_part';
 

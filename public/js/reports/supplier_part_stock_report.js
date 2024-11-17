@@ -171,10 +171,11 @@ const page = {
             info: true,
             autoWidth: true,
             lengthChange: true,
-            fixedColumns: {
-                leftColumns: 2,
-                // end: 1
-            },
+            fixedColumns:false,
+            // fixedColumns: {
+            //     leftColumns: 2,
+            //     // end: 1
+            // },
             ajax: {
                 data: {'search':data},    
                 url: "StockController/getPartStockReportData",

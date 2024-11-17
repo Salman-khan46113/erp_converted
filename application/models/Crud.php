@@ -244,7 +244,7 @@ class Crud extends CI_Model
 	
     public function read_data_where($table_name, $data, $clientFetch=false)
     {
-		$data = $this->getDBCriteria($table_name, $data);
+		$data = $this->getDBCriteria($table_name, $data,$clientFetch);
 
 		$dateTime = time();
         $query_data = $this->db->get_where($table_name, $data)->num_rows();

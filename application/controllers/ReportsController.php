@@ -19,6 +19,7 @@ class ReportsController extends CommonController
 
 	public function parts_stock_report()
 	{	
+        checkGroupAccess("supplier_parts_stock_report","list","Yes");
 		$filter_part_id = $this->input->post('part_id');
 		$data['filter_part_id'] = $filter_part_id;
 		
@@ -146,6 +147,7 @@ class ReportsController extends CommonController
 		$data = $this->SupplierParts->getStockReportDataModel($condition_arr,$post_data["search"]);
 		foreach ($data as $key => $value) {
 			$data[$key]['stock_value'] = $value['stock'] * $value['store_stock_rate'];
+            $data[$key]['stock_value'] = number_format($value['stock_value'],2,".","");
 
 		}
 		
@@ -160,7 +162,7 @@ class ReportsController extends CommonController
 
 	public function reports_grn()
 	{
-
+        checkGroupAccess("reports_grn","list","Yes");
 		$created_month  = $this->input->post("created_month");
 		$created_year  = $this->input->post("created_y	ear");
 
@@ -178,6 +180,8 @@ class ReportsController extends CommonController
 		$data['fincYears'] = $this->Common_admin_model->getFinancialYears();
 		$data['created_year'] = $created_year;
 		$data['created_month'] = $created_month;
+        $data['supplier'] = $this->Crud->read_data("supplier");
+        // pr($data,1);
 		$column[] = [
             "data" => "supplier_name",
             "title" => "Supplier name",
@@ -367,7 +371,7 @@ class ReportsController extends CommonController
         $condition_arr["length"] = $post_data["length"];
         $base_url = $this->config->item("base_url");
 		$data = $this->SupplierParts->getGNRepotData($condition_arr,$post_data["search"]);
-		
+		pr($data,1);
 		foreach($data as $k=>$v){
 			$data[$k]['po_date']= defaultDateFormat($v['po_date']);
 			$data[$k]['invoice_date'] = defaultDateFormat($v['invoice_date']);
@@ -396,7 +400,7 @@ class ReportsController extends CommonController
     /* payable report */
     public function payable_report()
     {
-
+        checkGroupAccess("payable_report","list","Yes");
         $data['supplier'] = $this->Crud->read_data("supplier");
 
         $column[] = [
@@ -668,9 +672,9 @@ class ReportsController extends CommonController
             $data[$key]['due_days_status'] = $due_days_status;
 
             $bal_amnt = $total_with_gst - $objs['amount_received'] - $objs['tds_amount'];
-            $data[$key]['bal_amnt'] = $bal_amnt;    
-            $data[$key]['action']= "--";
-            if($objs['total_accept_qty'] > 0){
+            $data[$key]['bal_amnt'] = number_format($bal_amnt, 2, '.', '');    
+            $data[$key]['action']= display_no_character("");
+            if($objs['total_accept_qty'] > 0 && checkGroupAccess("payable_report","update","No")){
                 $data[$key]['action'] = "<a href='javascript:void(0)' class='add-payable-report' data-grn-number='".$objs['grn_number']."' data-amount-paid='".$objs['amount_received']."' data-bal-amnt='".$bal_amnt."' data-transaction-details='".$objs['transaction_details']."' data-payment-receipt-date='".$objs['payment_receipt_date']."' data-tds='".$objs['tds_amount']."'><i class='ti ti-edit'></i></a>";
             }
 
@@ -761,7 +765,7 @@ class ReportsController extends CommonController
     /* sales summary report */
     public function sales_summary_report()
     {
-
+        checkGroupAccess("sales_summary_report","list","Yes");
         $data['customers'] = $this->Crud->read_data("customer");
 
         $column[] = [
@@ -961,7 +965,7 @@ class ReportsController extends CommonController
     /* GRN Summary Reports */
     public function grn_summary_report()
     {
-
+        checkGroupAccess("grn_summary_report","list","Yes");
          $data['supplier'] = $this->Crud->read_data("supplier");
 
         $column[] = [

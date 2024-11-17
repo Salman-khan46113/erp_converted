@@ -150,8 +150,8 @@
                                        <th>Inwarding Qty</th>
                                        <th>Required Qty</th>
                                        <th>Received Qty</th>
-                                       <th>Select Challan / Available Qty / Date</th>
-                                       <th>Submit</th>
+                                       <th>Challan / Available Qty / Date</th>
+                                       <th style="text-align: center;">Submit</th>
                                        <th>History</th>
                                     </tr>
                                 </thead>
@@ -162,6 +162,7 @@
                                     <b><span class="span-text">Input / Challan Part Details</span></b>
                                     <br>
                                     <%foreach from=$p->subcon_po_inwarding_parts item=r %>
+                                    
                                     <%if ($r->child_part_new_new) %>
                                     <tr>
                                        <form method="post" action="<%base_url('add_challan_parts_history') %>" id="add_challan_parts_history<%$i%>" class="add_challan_parts_history<%$i%> add_challan_parts_history">
@@ -175,25 +176,45 @@
                                           <%assign var="inwardCompleted" value=true%>
                                           <%assign var="disabled" value=true%>
                                           <%/if%> 
-                                          <td>
-                                             <select name="challan_id" style="width:400px" class="select2 form-control" <%if ($inwardCompleted == true) %>disabled<%/if%>>
+                                          <td >
+                                            <%if $r->selected_challan > 0%>
+                                            <%pr($r->selected_challan)%>
+                                                <%if ($r->challan_parts_data) %>
+                                                   <%foreach from=$r->challan_parts_data item=ch_parts %>
+                                                      <%if ($ch_parts->challan_data) %>
+                                                         <%if ($ch_parts->challan_data[0]->supplier_id == $supplier[0]->id) %>
+                                                            <%if ($ch_parts->challan_data[0]->status == "completed")%>
+                                                               <%foreach from=$ch_parts->challan_data item=c_d %>
+                                                               <%if $r->selected_challan eq $c_d->id %>
+                                                                  <%$c_d->challan_number %>/ <%$ch_parts->remaning_qty%>/ <%$c_d->created_date%>
+                                                               <%/if%>
+                                                               <%/foreach%>
+                                                            <%/if%>
+                                                         <%/if%>
+                                                      <%/if%>
+                                                   <%/foreach%>
+                                                <%/if%>
+
+                                            <%else%>
+                                             <select name="challan_id" style="width:400px" class="select2 form-control" <%if ($inwardCompleted == true) %><%/if%>>
                                                 <option value="0">NA</option>
                                                 <%if ($r->challan_parts_data) %>
                                                 <%foreach from=$r->challan_parts_data item=ch_parts %>
-                                                <%if ($ch_parts->challan_data) %>
-                                                <%if ($ch_parts->challan_data[0]->supplier_id == $supplier[0]->id) %>
-                                                <%if ($ch_parts->challan_data[0]->status == "completed")%>
-                                                <%foreach from=$ch_parts->challan_data item=c_d %>
-                                                <option value="<%$c_d->id %>"><%$c_d->challan_number %>/ <%$ch_parts->remaning_qty%>/ <%$ch_parts->created_date%></option>
-                                                <%/foreach%>
-                                                <%/if%>
-                                                <%/if%>
-                                                <%/if%>
+                                                   <%if ($ch_parts->challan_data) %>
+                                                      <%if ($ch_parts->challan_data[0]->supplier_id == $supplier[0]->id) %>
+                                                         <%if ($ch_parts->challan_data[0]->status == "completed")%>
+                                                            <%foreach from=$ch_parts->challan_data item=c_d %>
+                                                            <option value="<%$c_d->id %>" <%if $r->selected_challan eq $c_d->id %>selected<%/if%>><%$c_d->challan_number %>/ <%$ch_parts->remaning_qty%>/ <%$c_d->created_date%></option>
+                                                            <%/foreach%>
+                                                         <%/if%>
+                                                      <%/if%>
+                                                   <%/if%>
                                                 <%/foreach%>
                                                 <%/if%>
                                              </select>
+                                             <%/if%>
                                           </td>
-                                          <td> 
+                                          <td style="text-align: center;"> 
                                              <input type="hidden" name="part_id" value="<%$r->child_part_new_new[0]->id%>"> 
                                              <input type="hidden" name="subcon_po_inwarding_parts_id" value="<%$r->id%>"> 
                                              <input type="hidden" name="req_qty" value="<%$r->input_part_req_qty %>"> 
@@ -206,7 +227,7 @@
                                              <input type="hidden" name="child_part_id" value="<%$p->part_id %>" class="form-control"> 
                                              <input type="hidden" name="invoice_number" placeholder="invoice_number" value="<%$inwarding_data[0]->invoice_number%>" class="form-control"> 
                                              <%if ($inwardCompleted == true) %>
-                                             echo "inwarding added";
+                                             inwarding added
                                              <%else %> 
                                              <button type="submit" class="btn btn-info">Submit</button>
                                              <%/if%> 
@@ -228,8 +249,9 @@
                                              <%if (empty($po_parts[0]->rate)) %>
                                              <%assign var=part_rate_new value=$child_part_data[0]->part_rate %>
                                              <%else %>
-                                             <%assign var=part_rate_new value=$p->part_rate %>
+                                             <%assign var=part_rate_new value=$p->rate %>
                                              <%/if%>
+
                                              <input type="hidden" required step="any" value="<%$subcon_po_inwarding_master[0]->inwarding_qty %>" placeholder="$po_parts[0]->qty;" name="qty" class="form-control"> 
                                              <input type="hidden" name="inwarding_id" value="<%$inwarding_data[0]->id %>" placeholder="98771231236" class="form-control"> 
                                              <input type="hidden" name="new_po_id" value="<%$new_po_id %>" class="form-control"> 

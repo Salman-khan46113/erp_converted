@@ -28,6 +28,7 @@ class ChallanController extends CommonController {
 
 	public function challan_search()
 	{
+		checkGroupAccess("view_add_challan","list","Yes");
 		$challanId = $this->input->post('challan_id');
 		$supplierId = $this->input->post('supplier_id');
 
@@ -106,7 +107,7 @@ class ChallanController extends CommonController {
         ];
         
         $data["data"] = $column;
-        $data["is_searching_enable"] = false;
+        $data["is_searching_enable"] = true;
         $data["is_paging_enable"] = true;
         $data["is_serverSide"] = true;
         $data["is_ordering"] = true;
@@ -190,7 +191,7 @@ class ChallanController extends CommonController {
 	{
 		
 		$challan_id = $this->input->post('challan_id');
-
+		$client_id = $this->Unit->getSessionClientId();
 		$challanPartCount = $this->db->query('SELECT COUNT(*) as count FROM `challan_parts` where challan_id = ' . $challan_id)->row();
 		if($challanPartCount->count >= 7) {
 			$this->addWarningMessage("Already 7 parts added. No more parts are allowed.");
@@ -241,8 +242,8 @@ class ChallanController extends CommonController {
 			} else {
 				$inser_query = $this->Crud->insert_data("challan_parts", $data);
 				if ($inser_query) {
-					$updateResult = $this->db->query("update child_part_stock set stock = stock - ".$qty.", sub_con_stock = sub_con_stock + ".$qty."
-					where childPartId =".$part_id);
+					$updateResult = $this->db->query("update child_part_stock set stock = COALESCE(stock, 0) - ".$qty.", sub_con_stock = COALESCE(sub_con_stock, 0) + ".$qty."
+					where childPartId =".$part_id." AND clientId=".$client_id);
 					if($updateResult){
 						$messages = "Part added.";
 						$success = 1;
@@ -397,7 +398,7 @@ class ChallanController extends CommonController {
 	}
 	public function customerChallanRN()  
 	{
-
+		checkGroupAccess("challan_inward","list","Yes");
 		$data['customer'] = $this->Crud->read_data("customer");
 		// $data['rejection_sales_invoice'] = $this->Crud->read_data("rejection_sales_invoice");
 		$sql = "
@@ -706,6 +707,7 @@ class ChallanController extends CommonController {
 	}
 
 	public function challan_part_return(){
+		checkGroupAccess("challan_part_return","list","Yes");
 		$data['customer'] = $this->Crud->read_data("customer");
 		// $data['rejection_sales_invoice'] = $this->Crud->read_data("rejection_sales_invoice");
 		$sql = "
@@ -798,14 +800,14 @@ class ChallanController extends CommonController {
 					$value = $customer_part_data[0];
 					$basic_total = $qty *  $value['rate'];
 					if ((int) $value['igst'] === 0) {
-				                $gst = (int) $value['cgst'] + (int) $value['sgst'];
-				                $cgst = (int) $value['cgst'];
-				                $sgst = (int) $value['sgst'];
+				                $gst = (float) $value['cgst'] + (float) $value['sgst'];
+				                $cgst = (float) $value['cgst'];
+				                $sgst = (float) $value['sgst'];
 				                $tcs = (float) $value['tcs'];
 				                $igst = 0;
 				                $total_gst_percentage = $cgst + $sgst;
 				    } else {
-				                $gst = (int) $value['igst'];
+				                $gst = (float) $value['igst'];
 				                $tcs = (float) $value['tcs'];
 				                $cgst = 0;
 				                $sgst = 0;
@@ -842,6 +844,7 @@ class ChallanController extends CommonController {
 				
 					);
 				}
+
 				$part_insert_id = $this->SupplierParts->saveCustomerChallanPartReturnPart($return_part_data);
 				if($part_insert_id > 0){
 					$messages = "Successfully Added";

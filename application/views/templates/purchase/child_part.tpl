@@ -126,6 +126,7 @@ jelly-o tart brownie jelly.
               <div class="form-group mb-3">
                 <label class="form-label"> Purchase Item Category </label><span class="text-danger">*</span>
                 <select class="form-control select2 item-category parent-category" name="sub_type">
+                <option value="">Selecte Purchase Item Category</option>
                   <%foreach from=$category_list item=a%>
                       <%if (!($a->parent_id > 0)) %>
                         <option value="<%$a->category_name%>"><%$a->category_name %></option>
@@ -136,7 +137,7 @@ jelly-o tart brownie jelly.
             </div>
             <div class="col-lg-6">
               <div class="form-group mb-3">
-                <label class="form-label"> Sub Item Category </label><span class="text-danger">*</span>
+                <label class="form-label"> Sub Item Category </label>
                   <select class="form-control select2 sub_category_type" name="sub_category_type" style="width: 100%;">
                   </select>
               </div>

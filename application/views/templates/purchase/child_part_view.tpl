@@ -108,8 +108,10 @@
         <a type="button" class="btn btn-seconday" href="<%base_url('child_part')%>">Add Item</a>
       </div>
       <%/if%>
-      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+      <%if checkGroupAccess("child_part_view","export",false)%>
+        <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+        <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+      <%/if%>
       <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
       <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
     </div>
@@ -188,7 +190,7 @@
                             </div>
                             <div class="col-lg-6">
                               <div class="form-group">
-                                  <label> Sub Item Category </label><span class="text-danger">*</span>
+                                  <label> Sub Item Category </label>
                                       <select class="form-control select2 sub_category_type" id="sub_category_type" name="sub_category_type" style="width: 100%;" data-selected="">
                                           <option value="">Select Sub Item Category</option>
                                       </select>

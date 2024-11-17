@@ -1546,3 +1546,7 @@ a.view-all-btn{
 .dashboard-block .select2-container--default .select2-selection.select2-selection--single {
     height: 32px !important;
 }
+.fade:not(.show) {
+    opacity: 0;
+    display: none;
+}

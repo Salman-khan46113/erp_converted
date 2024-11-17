@@ -23,14 +23,56 @@ const datatable = {
             
             $('#revision_date').val(data[0]['revision_date']);
         })
+       
+        $(".import_operation_bom").submit(function(e){
+            e.preventDefault();
+           
+            var href = $(this).attr("action");
+            var id = $(this).attr("id");
+            let flag = that.formValidate(id);
+
+            if(flag){
+              return;
+            }
+
+            var formData = new FormData($('.'+id)[0]);
+
+            $.ajax({
+              type: "POST",
+              url: href,
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (response) {
+                var responseObject = JSON.parse(response);
+                var msg = responseObject.messages;
+                var success = responseObject.success;
+                if (success == 1) {
+                  toastr.success(msg);
+                  $(this).parents(".modal").modal("hide")
+                  setTimeout(function(){
+                    window.location.reload();
+                  },1000);
+
+                } else {
+                  toastr.error(msg);
+                }
+              },
+              error: function (error) {
+                console.error("Error:", error);
+              },
+            });
+          });
     },
     dataTable:function(){
+        let order_disable = [{ sortable: false, targets: 2 },{ sortable: false, targets: 3 },{ sortable: false, targets: 4 },{ sortable: false, targets: 5 }];
+        if(isPLMEnabled){
+            order_disable = [{ sortable: false, targets: 3 },{ sortable: false, targets: 4 },{ sortable: false, targets: 5 },{ sortable: false, targets: 6},{ sortable: false, targets: 7 },{ sortable: false, targets: 2}];
+        }
       table =  new DataTable('#example1',{
         dom: "Bfrtilp",
         // scrollX: true, 
-        columnDefs: [
-            { orderable: false, targets: [3,4,5,6,7,8] } // Disable ordering for the first and third columns
-        ],
+        columnDefs: order_disable,
         buttons: [
                 {     
                     extend: 'csv',
@@ -71,7 +113,7 @@ const datatable = {
       // scrollX: true,
       scrollY: true,
       bScrollCollapse: true,
-      columnDefs: [{ sortable: false, targets: 3 },{ sortable: false, targets: 4 },{ sortable: false, targets: 5 },{ sortable: false, targets: 6},{ sortable: false, targets: 7 },{ sortable: false, targets: 2}],
+      columnDefs: order_disable,
       pagingType: "full_numbers",
     });
       $('.dataTables_length').find('label').contents().filter(function() {
@@ -90,7 +132,66 @@ const datatable = {
     },
     resetFilter:function(){
         table.column(0).search('').draw();
+    },
+    formValidate: function(form_class = ''){
+        let flag = false;
+        $(".custom-form."+form_class+" .required-input").each(function( index ) {
+          var value = $(this).val();
+          var dataMax = parseFloat($(this).attr('data-max'));
+          var dataMin = parseFloat($(this).attr('data-min'));
+          if(value == ''){
+            flag = true;
+            var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+              return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+            }).text().trim();
+            var exit_ele = $(this).parents(".form-group").find("label.error");
+            if(exit_ele.length == 0){
+              var start ="Please enter ";
+              if($(this).prop("localName") == "select"){
+                var start ="Please select ";
+              }
+              label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+              var validation_message = start+(label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+              var label_html = "<label class='error'>"+validation_message+"</label>";
+              $(this).parents(".form-group").append(label_html)
+            }
+          }
+          else if(dataMin !== undefined && dataMin > value){
+            flag = true;
+            var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+              return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+            }).text().trim();
+            var exit_ele = $(this).parents(".form-group").find("label.error");
+            if(exit_ele.length == 0){
+              var end =" must be greater than or equal to "+dataMin;
+              label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+              label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+              label = label.charAt(0).toUpperCase() + label.slice(1);
+              var validation_message =label +end;
+              var label_html = "<label class='error'>"+validation_message+"</label>";
+              $(this).parents(".form-group").append(label_html)
+            }
+            }else if(dataMax !== undefined && dataMax < value){
+              flag = true;
+              var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+                return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+              }).text().trim();
+              var exit_ele = $(this).parents(".form-group").find("label.error");
+              if(exit_ele.length == 0){
+                var end =" must be less than or equal to "+dataMax;
+                label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+                label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+                label = label.charAt(0).toUpperCase() + label.slice(1)
+                var validation_message =label +end;
+                var label_html = "<label class='error'>"+validation_message+"</label>";
+                $(this).parents(".form-group").append(label_html)
+              }
+          }
+        });
+       
+        return flag;
     }
+
 
 }
 

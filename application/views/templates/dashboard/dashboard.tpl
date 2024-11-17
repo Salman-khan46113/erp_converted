@@ -38,7 +38,7 @@
                      <%/foreach%> 
                   </select>
                </div>
-               <div class="year-drop-down unit-drop-down float-right margin-right-2">
+               <div class="year-drop-down unit-drop-down float-right margin-right-2 <%if $isMultipleClientUnits != "true" %>hide<%/if %>">
                   <select class="select-box"  id="company-unit-filer">
                      <option value="All">All</option>
                      <%foreach from=$unit_data  key=key item=$value %>
@@ -59,42 +59,42 @@
          <ul class="nav nav-tabs dashboard-nav-tab" id="myTab" role="tablist">
             <%if checkGroupAccess("dashboard_ba","list",false)%>
             <li class="nav-item" role="presentation">
-               <a class="nav-link active" id="business-analytics-tab" data-bs-toggle="tab" data-tab="BusinessAnalytics" data-bs-target="#business-analytics" type="button" role="tab" aria-controls="business-analytics" aria-selected="true">Business Analytics</a>
+               <a class="nav-link <%if $selected_menu eq 'dashboard_ba'%>active<%/if%>" id="business-analytics-tab" data-bs-toggle="tab" data-tab="BusinessAnalytics" data-bs-target="#business-analytics" type="button" role="tab" aria-controls="business-analytics" aria-selected="true">Business Analytics</a>
             </li>
             <%/if%>
             <%if checkGroupAccess("dashboard_sales","list",false)%>
-            <li class="nav-item" role="presentation">
-               <a class="nav-link " id="sales-tab" data-bs-toggle="tab" data-tab="Sales" data-bs-target="#sales" type="button" role="tab" aria-controls="sales" aria-selected="true">Sales</a>
+            <li class="nav-item  " role="presentation">
+               <a class="nav-link <%if $selected_menu eq 'dashboard_sales'%>active<%/if%>" id="sales-tab" data-bs-toggle="tab" data-tab="Sales" data-bs-target="#sales" type="button" role="tab" aria-controls="sales" aria-selected="true">Sales</a>
             </li>
             <%/if%>
             <%if checkGroupAccess("dashboard_account","list",false)%>
-            <li class="nav-item" role="presentation">
-               <a class="nav-link " id="account-tab" data-bs-toggle="tab" data-tab="Account" data-bs-target="#account" type="button" role="tab" aria-controls="account" aria-selected="false">Accounts</a>
+            <li class="nav-item " role="presentation">
+               <a class="nav-link <%if $selected_menu eq 'dashboard_account'%>active<%/if%>" id="account-tab" data-bs-toggle="tab" data-tab="Account" data-bs-target="#account" type="button" role="tab" aria-controls="account" aria-selected="false">Accounts</a>
             </li>
             <%/if%>
             <%if checkGroupAccess("dashboard_purchase_grn","list",false)%>
-            <li class="nav-item" role="presentation">
-               <a class="nav-link " id="purchase-grn-tab" data-bs-toggle="tab" data-tab="PurchaseGRN" data-bs-target="#purchase-grn" type="button" role="tab" aria-controls="purchase-grn" aria-selected="false">Purchase Grn </a>
+            <li class="nav-item " role="presentation">
+               <a class="nav-link <%if $selected_menu eq 'dashboard_purchase_grn'%>active<%/if%>" id="purchase-grn-tab" data-bs-toggle="tab" data-tab="PurchaseGRN" data-bs-target="#purchase-grn" type="button" role="tab" aria-controls="purchase-grn" aria-selected="false">Purchase Grn </a>
             </li>
             <%/if%>
             <%if checkGroupAccess("dashboard_store","list",false)%>
-            <li class="nav-item" role="presentation">
-               <a class="nav-link " id="stotes-tab" data-bs-toggle="tab" data-tab="Stores" data-bs-target="#stotes" type="button" role="tab" aria-controls="stotes" aria-selected="false">Stores </a>
+            <li class="nav-item " role="presentation">
+               <a class="nav-link <%if $selected_menu eq 'dashboard_store'%>active<%/if%>" id="stotes-tab" data-bs-toggle="tab" data-tab="Stores" data-bs-target="#stotes" type="button" role="tab" aria-controls="stotes" aria-selected="false">Stores </a>
             </li>
             <%/if%>
             <%if checkGroupAccess("dashboard_subcon","list",false)%>
-            <li class="nav-item" role="presentation">
-               <a class="nav-link " id="subcon-tab" data-bs-toggle="tab" data-tab="Subcon" data-bs-target="#subcon" type="button" role="tab" aria-controls="subcon" aria-selected="false">Subcon </a>
+            <li class="nav-item " role="presentation">
+               <a class="nav-link <%if $selected_menu eq 'dashboard_subcon'%>active<%/if%>" id="subcon-tab" data-bs-toggle="tab" data-tab="Subcon" data-bs-target="#subcon" type="button" role="tab" aria-controls="subcon" aria-selected="false">Subcon </a>
             </li>
             <%/if%>
             <%if checkGroupAccess("dashboard_production","list",false)%>
-            <li class="nav-item" role="presentation">
-               <a class="nav-link " id="production-tab" data-bs-toggle="tab" data-tab="Production" data-bs-target="#production-grn" type="button" role="tab" aria-controls="production" aria-selected="false">Production </a>
+            <li class="nav-item " role="presentation">
+               <a class="nav-link <%if $selected_menu eq 'dashboard_production'%>active<%/if%>" id="production-tab" data-bs-toggle="tab" data-tab="Production" data-bs-target="#production-grn" type="button" role="tab" aria-controls="production" aria-selected="false">Production </a>
             </li>
             <%/if%>
             <%if checkGroupAccess("dashboard_quality","list",false)%>
-            <li class="nav-item" role="presentation">
-               <a class="nav-link " id="quality-tab" data-bs-toggle="tab" data-tab="Quality" data-bs-target="#quality" type="button" role="tab" aria-controls="quality" aria-selected="false">Quality </a>
+            <li class="nav-item " role="presentation">
+               <a class="nav-link <%if $selected_menu eq 'dashboard_quality'%>active<%/if%>" id="quality-tab" data-bs-toggle="tab" data-tab="Quality" data-bs-target="#quality" type="button" role="tab" aria-controls="quality" aria-selected="false">Quality </a>
             </li>
             <%/if%>
          </ul>
@@ -105,7 +105,8 @@
          <main class="main users chart-page" id="skip-target">
             <div class="container main-container-block">
                <div class="tab-content" id="myTabContent">
-                  <div class="tab-pane fade show active" id="business-analytics" role="tabpanel" aria-labelledby="business-analytics-tab" data-tab="BusinessAnalytics">
+                  <%if checkGroupAccess("dashboard_ba","list",false)%>
+                  <div class="tab-pane fade  <%if $selected_menu eq 'dashboard_ba'%>show active<%/if%>" id="business-analytics" role="tabpanel" aria-labelledby="business-analytics-tab" data-tab="BusinessAnalytics">
                      <div class="row stat-cards">
                         <div class="col-md-6 col-xl-3">
                            <article class="stat-cards-item widget-box" id="TODAY_SALES_BA_BLOCK" data-widget="TODAY_SALES_BA">
@@ -414,7 +415,9 @@
                         </div>
                      </div>
                   </div>
-                  <div class="tab-pane fade" id="sales" role="tabpanel" aria-labelledby="sales-tab" data-tab="Sales">
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_sales","list",false)%>
+                  <div class="tab-pane fade <%if $selected_menu eq 'dashboard_sales'%>show active<%/if%>" id="sales" role="tabpanel" aria-labelledby="sales-tab" data-tab="Sales">
                      <div class="row stat-cards">
                         <div class="col-md-6 col-xl-3">
                            <article class="stat-cards-item widget-box" id="TODAY_SALES_BLOCK" data-widget="TODAY_SALES">
@@ -682,7 +685,9 @@
                         </div>
                      </div>
                   </div>
-                  <div class="tab-pane fade " id="account" role="tabpanel" aria-labelledby="account-tab" data-tab="Account" >
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_account","list",false)%>
+                  <div class="tab-pane fade <%if $selected_menu eq 'dashboard_account'%>show active<%/if%> " id="account" role="tabpanel" aria-labelledby="account-tab" data-tab="Account" >
                      <div class="row stat-cards">
                         <div class="col-md-6 col-xl-3">
                            <article class="stat-cards-item widget-box" id="TOTAL_RECEIVABLES_PAID_BLOCK" data-widget="TOTAL_RECEIVABLES_PAID">
@@ -864,7 +869,9 @@
                         </div>
                      </div>
                   
-                     <div class="tab-pane fade " id="purchase-grn" role="tabpanel" aria-labelledby="purchase-grn-tab" data-tab="PurchaseGRN">
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_purchase_grn","list",false)%>
+                     <div class="tab-pane fade <%if $selected_menu eq 'dashboard_purchase_grn'%>show active<%/if%>" id="purchase-grn" role="tabpanel" aria-labelledby="purchase-grn-tab" data-tab="PurchaseGRN">
                         <div class="row ">
                            <div class="col-lg-5">
                               <div class="chart-box widget-box" id="CATEGORY_PURCHASE_AMOUNT_PIE_CHART" data-widget="CATEGORY_PURCHASE_AMOUNT">
@@ -951,7 +958,9 @@
                            </div>
                         </div>
                      </div>
-                     <div class="tab-pane fade " id="stotes" role="tabpanel" aria-labelledby="stotes-tab" data-tab="Stores">
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_store","list",false)%>
+                     <div class="tab-pane fade <%if $selected_menu eq 'dashboard_store'%>show active<%/if%>" id="stotes" role="tabpanel" aria-labelledby="stotes-tab" data-tab="Stores">
                         <div class="row stat-cards">
                            <div class="col-md-6 col-xl-3">
                               <article class="stat-cards-item widget-box" id="PURCHASE_STOCK_AMOUNT_BLOCK" data-widget="PURCHASE_STOCK_AMOUNT">
@@ -1049,7 +1058,9 @@
                            </div>
                         </div>
                      </div>
-                     <div class="tab-pane fade " id="subcon" role="tabpanel" aria-labelledby="subcon-tab" data-tab="Subcon">
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_subcon","list",false)%>
+                     <div class="tab-pane fade <%if $selected_menu eq 'dashboard_subcon'%>show active<%/if%>" id="subcon" role="tabpanel" aria-labelledby="subcon-tab" data-tab="Subcon">
                         <div class="row">
                            <div class="col-lg-5">
                               <div class="chart-box widget-box" id="SUPPLIER_SUBCON_STOCKS_PIE_CHART" data-widget="SUPPLIER_SUBCON_STOCKS">
@@ -1153,7 +1164,9 @@
                            </div>
                         </div>
                      </div>
-                     <div class="tab-pane fade " id="production-grn" role="tabpanel" aria-labelledby="production-tab" data-tab="Production">
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_production","list",false)%>
+                     <div class="tab-pane fade <%if $selected_menu eq 'dashboard_production'%>show active<%/if%>" id="production-grn" role="tabpanel" aria-labelledby="production-tab" data-tab="Production">
                         <div class="row stat-cards">
                            <div class="col-md-6 col-xl-3">
                               <article class="stat-cards-item widget-box" id="YESTERDAYS_MOLDING_PRODUCTION_BLOCK" data-widget="YESTERDAYS_MOLDING_PRODUCTION">
@@ -1413,7 +1426,9 @@
                            </div>
                         </div>
                      </div>
-                     <div class="tab-pane fade " id="quality" role="tabpanel" aria-labelledby="quality-tab" data-tab="Quality">
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_quality","list",false)%>
+                     <div class="tab-pane fade <%if $selected_menu eq 'dashboard_quality'%>show active<%/if%>" id="quality" role="tabpanel" aria-labelledby="quality-tab" data-tab="Quality">
                         <div class="row stat-cards">
                            <div class="col-md-6 col-xl-3">
                               <article class="stat-cards-item widget-box" id="YESTERDAYS_REJECTION_QUALITY_BLOCK" data-widget="YESTERDAYS_REJECTION_QUALITY">
@@ -1669,6 +1684,7 @@
                            </div>
                         </div>
                      </div>
+                  <%/if%>
                   </div>
                </div>
          </main>

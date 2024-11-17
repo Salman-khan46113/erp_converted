@@ -2,6 +2,15 @@
 var file_name = "customer_part";
 var pdf_title = "Customer Part";
 var table = '';
+var start_skip_row = 0;
+if(isPlastic){
+  start_skip_row = 17;
+}else{
+  start_skip_row = 12;
+  if(TusharEngg){
+    start_skip_row = 14;
+  }
+}
 const datatable = {
     init:function(){
         let that = this;
@@ -9,7 +18,8 @@ const datatable = {
         that.dataTable();
         $(document).on('click','.search-filter',function(e){
             let customer_name = $("#customer_name").val();
-            table.column(2).search(customer_name).draw();
+            table.column(1).search(customer_name).draw();
+            $(".close-filter-btn").trigger( "click" )
         })
         $(document).on('click','.reset-filter',function(e){
            that.resetFilter();
@@ -21,7 +31,7 @@ const datatable = {
     },
     dataTable:function(){
       table =  new DataTable('#example1',{
-        dom: 'Bfrtip',
+        dom: 'Bfrtilp',
         scrollX: true, 
         
         buttons: [
@@ -35,8 +45,8 @@ const datatable = {
                             var lines = csv.split('\n');
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
-                                values.splice(13, 2);
-                                values.splice(0, 1);
+                                values.splice(start_skip_row, 2);
+                                // values.splice(0, 1);
                                 return values.join(',');
                             });
                             return modifiedLines.join('\n');
@@ -57,7 +67,7 @@ const datatable = {
                         doc.pageMargins = [15, 15, 15, 15];
                         doc.content[0].text = pdf_title;
                         doc.content[0].color = theme_color;
-                        doc.content[1].table.widths = ['12%', '8%', '8%', '8%','8%', '8%', '8%','8%', '8%', '8%','8%', '8%', '8%'];
+                        // doc.content[1].table.widths = ['12%', '8%', '8%', '8%','8%', '8%', '8%','8%', '8%', '8%','8%', '8%', '8%'];
                         doc.content[1].table.body[0].forEach(function(cell) {
                             cell.fillColor = theme_color;
                         });
@@ -76,13 +86,26 @@ const datatable = {
                                 }
                                 cell.alignment = alignment;
                             });
-                            row.splice(13, 2);
-                                row.splice(0, 1);
+                            row.splice(start_skip_row, 2);
+                                // row.splice(0, 1);
                         });
                     }
                 },
             ],
+             pagingType: "full_numbers",
     });
+      $('.dataTables_length').find('label').contents().filter(function() {
+          return this.nodeType === 3; // Filter out text nodes
+      }).remove();
+      
+     $('#serarch-filter-input').on('keyup', function() {
+       table.search(this.value).draw();
+    });
+     setTimeout(function(){
+        $(".dataTables_length select").select2({
+            minimumResultsForSearch: Infinity
+        });
+      },1000)
     },
     inititeForm: function(){
         let that = this;
@@ -183,7 +206,7 @@ const datatable = {
         return flag;
     },
     resetFilter:function(){
-        table.column(2).search('').draw();
+        table.column(1).search('').draw();
     }
 
 }

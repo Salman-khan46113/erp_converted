@@ -9,7 +9,8 @@ const datatable = {
         that.dataTable();
         $(document).on('click','.search-filter',function(e){
             let customer_name = $("#customer_name").val();
-            table.column(1).search(customer_name).draw();
+            table.column(0).search(customer_name).draw();
+            $(".close-filter-btn").trigger( "click" )
         })
         $(document).on('click','.reset-filter',function(e){
            that.resetFilter();
@@ -18,8 +19,7 @@ const datatable = {
             var data = $(this).attr("data-value");
           
             data = JSON.parse(atob(data)); 
-            console.log(data)
-           
+            
             $("#ucustomer_id").val(data['id']);
             $("#ucustomer_name").val(data.customer_name);
             $("#ucustomer_code").val(data.customer_code);
@@ -103,7 +103,8 @@ const datatable = {
       },1000)
     },
     resetFilter:function(){
-        table.column(1).search('').draw();
+        $("#customer_name").val("").trigger("change");
+        table.column(0).search('').draw();
     }
 
 }

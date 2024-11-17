@@ -44,18 +44,21 @@
         <div class="card p-0 mt-4">
             <div class="tabTitle position-relative">
                 <h2 id="cc_sh_sys_static_field_3">
-                    <span>PO Parts</span>
-                    <span style="display:none;position:absolute;left:0;right:0;text-align:center;top: 19px;"
-                        id="ajax_loader_childModule_stock_intward_details">
-                        <i class="fa fa-refresh fa-spin-light fa-1x fa-fw"></i>
-                    </span>
+                    <span>Parts</span>
                 </h2>
+                 
+                <div class="input-wrapper">
+                  <input type="text" name="datetimes" class="dates form-control" id="date_range_filter" />
+                  <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
+                </div>
+               
+                
             </div>
-            <div class="card-body p-0">
-                <table class="table table-striped scrollable" id="example1">
+            <div class="card-body p-0 w-100">
+                <table class="table table-striped " id="view_po_by_supplier_id_table">
                     <thead>
                         <tr>
-                            <th>Sr. No.</th>
+                            <!-- <th>Sr. No.</th> -->
                             <th>Type</th>
                             <th>PO Number</th>
                             <th>PO Date</th>
@@ -70,9 +73,9 @@
                             <%if count($new_po)> 0 %>
                                 <%foreach from=$new_po item=s %>
                                     <tr>
-                                        <td>
+                                        <!-- <td>
                                             <%$i %>
-                                        </td>
+                                        </td> -->
                                         <td>
                                             <%if (empty($s->process_id)) %>
                                                 Normal PO
@@ -94,18 +97,16 @@
                                             <%if ($s->status == "accpet") %>
                                                 <a href="<%base_url('download_my_pdf/') %><%$s->id %>"
                                                     class="btn btn-primary" href="">Download</a>
-                                                <%/if%>
+                                            <%else%>
+                                                <%display_no_character("")%>
+                                            <%/if%>
                                         </td>
                                         <td><a href="<%base_url('view_new_po_by_id/') %><%$s->id %>"
                                                 class="btn btn-primary" href="">PO Details</a></td>
                                         <td>
-                                            <%if ($s->expiry_po_date > date('Y-m-d')) %>
-                                                <%assign var='expired' value='yes' %>
-                                            <%else %>
+                                                                                                                                    
 
-                                            <%/if%>
-
-                                            <%if ($expired=="no" ) %>
+                                            <%if ($s->expired=="yes" ) %>
                                                 <%assign var='statusNew' value='Expired' %>
                                             <%else if ($s->status == "accpet") %>
                                                 <%assign var='statusNew' value='Released' %>
@@ -125,3 +126,70 @@
         </div>
     </div>
 </div>
+<!-- / Content -->
+<div class="content-backdrop fade"></div>
+<script type="text/javascript">
+   var current_date = <%$current_date|@json_encode%>;
+   var base_url = <%base_url()|@json_encode%>
+</script>
+<script src="<%$base_url%>public/js/purchase/view_po_by_supplier_id.js"></script>
+<style type="text/css">
+    #date_range_filter,#serarch-filter-input {
+    float: right;
+    width: 12%;
+    margin: 11px;
+}
+#serarch-filter-input{
+        margin-top: 10px !important;
+    margin-right: 10px !important;
+
+}
+/* Wrapper for the input to allow positioning of the icon */
+.input-wrapper {
+      position: absolute;
+    display: inline-block;
+    
+    width: calc(100% - 121px);
+}
+
+/* Style for the input itself */
+.dates {
+  padding-right: 30px; /* Add space for the icon on the right */
+  width: 100%; /* Optional: make sure the input takes full width of its parent */
+  padding-left: 10px; /* Optional: padding for input text */
+  font-size: 16px; /* Input font size */
+  border: 1px solid #ccc; /* Optional: border styling */
+  border-radius: 4px; /* Optional: rounded corners */
+}
+
+/* Adding the icon using ::after on the wrapper */
+.input-wrapper::after {
+    /* content: '\f073'; */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 21px;
+    top: 44%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    content: "\fd2f";
+    unicode-bidi: isolate;
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+    text-indent: 0px !important;
+    text-align: start !important;
+    text-align-last: start !important;
+    /* content: "\ea65"; */
+    font-family: "tabler-icons" !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    font-size: 21px;
+}
+
+</style>
+<!-- Content wrapper -->

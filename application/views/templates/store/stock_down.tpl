@@ -15,13 +15,15 @@
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-       <%if ($role == "Admin" || $role=="production") %> 
-       <button type="button" class="btn btn-seconday float-left" data-bs-toggle="modal"
-                  data-bs-target="#exampleModal">
-                New Request</button>
-     <%/if%>
-     <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+       <%if (checkGroupAccess("stock_down","add","No")) %> 
+         <button type="button" class="btn btn-seconday float-left" data-bs-toggle="modal"
+                    data-bs-target="#exampleModal">
+                  New Request</button>
+       <%/if%>
+       <%if (checkGroupAccess("stock_down","export","No")) %> 
+         <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+          <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%/if%>
     </div>
   <!-- Main content -->
   <section class="content">
@@ -161,8 +163,12 @@
 						                    <td><%$c->created_date %></td>
 						                    <td>
 						                      <%if ($c->status == "pending") %>
-							                      <a class="btn btn-warning transfer-stock-value"
-							                        href="javascript:void(0)" data-href="<%base_url('remove_stock/') %><%$c->id %>">Click To Transfer Stock</a>
+                                    <%if (checkGroupAccess("stock_down","update","No")) %> 
+  							                       <a class="btn btn-warning transfer-stock-value"
+  							                        href="javascript:void(0)" data-href="<%base_url('remove_stock/') %><%$c->id %>">Click To Transfer Stock</a>
+                                    <%else%>
+                                      <%display_no_character("")%>
+                                    <%/if%>
 						                      <%else %>
 						                          stock transferred
 						                      <%/if%>

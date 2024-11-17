@@ -48,14 +48,18 @@
          </div>
       </nav>
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-         <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-         <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+         <%if checkGroupAccess("p_q_molding_production","add","No")%>
+            <button type="button" class="btn btn-seconday" data-bs-toggle="modal"
+               data-bs-target="#addPromo" title="Add Molding Production Qty">
+            <i class="ti ti-plus"></i>
+            </button>
+         <%/if%>
+         <%if checkGroupAccess("p_q_molding_production","export","No")%>
+            <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+            <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+         <%/if%>
          <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
          <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
-         <button type="button" class="btn btn-seconday" data-bs-toggle="modal"
-            data-bs-target="#addPromo" title="Add Molding Production Qty">
-         <i class="ti ti-plus"></i>
-         </button>
       </div>
       <div class="modal fade" id="addPromo" tabindex="-1" role="dialog"
          aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -303,9 +307,13 @@
                   <td><%$u->rejected_qty %></td>
                   <td>
                      <%if (!empty($u->onhold_qty)) %>
-                     <button type="button" class="btn btn-warning float-left "
-                        data-bs-toggle="modal" data-bs-target="#onhold<%$i %>">
-                     <%$u->onhold_qty %> </button>
+                        <%if checkGroupAccess("p_q_molding_production","update","No")%>
+                           <button type="button" class="btn btn-warning float-left "
+                              data-bs-toggle="modal" data-bs-target="#onhold<%$i %>">
+                           <%$u->onhold_qty %> </button>
+                        <%else%>
+                           <%$u->onhold_qty %>
+                        <%/if%>
                      <%else  %>
                      0
                      <%/if%>
@@ -427,20 +435,32 @@
                   <td><%$u->runner_weight %></td>
                   <td><%$u->production_target_per_shift %></td>
                   <td class="text-center">
-                     <a  href="<%base_url('view_rejection_details/') %><%$u->id %>/<%$u->customer_part_id %>/add">
-                     <i class="ti ti-edit"></i>
-                     </a>
+                     <%if checkGroupAccess("p_q_molding_production","update","No")%>
+                        <a  href="<%base_url('view_rejection_details/') %><%$u->id %>/<%$u->customer_part_id %>/add">
+                        <i class="ti ti-edit"></i>
+                        </a>
+                     <%else%>
+                        <%display_no_character()%>
+                     <%/if%>
                   </td>
                   <td class="text-center">
-                     <a  href="<%base_url('view_downtime_details/') %><%$u->id %>/<%$u->customer_part_id %>/add">
-                     <i class="ti ti-edit"></i>
-                     </a>
+                     <%if checkGroupAccess("p_q_molding_production","update","No")%>
+                        <a  href="<%base_url('view_downtime_details/') %><%$u->id %>/<%$u->customer_part_id %>/add">
+                        <i class="ti ti-edit"></i>
+                        </a>
+                     <%else%>
+                        <%display_no_character()%>
+                     <%/if%>
                   </td>
                   <td>
                      <%if ($u->status == "pending") %>
-                     <button type="button" class="btn btn-danger float-left "
-                        data-bs-toggle="modal" data-bs-target="#acceptReject<%$i %>">
-                     Accept/Reject </button>
+                        <%if checkGroupAccess("p_q_molding_production","update","No")%>
+                           <button type="button" class="btn btn-danger float-left "
+                              data-bs-toggle="modal" data-bs-target="#acceptReject<%$i %>">
+                           Accept/Reject </button>
+                        <%else%>
+                           <%display_no_character()%>
+                        <%/if%>
                      <%else %>
                      Completed
                      <%/if%>

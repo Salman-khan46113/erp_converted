@@ -23,9 +23,11 @@
         <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
         <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
         <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button> *%>
+        <%if (checkGroupAccess("group_master","add","No")) %>
         <button type="button" class="btn btn-seconday" data-bs-toggle="modal" data-bs-target="#addPromo" title="Add process">
        <i class="ti ti-plus"></i>
         </button>
+        <%/if%>
 
       </div>
       <div class="modal fade" id="addPromo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -78,7 +80,7 @@
             <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="process">
               <thead>
                  <tr>
-                    <th>Sr No</th>
+                    <!-- <th>Sr No</th> -->
                     <th>Group Name</th>
                     <th>Group Code</th>
                     <th>Status</th>
@@ -90,11 +92,12 @@
                       <%assign var='i' value= 1 %>
                       <%foreach from=$groups item=u %>
                      <tr>
-                        <td><%$i %></td>
+                        <!-- <td><%$i %></td> -->
                         <td><a href="<%base_url('group_menu')%>?id=<%$u['group_master_id']%>"><%$u['group_name'] %></a></td>
                         <td><%$u['group_code'] %></td>
                         <td><%$u['status'] %></td>
                         <td>
+                          <%if (checkGroupAccess("group_master","update","No")) %>
                         	<a type="button" class="" data-bs-toggle="modal" data-bs-target="#updateGroup<%$i %>" title="Edit">
 					       		<i class="ti ti-edit edit-part" ></i>
 					        </a>
@@ -137,6 +140,9 @@
 						               </div>
 						            </div>
 						         </div>
+                     <%else%>
+                   <%display_no_character("")%>
+                     <%/if%>
                         </td>
                      </tr>
                   <%assign var='i' value=$i+1 %>

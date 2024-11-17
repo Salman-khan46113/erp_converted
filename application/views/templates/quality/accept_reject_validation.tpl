@@ -56,8 +56,10 @@
       </nav>
 
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-        <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-        <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%if checkGroupAccess("accept_reject_validation","export","No")%>
+          <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+          <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%/if%>
         <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
         <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
       </div>
@@ -103,8 +105,15 @@
                           <%if ($isMultiClient == "true") %>
                           <td><%$t->delivery_unit %></td>
                           <%/if%>
-                          <td><a href="<%base_url('inwarding_details_accept_reject/') %><%$t->id %>/<%$t->po_id %>"
-                             class="btn btn-<%if ($t->status == "accept") %>success<%else%>danger <%/if%>" href="">Accept / Reject Details</a></td>
+                          <td>
+                            <%if checkGroupAccess("accept_reject_validation","update","No")%>
+                              <a href="<%base_url('inwarding_details_accept_reject/') %><%$t->id %>/<%$t->po_id %>"
+                             class="btn btn-<%if ($t->status == "accept") %>success<%else%>danger <%/if%>" href="">Accept / Reject Details</a>
+                             <%else%>
+                              <%display_no_character()%>
+                            <%/if%>
+                          </td>
+                            
                        </tr>
                       <%assign var='i' value=$i+1%>
                       <%/if%>

@@ -15,6 +15,14 @@
                     <span>Pending PO</span>
                 </div>
             </nav>
+             <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5 listing-btn">
+      <%if checkGroupAccess("pending_po","export","No")%>
+      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+      <%/if%>
+      
+      
+    </div>
             <div class="w-100">
                 <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
             </div>
@@ -34,7 +42,7 @@
                                 <th>Download PDF PO</th>
                                 <th>Status</th>
                                 <th>View PO Details</th>
-                                <th>Close PO</th>
+                                <th width="10%">Close PO</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -77,6 +85,7 @@
                                                                 class="btn btn-primary" href="">PO Details</a>
                                                         </td>
                                                         <td>
+                                                            <%if checkGroupAccess("pending_po","update","No")%>
                                                             <button type="button" class="btn btn-danger"
                                                                 data-bs-toggle="modal" data-bs-target="#edit<%$i %>">
                                                                 Close PO
@@ -138,6 +147,10 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
+
+                                                            <%else%>
+                                                                <%display_no_character("")%>
+                                                            <%/if%>
                                                         </td>           
 
                                                         <%assign var='i' value=$i+1%>

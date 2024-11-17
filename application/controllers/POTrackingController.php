@@ -108,6 +108,7 @@ class POTrackingController extends CommonController {
 	
 	public function customer_po_tracking_all() {
 
+		checkGroupAccess("customer_po_tracking_all","list","Yes");
 		$column[] = [
             "data" => "customer_name",
             "title" => "Customer",
@@ -219,9 +220,11 @@ class POTrackingController extends CommonController {
 			}
 		
 			$po_doc .= '<a type="button" data-value = '.$encode_data.' class=" upload_doc" data-bs-toggle="modal"  data-bs-target="#upload_modal"><i class="ti ti-upload"></i></a>';
-			
-			$action = '<a type="button" data-value = '.$encode_data.' class=" edit-part" data-bs-toggle="modal" data-bs-target="#edit_modal"><i class="ti ti-edit"></i> </a>
+			$action = display_no_character("");
+			if(checkGroupAccess("customer_po_tracking_all","update","No")){
+				$action = '<a type="button" data-value = '.$encode_data.' class=" edit-part" data-bs-toggle="modal" data-bs-target="#edit_modal"><i class="ti ti-edit"></i> </a>
 					   <a type="button" data-value = '.$encode_data.' class="close-po" data-bs-toggle="modal" data-bs-target="#close_modal" title="Close PO"><i class="ti ti-circle-x"></i></a>';
+			}
 		
 			$data[$key]['view_details'] = $view_details;
 			$data[$key]['po_doc'] = $po_doc;

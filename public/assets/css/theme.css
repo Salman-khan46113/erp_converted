@@ -1,4 +1,4 @@
-P/* custom css */
+/* custom css */
 .dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody {
     height: calc(100vh - 394px);
 }
@@ -550,6 +550,7 @@ animation: after 2s infinite;
     transform: translate(0%, 0) matrix(1, 0, 0, 1, 0, 0);
 }
 #scrollable_content{
+    width: 100%;
     overflow-y: auto;
     opacity: 1;
     visibility: visible;
@@ -775,9 +776,38 @@ a.nav-active-link {
 
 
 /* modal scroll bar */
-.modal-body {
+/*.modal-body {
     overflow-y: auto;
     max-height: calc(100vh - 162px) !important;
+}*/
+.modal-body  .row{
+    overflow-y: auto;
+    max-height: calc(100vh - 236px) !important
 }
 
+/* datatable body scrolling */
+.dataTables_wrapper .dataTables_scrollBody {
+    min-height: 55vh;
+    max-height: 60vh !important; /* Set desired height */
+    overflow-y: auto;  /* Enable vertical scrolling */
+}
 
+/* site map css */
+
+.site-map-contain .heading h3{
+    color: #000 !important;
+    margin-top: 30px;
+    font-size: 24px;
+    font-family: "gilroymedium" !important;
+    padding-left: 40px !important;
+}
+.menu_overlay.site-map-contain {
+        z-index: 0 !important;
+}
+
+/*global search for parts */
+.parts-global-seacrh{
+    float: right;
+    margin: 11px !important;
+    width: 16% !important;
+}

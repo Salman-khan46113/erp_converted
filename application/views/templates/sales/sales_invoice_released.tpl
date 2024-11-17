@@ -75,8 +75,10 @@
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%if checkGroupAccess("sales_invoice_released","export","No") %>
+          <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+          <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%/if%>
       <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
       <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
     </div>
@@ -148,6 +150,8 @@
                                                         <td>
                                                             <%if $c->status != "pending"%>
                                                             <a class="" href="<%$base_url%>view_e_invoice_by_id/<%$c->id%>"><i class="ti ti-eye"></i></a>
+                                                            <%else%>
+                                                                <%display_no_character("")%>
                                                             <%/if%>
                                                         </td>
                                                         <td><%$c->status%></td>
@@ -158,12 +162,13 @@
                                                         
                                                         <td><%number_format($c->sales_total, 2)%></td>
                                                         <td>
-                                                            
-                                                            <%if $c->status != "Cancelled" && (empty($c->Status) || $c->Status == "CANCELLED")%>
-                                                            <a type="button" class="" data-bs-toggle="modal" data-bs-target="#cancelInvoice<%$srNo%>"><i class="ti ti-circle-x"></i></a>&nbsp;
-                                                            <%/if%>
-                                                            <%if $c->status == "pending"%>
-                                                            <a type="button" data-bs-toggle="modal" class="" data-bs-target="#deleteInvoice<%$srNo%>"><i class="ti ti-trash"></i></a>
+                                                            <%if checkGroupAccess("sales_invoice_released","update","No")%>
+                                                                <%if $c->status != "Cancelled" && (empty($c->Status) || $c->Status == "CANCELLED")%>
+                                                                <a type="button" class="" data-bs-toggle="modal" data-bs-target="#cancelInvoice<%$srNo%>"><i class="ti ti-circle-x"></i></a>&nbsp;
+                                                                <%/if%>
+                                                                <%if $c->status == "pending"%>
+                                                                <a type="button" data-bs-toggle="modal" class="" data-bs-target="#deleteInvoice<%$srNo%>"><i class="ti ti-trash"></i></a>
+                                                                <%/if%>
                                                             <%/if%>
 
                                                             <div class="modal fade" id="cancelInvoice<%$srNo%>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -227,10 +232,14 @@
                                                                     </form>
                                                                 </div>
                                                             </div>
+                                                            <%if checkGroupAccess("sales_invoice_released","update","No")%>
                                                             <%if ($c->rejection_invoice_id == '' && $c->status =='lock') %>
                                                                 <a type="button" href="<%base_url("rejection_invoices/")%><%$c->id%>" class="" title="Generate Credit Note"><i class="ti ti-credit-card-refund"></i></a>
                                                             <%else if ($c->rejection_invoice_id > 0) %>
                                                                 <a type="button" href="<%base_url("view_rejection_sales_invoice_by_id/")%><%$c->rejection_invoice_id%>" class="" title="View Credit Note"><i class="ti ti-eye"></i></a>
+                                                            <%/if%>
+                                                            <%else%>
+                                                                <%display_no_character("")%>
                                                             <%/if%>
                                                         </td>
                                                     </tr>

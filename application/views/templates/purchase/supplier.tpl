@@ -98,6 +98,7 @@
                               </td>
                               <td><%$s->with_in_state %></td>
                               <td>
+                                 <%if (checkGroupAccess("supplier","update","No")) %>
                                  <a type="button" data-bs-toggle="modal" class=""
                                     data-bs-target="#exampleModal2<%$i %>"> <i
                                     class="ti ti-edit"></i></a>
@@ -345,6 +346,9 @@
                                        </div>
                                     </div>
                                  </div>
+                                 <%else%>
+                                    <%display_no_character("")%>
+                                 <%/if%>
                                  
                               </td>
                            </tr>

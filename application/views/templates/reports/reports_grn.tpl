@@ -16,18 +16,18 @@
       <div class="simplebar-content" >
         <ul class="menu-inner py-1">
             <!-- Dashboard -->
-            <div class="filter-row hide">
+            <div class="filter-row ">
               <li class="nav-small-cap">
-                <span class="hide-menu">Select Month</span>
+                <span class="hide-menu">Supplier</span>
                 <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
               </li>
               <li class="sidebar-item">
                 <div class="input-group">
-                <select required name="created_month" id="months" class="form-control select2">
-                <%foreach $month_data as $key => $val%>
-                <option <%if $month_number[$key] eq $created_month%>selected<%/if%>
-                    value="<%$month_number[$key]%>"><%$val%></option>
-            <%/foreach%>
+                <select required name="created_month" id="supplier_search" class="form-control select2">
+                    <option value="">Selecte Supplier</option>
+                <%foreach $supplier as $key => $val%>
+                    <option value="<%$val->id%>"><%$val->supplier_name%></option>
+                <%/foreach%>
                 </select>
                 </div>
               </li>
@@ -82,9 +82,11 @@
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
+        <%if checkGroupAccess("reports_grn","export","No") %>
         <button type="button" class="btn btn-seconday " data-bs-toggle="modal" data-bs-target="#exportForTally">Export For Tally</button>
       <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
       <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+      <%/if%>
       <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
       <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
     </div>

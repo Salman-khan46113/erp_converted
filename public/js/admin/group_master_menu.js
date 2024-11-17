@@ -32,6 +32,7 @@ $(document).ready(function() {
                         toastr.success(res.message);
                         setTimeout(() => {
                             window.location.href = base_url+"/group_master";
+                            // window.location.reload();
                         }, 1000);
                     } else {
                         // Show error message

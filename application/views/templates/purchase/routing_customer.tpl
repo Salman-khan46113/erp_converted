@@ -17,6 +17,13 @@
                 <span>Customer Routing</span>
             </div>
         </nav>
+          <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5 listing-btn">
+            <%if checkGroupAccess("routing_customer","export","No")%>
+                <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+                <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+            <%/if%>
+           
+        </div>
         <div class="w-100">
             <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
         </div>
@@ -42,8 +49,12 @@
                         <td><%$poo->part_number %></td>
                         <td><%$poo->part_description %></td>
                         <td>
+                            <%if checkGroupAccess("routing_customer","add","No")%>
                             <a class="btn btn-primary" href="<%base_url('addrouting_customer_subcon/') %><%$poo->id %>">Add
                                         Routing</a>
+                            <%else%>
+                                <%display_no_character()%>
+                            <%/if%>
                         </td>
                     </tr>
                     <%assign var="i" value=$i+1%>

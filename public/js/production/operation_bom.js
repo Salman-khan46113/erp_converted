@@ -71,7 +71,7 @@ const page = {
     },
     formValidation: function(){
     	let that = this;
-    	$(".update_operations_bom_output,.add_operations_bom,.add_operations_bom").submit(function(e){
+    	$(".update_operations_bom_output,.add_operations_bom,.add_customer_bom").submit(function(e){
         e.preventDefault();
         var href = $(this).attr("action");
         var id = $(this).attr("id");

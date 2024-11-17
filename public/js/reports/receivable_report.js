@@ -40,7 +40,10 @@ const page = {
                         if (success == 1) {
                             toastr.success(msg);
                             setTimeout(function(){
-                                window.location.reload();
+                                // window.location.reload();
+                                 table.destroy(); 
+                                that.dataTable();
+                                 myModal.hide();
                             },1000);
 
                         } else {

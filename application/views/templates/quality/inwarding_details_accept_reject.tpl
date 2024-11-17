@@ -69,10 +69,10 @@
                </div>
                <div class="tgdp-rgt-tp-sect">
                   <p class="tgdp-rgt-tp-ttl">Software Calculated Amount</p>
-                  <p class="tgdp-rgt-tp-txt"><%$actual_price %></p>
+                  <p class="tgdp-rgt-tp-txt"><%$inwarding_data[0]->invoice_amount %></p>
                </div>
                <div class="tgdp-rgt-tp-sect">
-                  <p class="tgdp-rgt-tp-ttl">Invoice Amount Validate Status<</p>
+                  <p class="tgdp-rgt-tp-ttl">Invoice Amount Validate Status</p>
                   <p class="tgdp-rgt-tp-txt"><%$status %></p>
                </div>
                <div class="col-lg-12">
@@ -222,9 +222,22 @@
             </div>
          </div>
       </div>
-      <div class="card p-0 mt-4 table-container">
+      <div class="card p-0 mt-4 ">
+         <div class="tabTitle">
+          <h2 id="cc_sh_sys_static_field_3">
+                    <span>Parts</span>
+                    <span style="display:none;position:absolute;left:0;right:0;text-align:center;top: 19px;"
+                        id="ajax_loader_childModule_stock_intward_details">
+                        <i class="fa fa-refresh fa-spin-light fa-1x fa-fw"></i>
+                    </span>
+
+                </h2>
+                <input type="text" name="reason" placeholder="Filter Search" class="form-control parts-global-seacrh" id="serarch-filter-input" fdprocessedid="bxkoib">
+               
+                
+            </div>   
          <div class="table-responsive text-nowrap ">
-            <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped scrollable" style="border-collapse: collapse;" border-color="#e1e1e1" id="inwarding_details_accept_reject">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped scrollable scrollable-seachable" style="border-collapse: collapse;" border-color="#e1e1e1" id="inwarding_details_accept_reject">
                <thead>
                   <tr>
                      <!--<th>Sr No</th>-->
@@ -539,7 +552,7 @@
                   <%/if%>
                </tbody>
             </table>
-            
+            </div>
          </div>
       </div>
       <!--/ Responsive Table -->

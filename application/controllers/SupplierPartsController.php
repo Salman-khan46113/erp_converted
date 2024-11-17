@@ -185,7 +185,7 @@ class SupplierPartsController extends CommonController
 
 	public function _child_part_view($filter_child_part_id)
 	{
-
+		checkGroupAccess("child_part_view","list","Yes");
 		if (isset($filter_child_part_id)) {
 			$data['filter_child_part_id'] = $filter_child_part_id;
 		} else {
@@ -317,7 +317,7 @@ class SupplierPartsController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([[0, 'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,1500], [10,50,100,200,500,1000,1500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
         // $ajax_json['teacher_data'] = $this->session->userdata();
@@ -449,7 +449,7 @@ class SupplierPartsController extends CommonController
 	 */
 	public function child_parts($part_id_selected = null)
 	{
-		// pr($_POST,1);
+		checkGroupAccess("child_parts","list","Yes");
 		$data['part_select_list'] = $this->SupplierParts->readSupplierPartsOnly();
 		if(empty($part_id_selected)){
 			$part_id_selected = $this->input->post("part_id_selected");
@@ -496,6 +496,7 @@ class SupplierPartsController extends CommonController
 	 */
 	public function stock_down()
 	{
+		checkGroupAccess("stock_down","list","Yes");
 		$data['child_part'] = $this->SupplierParts->readSupplierParts();
 		$data['supplier'] = $this->Crud->read_data("supplier");
 		$data['rejection_flow'] = $this->Crud->read_data("rejection_flow");
@@ -518,7 +519,8 @@ class SupplierPartsController extends CommonController
 	 */
 	public function stock_up()
 	{
-
+		checkGroupAccess("stock_up","list","Yes");
+		// pr($this->db->last_query(),1);
 		$data['child_part'] = $this->SupplierParts->readSupplierParts();
 		$unit_id = $this->Unit->getSessionClientId();
 		$data['stock_changes'] = $this->Crud->customQuery("

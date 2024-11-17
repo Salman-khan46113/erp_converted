@@ -207,7 +207,7 @@
                                 <%$poo->revision_remark %>
                             </td>
                             <td>
-                                <%$poo->revision_date %>
+                                <%defaultDateFormat($poo->revision_date) %>
                             </td>
                             <td>
                                 <%$poo->part_number %>

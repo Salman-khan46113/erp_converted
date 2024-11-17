@@ -635,7 +635,7 @@ public function get_po_sales_parts()
 {
 	$po_id = $this->input->post('id');
 	$salesno = $this->input->post('salesno');
-
+	
 	$customer_tracking_parts = $this->Crud->get_data_by_id("parts_customer_trackings", $po_id, 'customer_po_tracking_id');
 	//$customer_part = $this->Crud->get_data_by_id("customer_part", $customer_tracking_parts[0]->part_id,'id');
 
@@ -714,13 +714,21 @@ public function view_po_by_supplier_id()
 		$supplier_id = $this->uri->segment('2');
 		$data['supplier_data'] = $this->Crud->get_data_by_id("supplier", $supplier_id, "id");
 		$data['new_po'] = $this->Crud->customQuery("SELECT * FROM new_po WHERE clientId = ".$this->Unit->getSessionClientId()." AND supplier_id = ".$supplier_id);
-
+		
+		foreach ($data['new_po'] as $key => $value) {
+			$data['new_po'][$key]->expired = "no";
+			if($value->expiry_po_date < date('Y-m-d')){
+				$data['new_po'][$key]->expired = "yes";
+			}
+		}
+		$data['current_date'] = date("Y-m-d");
 		// $this->load->view('header');
 		$this->loadView('purchase/view_po_by_supplier_id', $data);
 		// $this->load->view('footer');
 	}
 	public function pending_po()
 	{
+		checkGroupAccess("pending_po","list","Yes");
 		$data['new_po'] = $this->Crud->customQuery("
 			SELECT np.*,s.supplier_name as supplier_name FROM new_po as np
 			LEFT JOIN supplier as s ON s.id = np.supplier_id 
@@ -733,7 +741,8 @@ public function view_po_by_supplier_id()
 	
 	public function expired_po()
 	{
-		$data['new_po'] = $this->Crud->customQuery("SELECT * FROM new_po WHERE clientId = " . $this->Unit->getSessionClientId() . " AND status in ('pending','expired')");
+		checkGroupAccess("expired_po","list","Yes");
+		$data['new_po'] = $this->Crud->customQuery("SELECT * FROM new_po WHERE clientId = " . $this->Unit->getSessionClientId() . " AND status in ('pending','expired','accept')");
 		foreach ($data['new_po'] as $key => $s) {
 			if ($s->status=='expired' || $s->expiry_po_date < date('Y-m-d')) {    
                 if($s->status=='pending'){
@@ -750,6 +759,7 @@ public function view_po_by_supplier_id()
 
 public function closed_po()
 {
+	checkGroupAccess("closed_po","list","Yes");
 	$data['new_po'] = $this->Crud->customQuery("SELECT * FROM new_po WHERE clientId = " . $this->Unit->getSessionClientId() . " AND status = 'accept_closed' ");
 
 	// $this->load->view('header');
@@ -758,6 +768,7 @@ public function closed_po()
 }
 public function rejected_po()
 {
+	checkGroupAccess("rejected_po","list","Yes");
 	$data['new_po'] = $this->Crud->customQuery("SELECT * FROM new_po WHERE clientId =
 		" . $this->Unit->getSessionClientId() . " AND status = 'pending' AND expiry_po_date < '".date('Y-m-d')."'");
 		// $this->load->view('header');
@@ -766,6 +777,7 @@ public function rejected_po()
 	}
 	public function new_po_list_supplier()
 	{
+		checkGroupAccess("new_po_list_supplier","list","Yes");
 		$new_po_id = $this->uri->segment('2');
 		$data['supplier_list'] = $this->Crud->read_data("supplier");
 		// $this->load->view('header');

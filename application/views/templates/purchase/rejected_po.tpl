@@ -16,6 +16,14 @@
                 <span>Rejected PO</span>
             </div>
         </nav>
+        <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5 listing-btn">
+      <%if checkGroupAccess("rejected_po","export","No")%>
+      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+      <%/if%>
+      
+      
+    </div>
         <div class="w-100">
             <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
         </div>
@@ -26,7 +34,7 @@
                 <table class="table table-striped" style="border-collapse: collapse;" id="rejected_po_view">
                 <thead>
                 <tr>
-                    <th>Sr. No.</th>
+                    <!-- <th>Sr. No.</th> -->
                     <th>PO Number</th>
                     <th>PO Date</th>
                     <th>Created Date</th>
@@ -41,7 +49,7 @@
                     <%foreach from=$new_po item=s %>
                         <%if ($new_po[0]->expiry_po_date < date('Y-m-d')) %>
                         <tr>
-                            <td><%$i %></td>
+                            <!-- <td><%$i %></td> -->
                             <td><%$s->po_number %></td>
                             <td><%defaultDateFormat($s->po_date) %></td>
                             <td><%defaultDateFormat($s->created_date) %></td>

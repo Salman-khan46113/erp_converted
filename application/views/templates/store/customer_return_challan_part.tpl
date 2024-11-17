@@ -19,6 +19,7 @@
                 <div class="row">
                     <div class="col-12">
                         <!-- /.card -->
+                        <%if checkGroupAccess("challan_part_return","add","No")%>
                         <div class="card mt-4">
                             <div class="card-header">
                             	 <form action="<%base_url('generate_customer_challan_return_part') %>" method="POST"  class="generate_customer_challan_return_part custom-form" id="generate_customer_challan_return_part">
@@ -95,6 +96,7 @@
                                 </div>
                             </div>
                         </div>
+                        <%/if%>
                         <div class="card mt-4">
 
                             <div class="">

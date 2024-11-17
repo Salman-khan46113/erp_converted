@@ -30,7 +30,7 @@
 
 
       <!-- Main content -->
-      <div class="card p-0 mt-4">
+      <div class="card p-0 mt-4"> 
            <div class="">
               <div class="row">
                  <div class="col-12">
@@ -250,8 +250,21 @@
                     <!-- /.col -->
                  </div>
       <div class="card p-0 mt-4">
+        <div class="tabTitle position-relative">
+                <h2 id="cc_sh_sys_static_field_3">
+                    <span>PO Parts</span>
+                    <span style="display:none;position:absolute;left:0;right:0;text-align:center;top: 19px;"
+                        id="ajax_loader_childModule_stock_intward_details">
+                        <i class="fa fa-refresh fa-spin-light fa-1x fa-fw"></i>
+                    </span>
+
+                </h2>
+                <input type="text" name="reason" placeholder="Filter Search" class="form-control parts-global-seacrh" id="serarch-filter-input" fdprocessedid="bxkoib">
+               
+                
+            </div>
                  <div class="table-responsive-border">
-                 <table  width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped scrollable" style="border-collapse: collapse;" border-color="#e1e1e1" id="view_add_challan">
+                 <table  width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped scrollable scrollable-seachable" style="border-collapse: collapse;" border-color="#e1e1e1" id="view_add_challan">
                  <thead>
                     <tr>
                        <!-- <th>Sr No</th> -->
@@ -266,7 +279,7 @@
                        <th class="text-center">Action </th>
                     </tr>
                  </thead>
-                 <tbody  style="max-height: 20em;">
+                 <tbody  >
                       <%if ($po_parts) %>
                            <%assign var="i" value=1%>
                           <%assign var="final_po_amount" value=0%>
@@ -376,7 +389,7 @@
                        <div class="form-group">
                        <label> Inwarding Qty </label><span class="text-danger">*</span>
                        <input type="text"  step="any"
-                       data-max="<%$p->pending_qty %>"
+                       data-max="<%$p->pending_qty+$grn_details_data[0]->qty %>"
                           name="qty"
                           value="<%$grn_details_data[0]->qty %>"
                           class="form-control required-input onlyNumericInput">
@@ -434,12 +447,13 @@
                        <td><%$child_part_data[0]->part_number %></td>
                        <td><%$child_part_data[0]->part_description %></td>
                        <td><%$uom_data[0]->uom_name %></td>
+                       <td><%$p->gst_structure_data[0]->code %></td>
                        <td><%$p->qty %></td>
                        <td><%$p->pending_qty %></td>
                        <td><%$part_rate_new %></td>
                        <td >
                        <%if ($inwarding_data[0]->status == "accepted") %>
-                              <%$grn_details_data[0]->qty %>
+                              <%$grn_details_data[0]->qty %>234
                        <%else if ($data_present == "yes") %>
                               <%$grn_details_data[0]->qty %>
                        <%else %>

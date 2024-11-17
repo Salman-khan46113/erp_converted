@@ -19,8 +19,10 @@
       </nav>
 
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
+      <%if checkGroupAccess("molding_stock_transfer","export","No")%>
         <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
         <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%/if%>
        
         <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal"
            data-bs-target="#addPromo">

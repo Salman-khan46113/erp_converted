@@ -110,7 +110,7 @@
                                  </button>
                               </div>
                               <div class="modal-body">
-                                 <form action="<%base_url('add_operations_bom') %>" method="POST" id="add_operations_bom" class="add_operations_bom custom-form">
+                                 <form action="<%base_url('add_operations_bom') %>" method="POST" id="add_customer_bom" class="add_customer_bom custom-form">
                                     <div class="row">
                                        <div class="col-lg-12">
                                           <div class="form-group">
@@ -164,7 +164,7 @@
                         <tbody>
                            
                               <%assign var='i' value=1%>
-                              
+                              <%if $operations_bom%>
                                 <%foreach from=$operations_bom item='po' %>
                                
                            <tr>
@@ -236,6 +236,7 @@
                               
                                <%assign var='i' value=$i+1%>
                               <%/foreach%>
+                              <%/if%>
                              
                         </tbody>
                      </table>

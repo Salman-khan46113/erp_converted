@@ -19,6 +19,7 @@ class MasterController extends CommonController {
 	
 	public function client()
 	{
+		checkGroupAccess("client","list","Yes");
 		$data['client_list'] = $this->Crud->read_data_acc("client");
 		$session_client_unit = $this->session->userdata('clientUnit');
 		$data['filter_client'] = $session_client_unit;
@@ -161,6 +162,7 @@ class MasterController extends CommonController {
 	*/
 	public function uom()
 	{
+		checkGroupAccess("uom","list","Yes");
 		$data['uom'] = $this->UomModel->getAllUOM();
 		// $this->load->view('header');
 		$this->loadView('admin/uom', $data);
@@ -328,6 +330,7 @@ class MasterController extends CommonController {
 	
 	public function transporter()
 	{
+		
 		$data['transporter'] = $this->Common_admin_model->get_all_data("transporter");
 		$this->load->view('header.php');
 		$this->load->view('transporter.php', $data);
@@ -385,6 +388,7 @@ class MasterController extends CommonController {
 
 	public function consignee()
 	{
+		checkGroupAccess("consignee","list","Yes");
 		$data['consignee_list'] = $this->Crud->CustomQuery("SELECT c.id as c_id, c.*,a.* FROM consignee c, 
 			address_master a where c.address_id = a.id");
 		// $this->load->view('header');

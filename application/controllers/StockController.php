@@ -34,8 +34,8 @@ class StockController extends CommonController
 
 	public function part_stocks_view($filter_part_id = 0, $filter_client='') {
 
-		
-			$data['child_part_list'] = $this->SupplierParts->readSupplierParts();
+		checkGroupAccess("part_stocks","list","Yes");
+		$data['child_part_list'] = $this->SupplierParts->readSupplierParts();
 			
 		$stock_column_name = $this->Unit->getStockColNmForClientUnit();
 
@@ -281,31 +281,49 @@ class StockController extends CommonController
 			$production_stocks = $value[$sheet_prod_column_name];
 			$plastic_prod_details = $value[$plastic_prod_column_name];
 			// pr($plastic_prod_details,1);
-			if($value['stock'] > 0){
+			// if($value['stock'] > 0){
 				$stock_temp = base64_encode(json_encode($value)); 
-				$stock_temp_html = '<button type="button" class="btn btn-primary edit-fg" data-bs-toggle="modal"  data-value='.$stock_temp.' data-bs-target="#storeToStore">
+				if(checkGroupAccess("part_stocks","update","No")){
+					$stock_temp_html = '<button type="button" class="btn btn-primary edit-fg" data-bs-toggle="modal"  data-value='.$stock_temp.' data-bs-target="#storeToStore">
 											'.$value['stock'].'
 											</button>';
-			}else{
-				$stock_temp_html = 0;
-			}
+				}else{
+					$stock_temp_html = $value['stock'];
+				}
+			// }else{
+			// 	$stock_temp_html = 0;
+			// }
 			if($value[$stock_column_name] > 0 && ($role == "Admin" || $role=="stores")){
 				$fg_data = base64_encode(json_encode($value)); 
-				$transfer_fg = '<button type="button" class="btn btn-primary fg_data_edit" data-bs-toggle="modal"  data-value='.$fg_data.' data-bs-target="#fgtransfer">
+				if(checkGroupAccess("part_stocks","update","No")){
+					$transfer_fg = '<button type="button" class="btn btn-primary fg_data_edit" data-bs-toggle="modal"  data-value='.$fg_data.' data-bs-target="#fgtransfer">
 											Transfer FG Stock
 											</button>';
+				}else{
+					$transfer_fg = display_no_character();
+				}
+			}else{
+				$transfer_fg = display_no_character();
 			}
 			if($value[$sheet_prod_column_name] > 0 && ($role == "Admin")){
 				$product__data = base64_encode(json_encode($value)); 
-				$production_stocks = '<button type="button" class="btn btn-primary product-store" data-bs-toggle="modal" data-bs-target="#prodToStore" data-value='.$product__data.'>
+				if(checkGroupAccess("part_stocks","update","No")){
+					$production_stocks = '<button type="button" class="btn btn-primary product-store" data-bs-toggle="modal" data-bs-target="#prodToStore" data-value='.$product__data.'>
 										  '.$value[$sheet_prod_column_name].'
 										  </button>';
+				}else{
+					$production_stocks = $value[$sheet_prod_column_name];
+				}
 			}
 			if($value[$plastic_prod_column_name] > 0 && ($role == "Admin")){
 				$plastic_prod_column_name_data = base64_encode(json_encode($value)); 
-				$plastic_prod_details = '<button type="button" class="btn btn-primary product-store-plas" data-bs-toggle="modal" data-bs-target="#prodToStorePlastic" data-value='.$plastic_prod_column_name_data.'>
+				if(checkGroupAccess("part_stocks","update","No")){
+					$plastic_prod_details = '<button type="button" class="btn btn-primary product-store-plas" data-bs-toggle="modal" data-bs-target="#prodToStorePlastic" data-value='.$plastic_prod_column_name_data.'>
 										'.$value[$plastic_prod_column_name].'
 										</button>';
+				}else{
+					$plastic_prod_details = $value[$plastic_prod_column_name];
+				}
 			}
 			$data[$key][$sheet_prod_column_name] = $production_stocks;
 			$data[$key]['stock_html'] = $stock_temp_html;
@@ -517,29 +535,55 @@ class StockController extends CommonController
 
 	public function sharing_issue_request_pending()
 	{
+		checkGroupAccess("sharing_issue_request_store","list","Yes");
 		$unit_id = $this->Unit->getSessionClientId();
+		$unit_where = "";
+		$stock_unit_where = "";
+		if($unit_id > 0){
+			$unit_where = " and s.clientId = ".$unit_id;
+			$stock_unit_where = "AND stock.clientId = " . $unit_id;
+		}
 		$data['sharing_issue_request'] = $this->Crud->customQuery("
 			SELECT s.* ,cp.part_number as part_number,cp.part_description as part_description,stock.stock as stock,cp.thickness as thickness,cp.weight as weight,cp.sharing_qty as sharing_qty
 			FROM sharing_issue_request  s
 			LEFT JOIN child_part cp ON cp.id = s.child_part_id
-			LEFT JOIN child_part_stock stock ON cp.id = stock.childPartId AND stock.clientId = " . $unit_id. "
-			WHERE s.status = 'pending' and s.clientId = ".$unit_id
+			LEFT JOIN child_part_stock stock ON cp.id = stock.childPartId  ".$stock_unit_where."
+			WHERE s.status = 'pending'  ".$unit_where."
+			ORDER BY s.id DESC;"
 		);
  		$data['child_part'] = $this->SupplierParts->readSupplierPartsOnly();
+ 		$date_filter = date("01/m/Y") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
+
 		$this->loadView('store/sharing_issue_request_store', $data);
 	}
 
 	public function sharing_issue_request_store_completed()
 	{
+		checkGroupAccess("sharing_issue_request_store_completed","list","Yes");
 		$unit_id = $this->Unit->getSessionClientId();
+		$unit_where = "";
+		$stock_unit_where = "";
+		if($unit_id > 0){
+			$unit_where = " and s.clientId = ".$unit_id;
+			$stock_unit_where = "AND stock.clientId = " . $unit_id;
+		}
 		//$data['operations_bom'] = $this->Crud->read_data("operations_bom");
 		$data['sharing_issue_request'] = $this->Crud->customQuery("
 			SELECT s.* ,cp.part_number as part_number,cp.part_description as part_description,stock.stock as stock,cp.thickness as thickness,cp.weight as weight,cp.sharing_qty as sharing_qty
 			FROM sharing_issue_request  s
 			LEFT JOIN child_part cp ON cp.id = s.child_part_id
-			LEFT JOIN child_part_stock stock ON cp.id = stock.childPartId AND stock.clientId = " . $unit_id. "
-			WHERE s.status = 'completed' and s.clientId = ".$unit_id
+			LEFT JOIN child_part_stock stock ON cp.id = stock.childPartId ".$stock_unit_where."
+			WHERE s.status = 'completed'  ".$unit_where."
+			ORDER BY s.id DESC;"
 		);
+		$date_filter = date("01/m/Y") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
+
 		//$data['child_part'] = $this->SupplierParts->readSupplierPartsOnly();
 		$this->loadView('store/sharing_issue_request_store_completed', $data);
 	}

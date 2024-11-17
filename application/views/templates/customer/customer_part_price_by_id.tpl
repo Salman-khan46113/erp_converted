@@ -54,7 +54,7 @@ Customer Master"><i class="ti ti-arrow-left"></i></a>
                             </div>
                             <!-- Modal -->
                             <div class="modal fade" id="add_customer_part" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="exampleModalLabel">Add </h5>
@@ -181,7 +181,7 @@ Customer Master"><i class="ti ti-arrow-left"></i></a>
 </div>
 
 <div class="modal fade" id="revision_part" tabindex=" -1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-<div class="modal-dialog " role="document">
+<div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
         <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">Update Operation</h5>

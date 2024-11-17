@@ -356,6 +356,7 @@
                               <th>Sr No</th>
                               <th>Part Number</th>
                               <th>Part Description</th>
+                              <th>Part Rate</th>
                               <th>Qty </th>
                               <th>Process</th>
                               <th>HSN</th>
@@ -377,6 +378,7 @@
                               <td><%$i %></td>
                               <td><%$child_part_data[0]->part_number %></td>
                               <td><%$child_part_data[0]->part_description %></td>
+                              <td><%$child_part_data[0]->store_stock_rate %></td>
                               <td><%$p->qty %></td>
                               <td><%$p->process %></td>
                               <td><%$p->hsn %></td>

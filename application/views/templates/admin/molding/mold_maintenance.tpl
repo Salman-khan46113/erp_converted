@@ -66,14 +66,18 @@
       </nav>
 
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-        <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-        <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
-        <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
-        <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
-
+        <%if (checkGroupAccess("mold_maintenance","add","No")) %>
         <button type="button" class="btn btn-seconday" data-bs-toggle="modal" data-bs-target="#addPromo1" title="Add Mold Master">
           <i class="ti ti-plus"></i>
         </button>
+        <%/if%>
+        <%if (checkGroupAccess("mold_maintenance","export","No")) %>
+        <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+        <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%/if%>
+        <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
+        <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
+        
       </div>
 
       <div class="modal fade" id="addPromo1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -178,9 +182,13 @@
                   <td><%$u->target_over_life %></td>
                   <td><%$u->target_life %></td>
                   <td>
+                    <%if (checkGroupAccess("mold_maintenance","update","No")) %>
                     <button type="button" class="btn no-btn edit-part" data-bs-toggle="modal"data-value="<%base64_encode(json_encode($u))%>" data-bs-target="#addProm">
                       <i class="ti ti-edit"></i>
                     </button>
+                    <%else%>
+                      <%display_no_character("")%>
+                    <%/if%>
                    
                   </td>
                 </tr>

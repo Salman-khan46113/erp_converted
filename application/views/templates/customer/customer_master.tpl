@@ -55,7 +55,12 @@
 </div>
 </nav>
 <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-    <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
+    <%if checkGroupAccess("customer_master","import","No")%>
+    <a class="btn btn-seconday " title="BOM Operation Template export" href="<%base_url('operation_bom_template_excel_export')%>" ><i class="ti ti-download" ></i></a>
+    <button type="button" class="btn btn-seconday" data-bs-toggle="modal" data-bs-target="#importCustomerPartsOnly" title="BOM Operation  Import"><i class="ti ti-upload" ></i>
+    </button>
+    <%/if%>
+    
     <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
     <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
 </div>
@@ -64,7 +69,60 @@
 </div>
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
-        
+        <!-- Import Modal -->
+<div class="modal fade" id="importCustomerPartsOnly" tabindex="-1" role="dialog"
+   aria-labelledby="exampleModalLabel" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Import BOM Data</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"
+               aria-label="Close">
+            
+            </button>
+         </div>
+         <div class="modal-body">
+            <form action="<%base_url('import_operation_bom') %>" 
+               method="POST" enctype='multipart/form-data' id="import_operation_bom" class="import_operation_bom custom-form">
+               <div class="row">
+                  <div class="col-lg-10">
+                    <div class="form-group">
+                     <label for="contractorName">Customer</label><span
+                        class="text-danger">*</span>
+                     <select name="customer_id" 
+                        class="form-control select2 required-input">
+                        <option value="">Select</option>
+                        <%if ($customers) %>
+                            <%foreach from=$customers item='c' %>
+                        <option value="<%$c->id %>">
+                           <%$c->customer_name %>
+                        </option>
+                        <%/foreach%>
+                        <%/if%>
+                     </select>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-lg-10">
+                     <div class="form-group">
+                        <label for="po_num">Upload File</label><span
+                           class="text-danger">*</span>
+                        <input type="file" name="uploadedDoc"  class="form-control required-input" id="exampleuploadedDoc" placeholder="Upload File" aria-describedby="uploadDocHelp">
+                     </div>
+                  </div>
+               </div>
+         </div>
+         <div class="modal-footer">
+         <button type="button" class="btn btn-secondary"
+            data-dismiss="modal">Cancel</button>
+         <button type="submit" class="btn btn-primary">Import</button>
+         </div>
+         </form>
+      </div>
+   </div>
+</div>
+<!-- Import end -->
 
         <!-- Main content -->
         <section class="content">
@@ -226,4 +284,7 @@
     </div>
     <!-- /.content-wrapper -->
 </div>
+<script type="text/javascript">
+    var isPLMEnabled = <%$entitlements.isPLMEnabled|@json_encode%>
+</script>
 <script src="<%$base_url%>/public/js/planning_and_sales/customer_master.js"></script>

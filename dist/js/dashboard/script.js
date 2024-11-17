@@ -5,7 +5,7 @@ var filter_enable =  false;
 var dashbord = {
   init: function(){
     this.initiatePluggin();
-    let tab_name  = "BusinessAnalytics";
+    let tab_name  = $(".dashboard-nav-tab .nav-link").attr("data-tab");//"BusinessAnalytics";
     this.getCurrentWidget(tab_name,'','');
   },
   initiatePluggin: function(){

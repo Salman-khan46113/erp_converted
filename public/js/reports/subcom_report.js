@@ -60,7 +60,7 @@ const page = {
                             var lines = csv.split('\n');
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
-                                values.splice(13, 1);
+                                // values.splice(14, 1);
                                 return values.join(',');
                             });
                             return modifiedLines.join('\n');
@@ -98,7 +98,7 @@ const page = {
                                 }
                                 cell.alignment = alignment;
                             });
-                            row.splice(14, 1);
+                            // row.splice(15, 1);
                         });
                     }
                 },

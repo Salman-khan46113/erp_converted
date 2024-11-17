@@ -352,7 +352,7 @@ class Welcome_model extends CI_Model
         chp.part_description,
         chn.supplier_id, 
         sup.supplier_name,
-        cp.value as part_rate
+        chp.store_stock_rate as part_rate
         ');
         $this->db->from('challan_parts cp');
         $this->db->join('child_part chp', 'cp.part_id = chp.id', 'inner');
@@ -586,6 +586,12 @@ class Welcome_model extends CI_Model
             }
         }
 
+        if ($search_params["date_range_filter"] != "") {
+                $date_filter =  explode((" - "),$search_params["date_range_filter"]);
+                $data['start_date'] = $date_filter[0];
+                $data['end_date'] = $date_filter[1];
+               $this->db->where("STR_TO_DATE(p.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        }
         if (is_array($search_params) && count($search_params) > 0) {
             if ($search_params["value"] != "") {
                 $search = $search_params["value"];
@@ -624,6 +630,12 @@ class Welcome_model extends CI_Model
             if ($condition_arr["order_by"] != "") {
                 $this->db->order_by($condition_arr["order_by"]);
             }
+        }
+        if ($search_params["date_range_filter"] != "") {
+                $date_filter =  explode((" - "),$search_params["date_range_filter"]);
+                $data['start_date'] = $date_filter[0];
+                $data['end_date'] = $date_filter[1];
+               $this->db->where("STR_TO_DATE(p.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
         }
 
         if (is_array($search_params) && count($search_params) > 0) {
@@ -755,6 +767,15 @@ class Welcome_model extends CI_Model
         $result_obj = $this->db->get();
         $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
         return $ret_data;
+    }
+
+
+    public function update_category($update_data= array(),$category_id = ''){
+        $this->db->where('category_id', $category_id);
+        $this->db->update('category', $update_data);
+        $this->db->affected_rows();
+        $affected_rows = $this->db->affected_rows() == 0 ? 1 : $this->db->affected_rows();
+        return $affected_rows;
     }
 
 

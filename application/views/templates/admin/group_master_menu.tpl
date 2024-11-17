@@ -19,8 +19,8 @@
       </nav>
 
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-        <%* <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-        <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <a type='button' class="btn btn-seconday" href="<%base_url('group_master')%>" title="Back To Group Master"><i class="ti ti-arrow-left"></i></a>
+         <%*<button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
         <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
         <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button> *%>
        
@@ -46,7 +46,7 @@
                         <p class="tgdp-rgt-tp-ttl">Status</p>
                         <p class="tgdp-rgt-tp-txt">
                             <%$group_details['status']%>
-                        group_menu</p>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -57,7 +57,7 @@
 		      <div class="card mb-4 ">
 		         <div class="card-body menu-list-block">
 		            <form id="updateGroupMenuRight" class="mb-3" action="javascript:void(0)" method="POST" enctype="multipart/form-data" novalidate="novalidate">
-		               <div class="row">
+		               <div class="row edit-block-contain">
 		               	<input type="hidden" name="group_id" value="<%$group_id%>">
 		               	<%foreach from=$groups_menu key='key' item='menu'%>
 		                  <div class="col-lg-12 ">
@@ -82,12 +82,16 @@
 					                    <label class="right-label-inline" for="eList_1">Update</label>
 					                </div>
 					                <div class="margin-equilize">
-					                	<input type="checkbox" name="menu[access]<%$key%>[access][delete]" class="regular-checkbox" value="Yes" <%if $menu['delete'] eq 'Yes'%>checked="true"<%/if%> >
+					                	<input type="checkbox" name="menu[access<%$key%>][access][delete]" class="regular-checkbox" value="Yes" <%if $menu['delete'] eq 'Yes'%>checked="true"<%/if%> >
 					                    <label class="right-label-inline" for="eList_1">Delete</label>
 					                </div>
 					                <div class="margin-equilize">
 					                	<input type="checkbox" name="menu[access<%$key%>][access][export]" class="regular-checkbox"  value="Yes" <%if $menu['export'] eq 'Yes'%>checked="true"<%/if%> >
 					                    <label class="right-label-inline" for="eList_1">Export</label>
+					                </div>
+					                 <div class="margin-equilize">
+					                	<input type="checkbox" name="menu[access<%$key%>][access][import]" class="regular-checkbox"  value="Yes" <%if $menu['import'] eq 'Yes'%>checked="true"<%/if%> >
+					                    <label class="right-label-inline" for="eList_1">Import</label>
 					                </div>
 					            </div>
 					        </div>
@@ -137,7 +141,7 @@
 	}
 	.menu-form-row .margin-equilize {
 		float: left;
-    	width: 20%;
+    	width: 16.65%;
 	}
 	.menu-form-row .margin-equilize label{
     	font-size: 17px;
@@ -149,10 +153,12 @@
     	height: 15px;
     	cursor: pointer;
 	}
-	.menu-list-block{
-		    max-height: 506px !important;
-    overflow-y: scroll;
-    overflow-x: clip;
+	.menu-list-block .edit-block-contain{
+		overflow-y: auto;
+	    padding: 0 17px;
+	    height: auto;
+	    border-radius: 0px;
+	    max-height: calc(100vh - 485px);
 	}
 
 </style>

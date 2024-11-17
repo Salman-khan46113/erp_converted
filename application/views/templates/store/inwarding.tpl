@@ -4,7 +4,38 @@
 
   <div class="container-xxl flex-grow-1 container-p-y">
    
-
+      <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme filter-popup-block" style="width: 0px;">
+   <div class="app-brand demo justify-content-between">
+      <a href="javascript:void(0)" class="app-brand-link">
+      <span class="app-brand-text demo menu-text fw-bolder ms-2">Filter</span>
+      </a>
+      <div class="close-filter-btn d-block filter-popup cursor-pointer">
+         <i class="ti ti-x fs-8"></i>
+      </div>
+   </div>
+   <nav class="sidebar-nav scroll-sidebar filter-block" data-simplebar="init">
+      <div class="simplebar-content" >
+         <ul class="menu-inner py-1">
+            <!-- Dashboard -->
+            <div class="filter-row">
+               <li class="nav-small-cap">
+                  <span class="hide-menu">Created Date</span>
+                  <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+               </li>
+               <li class="sidebar-item">
+                  <div class="input-group">
+                     <input type="text" name="datetimes" class="dates form-control" id="date_range_filter" />
+                  </div>
+               </li>
+            </div>
+        </ul>
+      </div>
+   </nav>
+   <div class="filter-popup-btn">
+      <button class="btn btn-outline-danger reset-filter">Reset</button>
+      <button class="btn btn-primary search-filter">Search</button>
+   </div>
+</aside>
     <nav aria-label="breadcrumb">
       <div class="sub-header-left pull-left breadcrumb">
         <h1>
@@ -14,14 +45,19 @@
             <em >Inwarding</em></a>
           </h1>
           <br>
-          <span >Part GRN</span>
+          <span >GRN Entry</span>
         </div>
       </nav>
       <!-- <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4> -->
 
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-        <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-        <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+
+        <%if checkGroupAccess("inwarding","export","No")%>
+          <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+          <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%/if%>
+        <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
+      <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
         <!-- <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
         <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button> -->
       </div>
@@ -62,6 +98,8 @@
     var sorting_column = <%$sorting_column%>;
     var api_name =  <%$api_name|json_encode%>;
     var base_url = <%$base_url|json_encode%>;
+    var start_date = <%$start_date|json_encode%>;
+    var end_date = <%$end_date|json_encode%>;
 </script>
 
   <script src="<%$base_url%>public/js/store/inwarding.js"></script>

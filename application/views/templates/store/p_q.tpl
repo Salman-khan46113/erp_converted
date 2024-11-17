@@ -16,7 +16,7 @@
             <!-- Dashboard -->
             <div class="filter-row">
               <li class="nav-small-cap">
-                <span class="hide-menu">Inhouse Part Number / Description</span>
+                <span class="hide-menu">Output Part/Description</span>
                 <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
               </li>
               <li class="sidebar-item">
@@ -26,7 +26,7 @@
                          <%foreach from=$inhouse_parts item=i %>
                                           <option 
                                              
-                                             value="<%$i->part_number %>/<%$i->part_description %>"><%$i->part_number %>/<%$i->part_description %></option>
+                                             value="<%$i%>"><%$i%></option>
                                           <%/foreach%>
                        </select>
                 </div>
@@ -72,12 +72,15 @@
       </div>
    </nav>
    <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
-      
-      <button id="AddProdButton" type="button" class="btn btn-seconday" data-bs-toggle="modal" data-bs-target="#addPromo" title=" Add Production Qty">
-      <i class="ti ti-plus"></i>
-      </button>
+    <%if checkGroupAccess("view_p_q","add","No")%>
+        <button id="AddProdButton" type="button" class="btn btn-seconday" data-bs-toggle="modal" data-bs-target="#addPromo" title=" Add Production Qty">
+        <i class="ti ti-plus"></i>
+        </button>
+      <%/if%>
+      <%if checkGroupAccess("view_p_q","export","No")%>
+        <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+        <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+      <%/if%>
       <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
         <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
    </div>
@@ -126,9 +129,13 @@
                               <td><%$u->rejected_qty %></td>
                               <td>
                                  <%if (!empty($u->onhold_qty)) %>
-                                 <button type="button" class="btn btn-warning float-left "
-                                    data-bs-toggle="modal" data-bs-target="#onhold<%$i %>">
-                                 <%$u->onhold_qty %> </button>
+                                  <%if checkGroupAccess("view_p_q","update","No")%>
+                                     <button type="button" class="btn btn-warning float-left "
+                                        data-bs-toggle="modal" data-bs-target="#onhold<%$i %>">
+                                     <%$u->onhold_qty %> </button>
+                                  <%else%>
+                                      <%$u->onhold_qty %>
+                                  <%/if%>
                                  <%else %>
                                  0
                                  <%/if%>
@@ -241,9 +248,13 @@
                               <td><%$u->status %></td>
                               <td>
                                  <%if ($u->status == "pending") %>
-                                 <button type="button" class="btn btn-danger float-left "
-                                    data-bs-toggle="modal" data-bs-target="#acceptReject<%$i %>">
-                                 Accept/Reject </button>
+                                   <%if checkGroupAccess("view_p_q","update","No")%>
+                                        <button type="button" class="btn btn-danger float-left "
+                                          data-bs-toggle="modal" data-bs-target="#acceptReject<%$i %>">
+                                       Accept/Reject </button>
+                                    <%else%>
+                                      <%display_no_character("")%>
+                                    <%/if%>
                                  <%else %>
                                  Completed
                                  <%/if%>

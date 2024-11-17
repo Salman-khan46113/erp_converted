@@ -41,9 +41,13 @@
                      <td><%$u->rejected_qty %></td>
                      <td>
                         <%if (!empty($u->onhold_qty)) %>
-                        <button type="button" class="btn btn-warning float-left "
-                           data-toggle="modal" data-target="#onhold<%$i %>">
-                        <%$u->onhold_qty %> </button>
+                           <%if checkGroupAccess("view_p_q_molding_production","update","No")%>
+                              <button type="button" class="btn btn-warning float-left "
+                                 data-toggle="modal" data-target="#onhold<%$i %>">
+                              <%$u->onhold_qty %> </button>
+                           <%else%>
+                              <%$u->onhold_qty %>
+                           <%/if%>
                         <%else %>
                            0
                         <%/if%>
@@ -174,20 +178,32 @@
                      <td><%round($total_ppm,2) %></td>
                      <td><%round($total_oee,2) %></td>
                      <td>
-                        <a class="" href="<%base_url('view_rejection_details/')%><%$u->id %>/<%$u->customer_part_id %>/view">
-                        <i class='ti ti-edit'></i>
-                        </a>
+                        <%if checkGroupAccess("view_p_q_molding_production","update","No")%>
+                           <a class="" href="<%base_url('view_rejection_details/')%><%$u->id %>/<%$u->customer_part_id %>/view">
+                           <i class='ti ti-edit'></i>
+                           </a>
+                        <%else%>
+                           <%display_no_character()%>
+                        <%/if%>
                      </td>
                      <td>
-                        <a class="" href="<%base_url('view_downtime_details/')%><%$u->id%>/<%$u->customer_part_id %>/view">
-                        <i class='ti ti-edit'></i>
-                        </a>
+                        <%if checkGroupAccess("view_p_q_molding_production","update","No")%>
+                           <a class="" href="<%base_url('view_downtime_details/')%><%$u->id%>/<%$u->customer_part_id %>/view">
+                           <i class='ti ti-edit'></i>
+                           </a>
+                        <%else%>
+                           <%display_no_character()%>
+                        <%/if%>
                      </td>
                      <td>
                         <%if ($u->status != "pending") %>
-                        <button type="button" class="btn btn-danger float-left "
-                           data-bs-toggle="modal" data-bs-target="#acceptReject<%$i %>">
-                        Accept/Reject </button>
+                           <%if checkGroupAccess("view_p_q_molding_production","update","No")%>
+                              <button type="button" class="btn btn-danger float-left "
+                                 data-bs-toggle="modal" data-bs-target="#acceptReject<%$i %>">
+                              Accept/Reject </button>
+                           <%else%>
+                              <%display_no_character()%>
+                           <%/if%>
                         <%else %>
                            Completed
                         <%/if%>

@@ -8,7 +8,9 @@ var pdf_title = "Sharing Issue Request - Pending";
 const page = {
     init: function() {
         this.dataTable();
+        this.filter();
         this.initiateValidate();
+        
     },
     dataTable: function() {
         var data = {};
@@ -82,7 +84,7 @@ const page = {
         });
             // table = $('#example1').DataTable();
       },
-      initiateValidate: function(){
+    initiateValidate: function(){
       	let that = this;
       	$(".accept_sharing_request").submit(function(e){
 	      e.preventDefault();
@@ -176,5 +178,69 @@ const page = {
 	          }
 	        });
 	        return flag;
-	    }
+	},
+	filter: function(){
+        let that = this;
+        $('#date_range_filter').daterangepicker({
+            singleDatePicker: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: 'DD/MM/YYYY' // Change this format as per your requirement
+            }
+        });
+        dateRangePicker = $('#date_range_filter').data('daterangepicker');
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
+       	that.serachParams();
+        $(".search-filter").on("click",function(){
+            that.serachParams();
+            $(".close-filter-btn").trigger( "click" )
+        })
+        $(".reset-filter").on("click",function(){
+            that.resetFilter();
+        })
+    },
+    serachParams: function(){
+    	var that = this;
+	    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+	       	var date = $("#date_range_filter").val();
+	        date = date.split(" - ");
+	        var fromDate = date[0];
+		    var toDate = date[1];
+		    
+	        var dateColumn = data[2].split(" / "); // Assuming the date is in the 3rd column (index 2)
+	        dateColumn = dateColumn[0];
+	       
+	        // Convert dateColumn into a Date object (assuming date is in 'YYYY-MM-DD' format)
+	        var rowDate = that.convertToDate(dateColumn);
+	        // If no "From Date" or "To Date" is selected, don't filter
+	        if (!fromDate && !toDate) {
+	            return true;
+	        }
+
+	        // If the "From Date" is set, compare it with the row's date
+	        if (fromDate &&  that.convertToDate(fromDate) > rowDate) {
+	            return false;
+	        }
+
+	        // If the "To Date" is set, compare it with the row's date
+	        if (toDate &&  that.convertToDate(toDate) < rowDate) {
+	            return false;
+	        }
+
+	        // If the row's date is within the range, show it
+	        return true;
+	    });
+	    table.draw();
+    },
+    resetFilter: function(){
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
+        this.serachParams();
+    },
+    convertToDate: function(dateString) {
+        var parts = dateString.split('/');
+        return new Date(parts[2], parts[1] - 1, parts[0]); // Convert to Date object: YYYY, MM-1, DD
+    }
 };

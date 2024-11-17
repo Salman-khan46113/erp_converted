@@ -108,19 +108,18 @@ data-template="vertical-menu-template-free"
                 </div>
 
 
-              <%if $isMultipleClientUnits == "true" %>
-              <div class="mb-3">
+              
+              <div class="mb-3 <%if $isMultipleClientUnits != "true" %>hide<%/if %>">
                 <label for="clientUnit" class="form-label">Client Unit</label>
-
-                <select name="clientUnit" id="clientId" class="form-control select2" id="client">
+                <select name="clientUnit" id="clientId" class="form-control select2 " id="client" >
                   <option value="">Select Client Unit</option>
-                  <%foreach from=$client_list item=cl %>
-                  <option value="<%$cl->id %>"><%$cl->client_unit %></option>
+                  <%foreach from=$client_list key='key' item=cl %>
+                  <option value="<%$cl->id %>" <%if $isMultipleClientUnits != "true" && $key eq 0%>selected<%/if %>><%$cl->client_unit %></option>
                   <%/foreach%>
 
                 </select>
               </div>
-              <%/if %>
+             
 
 
               <div class="mb-3 text-end hide">
@@ -129,7 +128,7 @@ data-template="vertical-menu-template-free"
                 </a>
 
               </div>
-              <div class="mb-3">
+              <div class="mb-3 mt-4">
                 <button class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
               </div>
             </form>

@@ -10,25 +10,26 @@
 	            <em>Inhouse Parts</em></a>
 	          </h1>
 	          <br>
-	          <span>Item Master Inhouse Parts</span>
+	          <span>Inhouse Parts</span>
 	        </div>
 	      </nav>
 	      <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5 listing-btn">
-      			
+            <%if checkGroupAccess("inhouse_parts_view","add","No") %>
+              <button class="btn btn-seconday filter-icon add-part-data" type="button" title="Add Inhouse Parts"><i class="ti ti-plus"></i></button>
+            <%/if%>
+      		<%if checkGroupAccess("inhouse_parts_view","export","No") %>
 		      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
 		      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
-		      <button class="btn btn-seconday filter-icon add-part-data" type="button" title="Add Inhouse Parts"><i class="ti ti-plus"></i></button>
+            <%/if%>
+            
 		    </div>
         <section class="content">
             <div class="">
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                </h3>
-                            </div>
-                            <div class="card-body">
+                           
+                            <div class="">
                             
                                 <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="inhouse_parts_view">
 						        <thead>

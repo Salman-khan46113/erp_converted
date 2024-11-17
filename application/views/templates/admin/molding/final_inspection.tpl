@@ -16,12 +16,16 @@
    <!-- /.content-header -->
    <!-- Main content -->
    <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-       <button type="button" class="btn btn-seconday" data-bs-toggle="modal"
-                        data-bs-target="#addPromo">
-                     Add Request
-         </button>
-        <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-        <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%if checkGroupAccess("final_inspection","add","No")%>
+           <button type="button" class="btn btn-seconday" data-bs-toggle="modal"
+                            data-bs-target="#addPromo">
+                         Add Request
+             </button>
+        <%/if%>
+        <%if checkGroupAccess("final_inspection","export","No")%>
+          <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+          <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+        <%/if%>
         
    </div>
    <section class="content">
@@ -108,10 +112,14 @@
 		                              <td>
 		                              	<%if ($u->status == "pending") %>
 			                                <%if ($u->qty <= $u->final_inspection_location) %>
-			                                 <a class="btn btn-warning"
-			                                    href="<%base_url('final_inspection_stock_transfer_click/') %><%$u->id %>">Click
-			                                 To
-			                                 Transfer Stock</a>
+                                        <%if checkGroupAccess("final_inspection","update","No")%>
+    			                                 <a class="btn btn-warning"
+    			                                    href="<%base_url('final_inspection_stock_transfer_click/') %><%$u->id %>">Click
+    			                                 To
+    			                                 Transfer Stock</a>
+                                        <%else%>
+                                          <%display_no_character("")%>
+                                        <%/if%>
 			                                <%else %>
 			                                    please add final Inspection stock
 			                                <%/if%>

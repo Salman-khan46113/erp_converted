@@ -64,19 +64,26 @@ class GRNController extends CommonController
 	public function delete_invoice(){
 		$invoice_id = $this->input->post('invoice_id');
 		$new_po_id = $this->input->post('new_po_id');
+		$invoice_number = $this->input->post('invoice_number');
 		$table_name = 'inwarding';
 		$data = array(
 			"id" => $invoice_id
 		);
 		$success = 0;
 		$messages = "Something went wrong.";
+
+		/* check subcon po or not */
+			$po_data = $this->Crud->customQuery("SELECT po.* FROM new_po po WHERE po.id = '".$new_po_id."'");
+			$is_sub_con_po = isset($po_data[0]->process_id) && $po_data[0]->process_id > 0 ? "Yes" : "No";
+		/* check subcon po or not  */
+
 		$result = $this->Crud->delete_data($table_name, $data);
-		if ($result) {
+		if ($result || true) {
 			$success  = 1;
 			$messages = "Invoice deleted successfully.";
 			$po_parts = $this->Crud->customQuery("SELECT pp.* FROM po_parts pp WHERE pp.po_id = '".$new_po_id."'");
-			$grn_details= $this->Crud->customQuery("SELECT g.* FROM grn_details g WHERE g.inwarding_id = '".$invoice_id."'");
 			$po_parts  =array_column($po_parts, "pending_qty","id");
+			$grn_details= $this->Crud->customQuery("SELECT g.* FROM grn_details g WHERE g.invoice_number = '".$invoice_number."' AND g.po_number = '".$new_po_id."'");
 			$po_part_update_arr = [];
 			foreach ($grn_details as $key => $value) {
 				$po_part_update_arr[] = [
@@ -84,8 +91,22 @@ class GRNController extends CommonController
 					"pending_qty" => $po_parts[$value->po_part_id]+$value->qty
 				];
 			}
+
 			if(is_valid_array($po_part_update_arr)){
-			$this->SupplierParts->updateBatchPoPartQtyByIds($po_part_update_arr);
+				$this->SupplierParts->updateBatchPoPartQtyByIds($po_part_update_arr);
+				$data = array(
+					"invoice_number" => $invoice_number
+				);
+				$result = $this->Crud->delete_data("grn_details", $data);
+				
+			}
+			/* delete suncon master parts */
+			if($is_sub_con_po == "Yes"){
+
+				$data = array(
+					"invoice_number" => $invoice_number
+				);
+				$result = $this->Crud->delete_data("subcon_po_inwarding", $data);
 			}
 			// echo "<script>alert('Record deleted successfully.');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
 			// $this->addSuccessMessage('Record deleted successfully.');
@@ -441,7 +462,6 @@ class GRNController extends CommonController
 				$tax_id = $this->input->post('tax_id');
 				$pending_qty = $this->input->post('pending_qty');
 				$inwarding_price = ($part_rate * round($qty,2));
-
 				$gst_structure = $this->Crud->get_data_by_id("gst_structure", $tax_id, "id");
 				$cgst_amount = ($inwarding_price * $gst_structure[0]->cgst) / 100;
 				$sgst_amount = ($inwarding_price * $gst_structure[0]->sgst) / 100;
@@ -472,7 +492,6 @@ class GRNController extends CommonController
 					"created_year" => $this->year,
 					"status" => "Challan_Completed"
 				);
-
 				$result = $this->Crud->insert_data("grn_details", $data);
 				if ($result) {
 					$pending_qty =

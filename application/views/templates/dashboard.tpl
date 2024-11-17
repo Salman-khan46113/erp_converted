@@ -74,7 +74,7 @@
             <%/if%>
             <%if checkGroupAccess("dashboard_purchase_grn","list",false)%>
             <li class="nav-item" role="presentation">
-               <a class="nav-link " id="purchase-grn-tab" data-bs-toggle="tab" data-tab="PurchaseGRN" data-bs-target="#purchase-grn" type="button" role="tab" aria-controls="purchase-grn" aria-selected="false">Purchase Grn213 </a>
+            <a class="nav-link " id="purchase-grn-tab" data-bs-toggle="tab" data-tab="PurchaseGRN" data-bs-target="#purchase-grn" type="button" role="tab" aria-controls="purchase-grn" aria-selected="false">Purchase Grn </a>
             </li>
             <%/if%>
             <%if checkGroupAccess("dashboard_store","list",false)%>
@@ -105,6 +105,7 @@
          <main class="main users chart-page" id="skip-target">
             <div class="container main-container-block">
                <div class="tab-content" id="myTabContent">
+                  <%if checkGroupAccess("dashboard_ba","list",false)%>
                   <div class="tab-pane fade show active" id="business-analytics" role="tabpanel" aria-labelledby="business-analytics-tab" data-tab="BusinessAnalytics">
                      <div class="row stat-cards">
                         <div class="col-md-6 col-xl-3">
@@ -414,6 +415,8 @@
                         </div>
                      </div>
                   </div>
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_sales","list",false)%>
                   <div class="tab-pane fade" id="sales" role="tabpanel" aria-labelledby="sales-tab" data-tab="Sales">
                      <div class="row stat-cards">
                         <div class="col-md-6 col-xl-3">
@@ -682,6 +685,8 @@
                         </div>
                      </div>
                   </div>
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_account","list",false)%>
                   <div class="tab-pane fade " id="account" role="tabpanel" aria-labelledby="account-tab" data-tab="Account" >
                      <div class="row stat-cards">
                         <div class="col-md-6 col-xl-3">
@@ -864,7 +869,9 @@
                         </div>
                      </div>
                   </div>
+                  <%/if%>
                 </div>
+                <%if checkGroupAccess("dashboard_purchase_grn","list",false)%>
                      <div class="tab-pane fade " id="purchase-grn" role="tabpanel" aria-labelledby="purchase-grn-tab" data-tab="PurchaseGRN">
                         <div class="row ">
                            <div class="col-lg-5">
@@ -952,6 +959,8 @@
                            </div>
                         </div>
                      </div>
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_store","list",false)%>
                      <div class="tab-pane fade " id="stotes" role="tabpanel" aria-labelledby="stotes-tab" data-tab="Stores">
                         <div class="row stat-cards">
                            <div class="col-md-6 col-xl-3">
@@ -1050,6 +1059,8 @@
                            </div>
                         </div>
                      </div>
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_subcon","list",false)%>
                      <div class="tab-pane fade " id="subcon" role="tabpanel" aria-labelledby="subcon-tab" data-tab="Subcon">
                         <div class="row">
                            <div class="col-lg-5">
@@ -1154,6 +1165,8 @@
                            </div>
                         </div>
                      </div>
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_production","list",false)%>
                      <div class="tab-pane fade " id="production-grn" role="tabpanel" aria-labelledby="production-tab" data-tab="Production">
                         <div class="row stat-cards">
                            <div class="col-md-6 col-xl-3">
@@ -1414,6 +1427,8 @@
                            </div>
                         </div>
                      </div>
+                  <%/if%>
+                  <%if checkGroupAccess("dashboard_quality","list",false)%>
                      <div class="tab-pane fade " id="quality" role="tabpanel" aria-labelledby="quality-tab" data-tab="Quality">
                         <div class="row stat-cards">
                            <div class="col-md-6 col-xl-3">
@@ -1670,6 +1685,7 @@
                            </div>
                         </div>
                      </div>
+                  <%/if%>
                   </div>
                </div>
          </main>

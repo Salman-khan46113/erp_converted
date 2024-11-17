@@ -59,15 +59,22 @@
     </nav>
     <%assign var="entitlements" value=$session_data['entitlements']%>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-      <!-- <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button> -->
-      <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
-      <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
+        <%if checkGroupAccess("customer_po_tracking_all","add","No")%>
       <a class="btn btn-seconday" href="<%base_url('customer_po_tracking')%>" title="Add Sales Order"><i class="ti ti-plus"></i></a>
-      <a class="btn btn-seconday" href="<%base_url('customer_po_tracking_all_closed')%>" title="Close PO"><i class="ti ti-square-x"></i></a>
-      <%if ($entitlements['po_import_export']!=null) %>
+      <%/if%>
+        <a class="btn btn-seconday" href="<%base_url('customer_po_tracking_all_closed')%>" title="Close PO"><i class="ti ti-square-x"></i></a>
+      <%if ($entitlements['po_import_export']!=null ) %>
             <a class="btn btn-seconday" href="<%base_url('customer_po_tracking_importExport')%>" title="Import/Export PO Tracking"><i class="ti ti-file-arrow-left"></i></a>
       <%/if%>
+        <%if checkGroupAccess("customer_po_tracking_all","export","No") %>
+      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+      <%/if%>
+      <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
+      <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
+
+       
+      
     </div>
 
     <div class="w-100">
@@ -87,29 +94,9 @@
 
                         <!-- /.card -->
 
-                        <div class="card p-0"><!--
-                            <div class="card-header">
-                                <div class="row">
-                                     <div class="col-lg-2">
-                                            <div class="form-group">
-                                                <form action="<%$base_url%>inwarding_by_po" method="POST">
-                                                <label for="">Enter PO Number <span class="text-danger">*</span> </label>
-                                                <input type="text" name="po_number" class="form-control" required placeholder="Enter Valid PO Number : ">
-                                            </div>
+                        <div class="col-12">
 
-                                    </div>
-                                    <div class="col-lg-2">
-                                            <div class="form-group">
-                                                <button type="submit" class="btn btn-success mt-4">Search</button>
-                                            </div>
-                                            </form>
-
-                                    </div> 
-                                </div>
-
-                            </div>-->
-
-                            <div class="">
+                            <div class="card p-0">
                                 <table id="example1" class="table  table-striped">
                                     <thead>
                                         <tr>

@@ -64,8 +64,10 @@
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
         <a href="<%base_url('download_stock_variance') %>"
            class="btn btn-seconday" title="Download Stock Variance"> <i class="ti ti-download"></i> </a>
+        <%if checkGroupAccess("part_stocks_inhouse","export","No")%>
         <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
         <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%/if%>
         <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
         <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
         
@@ -140,62 +142,60 @@
                           <td><%$po->store_stock_rate %></td>
                           <td><%($stock) * ($po->store_stock_rate) %></td>
                           <td>
-                             <%if ($child_part_present == "yes") %>
+                             <%if ($child_part_present == "yes") && checkGroupAccess("part_stocks_inhouse","update","No") %>
                                     <%if ($po->$prodQtyColName > 0) %>
-                                    <%if ($role == "Admin" || $role == "production" ) %>
-                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#edit<%$i %>">
-                                     <%$po->$prodQtyColName %>
-                                     </button>
-                                     <div class="modal fade" id="edit<%$i %>" tabindex="-1"
-                                        role="dialog" aria-labelledby="exampleModalLabel"
-                                        aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered" role="document">
-                                           <div class="modal-content">
-                                              <div class="modal-header">
-                                                 <h5 class="modal-title" id="exampleModalLabel">Transfer
-                                                    Production stock to store stock
-                                                 </h5>
-                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close">
-                                                 </button>
-                                              </div>
-                                              <form
-                                                          action="<%base_url('update_production_qty') %>"
-                                                          method="POST" enctype="multipart/form-data" id="update_production_qty<%$po->id %>" class="update_production_qty update_production_qty<%$po->id %> custom-form">
-                                              <div class="modal-body">
-                                                 <div class="row">
-                                                    <div class="col-lg-12">
-                                                        <div class="form-group">
-                                                          <label for="">Production Qty <span
-                                                             class="text-danger">*</span>
-                                                          </label>
-                                                          <input type="text" step="any" class="form-control onlyNumericInput required-input"
-                                                             value=""
-                                                             data-max="	<%$po->$prodQtyColName %>"
-                                                             name="production_qty" data-min="1" 
-                                                             placeholder="Enter Transfer Qty">
-                                                          <input type="hidden" class="form-control"
-                                                             value="<%$po->part_number %>"
-                                                             name="part_number" required
-                                                             placeholder="Enter Transfer Qty">
-                                                        </div>
+                                           <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                              data-bs-target="#edit<%$i %>">
+                                           <%$po->$prodQtyColName %>
+                                           </button>
+                                           <div class="modal fade" id="edit<%$i %>" tabindex="-1"
+                                              role="dialog" aria-labelledby="exampleModalLabel"
+                                              aria-hidden="true">
+                                              <div class="modal-dialog modal-dialog-centered" role="document">
+                                                 <div class="modal-content">
+                                                    <div class="modal-header">
+                                                       <h5 class="modal-title" id="exampleModalLabel">Transfer
+                                                          Production stock to store stock
+                                                       </h5>
+                                                       <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                          aria-label="Close">
+                                                       </button>
+                                                    </div>
+                                                    <form
+                                                                action="<%base_url('update_production_qty') %>"
+                                                                method="POST" enctype="multipart/form-data" id="update_production_qty<%$po->id %>" class="update_production_qty update_production_qty<%$po->id %> custom-form">
+                                                    <div class="modal-body">
+                                                       <div class="row">
+                                                          <div class="col-lg-12">
+                                                              <div class="form-group">
+                                                                <label for="">Production Qty <span
+                                                                   class="text-danger">*</span>
+                                                                </label>
+                                                                <input type="text" step="any" class="form-control onlyNumericInput required-input"
+                                                                   value=""
+                                                                   data-max="	<%$po->$prodQtyColName %>"
+                                                                   name="production_qty" data-min="1" 
+                                                                   placeholder="Enter Transfer Qty">
+                                                                <input type="hidden" class="form-control"
+                                                                   value="<%$po->part_number %>"
+                                                                   name="part_number" required
+                                                                   placeholder="Enter Transfer Qty">
+                                                              </div>
+                                                          </div>
+                                                       </div>
+                                                       <div class="modal-footer">
+                                                       <button type="button" class="btn btn-secondary"
+                                                          data-bs-dismiss="modal">Close</button>
+                                                       <button type="submit" class="btn btn-primary">Save
+                                                       changes</button>
+                                                       </form>
+                                                       </div>
                                                     </div>
                                                  </div>
-                                                 <div class="modal-footer">
-                                                 <button type="button" class="btn btn-secondary"
-                                                    data-bs-dismiss="modal">Close</button>
-                                                 <button type="submit" class="btn btn-primary">Save
-                                                 changes</button>
-                                                 </form>
-                                                 </div>
                                               </div>
-                                           </div>
-                                        </div>
+                                    <%else %>
+                                      <%$po->$prodQtyColName %>
                                     <%/if%>
-                              <%else %>
-                                <%$po->$prodQtyColName %>
-                              <%/if%>
                               <%else %>
                                   <%$po->$prodQtyColName %>
                               <%/if%>
@@ -204,8 +204,8 @@
                           <td><%$po->production_rejection %></td>
                           <td><%$po->production_scrap %></td>
                           <td>
-                            <%if ($po->$prodQtyColName > 0) %>
-                                    <%if ($role == "Admin" || $role == "production") %>
+                            <%if ($po->$prodQtyColName > 0) && checkGroupAccess("part_stocks_inhouse","update","No")%>
+                                    <%*if ($role == "Admin" || $role == "production") *%>
                                   <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                      data-bs-target="#fgtransfer<%$i %>">
                                   Transfer to FG
@@ -277,7 +277,7 @@
                                     </div>
                                     </div>
                                   </div>
-                                <%/if%>
+                                <%*/if*%>
                             <%else %>
                                <%$po->$prodQtyColName %>
                             <%/if%>

@@ -25,7 +25,7 @@ const page = {
                         var lines = csv.split('\n');
                         var modifiedLines = lines.map(function(line) {
                             var values = line.split(',');
-                            values.splice(4, 1);
+                            values.splice(7, 2);
                             return values.join(',');
                         });
                         return modifiedLines.join('\n');
@@ -44,12 +44,12 @@ const page = {
                     doc.pageMargins = [15, 15, 15, 15];
                     doc.content[0].text = pdf_title;
                     doc.content[0].color = "#5d87ff";
-                    doc.content[1].table.widths = ["19%", "19%", "13%", "13%", "15%", "15%"];
+                    // doc.content[1].table.widths = ["19%", "19%", "13%", "13%", "15%", "15%"];
                     doc.content[1].table.body[0].forEach(function (cell) {
                         cell.fillColor = "#5d87ff";
                     });
                     doc.content[1].table.body.forEach(function (row, index) {
-                        row.splice(4, 1);
+                        row.splice(7, 2);
                         row.forEach(function (cell) {
                             // Set alignment for each cell
                             cell.alignment = "center"; // Change to 'left' or 'right' as needed
@@ -62,7 +62,7 @@ const page = {
         // scrollX: true,
         scrollY: true,
         bScrollCollapse: true,
-        columnDefs: [{ sortable: false, targets: 5 },{ sortable: false, targets: 7 },{ sortable: false, targets: 8 }],
+        columnDefs: [{ sortable: false, targets: 7 },{ sortable: false, targets: 8 }],
         pagingType: "full_numbers",
        
         

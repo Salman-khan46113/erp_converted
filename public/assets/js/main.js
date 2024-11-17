@@ -1,7 +1,7 @@
 $( document ).ready(function() {
     app.init();
 });
-
+var table_data ;
 if($("body .dashboard-block").length == 0){
   // console.log("k")
 $(document).ajaxStart(function() {
@@ -193,11 +193,12 @@ const app = {
             $(this).find(".table-responsive").attr("style","width:96% !important");
           }
         });
-        this.initiateDataTableRes(".table.scrollable");
+        // this.initiateDataTableRes(".table.scrollable");
         $("#dropdownUser").on("click",function(){
             $("#dropdownUserNav").toggleClass("show-nav")
         })
     }
+    this.initiateDataTableRes(".table.scrollable.scrollable-seachable");
   }, 
   initiateDataTableRes: function(calss_val =""){
     // console.log(calss_val)
@@ -205,14 +206,19 @@ const app = {
       $($targetElement).addClass("w-100")
       var $previousElement = $targetElement.parent("div");
       $previousElement.addClass('table-responsive text-nowrap w-100');
-        $(calss_val).DataTable({
+        table_data = $(calss_val).DataTable({
             dom: "",
-            searching: false,
+            searching: true,
             scrollX: true,
             scrollY: true,
-            "ordering": false
+            "ordering": false,
+            "paging":false
            
-            });
+        });
+        
+        $('#serarch-filter-input').on('keyup', function() {
+            table_data.search(this.value).draw();
+        });
       }
   
 }

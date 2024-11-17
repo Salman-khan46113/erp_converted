@@ -20,12 +20,13 @@
             <!-- Dashboard -->
             <div class="filter-row">
               <li class="nav-small-cap">
-                <span class="hide-menu">Select Month</span>
+                <span class="hide-menu">Customer</span>
                 <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
               </li>
               <li class="sidebar-item">
                 <div class="input-group">
                   <select name="customer_name" class="form-control select2" id="customer_name">
+                    <option value="">Select Customer</option>
                   <%foreach from=$customers item=t%>
                   <option
                       value="<%$t->customer_name%>"><%$t->customer_name%></option>
@@ -59,14 +60,18 @@
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
-      <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
-      <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
-     
+      <%if checkGroupAccess("customer","add","No") %>
       <button type="button" class="btn btn-seconday float-left" data-bs-toggle="modal" data-bs-target="#exampleModal">
                                     <i class="ti ti-plus "></i>
                                 </button>
+      <%/if%>
+      <%if checkGroupAccess("customer","export","No") %>
+        <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+        <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+      <%/if%>
+      <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
+      <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
+
     </div>
 
     
@@ -134,7 +139,7 @@
                                                 <div class="col-lg-6">
                                                   <div class="form-group">
                                                      <label for="state_no">State No</label><span class="text-danger">*</span>
-                                                     <input type="text" name="state_no" class="form-control" id="state_no" placeholder="Add State No">
+                                                     <input type="text" name="state_no" class="form-control onlyNumericInput" id="state_no" placeholder="Add State No">
                                                   </div>
                                                 </div>
                                                 <div class="col-lg-6">
@@ -164,7 +169,7 @@
                                                 <div class="col-lg-6">
                                                   <div class="form-group">
                                                      <label for="pos">Pos</label><span class="text-danger">*</span>
-                                                     <input type="text" name="pos" class="form-control" id="pos" placeholder="Pos">
+                                                     <input type="text" name="pos" class="form-control onlyNumericInput" id="pos" placeholder="Pos">
                                                   </div>
                                                 </div>
                                                 <div class="col-lg-6">
@@ -255,9 +260,13 @@
                                                     <td><%$t->pan_no%></td>
                                                     <td><%$t->payment_terms%></td>
                                                     <td>
+                                                      <%if checkGroupAccess("customer","update","No") %>
                                                         <a type="button" data-bs-toggle="modal" class=" edit-part" data-bs-target="#edit_modal" data-value = "<%$t->encode_data%>">
                                                             <i class="ti ti-edit"></i>
                                                         </a>
+                                                      <%else%>
+                                                        <%display_no_character("")%>
+                                                      <%/if%>
 
                                                        
                                                     
@@ -329,7 +338,7 @@
                     <div class="col-lg-6">
                         <div class="form-group">
                             <label for="customer_location">State No</label><span class="text-danger">*</span>
-                            <input type="text" name="state_no"  value="<%$t->state_no%>" class="form-control" id="ucustomer_state_no" aria-describedby="emailHelp" placeholder="Add State No">
+                            <input type="text" name="state_no"  value="<%$t->state_no%>" class="form-control onlyNumericInput" id="ucustomer_state_no" aria-describedby="emailHelp" placeholder="Add State No">
                         </div>
                     </div>
                     <div class="col-lg-6">
@@ -365,7 +374,7 @@
                     <div class="col-lg-6">
                         <div class="form-group">
                             <label for="post">Pos</label><span class="text-danger">*</span>
-                            <input type="text" value="<%$t->pos%>" name="pos" id ="upos" class="form-control" aria-describedby="emailHelp" placeholder="Enter Pos">
+                            <input type="text" value="<%$t->pos%>" name="pos" id ="upos" class="form-control onlyNumericInput" aria-describedby="emailHelp" placeholder="Enter Pos">
                         </div>
                     </div>
                     <div class="col-lg-6">

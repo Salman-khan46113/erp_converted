@@ -58,13 +58,16 @@
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%if checkGroupAccess("consignee","export","No") %>
+          <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+          <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%/if%>
       <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
       <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
-     
-      <button type="button" class="btn btn-seconday float-left" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        <%if checkGroupAccess("consignee","add","No") %>
+            <button type="button" class="btn btn-seconday float-left" data-bs-toggle="modal" data-bs-target="#exampleModal">
                                     <i class="ti ti-plus "></i></button>
+        <%/if%>
     </div>
 
     <div class="w-100">
@@ -197,6 +200,7 @@
                                                     <td><%$t->gst_number%></td>
                                                     <td><%$t->pan_no%></td>
                                                     <td>
+                                                        <%if checkGroupAccess("consignee","update","No") %>
                                                         <a type="button" data-bs-toggle="modal" class=" edit-part" data-bs-target="#edit_modal" data-value ='<%$t->encode_data%>'> <i class="ti ti-edit"></i></a>
 
                                                      
@@ -223,6 +227,9 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        <%else%>
+                                                            <%display_no_character("")%>
+                                                        <%/if%>
 
                                                     </td>
                                                 </tr>

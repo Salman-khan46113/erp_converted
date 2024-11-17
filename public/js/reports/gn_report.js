@@ -150,11 +150,12 @@ const page = {
         var month_number = $("#months").val();
         var year = $("#year").val();
         var date_range = $("#date_range_filter").val();
-        var params = {month_number:month_number,year:year,date_range:date_range};
+        var supplier_search = $("#supplier_search").val();
+        var params = {supplier_search:supplier_search,year:year,date_range:date_range};
         return params;
     },
     resetFilter: function(){
-        $("#months").val('').trigger('change');
+        $("#supplier_search").val('').trigger('change');
         $("#year").val('');
         dateRangePicker.setStartDate(start_date);
         dateRangePicker.setEndDate(end_date);

@@ -45,6 +45,17 @@
                 </div>
               </li>
             </div>
+            <div class="filter-row">
+              <li class="nav-small-cap">
+                <span class="hide-menu">Sales Invoice Date</span>
+                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+              </li>
+              <li class="sidebar-item">
+                <div class="input-group">
+                <input type="text" name="datetimes" class="dates form-control" id="date_range_filter" />
+                </div>
+              </li>
+            </div>
             
 
           </ul>
@@ -67,11 +78,15 @@
 </span>
       </div>
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-                     <button type="button" class="btn btn-seconday" data-bs-toggle="modal"
+        <%if checkGroupAccess("sharing_issue_request","add","No")%>
+          <button type="button" class="btn btn-seconday" data-bs-toggle="modal"
                               data-bs-target="#addPromo">Add Request</button>
-            <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
-      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
-      <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
+        <%/if%>
+        <%if checkGroupAccess("sharing_issue_request","export","No")%>
+          <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+          <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%/if%>
+        <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
         <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
     </div>
    <section class="content">
@@ -165,6 +180,8 @@
     var sorting_column = <%$sorting_column%>;
     var api_name =  <%$api_name|json_encode%>;
     var base_url = <%$base_url|json_encode%>;
+    var start_date = <%$start_date|json_encode%>;
+    var end_date = <%$end_date|json_encode%>;
 </script>
 
   <script src="<%$base_url%>public/js/production/sharing_issue_request.js"></script>

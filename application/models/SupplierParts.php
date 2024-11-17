@@ -656,7 +656,7 @@ class SupplierParts extends CI_Model {
                 $this->db->order_by($condition_arr["order_by"]);
             }
         }
-        $this->db->group_by('po.id');
+        // $this->db->group_by('po.id');
 
         $query = $this->db->get();
         $result = is_object($query) ? $query->result_array() : [];
@@ -726,6 +726,7 @@ class SupplierParts extends CI_Model {
             po_parts.tax_id, 
             po_parts.part_id, 
             po_parts.rate, 
+            po_parts.discount,
             grn.accept_qty as total_accept_qty,
             tax.igst, 
             tax.sgst, 
@@ -764,6 +765,9 @@ class SupplierParts extends CI_Model {
                 $data['start_date'] = $date_filter[0];
                 $data['end_date'] = $date_filter[1];
                $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        }
+        if ($search_params["supplier_search"] > 0) {
+             $this->db->where('po.supplier_id', $search_params["supplier_search"]);
         }
 
         if (!empty($search_params['value'])) {
@@ -827,6 +831,9 @@ class SupplierParts extends CI_Model {
                 $data['start_date'] = $date_filter[0];
                 $data['end_date'] = $date_filter[1];
                $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        }
+        if ($search_params["supplier_search"] > 0) {
+             $this->db->where('po.supplier_id', $search_params["supplier_search"]);
         }
 
         if (!empty($search_params['value'])) {
@@ -980,12 +987,13 @@ class SupplierParts extends CI_Model {
             inward.grn_number as grn_number_val
         ');
         $this->db->from('grn_details grn');
-        $this->db->join('new_po po', 'po.id = grn.po_number', 'inner');
+        $this->db->join('new_po po', 'po.id = grn.po_number', 'left');
         $this->db->join('inwarding inward', 'inward.id = grn.inwarding_id AND inward.status = "validate_grn"', 'left');
         $this->db->join('supplier supplier', 'supplier.id = po.supplier_id', 'left');
         $this->db->join('child_part child_part', 'child_part.id = grn.part_id', 'left');
         $this->db->join('po_parts po_parts', 'po.id = po_parts.po_id AND grn.part_id = po_parts.part_id', 'left');
-        $this->db->where('po.clientId', $clientId);
+        $this->db->where('po.clientId', (int)$clientId);
+        $this->db->where('inward.grn_number !=', "");
        
         // Set the created_year and created_month for further processing
         if(is_valid_array($search_params) && $search_params['month_number'] > 0){
@@ -1025,7 +1033,7 @@ class SupplierParts extends CI_Model {
 
         $query = $this->db->get();
         $result = is_object($query) ? $query->result_array() : [];
-       
+        // pr($this->db->last_query(),1);
         return $result;
     }
 
@@ -1037,12 +1045,12 @@ class SupplierParts extends CI_Model {
             count(grn.id) as tot_record');
         $this->db->from('grn_details grn');
         $this->db->join('new_po po', 'po.id = grn.po_number', 'left');
-        $this->db->join('inwarding inward', 'inward.id = grn.inwarding_id', 'left');
+        $this->db->join('inwarding inward', 'inward.id = grn.inwarding_id AND inward.status = "validate_grn"', 'left');
         $this->db->join('supplier supplier', 'supplier.id = po.supplier_id', 'left');
         $this->db->join('child_part child_part', 'child_part.id = grn.part_id', 'left');
         $this->db->join('po_parts po_parts', 'po.id = po_parts.po_id AND grn.part_id = po_parts.part_id', 'left');
         $this->db->where('po.clientId', $clientId);
-
+        $this->db->where('inward.grn_number !=', "");
         if(is_valid_array($search_params) && $search_params['month_number'] > 0){
             $this->db->where('grn.created_month', $search_params['month_number']);
         }
@@ -1154,11 +1162,7 @@ class SupplierParts extends CI_Model {
         $this->db->join('grn_details grn_details_data', 'parts.id = grn_details_data.part_id', 'left');
         $this->db->join('job_card_details', 'parts.part_number = job_card_details.item_number', 'left');
         */
-        $this->db->select('parts.*, stock.*, uom_data.*, child_part_type.*, 
-            SUM(IFNULL(grn_details.reject_qty, 0)) AS scrap_stock, 
-            SUM(CASE WHEN grn_details.accept_qty = 0 THEN IFNULL(grn_details.verified_qty, 0) ELSE 0 END) AS underinspection_stock, 
-            SUM(IFNULL(job_card_details.store_reject_qty, 0)) AS store_scrap, 
-            (SUM(IFNULL(stock.stock, 0)) * parts.store_stock_rate) AS total_value');
+        $this->db->select('parts.id');
         $this->db->from('child_part parts');
         $this->db->join('child_part_stock stock', 'parts.id = stock.childPartId AND stock.clientId = '.$this->Unit->getSessionClientId(), 'left');
         $this->db->join('uom uom_data', 'parts.uom_id = uom_data.id', 'left');
@@ -1260,8 +1264,29 @@ class SupplierParts extends CI_Model {
             if ($search_params["supplier_id"] != "") {
                 $this->db->where("c.supplier_id", $search_params["supplier_id"]);
             }
-           
-           
+        }
+        if (!empty($search_params['value'])) {
+            $keyword = $search_params['value'];
+            $this->db->group_start(); // Start a group of OR conditions
+            
+            $fields = [
+                'c.challan_number',
+                'c.remark',
+                'c.vechical_number',
+                'c.mode',
+                'c.transpoter',
+                'c.l_r_number',
+                'c.created_date',
+                's.supplier_name',
+                'c.status',
+                // Add more fields if needed
+            ];
+    
+            foreach ($fields as $field) {
+                $this->db->or_like($field, $keyword);
+            }
+    
+            $this->db->group_end(); // End the group of OR conditions
         }
 
         $result_obj = $this->db->get();
@@ -1302,6 +1327,29 @@ class SupplierParts extends CI_Model {
             }
             
         }
+        if (!empty($search_params['value'])) {
+            $keyword = $search_params['value'];
+            $this->db->group_start(); // Start a group of OR conditions
+            
+            $fields = [
+                'c.challan_number',
+                'c.remark',
+                'c.vechical_number',
+                'c.mode',
+                'c.transpoter',
+                'c.l_r_number',
+                'c.created_date',
+                's.supplier_name',
+                'c.status',
+                // Add more fields if needed
+            ];
+    
+            foreach ($fields as $field) {
+                $this->db->or_like($field, $keyword);
+            }
+    
+            $this->db->group_end(); // End the group of OR conditions
+        }
         $result_obj = $this->db->get();
         $ret_data = is_object($result_obj) ? $result_obj->row_array() : [];
 
@@ -1329,7 +1377,12 @@ class SupplierParts extends CI_Model {
                 $this->db->order_by($condition_arr["order_by"]);
             }
         }
-
+        if ($search_params["date_range"] != "") {
+                $date_filter =  explode((" - "),$search_params["date_range"]);
+                $data['start_date'] = $date_filter[0];
+                $data['end_date'] = $date_filter[1];
+               $this->db->where("STR_TO_DATE(s.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        }
         if (is_array($search_params) && count($search_params) > 0) {
             if ($search_params["created_year"] != "") {
                 $this->db->where("s.year", $search_params["created_year"]);
@@ -1360,7 +1413,12 @@ class SupplierParts extends CI_Model {
         $this->db->from("sharing_issue_request as s");
         $this->db->join("child_part as c", "c.id = s.child_part_id",'left');
         $this->db->where("s.clientId",$clientId);
-
+        if ($search_params["date_range"] != "") {
+                $date_filter =  explode((" - "),$search_params["date_range"]);
+                $data['start_date'] = $date_filter[0];
+                $data['end_date'] = $date_filter[1];
+               $this->db->where("STR_TO_DATE(s.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        }
         if (is_array($search_params) && count($search_params) > 0) {
             if ($search_params["created_year"] != "") {
                 $this->db->where("s.year", $search_params["created_year"]);

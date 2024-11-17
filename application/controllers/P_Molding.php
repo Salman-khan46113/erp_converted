@@ -28,6 +28,7 @@ class P_Molding extends CommonController
 
 	public function grades()
 	{
+		checkGroupAccess("grades","list","Yes");
 		$data['grades'] = $this->Common_admin_model->get_all_data("grades");
 		$this->loadView('admin/molding/grades', $data);
 	}
@@ -265,7 +266,7 @@ class P_Molding extends CommonController
 	public function p_q_molding_production()
 
 	{
-
+		checkGroupAccess("p_q_molding_production","list","Yes");
 		$data['molding_production'] = $this->Crud->customQuery("SELECT mp.*,s.shift_type as shift_type,s.name as name,m.name as machine_name,op.name as operator_name,cp.part_number as part_number,cp.part_description as part_description,cp.production_target_per_shift as production_target_per_shift,mm.mold_name as mold_name
 			FROM molding_production as mp
 			LEFT JOIN shifts as s ON s.id = mp.shift_id 
@@ -315,6 +316,7 @@ class P_Molding extends CommonController
 
 	public function view_p_q_molding_production()
 	{
+		checkGroupAccess("view_p_q_molding_production","list","Yes");
 		$data['reject_remark'] = $this->Crud->read_data("reject_remark");
 		$created_month = $this->input->post('created_month');
 		$created_year = $this->input->post('created_year');
@@ -997,6 +999,7 @@ class P_Molding extends CommonController
 
 	public function mold_maintenance($filter_part=null)
 	{
+		checkGroupAccess("mold_maintenance","list","Yes");
 		// $this->db->group_by('customer_part_id');
 	 //    $this->db->group_by('mold_name');
 		$data['filter_child_part_id'] = $filter_part;
@@ -1057,7 +1060,7 @@ class P_Molding extends CommonController
 	
 	public function machine_request()
 	{
-
+		checkGroupAccess("machine_request","list","Yes");
 		$clientUnit = $this->Unit->getSessionClientId();
 		$data['filter_client'] = $clientUnit;
 		$data['operator'] = $this->Crud->read_data("operator");
@@ -1162,7 +1165,10 @@ class P_Molding extends CommonController
 			// $edit_data = base64_encode(json_encode($value)); 
 			$value['request_no'] = "MR-".$value['request_no'];
 			$data[$key]['request_no'] = '<a href="'.base_url("machine_request_details/").$value['id'].'" title="'.$value['request_no'].'">'.$value['request_no'].'</a>';
-			$data[$key]['action'] = '<i class="ti ti-trash delete-request" data-id="'.$value['id'].'" data-request-code="'.$value['request_no'].'" title="delete"></i>';
+			$data[$key]['action'] = display_no_character("");
+			if(checkGroupAccess("machine_request","delete","No")){
+				$data[$key]['action'] = '<i class="ti ti-trash delete-request" data-id="'.$value['id'].'" data-request-code="'.$value['request_no'].'" title="delete"></i>';
+			}
 			if($value['req_parts']){
 				$data[$key]['action'] = display_no_character();
 			}
@@ -1231,7 +1237,7 @@ class P_Molding extends CommonController
 	public function machine_request_completed()
 	{
 		
-		
+		checkGroupAccess("machine_request_completed","list","Yes");
 		$data['filter_by_status'] = "pending";
 		/* datatable */
         $column[] = [
@@ -1467,7 +1473,7 @@ class P_Molding extends CommonController
 	public function molding_stock_transfer()
 	{
 		
-		
+		checkGroupAccess("molding_stock_transfer","list","Yes");
 		$data['filter_by_status'] = "pending";
 		/* datatable */
       
@@ -1550,7 +1556,11 @@ class P_Molding extends CommonController
 		foreach ($data as $key => $value) {
 			$data[$key]['transfer'] = "Stock Transferred";
 			if($value['status'] == "pending"){
-				$data[$key]['transfer'] = '<a class="btn btn-warning" href="'.base_url('molding_stock_transfer_click/').$value['id'].'">Click To Transfer Stock</a>';
+				if(checkGroupAccess("molding_stock_transfer","update","No")){
+					$data[$key]['transfer'] = '<a class="btn btn-warning" href="'.base_url('molding_stock_transfer_click/').$value['id'].'">Click To Transfer Stock</a>';
+				}else{
+					$data[$key]['transfer'] = display_no_character("");
+				}
 			}
 			
 			$data[$key]['date'] = getDefaultDateTime($value['date']);
@@ -1768,7 +1778,7 @@ class P_Molding extends CommonController
 
 	public function report_prod_rejection()
 	{
-
+		checkGroupAccess("report_prod_rejection","list","Yes");
 		$created_month  = $this->input->post("created_month");
 		$created_year  = $this->input->post("created_year");
 
@@ -1921,6 +1931,7 @@ class P_Molding extends CommonController
 	
 	public function mold_maintenance_report()
 	{
+		checkGroupAccess("mold_maintenance_report","list","Yes");
 		$mold_maintenance_docs = [];
 		$data['mold_maintenance']  = $this->CustomerPart->getCustomerPartsMolding();
 		// pr($data);
@@ -1988,6 +1999,7 @@ class P_Molding extends CommonController
 
 	/* erp improvement points */
 	public function downtime_report(){
+		checkGroupAccess("downtime_report","list","Yes");
 		$current_year = date("Y");
 		$date_filter = [
 			"start_date" => $current_year."-04-01",

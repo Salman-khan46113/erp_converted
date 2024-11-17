@@ -59,7 +59,7 @@ const page = {
         },
     ],
     searching: true,
-    // scrollX: true,
+    scrollX: true,
     scrollY: '250px',
     bScrollCollapse: true,
     // columnDefs: [{ sortable: false, targets: 9 }],

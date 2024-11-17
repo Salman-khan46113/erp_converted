@@ -45,7 +45,7 @@ class Welcome extends CommonController
 	public function reports_po_balance_qty()
 
 	{
-
+        checkGroupAccess("reports_po_balance_qty","list","Yes");
 		$created_month  = $this->input->post("created_month");
 		$created_year  = $this->input->post("created_year");
 
@@ -207,7 +207,7 @@ class Welcome extends CommonController
 
 	public function reports_inspection()
 	{
-
+        checkGroupAccess("reports_inspection","list","Yes");
 		$created_month  = $this->input->post("created_month");
 		$created_year  = $this->input->post("created_year");
 
@@ -338,13 +338,15 @@ class Welcome extends CommonController
         $base_url = $this->config->item("base_url");
 
 		$data = $this->SupplierParts->getInspectionsReportView($condition_arr,$post_data["search"]);
-
+        // pr($data,1);
 
 		foreach ($data as $key => $value) {
-
 			$data[$key]['po_date'] = defaultDateFormat($value['po_date']);
             $inwarding = $this->Crud->get_data_by_id("inwarding", $value['inwarding_id'], "id");
-            $data[$key]['grn_number_val'] = $inwarding[0]->grn_number;
+            if($inwarding[0]->status != "validate_grn"){
+                $data[$key]['verified_qty'] = 0;
+            }
+            // $data[$key]['grn_number_val'] = $inwarding[0]->grn_number;
 		}
 
 		$data["data"] = $data;
@@ -399,7 +401,7 @@ class Welcome extends CommonController
 	}
 	public function reports_incoming_quality()
 	{
-
+        checkGroupAccess("reports_incoming_quality","list","Yes");
 		// $from_date_convert  = strtotime($this->input->post("from_date"));
 		// $from_date = date("d-m-Y", $from_date_convert);
 		// $to_date_convert  = strtotime($this->input->post("to_date"));
@@ -738,7 +740,6 @@ class Welcome extends CommonController
 	}
 
 	public function addSupplierDetails()
-
 	{
 		$get_data = $this->input->get();
 		$mode ="Add";
@@ -746,15 +747,19 @@ class Welcome extends CommonController
 			if($get_data['id'] >0){
 				$mode = "Update";
 				$data = $this->welcome_model->get_supplier_details($get_data['id']);
+                checkGroupAccess("approved_supplier","update","Yes");
 			}
 
-		}
+		}else{
+            checkGroupAccess("approved_supplier","add","Yes");
+        }
 		$data['mode'] = $mode;
 		// pr($data,1);
 		$this->loadView('purchase/add_update_supplier', $data);
 	}
     public function supplier()
     {
+        checkGroupAccess("supplier","list","Yes");
         $supplier_list = $this->Crud->read_data_where_result("supplier", array("admin_approve" => "pending"));
         $data['supplier_list'] = $supplier_list->result();
         // $data['supplier_list'] = $this->Crud->read_data_with_admin("supplier");
@@ -864,6 +869,7 @@ class Welcome extends CommonController
 
 	public function customer()
 	{
+        checkGroupAccess("customer","list","Yes");
 		$data['customers'] = $this->Crud->read_data("customer");
 
 		// $this->load->view('header');
@@ -878,6 +884,7 @@ class Welcome extends CommonController
 	}
 	public function customer_master()
 	{
+        checkGroupAccess("customer_master","list","Yes");
 		$data['customers'] = $this->Crud->read_data("customer");
 		$data['entitlements'] = $this->session->userdata('entitlements');
 		$this->loadView('customer/customer_master', $data);
@@ -897,7 +904,7 @@ class Welcome extends CommonController
 	}
 	public function inwarding()
 	{
-
+        checkGroupAccess("inwarding","list","Yes");
 		/* datatable */
         $column[] = [
             "data" => "id",
@@ -945,7 +952,7 @@ class Welcome extends CommonController
         $column[] = [
             "data" => "action",
             "title" => "Close PO",
-            "width" => "7%",
+            "width" => "100px",
             "className" => "dt-center",
         ];
         $data["data"] = $column;
@@ -963,6 +970,10 @@ class Welcome extends CommonController
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
+        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
         // $ajax_json['teacher_data'] = $this->session->userdata();
         // pr($ajax_json['designation'],1);
 		$this->loadView('store/inwarding', $data,"Yes","Yes");
@@ -996,10 +1007,13 @@ class Welcome extends CommonController
 			// $edit_data = base64_encode(json_encode($value)); 
 			$data[$key]['po_number'] = '<a href="'.base_url().'inwarding_invoice/'.$value['id'].'"  class="po-number">'.$value['po_number'].'</a>';
 			$data[$key]['download_po'] = '<a href="'.base_url().'download_my_pdf/'.$value['id'].'" class="btn btn-primary">Download</a>';
-			$data[$key]['action'] = '<a data-id="'.$value['id'].'" href="javascript:void(0)" class="btn btn-danger close-po">Close</a>';
 			$data[$key]['po_date'] = defaultDateFormat($value['po_date']);
 			$data[$key]['created_date'] = defaultDateFormat($value['created_date']);
 			$data[$key]['expiry_po_date'] = defaultDateFormat($value['expiry_po_date']);
+            $data[$key]['action'] = display_no_character();
+            if(checkGroupAccess("inwarding","update","No")){
+                $data[$key]['action'] = '<a data-id="'.$value['id'].'" href="javascript:void(0)" class="btn btn-danger close-po">Close</a>';
+            }
 		}
 		$data["data"] = $data;
         $total_record = $this->welcome_model->get_inwarding_view_count([], $post_data["search"]);
@@ -1013,7 +1027,7 @@ class Welcome extends CommonController
 	
 	public function grn_validation()
 	{
-
+        checkGroupAccess("grn_validation","list","Yes");
 		$new_po_id = $this->uri->segment('2');
 		$data['new_po_id'] = $this->uri->segment('2');
 		$session_data = $this->session->userdata();
@@ -1124,7 +1138,10 @@ class Welcome extends CommonController
 		
 		foreach ($data as $key => $value) {
 			$edit_data = base64_encode(json_encode($value)); 
-			$data[$key]['view_details'] = '<a href="'.base_url("inwarding_details_validation/").$value['id'].'/'.$value['po_id'].'" class="btn btn-danger">Validation Details</a></td>';
+            $data[$key]['view_details'] = display_no_character();
+            if(checkGroupAccess("grn_validation","update","No")){
+			     $data[$key]['view_details'] = '<a href="'.base_url("inwarding_details_validation/").$value['id'].'/'.$value['po_id'].'" class="btn btn-danger">Validation Details</a></td>';
+            }
 			$data[$key]['grn_date'] = defaultDateFormat($value['grn_date']);
 			$data[$key]['invoice_date'] = defaultDateFormat($value['invoice_date']);
 		}
@@ -1139,6 +1156,7 @@ class Welcome extends CommonController
 	}
 	public function accept_reject_validation()
 	{
+        checkGroupAccess("accept_reject_validation","list","Yes");
 		$new_po_id = $this->uri->segment('2');
 		$data['new_po_id'] = $this->uri->segment('2');
 		$data['inwarding_data'] = $this->Crud->customQuery("
@@ -1164,6 +1182,11 @@ class Welcome extends CommonController
 			'id' => $inwarding_id
 		);
 		$inwarding_data = $this->Crud->get_data_by_id_multiple("inwarding", $arr);
+        if(count($inwarding_data) == 0){
+            $forbidden_page = base_url("404_override");
+            header("Location: $forbidden_page");
+        }
+        
 		$data['inwarding_data'] = $inwarding_data;
 		$data['invoice_number'] = $inwarding_data[0]->invoice_number;
 		$invoice_amount = $inwarding_data[0]->invoice_amount;
@@ -1386,6 +1409,10 @@ class Welcome extends CommonController
 		);
 
 		$inwarding_data = $this->Crud->get_data_by_id_multiple("inwarding", $arr);
+        if(count($inwarding_data) == 0){
+            $forbidden_page = base_url("404_override");
+            header("Location: $forbidden_page");
+        }
 		$data['inwarding_data'] = $inwarding_data;
 		$data['invoice_number'] = $inwarding_data[0]->invoice_number;
 
@@ -1415,7 +1442,7 @@ class Welcome extends CommonController
 			'po_id' => $new_po_id,
 			'part_id' => $data['part_id_new']
 		);
-
+        $client_id = $this->Unit->getSessionClientId();
 		$data['po_parts'] = $this->Crud->get_data_by_id_multiple("po_parts", $po_parts_array);
         $po_parts = $data['po_parts'];
         foreach ($po_parts as $key=>$p) {
@@ -1442,12 +1469,21 @@ class Welcome extends CommonController
                         'part_id' => $r->child_part_new_new[0]->id,
                         'qty' => 1,
                     );
-                    $role_management_data2 = $this->db->query('SELECT * FROM `challan_parts` WHERE part_id = ' . $r->child_part_new_new[0]->id . ' AND remaning_qty > 0 ');
+                    $role_management_data2 = $this->db->query('
+                        SELECT * 
+                        FROM `challan_parts` as cp 
+                        JOIN  challan as c On cp.challan_id = c.id AND c.clientId = '.$client_id.'
+                        WHERE cp.part_id = ' . $r->child_part_new_new[0]->id . ' AND cp.remaning_qty > 0 ');
                     $challan_parts_data = $role_management_data2->result();
-                    foreach ($r->challan_parts_data as $key_v=>$ch_parts) {
-                        $challan_parts_data['$key']->challan_data = $this->Crud->get_data_by_id("challan", $ch_parts->challan_id, "id");
-                                                           
+                    foreach ($challan_parts_data as $key_v=>$ch_parts) {
+                        $challan_parts_data[$key_v]->challan_data = $this->Crud->customQuery("
+                            SELECT * FROM `challan` WHERE `id` = '".$ch_parts->challan_id." AND clientid = $client_id' ORDER BY `id` DESC");
+ 
                     }
+                   
+
+                    $subcon_po_inwarding_history = $this->Crud->customQuery("SELECT pi.* FROM subcon_po_inwarding_history pi WHERE pi.subcon_po_inwarding_parts_id = '".$r->id."' AND pi.invoice_number = '".$data['invoice_number']."'");
+                    $subcon_po_inwarding_parts[$key_val]->selected_challan = $subcon_po_inwarding_history[0]->id;
                     $subcon_po_inwarding_parts[$key_val]->challan_parts_data = $challan_parts_data;
                 }
                 $po_parts[$key]->subcon_po_inwarding_parts = $subcon_po_inwarding_parts;
@@ -1899,6 +1935,7 @@ class Welcome extends CommonController
 
 	public function gst()
 	{
+        checkGroupAccess("gst","list","Yes");
 		$data['gst'] = $this->Crud->read_data("gst_structure");
 
 		// $this->load->view('header');
@@ -2295,7 +2332,7 @@ class Welcome extends CommonController
 	}
 	public function operations()
 	{
-
+        checkGroupAccess("operations","list","Yes");
 		$data['operations'] = $this->Common_admin_model->get_all_data("operations");
 
 		// print_r($data['orders']);
@@ -2305,6 +2342,7 @@ class Welcome extends CommonController
 	}
 	public function transporter()
 	{
+        checkGroupAccess("transporter","list","Yes");
 		$data['transporter'] = $this->Common_admin_model->get_all_data("transporter");
 		// $this->load->view('header.php');
 		$this->loadView('admin/transporter', $data);
@@ -2312,13 +2350,13 @@ class Welcome extends CommonController
 	}
 	public function remarks()
 	{
-
+        checkGroupAccess("remarks","list","Yes");
 		$data['operations'] = $this->Crud->read_data("reject_remark");
 		$this->loadView('quality/remarks', $data);
 	}
 	public function operations_data()
 	{
-
+        checkGroupAccess("operations_data","list","Yes");
 		$data['operation_data'] = $this->Common_admin_model->get_all_data("operation_data");
 
 		// print_r($data['orders']);
@@ -2946,6 +2984,7 @@ class Welcome extends CommonController
 	}
 
 	public function child_part() {
+        checkGroupAccess("child_part_view","add","Yes");
 		$data['uom'] = $this->Crud->read_data("uom");
 		$data['cparttypelist'] = $this->Crud->read_data("part_type");
 		$data['supplier_list'] = $this->Crud->read_data("supplier");
@@ -2989,6 +3028,7 @@ class Welcome extends CommonController
 
 	public function report_stock_transfer()
 	{
+        checkGroupAccess("report_stock_transfer","list","Yes");
 		$child_part_list = $this->db->query("SELECT * FROM `stock_report` WHERE clientId =".$this->Unit->getSessionClientId());
 		$data['stock_report'] = $child_part_list->result();
 		$this->loadView('reports/report_stock_transfer', $data);
@@ -3018,6 +3058,7 @@ class Welcome extends CommonController
 
 	public function _approved_supplier($filter_supplier_id = 0)
 	{
+        checkGroupAccess("approved_supplier","list","Yes");
 		$supplier_list = $this->Crud->read_data_where_result("supplier", array("admin_approve" => "accept"));
 		$data['supplier_list'] = $supplier_list->result();
 		// $this->load->view('header');
@@ -3237,8 +3278,10 @@ class Welcome extends CommonController
 			}else{
 				$data[$key]['other_document_3'] = display_no_character();
 			}
-
-			$data[$key]['action'] = "<a href='".$base_url."add_supplier?id=".$value['id']."' title='Edit'><i class='ti ti-edit ' ></i></a>";
+            $data[$key]['action'] = display_no_character();
+            if(checkGroupAccess("approved_supplier","update","No")){    
+			     $data[$key]['action'] = "<a href='".$base_url."add_supplier?id=".$value['id']."' title='Edit'><i class='ti ti-edit ' ></i></a>";
+            }
 		}
 
 		$data["data"] = $data;
@@ -3317,7 +3360,7 @@ class Welcome extends CommonController
 
 	public function routing()
 	{
-
+        checkGroupAccess("routing","list","Yes");
 		$data['child_part_master']  = $this->Crud->customQuery("SELECT DISTINCT part_number, c.*
 		FROM `child_part` c WHERE sub_type in ('Subcon grn','Subcon Regular') ");
 
@@ -3327,6 +3370,7 @@ class Welcome extends CommonController
 	}
 	public function routing_customer()
 	{
+        checkGroupAccess("routing_customer","list","Yes");
 		$data['customer_part_master'] = $this->Crud->customQuery('SELECT DISTINCT part_number, part_description, id FROM `customer_part` WHERE type!="subcon_po" ');
 		// $this->load->view('header');
 		$this->loadView('purchase/routing_customer', $data);
@@ -3335,6 +3379,7 @@ class Welcome extends CommonController
 
 	public function view_add_challan_subcon()
 	{
+        checkGroupAccess("view_add_challan_subcon","list","Yes");
 		$data['challan'] = $this->Crud->read_data("challan_subcon");
 		$data['customer'] = $this->Crud->read_data("customer");
 
@@ -3346,7 +3391,7 @@ class Welcome extends CommonController
 	public function view_supplier_challan()
 	{
 
-
+        checkGroupAccess("view_supplier_challan","list","Yes");
 		$data['challan'] = $this->Crud->read_data("challan");
 		$data['supplier'] = $this->Crud->read_data("supplier");
 
@@ -3357,7 +3402,7 @@ class Welcome extends CommonController
 	}
 	public function view_supplier_challan_subcon()
 	{
-
+        checkGroupAccess("view_supplier_challan_subcon","list","Yes");
 		//$data['challan'] = $this->Crud->read_data("challan");
 		$data['customer'] = $this->Crud->read_data("customer");
 		// $this->load->view('header');
@@ -3660,8 +3705,11 @@ class Welcome extends CommonController
 				$mode = "Update";
 				$child_part_data = $this->welcome_model->get_child_part_details($get_data['id']);
 				$child_part_data['revision_date'] = formateFormDate($child_part_data['revision_date']);
+                checkGroupAccess("child_part_supplier_view","update","Yes");
 			}
-		}
+		}else{
+            checkGroupAccess("child_part_supplier_view","add","Yes");
+        }
 		$data['child_part_data'] =$child_part_data;
 		$data['mode'] =$mode;
 		$this->loadView('purchase/child_part_supplier', $data);
@@ -3670,7 +3718,7 @@ class Welcome extends CommonController
 
 	private function _view_child_part_supplier($filter_supplier_id)
 	{
-
+        checkGroupAccess("child_part_supplier_report","list","Yes");
 		$data['filter_supplier_id'] = $filter_supplier_id;
 		$data['uom'] = $this->Crud->read_data("uom");
 		$data['cparttypelist'] = $this->Crud->read_data("part_type");
@@ -3817,10 +3865,14 @@ class Welcome extends CommonController
         $base_url = $this->config->item("base_url");
 		$data = $this->SupplierParts->getChildSupplierReportData($condition_arr,$post_data["search"]);
 		foreach ($data as $key => $value) {
-			$edit_data = base64_encode(json_encode($value)); 
+			$edit_data = base64_encode(json_encode($value));
+            $data[$key]['rev_history'] = display_no_character(""); 
+            if(checkGroupAccess("child_part_supplier_report","update","No")){
 			$data[$key]['rev_history'] = '<a type="submit" data-toggle="modal" class="" data-target="#exampleModaledit2<%$i%>"> <i class="ti ti-edit" data-edit ='. $edit_data.'></i></a>  ' . "<a href='" . base_url() . "price_revision/" . $value['part_number'] . "/" . $value['supplier_id'] . "' class=''> <i class='ti ti-history'></i></a>";
+            }
 			$data[$key]['quotation_doc'] = "<a href='" . base_url('documents') . "/" . $value['part_number'] . $value['quotation_document'] . "' download><i class='ti ti-download'></i></a>";
 			$data[$key]['revision_date'] = defaultDateFormat($value['revision_date']);
+            $data[$key]['admin_approve'] = $value['admin_approve'] != "" ? $value['admin_approve'] : display_no_character("");
 		}
 
 		$data["data"] = $data;
@@ -3847,7 +3899,7 @@ class Welcome extends CommonController
 
 	private function _view_view_child_part_supplier($filter_child_part_id)
 	{
-
+        checkGroupAccess("child_part_supplier_view","list","Yes");
 		// if (isset($filter_child_part_id) && !$filter_child_part_id == '') {
 			$data['filter_child_part_id'] = (int) $filter_child_part_id;
 			$data['gst_structure'] = $this->Crud->read_data("gst_structure");
@@ -3872,6 +3924,7 @@ class Welcome extends CommonController
 					WHERE master.part_number = child.part_number
 					GROUP BY master.part_number,master.child_part_id
 					ORDER BY child_part_id asc');
+        $data['supplier_list'] = $this->Crud->read_data("supplier");
 		/* datatable */
         $column[] = [
             "data" => "id",
@@ -4020,7 +4073,10 @@ class Welcome extends CommonController
 			}
 			$data[$key]['rev_history'] = $rev_history;
 			$edit_url = $base_url."child_part_supplier?id=".$value['id'];
-			$data[$key]['action'] = "<a href='".$edit_url."'><i class='ti ti-edit edit-part' title='Edit'></i></a>";
+            $data[$key]['action'] = display_no_character();
+            if(checkGroupAccess("child_part_supplier_view","update","No")){    
+			   $data[$key]['action'] = "<a href='".$edit_url."'><i class='ti ti-edit edit-part' title='Edit'></i></a>";
+            }
             $data[$key]['revision_date'] = defaultDateFormat($value['revision_date']);
 		}
 		$data["data"] = $data;
@@ -4047,7 +4103,7 @@ class Welcome extends CommonController
 
 	public function child_part_supplier_admin()
 	{
-
+        checkGroupAccess("child_part_supplier_admin","list","Yes");
 		$data['uom'] = $this->Crud->read_data("uom");
 		$data['cparttypelist'] = $this->Crud->read_data("part_type");
 
@@ -4112,6 +4168,7 @@ class Welcome extends CommonController
 	}
 	public function planning_year_page()
 	{
+        checkGroupAccess("planning_year_page","list","Yes");
 		// $this->load->view('header');
 		// $this->load->view('planning_year_page', $data);
 		// $this->load->view('footer');
@@ -4228,7 +4285,7 @@ class Welcome extends CommonController
 	}
 	public function planing_data_report()
 	{
-
+        checkGroupAccess("planing_data_report","list","Yes");
 		$column[] = [
             "data" => "part_number",
             "title" => "Customer Part Number",
@@ -4356,6 +4413,7 @@ class Welcome extends CommonController
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
+        $data["current_year"] = date("Y");
 
 		// $this->load->view('header');
 		$this->getPage('reports/planing_data_report_view', $data);
@@ -4690,6 +4748,7 @@ class Welcome extends CommonController
 
 	public function asset()
 	{
+        checkGroupAccess("asset","list","Yes");
 		$data['shifts'] = $this->Crud->read_data("shifts");
 		// $this->load->view('header');
 		$this->loadView('admin/shift', $data);
@@ -4698,7 +4757,7 @@ class Welcome extends CommonController
 
 	public function final_inspection_qa()
 	{
-
+        checkGroupAccess("final_inspection_qa","list","Yes");
 		$clientId = $this->Unit->getSessionClientId();
 		$data['p_q'] = $this->Crud->customQuery('SELECT
 					p.*,
@@ -4737,7 +4796,7 @@ class Welcome extends CommonController
 
 	public function final_inspection()
 	{
-
+        checkGroupAccess("final_inspection","list","Yes");
 		$role_management_data = $this->db->query('SELECT *  FROM `customer_part` ');
 		$data['customer_part'] = $role_management_data->result();
 		$role_management_data = $this->db->query('
@@ -4761,7 +4820,7 @@ class Welcome extends CommonController
 
 	public function part_family()
 	{
-
+        checkGroupAccess("part_family","list","Yes");
 		$data['part_family'] = $this->Crud->read_data("part_family");
 
 		// $this->load->view('header');
@@ -4770,7 +4829,7 @@ class Welcome extends CommonController
 	}
 	public function process()
 	{
-
+        checkGroupAccess("process","list","Yes");
 		$data['process'] = $this->Crud->read_data("process");
 
 		// $this->load->view('header');
@@ -4779,7 +4838,7 @@ class Welcome extends CommonController
 	}
 	public function customer_parts_master()
 	{
-
+        checkGroupAccess("customer_parts_master","list","Yes");
 		// $data['customer_parts_master'] = $this->CustomerPart->readCustomerParts();
 		// $data['grades'] = $this->Crud->read_data("grades");
 		// $data['flash_err'] = $this->session->flashdata('errors');
@@ -4868,8 +4927,10 @@ class Welcome extends CommonController
 
 		foreach ($customer_data as $key => $value) {
 			$edit_data = base64_encode(json_encode($value)); 
-			
-			$customer_data[$key]['action'] = "<a type='button' class=' edit-part' data-bs-toggle='modal' data-bs-target='#editpart' data-value = " . $edit_data . "><i class='ti ti-edit'></i></a>";
+            $customer_data[$key]['action'] = display_no_character("");
+			if(checkGroupAccess("customer_parts_master","update","No")){    
+			 $customer_data[$key]['action'] = "<a type='button' class=' edit-part' data-bs-toggle='modal' data-bs-target='#editpart' data-value = " . $edit_data . "><i class='ti ti-edit'></i></a>";
+            }
 
 		}
 
@@ -4883,6 +4944,7 @@ class Welcome extends CommonController
 
 	public function downtime_master()
 	{
+        checkGroupAccess("downtime_master","list","Yes");
 		$data['downtime_master'] = $this->Crud->read_data("downtime_master");
 
 		// $this->load->view('header');
@@ -5648,6 +5710,7 @@ class Welcome extends CommonController
 	}
 	public function stock_rejection()
 	{
+        checkGroupAccess("stock_rejection","list","Yes");
 		$data['child_part'] = $this->SupplierParts->readSupplierParts();
 		$data['supplier'] = $this->Crud->read_data("supplier");
 		$data['rejection_flow'] = $this->Crud->customQuery("SELECT r.*, c.part_number, c.part_description,s.supplier_name FROM rejection_flow r
@@ -5661,6 +5724,7 @@ class Welcome extends CommonController
 
 	public function grn_rejection()
 	{
+        checkGroupAccess("grn_rejection","list","Yes");
 		// $data['customer_part_list'] = $this->Crud->read_data("customer_part");
 		// $data['child_part'] = $this->SupplierParts->readSupplierParts();
 		//$data['supplier'] = $this->Crud->read_data("supplier");
@@ -5678,6 +5742,7 @@ class Welcome extends CommonController
 	}
 	public function short_receipt_mdr()
 	{
+        checkGroupAccess("short_receipt","list","Yes");
 		$data['child_part'] = $this->SupplierParts->readSupplierParts();
 		// pr($data['child_part'],1);
 		$data['supplier'] = $this->Crud->read_data("supplier");
@@ -6575,9 +6640,9 @@ class Welcome extends CommonController
 		$revision_date = $this->input->post('revision_date');
 		$revision_remark = $this->input->post('revision_remark');
 		$uploading_document = $this->input->post('uploading_document');
-		$customer_part_id = $this->input->post('customer_part_id');
+		$customer_part_id = $this->input->post('customer_master_id');
 		$data = array(
-			"customer_part_id" => $customer_part_id,
+			"customer_master_id" => $customer_part_id,
 			"revision_no" => $revision_no,
 		);
         $success = 0;
@@ -8128,7 +8193,7 @@ class Welcome extends CommonController
 
 			$data = array(
 				"part_rate" => $part_rate,
-				"uom_id" => $child_part_data[0]->uom_id,
+				// "uom_id" => $child_part_data[0]->uom_id,
 				"revision_remark" => $revision_remark,
 				"gst_id" => $gst_id
 			);
@@ -8813,7 +8878,7 @@ class Welcome extends CommonController
 				"other_document_2" => $picture7,
 				"other_document_3" => $picture8,
 				"with_in_state" => $with_in_state,
-				"admin_approve"=>$admin_approve,
+				// "admin_approve"=>$admin_approve,
                 "discount" => $discount,
                 "discount_type" => $discount_type
 			);
@@ -9829,7 +9894,7 @@ class Welcome extends CommonController
 	}
 	public function customer_part_wip_stock_report()
 	{
-
+        checkGroupAccess("customer_part_wip_stock_report","list","Yes");
 		// $role_management_data = $this->db->query('SELECT id,customer_name FROM `customer`');
 		// $data['customer_parts_data'] = $role_management_data->result();
 
@@ -9882,6 +9947,7 @@ class Welcome extends CommonController
 	public function subcon_supplier_challan_part_report()
 	{
 
+        checkGroupAccess("subcon_supplier_challan_part_report","list","Yes");
 		$column[] = [
             "data" => "supplier_name",
             "title" => "Supplier",
@@ -9921,6 +9987,12 @@ class Welcome extends CommonController
         $column[] = [
             "data" => "remaning_qty",
             "title" => "Remaning qty",
+            "width" => "7%",
+            "className" => "dt-center",
+        ];
+        $column[] = [
+            "data" => "part_rate",
+            "title" => "Part Rate",
             "width" => "7%",
             "className" => "dt-center",
         ];
@@ -10002,6 +10074,7 @@ class Welcome extends CommonController
         $base_url = $this->config->item("base_url");
 		
 		$data = $this->welcome_model->getSubConReportView($condition_arr,$post_data["search"]);
+        // pr($data,1);
 		foreach ($data as $key => $val) {
 			$data[$key]['value_qty'] = $val['qty'] * $val['part_rate'];
 			$data[$key]['value_qty_remaning'] = $val['remaning_qty'] * $val['part_rate'];
@@ -10078,7 +10151,7 @@ class Welcome extends CommonController
 	}
 	public function new_po()
 	{
-
+        checkGroupAccess("new_po","list","Yes");
 		$data['id'] = $this->uri->segment('2');
 		$data['customer'] = $this->Crud->get_data_by_id("customer_part", $data['id'], "id");
 		$data['supplier'] = $this->Crud->read_data("supplier");
@@ -10093,7 +10166,7 @@ class Welcome extends CommonController
 
 	public function new_po_sub()
 	{
-
+        checkGroupAccess("new_po_sub","list","Yes");
 		$data['id'] = $this->uri->segment('2');
 		//$data['customer'] = $this->Crud->get_data_by_id("customer_part", $data['id'], "id");
 		$data['supplier'] = $this->Crud->read_data("supplier");
@@ -10335,7 +10408,6 @@ class Welcome extends CommonController
 			"output_part_id" => $output_part_id,
 			"output_part_table_name" => $output_part_table_name,
 		);
-		// print_r($data);
 		$check = $this->Crud->read_data_where("operations_bom", $data);
 		// print_r($check);
         $success = 0;
@@ -10901,8 +10973,20 @@ class Welcome extends CommonController
     }
     public function category()
     {
-        $category_list = $this->db->query('SELECT * FROM `category`');
+        checkGroupAccess("category","list","Yes");
+        $category_list = $this->db->query('SELECT c.* FROM `category` as c');
         $data['category_list'] = $category_list->result();
+        $categories = $data['category_list'];
+        $categories_by_id = array_column($categories, "category_name","category_id");
+        foreach ($categories as $key => $value) {
+           
+            if($value->parent_id > 0){
+                $value->parent_category = $categories_by_id[$value->parent_id];
+            }else{
+                $value->parent_category = display_no_character("");
+            }
+
+        }
         // $this->load->view('header');
         $this->loadView('admin/category', $data);
         // $this->load->view('footer');
@@ -10925,6 +11009,41 @@ class Welcome extends CommonController
             $result = $this->Crud->insert_data("category", $data);
             if ($result) {
                 $messages = "Category added successfully.";
+                $success = 1;
+                // echo "<script>alert('Category added successfully.');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+            } else {
+                $messages = "Unable to Add";
+                // echo "<script>alert('Unable to Add');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+            }
+        }else{
+            $messages = "Category already exist.";
+            // echo "<script>alert('Category already exist');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+        }
+        $return_arr['success']=$success;
+        $return_arr['messages']=$messages;
+        echo json_encode($return_arr);
+        exit;
+    }
+    public function update_category()
+    {
+        $post_data = $this->input->post();
+        
+        $category_id = $post_data['category_id'];
+        $category_name = trim($post_data['category_name']);
+        $category_list = $this->db->query("SELECT * FROM `category` WHERE category_name = '".$category_name."' AND category_id != $category_id");
+        $category_list = $category_list->result();
+        $messages = "Something went wrong";
+        $success = 0;
+        if(count($category_list) == 0){
+            $data = array(
+                "parent_id" => $post_data['parent_category_id'],
+                "category_name" => $category_name,
+                "updated_by" => $this->user_id,
+                "updated_date" => date("Y-m-d H:i:s") 
+            );
+            $update_result = $this->welcome_model->update_category($data, $category_id);
+            if ($update_result) {
+                $messages = "Category updated successfully.";
                 $success = 1;
                 // echo "<script>alert('Category added successfully.');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
             } else {

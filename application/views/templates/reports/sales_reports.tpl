@@ -72,6 +72,7 @@
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
+        <%if checkGroupAccess("sales_report","export","No") %>
         <button type="button" class="btn btn-seconday" data-toggle="modal"
                                             data-bs-target="#exportForTally" data-bs-toggle="modal">
                                             Sales Export For Tally
@@ -79,6 +80,7 @@
         
       <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
       <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+      <%/if%>
       <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
       <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
     </div>

@@ -1,7 +1,4 @@
 
-<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <div class="wrapper">
 <!-- Navbar -->
 <!-- /.navbar -->
@@ -250,13 +247,13 @@
             resetFilter();
         })
         $('#date_range_filter').daterangepicker({
-	       singleDatePicker: true,
-	       showDropdowns: true,
-	       autoApply: true,
-	       locale: {
-	           format: 'YYYY-MM-DD' // Change this format as per your requirement
-	       }
-	   });
+    	       singleDatePicker: true,
+    	       showDropdowns: true,
+    	       autoApply: true,
+    	       locale: {
+    	           format: 'YYYY-MM-DD' // Change this format as per your requirement
+    	       }
+    	   });
     }
     function serachParams(){
        var date = $("#date_range_filter").val();

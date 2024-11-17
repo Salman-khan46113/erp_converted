@@ -19,10 +19,14 @@
       <!-- <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4> -->
 
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
+        <%if checkGroupAccess("stock_rejection","export","No")%>
         <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
         <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
+        <%/if%>
+        <%if checkGroupAccess("stock_rejection","add","No")%>
         <button type="button" class="btn btn-seconday" title="Add Stock Rejection" data-bs-toggle="modal" data-bs-target="#exampleModal">
           <i class="ti ti-plus"></i> </button>
+        <%/if%>
       </div>
 
 
@@ -126,7 +130,11 @@
                           </td>
                           <td>
                              <%if ($c->status == "pending") %>
-                              <a class="btn btn-warning" href="<%base_url('transfer_stock/') %><%$c->id %>">Click To Transfer Stock</a>
+                              <%if checkGroupAccess("stock_rejection","update","No")%>
+                                <a class="btn btn-warning" href="<%base_url('transfer_stock/') %><%$c->id %>">Click To Transfer Stock</a>
+                              <%else %>
+                              <%display_no_character()%>
+                              <%/if%>
                              <%else %>
                                 stock transfered
                              <%/if%>

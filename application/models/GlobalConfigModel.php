@@ -147,9 +147,36 @@ class GlobalConfigModel extends CI_Model {
                 $group_rights_arr[$value['menu_master_id']]['export'] = $value['export'];
             }
         }
+        // pr($group_rights_arr,1);
         return $group_rights_arr;
     }
     public function getGroupRightsDataList($group_id = [],$menu_url = ''){
+        $group_rights_arr = $this->session->userdata('group_rights_arr');
+        $group_rights_arr =  $group_rights_arr != "" ? json_decode(base64_decode($group_rights_arr),TRUE) : '';
+        $ret_data = [];
+        if(is_valid_array($group_rights_arr)){ 
+            foreach ($group_rights_arr as $key => $value) {
+                if($value['url'] == $menu_url){
+                   $ret_data[] = $value;
+                }
+            }
+        }
+        // pr($ret_data,1);
+        // pr($ret_data,1);
+        // $group_id = explode(",",$group_id);
+        // $this->db->select('g.*,m.diaplay_name,m.url');
+        // $this->db->from('group_rights as g');
+        // $this->db->join("menu_master as m","m.menu_master_id = g.menu_master_id");
+        // $this->db->where_in("g.group_master_id",$group_id);
+        // if($menu_url != ""){
+        //     $this->db->where("m.url",$menu_url);
+        // }
+        // $result_obj = $this->db->get();
+        // $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        return $ret_data;
+    }
+    public function getGroupRightData($group_id = [],$menu_url = ''){
+        $group_id = explode(",",$group_id);
         $this->db->select('g.*,m.diaplay_name,m.url');
         $this->db->from('group_rights as g');
         $this->db->join("menu_master as m","m.menu_master_id = g.menu_master_id");
@@ -161,6 +188,8 @@ class GlobalConfigModel extends CI_Model {
         $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
         return $ret_data;
     }
+
+
 	
    
 }

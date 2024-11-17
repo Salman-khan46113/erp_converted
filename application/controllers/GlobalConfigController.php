@@ -39,6 +39,7 @@ class GlobalConfigController extends CommonController
 
 	public function listconfigs()
 	{
+		checkGroupAccess("configs","list","Yes");
 		if($this->isAromAdmin == 'false'){
 			$criteria = array("ARMUserOnly" => 0);//get only those fields which can be edited by Customers
 			$data['configurations'] = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
@@ -202,7 +203,7 @@ class GlobalConfigController extends CommonController
 	}
 	
 	public function groupMaster(){
-		// checkGroupAccess("approved_supplier","list");
+		checkGroupAccess("group_master","list","Yes");;
 		$data['groups'] = $this->GlobalConfigModel->getGroupData();
 		// pr($data,1);
 		$this->loadView('admin/group_master', $data);
@@ -233,6 +234,7 @@ class GlobalConfigController extends CommonController
 					"update" => "No",
 					"delete" => "No",
 					"export" => "No",
+					"import" => "No",
 					"diaplay_name" => $value['diaplay_name']
 				];
 			}
@@ -244,7 +246,7 @@ class GlobalConfigController extends CommonController
 		$post_data = $this->input->post();
 		$menu_data = $post_data['menu'];
 		$group_id = $post_data['group_id'];
-		$access_data = ["list","add","update","export","delete"];
+		$access_data = ["list","add","update","export","delete",'import'];
 		$group_menu_right = [];
 		foreach ($menu_data as $key => $value) {
 			$group_master_id = $value['group_master_id'];
@@ -268,10 +270,17 @@ class GlobalConfigController extends CommonController
 		
 		$success = 0;
         $messages = "Something went wrong.";
+        // pr($group_menu_right,1);
 		if(is_array($group_menu_right) && count($group_menu_right)){
 			$this->GlobalConfigModel->deleteGroupRights($group_id);
 			$affected_rows = $this->GlobalConfigModel->insertGroupRights($group_menu_right);
 			if($affected_rows > 0){
+				$group_ids = $this->session->userdata("groups");
+				$group_ids = explode(",",$group_ids);
+				if(in_array($group_id,$group_ids)){
+					$group_rights = $this->GlobalConfigModel->getGroupRightData($group_ids,"");
+					$this->session->set_userdata('group_rights_arr', base64_encode(json_encode($group_rights)));
+				}
 				$success = 1;
 				$messages = "Group Right updated successfully.";
 			}
@@ -376,7 +385,7 @@ class GlobalConfigController extends CommonController
 
 	/* Global Formate */
 	public function globalFormateConfig(){
-		// pr("ok",1);
+		checkGroupAccess("global_formate_config","list","Yes");
 		$data['configurations'] = $this->Crud->read_data("global_formate_configuration");
 		$data['isAromAdmin'] = $this->isAromAdmin;
 		// pr($data,1);

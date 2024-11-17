@@ -25,6 +25,28 @@ class Dashboard extends CommonController
        $data['year'] = $year;
        $data['month_arr'] = [['id'=>'4','val'=>'Apr'],['id'=>'5','val'=>'May'],['id'=>'6','val'=>'Jun'],['id'=>'7','val'=>'Jul'],['id'=>'8','val'=>'Aug'],['id'=>'9','val'=>'Sep'],['id'=>'10','val'=>'Oct'],['id'=>'11','val'=>'Nov'],['id'=>'12','val'=>'Dec'],['id'=>'1','val'=>'Jan'],['id'=>'2','val'=>'Feb'],['id'=>'3','val'=>'Mar']];
        $data['customer_type'] = $this->session->userdata("AROMCustomerType");
+
+       // get active menu
+       $selected_menu = "";
+       if(checkGroupAccess("dashboard_ba","list",false)){
+            $selected_menu = "dashboard_ba";
+       }else if(checkGroupAccess("dashboard_sales","list",false)){
+            $selected_menu = "dashboard_sales";
+       }else if(checkGroupAccess("dashboard_account","list",false)){
+            $selected_menu = "dashboard_account";
+       }else if(checkGroupAccess("dashboard_purchase_grn","list",false)){
+            $selected_menu = "dashboard_purchase_grn";
+       }else if(checkGroupAccess("dashboard_store","list",false)){
+            $selected_menu = "dashboard_store";
+       }else if(checkGroupAccess("dashboard_subcon","list",false)){
+            $selected_menu = "dashboard_subcon";
+       }else if(checkGroupAccess("dashboard_production","list",false)){
+            $selected_menu = "dashboard_production";
+       }else if(checkGroupAccess("dashboard_quality","list",false)){
+            $selected_menu = "dashboard_quality";
+       }
+       $data['selected_menu'] = $selected_menu;
+       $data['isMultipleClientUnits'] = $this->session->userdata("isMultipleClientUnits");
        $this->loadView("dashboard/dashboard",$data);
     }
      public function get_dashboard_widget_data()

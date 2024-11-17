@@ -125,7 +125,7 @@
 
                 </tr>
               </thead>
-              <tbody style="max-height: 20em;">
+              <tbody >
                 <%assign var='i' value=1%>
                 <%if ($inwarding_data) %>
                 <%foreach from=$inwarding_data item=t %>
@@ -276,6 +276,12 @@
                                                   type="hidden"
                                                   value="<%$new_po_id %>"
                                                   name="new_po_id"
+                                                  readonly="readonly"
+                                                  required="required">
+                                              <input
+                                                  type="hidden"
+                                                  value="<%$t->invoice_number %>"
+                                                  name="invoice_number"
                                                   readonly="readonly"
                                                   required="required">
                                               <strong>Are you sure want to delete this invoice?</strong>

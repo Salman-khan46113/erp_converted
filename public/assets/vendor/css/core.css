@@ -29363,7 +29363,7 @@ a.bg-vimeo:hover,a.bg-vimeo:focus {
   border: none !important;
 }
 
-
+/*
 .scrollable tbody,
 .scrollable th,
 .scrollable td
@@ -29406,7 +29406,7 @@ a.bg-vimeo:hover,a.bg-vimeo:focus {
 .scrollable tbody td
 {
 	border-top: none;
-}
+}*/
 
 .scrollable th:not(:last-child),
 .scrollable td:not(:last-child)
@@ -29432,17 +29432,19 @@ a.bg-vimeo:hover,a.bg-vimeo:focus {
 
 .dataTables_scrollBody tbody{
     max-height: unset;
+    max-height: 47px !important;
 }
 .table-container ,.table-responsive {
    
-    width: 100% !important;
+        width: 100.1% !important;
     
     overflow-y: clip; /* Enables vertical scrolling */
     overflow-x: auto; /* Enables horizontal scrolling */
-    border: 1px solid #ddd; /* Optional: for visual separation */
+    border: 0px solid #ddd; /* Optional: for visual separation */
 }
 .dataTables_scrollBody table {
-    /*min-height: 581px !important;*/
+   /* min-height: 581px !important;
+    max-height: 47px !important;*/
 }
 table.dataTable.no-footer {
     border-bottom: 0px solid #111 !important;

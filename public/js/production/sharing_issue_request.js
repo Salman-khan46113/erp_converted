@@ -28,7 +28,7 @@ const page = {
                             var lines = csv.split('\n');
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
-                                // values.splice(5, 2);
+                                values.splice(0, 1);
                                 return values.join(',');
                             });
                             return modifiedLines.join('\n');
@@ -70,7 +70,7 @@ const page = {
                                 }
                                 cell.alignment = alignment;
                             });
-                            // row.splice(5, 2);
+                            row.splice(0,1);
                         });
                     }
                 },
@@ -96,6 +96,7 @@ const page = {
             info: true,
             autoWidth: true,
             lengthChange: true,
+            // order: sorting_column,
             ajax: {
                 data: {'search':data},    
                 url: "sheetProdController/get_sharing_issue_request_data",
@@ -114,6 +115,17 @@ const page = {
     },
     filter: function(){
         let that = this;
+        $('#date_range_filter').daterangepicker({
+            singleDatePicker: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: 'YYYY/MM/DD' // Change this format as per your requirement
+            }
+        });
+        dateRangePicker = $('#date_range_filter').data('daterangepicker');
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
         $(".search-filter").on("click",function(){
             table.destroy(); 
             that.dataTable();
@@ -126,12 +138,15 @@ const page = {
     serachParams: function(){
         var created_year_search = $("#created_year_search").val();
         var created_month_search = $("#created_month_search").val();
-        var params = {created_year:created_year_search,created_month:created_month_search};
+        var date_range = $("#date_range_filter").val();
+        var params = {created_year:created_year_search,created_month:created_month_search,date_range:date_range};
         return params;
     },
     resetFilter: function(){
         $("#created_year_search").val('').trigger('change');
         $("#created_month_search").val('').trigger('change');
+         dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
         table.destroy(); 
         this.dataTable();
     },

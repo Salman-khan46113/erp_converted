@@ -272,7 +272,7 @@
           </div>
           <!-- /.row -->
         </div>
-        <div class="card p-0 mt-4">
+        <div class="card p-0 mt-4 ">
         <div class="tabTitle position-relative">
         <h2 id="cc_sh_sys_static_field_3" style="    width: 98%;
 ">
@@ -291,7 +291,7 @@
         </h2>
         
     </div>
-        <table class="table table-striped" id="inwarding_details_tbl">
+        <table class="table table-striped w-100" id="inwarding_details_tbl">
         <thead>
           <tr>
              <!--<th>Sr No</th> -->

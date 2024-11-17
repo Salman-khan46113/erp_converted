@@ -10,6 +10,7 @@ class ProdMasterController extends CommonController {
 	
 	public function shifts()
 	{
+		checkGroupAccess("shifts","list","Yes");
 		$data['shifts'] = $this->Crud->read_data("shifts",true);
 		$this->loadView('admin/shifts', $data);
 	}
@@ -56,6 +57,7 @@ class ProdMasterController extends CommonController {
 	 */
 	public function operator()
 	{
+		checkGroupAccess("operator","list","Yes");
 		$data['operator'] = $this->Crud->read_data("operator",true);
 		$this->loadView('admin/operator', $data);
 	}
@@ -101,6 +103,7 @@ class ProdMasterController extends CommonController {
 
 	public function machine()
 	{
+		checkGroupAccess("machine","list","Yes");
 		$data['machine'] = $this->Crud->read_data("machine",true);
 		$this->loadView('admin/machine', $data);	
 	}

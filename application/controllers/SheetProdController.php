@@ -294,7 +294,7 @@ class SheetProdController extends ProductionController
 
 	public function view_p_q()
 	{
-
+		checkGroupAccess("view_p_q","list","Yes");
 		$clientId = $this->Unit->getSessionClientId();
 		$data['p_q'] = $this->Crud->customQuery('SELECT 
 					p.*, 
@@ -329,7 +329,14 @@ class SheetProdController extends ProductionController
             $data['p_q'][$key]->output_part_data = $output_part_data;
 
 		}
-		$data['inhouse_parts'] = $this->InhouseParts->readInhousePartsOnly();
+		$inhouse_parts = [];
+		foreach ($data['p_q'] as $key => $value) {
+			$output_part_data = $value->output_part_data;
+			if(!in_array($output_part_data[0]->part_number."/".$output_part_data[0]->part_description, $inhouse_parts)){
+				$inhouse_parts[] = $output_part_data[0]->part_number."/".$output_part_data[0]->part_description;
+			}
+		}
+		$data['inhouse_parts'] = $inhouse_parts;
 		$data['machine_data'] = $this->Crud->read_data("machine", true);
 		$this->loadView('store/p_q', $data);
 	}
@@ -358,12 +365,12 @@ class SheetProdController extends ProductionController
 			"output_part_table_name" => $output_part_table_name,
 			"machine_id" => $machine_id,
 		);
+		// pr($data_to_check,1);
 
 		$routing_data = $this->Common_admin_model->get_data_by_id_multiple_condition_count_new("p_q", $data_to_check);
-		// print_r($routing_data);
 		$success = 0;
         $messages = "Something went wrong.";
-		if ($routing_data == 0) {
+		if ($routing_data > 0) {
 			$messages = "already present"; 
 			// echo "<script>alert('already present');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
 		} else {
@@ -373,6 +380,7 @@ class SheetProdController extends ProductionController
 				$operations_bom_inputs_data = $this->Crud->get_data_by_id("operations_bom_inputs", $this->input->post('output_part_id'), "operations_bom_id");
 				$req_qty = 0;
 				$flag = 0;
+
 				if ($operations_bom_inputs_data) {
 					foreach ($operations_bom_inputs_data as $oib) {
 						if ($oib->input_part_table_name == "inhouse_parts") {
@@ -394,7 +402,9 @@ class SheetProdController extends ProductionController
 							$messages = "part Not Found <br>";
 						}
 					}
+					
 					if ($flag == 0) {
+
 						foreach ($operations_bom_inputs_data as $oib) {
 							if ($oib->input_part_table_name == "inhouse_parts") {
 								$output_part_data = $this->InhouseParts->getInhousePartById($oib->input_part_id);
@@ -479,6 +489,7 @@ class SheetProdController extends ProductionController
 
 	 public function sharing_p_q()
 	{
+		checkGroupAccess("sharing_p_q","list","Yes");
 		$clientId = $this->Unit->getSessionClientId();
 
 		//Get the details per unit using machine id reference
@@ -562,9 +573,16 @@ class SheetProdController extends ProductionController
 	
 	public function sharing_issue_request()
 	{
-
+		checkGroupAccess("sharing_issue_request","list","Yes");
 
 		/* datatable */
+		$column[] = [
+            "data" => "id",
+            "title" => "id",
+            "width" => "24%",
+            "className" => "dt-left",
+            "visible" => false
+        ];
         $column[] = [
             "data" => "part_number",
             "title" => "Part Number",
@@ -620,12 +638,16 @@ class SheetProdController extends ProductionController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Part GRN data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
+        $data["sorting_column"] = json_encode([0, 'desc']);
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
         // $ajax_json['teacher_data'] = $this->session->userdata();
         // pr($ajax_json['designation'],1);
+        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
 		$this->loadView('store/sharing_issue_request', $data,"Yes","Yes");
 
 		$created_month  = $this->input->post("created_month");

@@ -61,10 +61,12 @@
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
        <a href="<%base_url('download_stock_variance')%>" class="btn btn-info">Download Stock Variance </a>
-      <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i
-          class="ti ti-file-type-csv"></i></button>
-      <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i
+       <%if checkGroupAccess("part_stocks","export","No")%>
+        <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i
+            class="ti ti-file-type-csv"></i></button>
+        <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i
           class="ti ti-file-type-pdf"></i></button>
+        <%/if%>
       <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter"></i></i></button>
       <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
     </div>

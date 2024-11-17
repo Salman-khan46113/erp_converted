@@ -1,20 +1,29 @@
-
-$(document).ready(function() {
-    page.init();
-});
-
 var table = '';
-var file_name = "accept_reject_validation";
-var pdf_title = "accept_reject_validation";
-
+var file_name = "sales_report";
+var pdf_title = "Sales Report";
+// var myModal = new bootstrap.Modal(document.getElementById('child_part_update'))
 const page = {
-    init: function() {
+    init: function(){
         this.dataTable();
-        this.filter();
+        $('#date_range_filter').daterangepicker({
+               singleDatePicker: true,
+               showDropdowns: true,
+               autoApply: true,
+               locale: {
+                   format: 'DD/MM/YYYY' // Change this format as per your requirement
+               }
+        });
+        $("#date_range_filter").on("change",function(){
+            var date = $(this).val();
+            if (table && date) {
+                table.column(3).search(date).draw();
+            }
+        })
+        $("#date_range_filter").trigger("change")
     },
     dataTable: function() {
         var data = {};
-        table = $("#accept_reject_validation").DataTable({
+        table = $("#view_po_by_supplier_id_table").DataTable({
         dom: "Bfrtilp",
         buttons: [
             {
@@ -27,7 +36,7 @@ const page = {
                         var lines = csv.split('\n');
                         var modifiedLines = lines.map(function(line) {
                             var values = line.split(',');
-                            values.splice(8, 1);
+                            values.splice(7, 1);
                             return values.join(',');
                         });
                         return modifiedLines.join('\n');
@@ -51,7 +60,7 @@ const page = {
                         cell.fillColor = theme_color;
                     });
                     doc.content[1].table.body.forEach(function (row, index) {
-                        row.splice(8, 1);
+                        row.splice(7, 1);
                         row.forEach(function (cell) {
                             // Set alignment for each cell
                             cell.alignment = "center"; // Change to 'left' or 'right' as needed
@@ -64,10 +73,13 @@ const page = {
         // scrollX: true,
         scrollY: true,
         bScrollCollapse: true,
-        columnDefs: isMultiClient == true ? [{ sortable: false, targets: 8}] : [{ sortable: false, targets: 7 }],
+        columnDefs: [{ sortable: false, targets: 5 }],
         pagingType: "full_numbers",
        
         
+        });
+        $('#serarch-filter-input').on('keyup', function() {
+            table.search(this.value).draw();
         });
         $('.dataTables_length').find('label').contents().filter(function() {
                 return this.nodeType === 3; // Filter out text nodes
@@ -77,33 +89,16 @@ const page = {
                 minimumResultsForSearch: Infinity
             });
         },1000)
-        this.serachParams();
+
         // global searching for datable 
         $('#serarch-filter-input').on('keyup', function() {
             table.search(this.value).draw();
         });
             // table = $('#example1').DataTable();
-    },
-    filter: function(){
-        let that = this;
-        $(".search-filter").on("click",function(){
-            that.serachParams();
-            $(".close-filter-btn").trigger( "click" )
-        })
-        $(".reset-filter").on("click",function(){
-            that.resetFilter();
-        })
-    },
-    serachParams: function(){
-        let status= $('#status_search').val();
-        // Ensure that the table and column exist before applying the search
-        if (table && status) {
-            table.column(6).search(status).draw();
-        }
-    },
-    resetFilter: function(){
-        $('#status_search').val('');
-        table.column(6).search('').draw();
-        $('.close-filter-btn').trigger('click');
-    }
-};
+      },
+    
+}
+
+$( document ).ready(function() {
+    page.init();
+});

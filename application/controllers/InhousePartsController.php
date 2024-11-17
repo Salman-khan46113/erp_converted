@@ -26,6 +26,7 @@ class InhousePartsController extends CommonController
 
 
 	public function inhouse_parts_view() {
+		checkGroupAccess("inhouse_parts_view","list","Yes");
 		$data['uom'] = $this->Crud->read_data("uom");
 		// $data['child_part_master'] = $this->Crud->customQuery("SELECT parts.*, stock.*, u.uom_name 
 		// 	FROM `inhouse_parts` parts
@@ -175,13 +176,16 @@ class InhousePartsController extends CommonController
 
 		foreach ($data as $key => $value) {
 			$part_edit_data =  base64_encode(json_encode($value));
-			$data[$key]['action'] = "<i class='ti ti-edit edit-parts-data' data-parts='".$part_edit_data."'></i>";
+			$data[$key]['action'] = display_no_character("");
+			if(checkGroupAccess("inhouse_parts_view","update","No")){
+				$data[$key]['action'] = "<i class='ti ti-edit edit-parts-data' data-parts='".$part_edit_data."'></i>";
+			}
 		}
 		$data["data"] = $data;
         $total_record = $this->InhouseParts->get_inhouse_parts_view_data_Count([], $post_data["search"]);
 
-        $data["recordsTotal"] = count($total_record);
-        $data["recordsFiltered"] = count($total_record);
+        $data["recordsTotal"] = $total_record['total_record'];
+        $data["recordsFiltered"] = $total_record['total_record'];
         echo json_encode($data);
 	}
 
@@ -360,6 +364,7 @@ class InhousePartsController extends CommonController
 	 */
 	public function inhouse_parts_admin($part_id_selected = null)
 	{
+		checkGroupAccess("inhouse_parts_admin","list","Yes");
 		$data['child_parts_list_distinct'] = $this->Crud->customQuery('SELECT DISTINCT part_number,part_description,id FROM `inhouse_parts` ');
 		
 		if(empty($part_id_selected)){
@@ -422,7 +427,7 @@ class InhousePartsController extends CommonController
 
 	public function _part_stocks_inhouse($filter_part_id)
 	{
-		
+		checkGroupAccess("part_stocks_inhouse","list","Yes");
 		$data['filter_part_id'] = $filter_part_id;
 		$data['customer_part_list'] = $this->InhouseParts->getUniquePartNumber();
 		// if(!empty($filter_part_id)){

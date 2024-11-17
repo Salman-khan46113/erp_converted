@@ -1152,10 +1152,12 @@ class ExportController extends CommonController
     public function import_operation_bom(){
        $customer_id = $this->input->post('customer_id');
        $uploadedDoc = $this->input->post('uploadedDoc');
-
+       $success = 0;
+       $messages = "Something went wrong.";
        //only valid types are allowed.
        if($this->isValidUploadFileType()=="false"){
-            $this->addErrorMessage("Only Excel sheets are allowed.");
+        $messages = "Only Excel sheets are allowed.";
+            // $this->addErrorMessage("Only Excel sheets are allowed.");
        } else {
         if (!empty($_FILES["uploadedDoc"]["name"])) {
                 $error;
@@ -1268,7 +1270,7 @@ class ExportController extends CommonController
                                                 $oldOutptPartType = $bom_item['out_part_type'];
                                                 $oldOutptPartNo = $bom_item['out_part_no'];
 
-                                                echo "<br>bom_item['out_part_no']: ".$bom_item['out_part_no'];
+                                                // echo "<br>bom_item['out_part_no']: ".$bom_item['out_part_no'];
 
                                                 $isOutputPartSame = false;
                                                 if ('Inhouse' == $bom_item['out_part_type']) {
@@ -1313,7 +1315,7 @@ class ExportController extends CommonController
                                             }
 
                                             //input and outpart is valid so move ahead
-                                            echo ", validPart: ".$validPart;
+                                            // echo ", validPart: ".$validPart;
 
                                             if($validPart == true) {
                                                     $bom_data = array(
@@ -1400,21 +1402,29 @@ class ExportController extends CommonController
                                 if (!empty($successCount)) {
                                     $error = $error . "<br> Successfully added records for rows :" . $successCount;
                                 }
-                                $this->addErrorMessage($error);
+                                $messages = $error;
+                                // $this->addErrorMessage($error);
                             }else{
-                                $this->addSuccessMessage("Data imported successfully.");
+                                $messages = "Data imported successfully.";
+                                $success = 1;
+                                // $this->addSuccessMessage("Data imported successfully.");
                             }
 
                     } catch (Exception $e) {
-                        die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME). '": ' .$e->getMessage());
+                        $messages = 'Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME). '": ' .$e->getMessage();
+                        // die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME). '": ' .$e->getMessage());
                     }
                 
                 }
                 //for view pages
                 $data['customers'] = $this->Crud->read_data("customer");              
             }
-            
-            $this->getPage('customer_master',$data);
+            $result = [];
+            $result['messages'] = $messages;
+            $result['success'] = $success;
+            echo json_encode($result);
+            exit();
+            // $this->getPage('customer_master',$data);
         }
 
 }

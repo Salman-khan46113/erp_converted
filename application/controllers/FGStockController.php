@@ -23,6 +23,7 @@ class FGStockController extends CommonController
 
 	public function fg_stock()
 	{
+		checkGroupAccess("fw_stock","list","Yes");
 		$part_id = $this->input->post("part_id");
 		$data['inhouse_parts'] = $this->InhouseParts->getUniquePartNumber();
 		$data['customer_parts'] = $this->CustomerPart->readCustomerParts();
@@ -129,9 +130,14 @@ class FGStockController extends CommonController
         );
 		// pr($data,1);
 		foreach ($data as $key => $value) {
-			$data[$key]['transfer_to_inhouse_part'] = "<button type='button' class='btn btn-primary fg-transfer'  data-stock='".$value['fg_stock']."' data-customer-part-id='".$value['customer_parts_master_id']."' data-part-number='".$value['part_number']."'>
+			
+            if(checkGroupAccess("fw_stock","update","No")){
+            	$data[$key]['transfer_to_inhouse_part'] = "<button type='button' class='btn btn-primary fg-transfer'  data-stock='".$value['fg_stock']."' data-customer-part-id='".$value['customer_parts_master_id']."' data-part-number='".$value['part_number']."'>
                     Transfer To Inhouse
                   </button>";
+            }else{
+            	$data[$key]['transfer_to_inhouse_part'] = display_no_character();
+            }
 		}
 		$data["data"] = $data;
         $total_record = $this->CustomerPart->get_fg_stock_view_count([], $post_data["search"]);
@@ -190,6 +196,7 @@ class FGStockController extends CommonController
 
 	public function customer_parts_admin($part_id_selected = null)
 	{
+        checkGroupAccess("customer_parts_admin","list","Yes");
 		$data['child_parts_list_distinct']  = $this->CustomerPart->getUniquePartNumber();
 		if(empty($part_id_selected)){
 			$part_id_selected = $this->input->post("part_id_selected");

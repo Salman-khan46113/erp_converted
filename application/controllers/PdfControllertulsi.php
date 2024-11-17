@@ -317,7 +317,6 @@ class PdfControllertulsi extends CommonController
         // pr($new_po_data['po_number'],1);
         // echo "<br>";
         $supplier_data = $this->Crud->get_data_by_id("supplier", $new_po_data[0]->supplier_id, "id");
-        // print_r($supplier_data);
         // 
         $discount = ($discount_value != null && $discount_value != "") ? $discount_value : "";
 
@@ -733,7 +732,7 @@ class PdfControllertulsi extends CommonController
                                         <td width="100%" style="text-align:left;font-size:10.6px;" >' . $billing_address . ' </td>
                                     </tr>
                                     <tr>
-                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>GSTIN- </b>' . $supplier_data[0]->gst_number . '</td>
+                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>GSTIN- </b>' . $client_data[0]->gst_number . '</td>
                                     </tr>
                                    
                                     <tr>
@@ -750,7 +749,7 @@ class PdfControllertulsi extends CommonController
                                         <td width="100%" style="text-align:left;font-size:10.6px;" >' . $shipping_address . ' </td>
                                     </tr>
                                     <tr>
-                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>GSTIN- </b>' . $supplier_data[0]->gst_number . '</td>
+                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>GSTIN- </b>' . $client_data[0]->gst_number . '</td>
                                     </tr>
                                     <tr>
                                         <td width="100%" style="text-align:left;font-size:10.6px;" ><b>STATE: </b>  ' . $client_data[0]->state . '</td>
@@ -2105,6 +2104,8 @@ TECHNIQUE </td>
         $debit_note_id = $this->uri->segment('2');
         $client_data = $this->Unit->getClientUnitDetails();
         $rejection_flow_data = $this->Crud->get_data_by_id("rejection_flow", $debit_note_id, "id");
+        $invoice_data = $this->Crud->get_data_by_id("inwarding", $rejection_flow_data[0]->grn_number, "grn_number");
+        $rejection_flow_data[0]->invoice_number = $invoice_data[0]->invoice_number;
         $type = "";
         if ($rejection_flow_data[0]->type == "stock_rejection") {
             $type = "Stock Rejection";
@@ -2138,8 +2139,11 @@ TECHNIQUE </td>
         $i = 1;
         foreach ($rejection_flow_data as $p) {
             $p->part_id;
-            // echo "<br>";
+            if($p->part_id > 0){
             $child_part_data = $this->SupplierParts->getSupplierPartById($p->part_id);
+            }else{
+                $child_part_data = [];
+            }
             $data_old = array(
                 'supplier_id' => $rejection_flow_data[0]->supplier_id,
                 'child_part_id' => $p->part_id,
@@ -2306,7 +2310,7 @@ TECHNIQUE </td>
         <b>Vehicle No : </b><br>
         <b>Date & Time : </b> <br>
         </td>
-        <td colspan="5"><b>INVOICE NO. ' . $rejection_flow_data[0]->invoice_number . '</b>:-
+        <td colspan="5"><b>INVOICE NO. </b>:-' . $rejection_flow_data[0]->invoice_number . '
         <br>
         <b> INVOICE DATE . ' . $rejection_flow_data[0]->po_date . '</b>:<br>
         <b> P.O. NO : ' . $rejection_flow_data[0]->po_number . '</b><br>

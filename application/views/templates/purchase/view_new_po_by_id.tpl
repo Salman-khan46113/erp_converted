@@ -19,7 +19,7 @@
                <div class="col-12">
                   <div class="card">
                      <div class="card-header">
-                        <%if (count($grn_part_arr) == 0) %>
+                        <%if (count($grn_part_arr) == 0 && $status_value != "Expired") %>
                         <form action="<%base_url('update_po')%>" method="post" id="update_po" class="update_po custom-form">
                            <div class="row">
                               <div class="col-lg-4">
@@ -314,20 +314,20 @@
                      <%/if%>
                      <div class="card-header">
                         <%if ($po_parts) %>
-                           <%if ($new_po[0]->status == "accept") %>
+                           <%if ($new_po[0]->status == "accept" && $status_value != "Expired") %>
                                  <button type="button" class="btn btn-danger ml-1" data-bs-toggle="modal" data-bs-target="#lock">
                                  UnLock PO
                                  </button>
                            <%/if%>
                         <%/if%>
-                        <%if ($new_po[0]->status == "pending") %>
+                        <%if ($new_po[0]->status == "pending" && $status_value != "Expired") %>
                            <%if ($user_type == 'admin' || $user_type == 'Admin') %>
                                  <button type="button" class="btn btn-success ml-1" data-bs-toggle="modal" data-bs-target="#accept">
                                  Approve & Release PO
                                  </button>
                            <%/if%>
                         <%else %>
-                           <%if ($new_po[0]->status != "pending") %>
+                           <%if ($new_po[0]->status != "pending" ) %>
                               <a href="<%base_url('download_my_pdf/') %><%$new_po[0]->id %>" class="btn btn-primary" href="">Download</a>
                            <%/if%>
                         <%/if%>

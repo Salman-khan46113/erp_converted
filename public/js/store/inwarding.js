@@ -9,11 +9,12 @@ var pdf_title = "Inwarding List";
 const page = {
     init: function() {
         // inwarding_grn
+        this.filter();
         this.dataTable();
         this.closePo();
     },
     dataTable: function(){
-        var data ={};
+        var data = this.serachParams();
         table = new DataTable("#inwarding_grn", {
             dom: "Bfrtilp",
             buttons: [
@@ -171,5 +172,37 @@ const page = {
 					}
 			})
 		});
-    }
+    },
+    filter: function(){
+        let that = this;
+        $('#date_range_filter').daterangepicker({
+            singleDatePicker: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: 'YYYY/MM/DD' // Change this format as per your requirement
+            }
+        });
+        dateRangePicker = $('#date_range_filter').data('daterangepicker');
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
+        $(".search-filter").on("click",function(){
+            table.destroy(); 
+            that.dataTable();
+            $(".close-filter-btn").trigger( "click" )
+        })
+        $(".reset-filter").on("click",function(){
+            that.resetFilter();
+        })
+    },
+    serachParams: function(){
+        var date_range_filter = $("#date_range_filter").val();
+        var params = {date_range_filter:date_range_filter};
+        return params;
+    },
+    resetFilter: function(){
+        $('#date_range_filter').data('daterangepicker').setStartDate(moment().format('YYYY-MM-DD'));
+        table.destroy(); 
+        this.dataTable();
+    },
 };

@@ -634,6 +634,7 @@ class PlanningController extends CommonController
 
 	public function planning_shop_order_details()
 	{
+		checkGroupAccess("planning_shop_order_details","list","Yes");
 		$filter_month = $this->input->post('filter_month');
 		$filter_year = $this->input->post('filter_year');
 		$selected_customer = $this->input->post('selected_customer');

@@ -36,7 +36,7 @@ class SalesController extends CommonController
 	   $data['new_sales'] = $this->Crud->read_data_with_limit("new_sales",$config["per_page"], $page);
 	   $data["links"] = $this->pagination->create_links();
 	*/
-
+	    checkGroupAccess("sales_invoice_released","list","Yes");
 		$created_month = $this->input->post('created_month');
 		$created_year = $this->input->post('created_year');
 
@@ -116,6 +116,7 @@ class SalesController extends CommonController
 
 	public function new_sales($reused_sales_no=null)
 	{
+		checkGroupAccess("new_sales","list","Yes");
 		if(!empty($reused_sales_no)){
 			$data['reused_sales_no'] = $reused_sales_no;
 		}else{
@@ -350,7 +351,7 @@ class SalesController extends CommonController
 		parts_customer_trackings as po_parts 
 		WHERE po.status = "pending" AND po.customer_id =' . $data['new_sales'][0]->customer_id . '
 		 AND po.id = po_parts.customer_po_tracking_id AND po_parts.part_id = ' . $data['new_sales'][0]->customer_part_id);
-
+		// pr($data['customer_tracking'],1);
 		//old -> $data['customer_tracking'] = $this->Crud->get_data_by_id("customer_po_tracking", $data['new_sales'][0]->customer_id, 'customer_id');
 
 		
@@ -810,6 +811,7 @@ class SalesController extends CommonController
 
 	public function sales_report()
 	{
+		checkGroupAccess("sales_report","list","Yes");
 		if (isset($_POST['export'])) {
 			$success = 0;
 	        $message = '';
@@ -1164,6 +1166,7 @@ class SalesController extends CommonController
 
 	public function rejection_invoices()  
 	{
+		checkGroupAccess("rejection_invoices","list","Yes");
 		$sales_id = $this->uri->segment('2');
 
 		$data['new_sales'] = $this->Crud->get_data_by_id("new_sales", $sales_id, "id");
@@ -2412,7 +2415,7 @@ class SalesController extends CommonController
 
 	public function receivable_report()
 	{
-
+		checkGroupAccess("receivable_report","list","Yes");
 		$data['customers'] = $this->Crud->read_data("customer");
 		$data['selected_customer_part_id'] = $customer_part_id;
 
@@ -2650,7 +2653,10 @@ class SalesController extends CommonController
 		
 		foreach ($data as $key => $value) {
 			$edit_data = base64_encode(json_encode($value)); 
-			$data[$key]['action'] = "<i class='ti ti-edit edit-part' title='Edit' data-value='$edit_data'></i>";
+			$data[$key]['action'] = display_no_character("");
+			if(checkGroupAccess("receivable_report","update","No")){
+				$data[$key]['action'] = "<i class='ti ti-edit edit-part' title='Edit' data-value='$edit_data'></i>";
+			}
 		}
 
 		$data["data"] = $data;

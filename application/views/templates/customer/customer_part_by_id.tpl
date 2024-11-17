@@ -19,16 +19,16 @@
         <!-- Dashboard -->
         <div class="filter-row">
           <li class="nav-small-cap">
-            <span class="hide-menu">Select Customer</span>
+            <span class="hide-menu">Customer Part</span>
             <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
           </li>
           <li class="sidebar-item">
             <div class="input-group">
               <select name="customer_name" class="form-control select2" id="customer_name">
-              <%foreach $customers as $val%>
+              <%foreach $customer_part_list as $val%>
               <option 
-                  value="<%$val->customer_name%>"><%$val->customer_name%></option>
-          <%/foreach%>
+                  value="<%$val->part_number%>"><%$val->part_number%></option>
+                <%/foreach%>
               </select>
             </div>
           </li>
@@ -66,8 +66,10 @@
 <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
 <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
 </div>
-
-    <div class="content-wrapper">
+<div class="w-100">
+    <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
+  </div>
+    <div class="content-wrapper w-100">
         <!-- Content Header (Page header) -->
       
         <!-- Main content -->
@@ -93,7 +95,7 @@
                                                 <div class="row" >
                                                     <div class="col-lg-6">
                                                         <div class="form-group">
-                                                            <label for="">Select Part <span class="text-danger">*</span></label>
+                                                            <label for="">Part <span class="text-danger">*</span></label>
                                                             <select name="customer_parts_master_id" class="required-input form-control select2" style="width: 100%;">
                                                                 <%if $customer_parts_master%>
                                                                     <%foreach from=$customer_parts_master item=c%>
@@ -109,10 +111,11 @@
                                                             <input type="text" name="hsn_code" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
                                                         </div>
                                                     </div>
-                                                    <div class="col-lg-6">
+                                                    <div class="col-lg-6 hide">
                                                         <div class="form-group">
                                                             <label> Part Family </label><span class="text-danger">*</span>
                                                             <select readonly class="form-control select2 required-input" name="part_family" style="width: 100%;">
+                                                                <option value="NA" selected>NA</option>
                                                                 <%if $part_family%>
                                                                     <%foreach from=$part_family item=p%>
                                                                         <option value="<%$p->name%>"><%$p->name%></option>
@@ -123,7 +126,7 @@
                                                     </div>
                                                     <div class="col-lg-6">
                                                         <div class="form-group">
-                                                            <label> Select Tax Structure </label><span class="text-danger">*</span>
+                                                            <label> Tax Structure </label><span class="text-danger">*</span>
                                                             <select class="form-control select2" name="gst_id" style="width: 100%;">
                                                                 <%foreach from=$gst_structure item=c%>
                                                                     <option value="<%$c->id%>"><%$c->code%></option>
@@ -222,8 +225,9 @@
                                                         <%/if%>
                                                         <div class="col-lg-6">
                                                         <div class="form-group">
-                                                            <label> Select Type </label><span class="text-danger">*</span>
+                                                            <label> Customer Po Type </label><span class="text-danger">*</span>
                                                             <select class="form-control select2 required-input" name="type" style="width: 100%;">
+                                                                <option value="">Select Customer Po Type</option>
                                                                 <option value="standard_po">Standard PO</option>
                                                                 <option value="subcon_po">Subcon Po</option>
                                                             </select>
@@ -231,7 +235,7 @@
                                                     </div>
                                                     <div class="col-lg-6">
                                                         <div class="form-group">
-                                                            <label>Select Is Service </label><span class="text-danger">*</span>
+                                                            <label>Is Service </label><span class="text-danger">*</span>
                                                             <select class="form-control select2  required-input"  name="isservice" style="width: 100%;">
                                                                 <option value="">Select</option>
                                                                 <option value="Y">YES</option>
@@ -258,7 +262,7 @@
                                     <thead>
                                         <tr>
                                             <!-- <th>Sr. No.</th> -->
-                                            <th>Add Production</th>
+                                            <!-- <th>Add Production</th> -->
                                             <th>Customer Name</th>
                                             <th>Part Number</th>
                                             <th>Part Description</th>
@@ -296,7 +300,7 @@
                                                
                                                 <tr>
                                                     <!--<td><%$i%></td> -->
-                                                    <td>
+                                                    <%*<td>
                                                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPromo">
                                                             Add Production Qty
                                                         </button>
@@ -392,7 +396,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </td>
+                                                    </td> *%>
                                                     <td><%$customer_data[0]->customer_name%></td>
                                                     <td><%$po[$poo->id][0]->part_number%></td>
                                                     <td><%$po[$poo->id][0]->part_description%></td>
@@ -441,20 +445,20 @@
                                                                                 </div>
                                                                                 <div class="col-lg-6">
                                                                                     <div class="form-group">
-                                                                                        <label>Select Type </label><span class="text-danger">*</span>
+                                                                                        <label>Customer Po Type </label><span class="text-danger">*</span>
                                                                                         <select class="form-control select2 required-input" name="type" style="width: 100%;">
                                                                                             <option value="standard_po" <%if $po[$poo->id][0]->type == 'standard_po'%>selected<%/if%>>Standard PO</option>
                                                                                             <option value="subcon_po" <%if $po[$poo->id][0]->type == 'subcon_po'%>selected<%/if%>>Subcon Po</option>
                                                                                         </select>
                                                                                     </div>
                                                                                 </div>
-                                                                                <div class="col-lg-6">
+                                                                                <div class="col-lg-6 hide">
                                                                                     <div class="form-group">
                                                                                         <label> Part Family </label><span class="text-danger">*</span>
                                                                                         <select readonly class="form-control select2" name="part_family required-input" style="width: 100%;">
+                                                                                            <option value="NA" selected>NA</option>
                                                                                             <%if $part_family%>
                                                                                                 <%foreach from=$part_family item=p%>
-                                                                                                
                                                                                                 
                                                                                                     <option value="<%$p->name%>" <%if ($p->name == $po[$poo->id][0]->part_family)%> selected<%/if%>><%$p->name%></option>
                                                                                                 <%/foreach%>
@@ -607,6 +611,10 @@
     <!-- /.content-wrapper -->
 </div>
 
-
+<script type="text/javascript">
+    var isSheetMetal = <%$entitlements.isSheetMetal|@json_encode%>;
+    var isPlastic = <%$entitlements.isPlastic|@json_encode%>;
+    var TusharEngg = <%$TusharEngg|@json_encode%>;
+</script>
 
 <script src="<%$base_url%>/public/js/planning_and_sales/customer_part.js"></script>
