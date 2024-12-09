@@ -266,7 +266,7 @@ class Reports_model extends CI_Model {
 		// Apply conditions
 		$this->db->where('sales.clientId', $this->Unit->getSessionClientId());
 		$this->db->where("sales.sales_number NOT LIKE 'TEMP%'", NULL, FALSE);
-		$this->db->where_not_in('sales.status', ['pending']);
+		$this->db->where_not_in('sales.status', ['pending','unlocked']);
 		if (count($condition_arr) > 0) {
             $this->db->limit($condition_arr["length"], $condition_arr["start"]);
             if ($condition_arr["order_by"] != "") {
@@ -351,7 +351,7 @@ class Reports_model extends CI_Model {
 			// Apply conditions
 			$this->db->where('sales.clientId', $this->Unit->getSessionClientId());
 			$this->db->where("sales.sales_number NOT LIKE 'TEMP%'", NULL, FALSE);
-			$this->db->where_not_in('sales.status', ['pending']);
+			$this->db->where_not_in('sales.status', ['pending','unlocked']);
 
 		if (is_array($search_params) && count($search_params) > 0) {
             if ($search_params["customer_part_id"] != "") {

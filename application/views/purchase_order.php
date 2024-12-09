@@ -354,14 +354,14 @@
                                                     $cgst = $this->Crud->get_data_by_id("gst_structure", $po->cgst_id, "id");
                                                     $sgst = $this->Crud->get_data_by_id("gst_structure", $po->sgst_id, "id");
 
-                                                    $cgst = (int)$cgst[0]->value;
-                                                    $sgst = (int)$sgst[0]->value;
+                                                    $cgst = $cgst[0]->value;
+                                                    $sgst = $sgst[0]->value;
                                                     $gst_value = (($total * $cgst) / 100) + (($total * $sgst) / 100);
                                                 } else if ($po->cgst_id == "N/A" && $po->sgst_id == "N/A") {
                                                     echo "yes1";
                                                     $igst = $this->Crud->get_data_by_id("gst_structure", $po->igst_id, "id");
 
-                                                    $igst = (int)$igst[0]->value;
+                                                    $igst = $igst[0]->value;
                                                     $gst_value = (($total * $igst) / 100);
                                                 } else {
                                                     $gst_value = 0;

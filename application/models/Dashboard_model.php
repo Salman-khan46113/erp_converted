@@ -489,7 +489,7 @@ class Dashboard_model extends CI_Model
 		if($this->unit > 0){
 			$unit_condition = " AND c.clientId = $this->unit";
 		}
-		$this->db->select('s.supplier_name as supplier_name,(parts.remaning_qty * cp.store_stock_rate ) as remaning_qty_amount');
+		$this->db->select('s.supplier_name as supplier_name,SUM((parts.remaning_qty * cp.store_stock_rate )) as remaning_qty_amount');
 	    $this->db->from('challan_parts as parts');
 	    $this->db->join('challan as c', ' c.id = parts.challan_id'.$unit_condition, 'inner');
 	    $this->db->join('child_part as cp', ' cp.id = parts.part_id', 'left');
@@ -510,7 +510,7 @@ class Dashboard_model extends CI_Model
 	public function get_supplier_subcon_stocks_new($year = '',$month_arr = []){
 		$unit_condition = '';
 		if($this->unit > 0){
-			$unit_condition = " AND c.clientId = $this->unit";
+			$unit_condition = " AND np.clientId = $this->unit";
 		}
 		$this->db->select('iw.invoice_amount as invoice_amount,spip.input_part_req_qty as required_qty,cp.store_stock_rate as store_stock_rate,SUM(gd.inwarding_price) as inwarding_price');
 	    $this->db->from('inwarding as iw');
@@ -518,6 +518,7 @@ class Dashboard_model extends CI_Model
 	    $this->db->join('subcon_po_inwarding_parts as spip', ' spip.id = spi.id ', 'left');
 	    $this->db->join('child_part as cp', ' cp.id = spip.input_part_id ', 'left');
 	    $this->db->join('grn_details as gd', 'gd.inwarding_id = iw.id AND gd.invoice_number = iw.invoice_number');
+	    $this->db->join('new_po as np', 'np.id = iw.po_id '.$unit_condition);
 
 	    if($year != ""){
 	    	if(array_key_exists("year", $month_arr)){

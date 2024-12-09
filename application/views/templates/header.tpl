@@ -552,7 +552,7 @@
                         <li><a class="dropdown-item" href="<%base_url('stock_rejection')%>">Stock Rejection</a></li>
                         <%/if%>
                         <%if checkGroupAccess("short_receipt","list","No") %>
-                        <li><a class="dropdown-item" href="<%base_url('short_receipt')%>">MRD Short Receipts</a></li>
+                        <li><a class="dropdown-item" href="<%base_url('short_receipt')%>">MDR Short Receipts</a></li>
                         <%/if%>
                      </ul>
                   </li>

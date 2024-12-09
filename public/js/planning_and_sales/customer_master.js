@@ -110,6 +110,7 @@ const datatable = {
                 },
             ],
         searching: true,
+        order: [[0, 'desc']],
       // scrollX: true,
       scrollY: true,
       bScrollCollapse: true,

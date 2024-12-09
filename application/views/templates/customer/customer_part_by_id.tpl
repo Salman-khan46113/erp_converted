@@ -243,6 +243,14 @@
                                                             </select>
                                                         </div>
                                                     </div>
+                                                    <%if ($entitlements['itemCode']!=null && $entitlements['itemCode']==true) %>
+                                                     <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                    <label for="itemCode">Item Code</label>
+                                                                    <input type="text" name="itemCd" class="form-control" id="itemCodeId" aria-describedby="itemCodeHelp">
+                                                            </div>
+                                                    </div>
+                                                        <%/if%>
                                                     <div class="col-lg-6">
                                                     </div>
                                                 </div>
@@ -258,16 +266,17 @@
                             <!-- /.card-header -->
                             <div class="">
                             <div class="table-responsive text-nowrap">
-                                <table id="example1" class="table table-striped">
+                                <table id="example1" class="table table-striped w-100">
                                     <thead>
                                         <tr>
                                             <!-- <th>Sr. No.</th> -->
                                             <!-- <th>Add Production</th> -->
+                                            <th style="display: none;">Id</th>
                                             <th>Customer Name</th>
                                             <th>Part Number</th>
                                             <th>Part Description</th>
                                             <th>PO Type</th>
-                                            <th>Part Family</th>
+                                            <!-- <th>Part Family</th> -->
                                             <th>Tax Structure</th>
                                             <th>UOM</th>
                                             <th>Packaging QTY</th>
@@ -288,6 +297,9 @@
                                                 <%/if%>
                                             <%/if%>
                                             <th>Is Service</th>
+                                            <%if ($entitlements['itemCode']!=null && $entitlements['itemCode']==true) %>
+                                                <th>Item Code</th>
+                                            <%/if%>
                                             <th class="text-center">Update</th>
                                             <th class="text-center">Drawing Parameters</th>
                                         </tr>
@@ -397,11 +409,12 @@
                                                             </div>
                                                         </div>
                                                     </td> *%>
+                                                    <td style="display: none"><%$poo->id%></td>
                                                     <td><%$customer_data[0]->customer_name%></td>
                                                     <td><%$po[$poo->id][0]->part_number%></td>
                                                     <td><%$po[$poo->id][0]->part_description%></td>
                                                     <td><%$po[$poo->id][0]->type%></td>
-                                                    <td><%$po[$poo->id][0]->part_family%></td>
+                                                    <!-- <td><%$po[$poo->id][0]->part_family%></td> -->
                                                     <td><%$gst_structure2[$po[$poo->id][0]->gst_id][0]->code%></td>
                                                     <td><%$po[$poo->id][0]->uom%></td>
                                                     <td><%$po[$poo->id][0]->packaging_qty%></td>
@@ -422,6 +435,9 @@
                                                         <%/if%>
                                                     <%/if%>
                                                     <td><%if $po[$poo->id][0]->isservice == 'Y'%>YES<%else%>NO<%/if%></td>
+                                                    <%if ($entitlements['itemCode']!=null && $entitlements['itemCode']==true) %>
+                                                       <td><%$po[$poo->id][0]->itemCode %></td>
+                                                    <%/if%>
                                                     <td class="text-center">
                                                         <a type="button" data-bs-toggle="modal" class="" data-bs-target="#exampleModaledit2333<%$i%>"> <i class="ti ti-edit"></i></a>
                                                         <div class="modal fade" id="exampleModaledit2333<%$i%>" tabindex=" -1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -570,6 +586,14 @@
                                                                                         </select>
                                                                                     </div>
                                                                                 </div>
+                                                                                <%if ($entitlements['itemCode']!=null && $entitlements['itemCode']==true) %>
+                                                                                 <div class="col-lg-6">
+                                                                                            <div class="form-group">
+                                                                                                    <label for="itemCode">Item Code</label>
+                                                                                                    <input type="text" name="itemCd" value="<%$po[$poo->id][0]->itemCode %>" class="form-control" id="itemCodeId" aria-describedby="itemCodeHelp">
+                                                                                            </div>
+                                                                                    </div>
+                                                                                        <%/if%>
                                                                                
                                                                             </div>
                                                                     </div>

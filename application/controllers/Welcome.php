@@ -583,9 +583,12 @@ class Welcome extends CommonController
         $base_url = $this->config->item("base_url");
 
 		$data = $this->SupplierParts->getIncomeReportView($condition_arr,$post_data["search"]);
-		// pr($data,1);
+
 		foreach ($data as $key => $value) {
-			
+			if($value['status'] != "accept"){
+                $data[$key]['accept_qty'] = 0;
+                $data[$key]['reject_qty'] = 0;
+            }
 			$data[$key]['created_date'] = defaultDateFormat($value['created_date']);
 		}
 		$data["data"] = $data;
@@ -871,7 +874,7 @@ class Welcome extends CommonController
 	{
         checkGroupAccess("customer","list","Yes");
 		$data['customers'] = $this->Crud->read_data("customer");
-
+        // pr($this->db->last_query(),1);
 		// $this->load->view('header');
 		// $this->load->view('customer', $data);
 		// $this->load->view('footer');
@@ -879,13 +882,15 @@ class Welcome extends CommonController
 			
 			$data['customers'][$key]->encode_data = base64_encode(json_encode($val));
 		}
-		
+		// pr($data,1);
+        $data['currentUnit'] = $this->Unit->getNoOfClients();
 		$this->loadView('customer/customer',$data);
 	}
 	public function customer_master()
 	{
         checkGroupAccess("customer_master","list","Yes");
 		$data['customers'] = $this->Crud->read_data("customer");
+        // pr($data,1);
 		$data['entitlements'] = $this->session->userdata('entitlements');
 		$this->loadView('customer/customer_master', $data);
 	}
@@ -1241,14 +1246,9 @@ class Welcome extends CommonController
         $grn_details_data = $this->Crud->get_data_by_id_multiple("grn_details", $arr);
         $actual_price = 0;
         foreach ($grn_details_data as $g) {
-            $inwarding_price = $g->inwarding_price;
-            if($new_po[0]->po_discount_type == "Part Level" && isset($part_wise_dicount[$g->po_part_id])){
-                $part_level_dis = $part_wise_dicount[$g->po_part_id] != "" && $part_wise_dicount[$g->po_part_id] != null ? $part_wise_dicount[$g->po_part_id] : 0;
-                $inwarding_price = $inwarding_price - ($inwarding_price*$part_level_dis)/100;
-            }
-            $actual_price = $actual_price + $inwarding_price;
+            $actual_price = $actual_price + $g->inwarding_price;
         }
-        // pr($grn_details_data,1);
+        // pr($actual_price,1);
         if($new_po[0]->po_discount_type == "PO Level"){
             $discount_amount = 0;
             if($new_po[0]->discount_type == "Number"){
@@ -1257,10 +1257,43 @@ class Welcome extends CommonController
                 $discount_amount = $actual_price*$new_po[0]->discount/100;
             }
             $actual_price -= $discount_amount;
+            $gst_structure_data = $this->Crud->get_data_by_id("gst_structure", $po_parts[0]->tax_id, "id");
+            if ((int) $gst_structure_data[0]->igst === 0) {
+                $gst = (int) $gst_structure_data[0]->cgst + (int) $gst_structure_data[0]->sgst;
+                $cgst = (int) $gst_structure_data[0]->cgst;
+                $sgst = (int) $gst_structure_data[0]->sgst;
+                $tcs = (float) $gst_structure_data[0]->tcs;
+                $tcs_on_tax = $gst_structure_data[0]->tcs_on_tax;
+                $igst = 0;
+            } else {
+
+                $gst = (int) $gst_structure_data[0]->igst;
+                $cgst = 0;
+                $sgst = 0;
+                $tcs = (float) $gst_structure_data[0]->tcs;
+                $tcs_on_tax = $gst_structure_data[0]->tcs_on_tax;
+                $igst = $gst;
+            }
+            $cgst_amount +=  (($actual_price * $cgst) / 100);
+            $sgst_amount += (($actual_price * $sgst) / 100);
+            $igst_amount += (($actual_price * $igst) / 100);
+            if ($gst_structure_data[0]->tcs_on_tax == "no") {
+                $tcs_amount += (($actual_price * $tcs) / 100);
+            } else {
+                //$tcs_amount =  $tcs_amount + ((($cgst_amount + $sgst_amount + $igst_amount + $total_amount) * $tcs) / 100);
+                $tcs_amount +=  ((((float) (($actual_price * $cgst) / 100) + (float) (($actual_price * $sgst) / 100) + (float) $igst_amount + (float) $actual_price) * $tcs) / 100);
+            }
             $actual_price = $actual_price + $cgst_amount + $sgst_amount + $igst_amount + $tcs_amount;
 
         }
-        $actual_price = $actual_price + $new_po[0]->final_amount;
+        
+        if($actual_price < 0){
+            $actual_price = $new_po[0]->final_amount;
+        }else{
+            $actual_price = $actual_price + $new_po[0]->final_amount;
+        }
+        
+
     
         // pr($actual_price,1);
 
@@ -1483,7 +1516,8 @@ class Welcome extends CommonController
                    
 
                     $subcon_po_inwarding_history = $this->Crud->customQuery("SELECT pi.* FROM subcon_po_inwarding_history pi WHERE pi.subcon_po_inwarding_parts_id = '".$r->id."' AND pi.invoice_number = '".$data['invoice_number']."'");
-                    $subcon_po_inwarding_parts[$key_val]->selected_challan = $subcon_po_inwarding_history[0]->id;
+
+                    $subcon_po_inwarding_parts[$key_val]->selected_challan = $subcon_po_inwarding_history[0]->challan_id;
                     $subcon_po_inwarding_parts[$key_val]->challan_parts_data = $challan_parts_data;
                 }
                 $po_parts[$key]->subcon_po_inwarding_parts = $subcon_po_inwarding_parts;
@@ -4733,11 +4767,11 @@ class Welcome extends CommonController
 	public function erp_users()
 	{
         checkGroupAccess("erp_users","list","Yes");
-		$criteria = array('AROM_ADMIN');
+		// $criteria = array('AROM_ADMIN');
         $data['client'] = $this->Crud->read_data("client");
         $groups = $this->db->query('SELECT *  FROM `group_master` ');
         $data['groups'] = $groups->result();
-		$data['user_info'] = $this->Crud->where_not_condition("userinfo", "type", $criteria);
+		$data['user_info'] = $this->Crud->customQuery("SELECT * FROM `userinfo` WHERE `user_role` IS NULL OR `user_role` NOT IN ('AROM') ORDER BY `id` DESC");
 		//earlier code --> $data['user_info'] = $this->Crud->get_data_by_id_multiple_condition("userinfo",$criteria);
 		//working earlier - $data['user_info'] = $this->Crud->read_data("userinfo");
 		// $this->load->view('header');
@@ -4844,7 +4878,13 @@ class Welcome extends CommonController
 		// $data['flash_err'] = $this->session->flashdata('errors');
 		// $data['flash_suc'] = $this->session->flashdata('success');
 		// $data['entitlements'] = $this->session->userdata['entitlements'];
-
+        $column[] = [
+            "data" => "id",
+            "title" => "id",
+            "width" => "0%",
+            "className" => "dt-left",
+            "visible" => false
+        ];
 		$column[] = [
             "data" => "part_number",
             "title" => "Part Number",
@@ -4894,7 +4934,7 @@ class Welcome extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
+        $data["sorting_column"] = json_encode([[0, 'desc']]);
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
@@ -5556,44 +5596,54 @@ class Welcome extends CommonController
 	}
 	public function add_customer_parts_master()
 	{
-		$part_number = $this->input->post('part_number');
-		$part_description = $this->input->post('part_description');
+		$part_number = trim($this->input->post('part_number'));
+		$part_description = trim($this->input->post('part_description'));
 		$fg_rate = $this->input->post('fg_rate');
 
 		$data = array(
 			"part_number" => $part_number,
 		);
 		$check = $this->Crud->read_data_where("customer_parts_master", $data);
+        $success = 0;
+        $message = "Somthing went wrong";
 		if ($check != 0) {
-			$data = array(
-				'errors' => $part_number . ' : This Part Number Already Present, Please Enter Different Part Number',
-			);
-			$this->session->set_flashdata($data);
-			redirect($_SERVER['HTTP_REFERER']);
+			// $data = array(
+			// 	'errors' => $part_number . ' : This Part Number Already Present, Please Enter Different Part Number',
+			// );
+            $message = $part_number . ' : This Part Number Already Present, Please Enter Different Part Number';
+			// $this->session->set_flashdata($data);
+			// redirect($_SERVER['HTTP_REFERER']);
 		} else {
 
 			$data = array(
-				'part_number' => $part_number,
-				'part_description' => $part_description,
+				'part_number' => trim($part_number),
+				'part_description' => trim($part_description),
 				'fg_rate' => $fg_rate
 			);
 
 			$inser_query = $this->CustomerPart->createCustomerPart($data);
 
 			if ($inser_query) {
-				$data = array(
-					'success' => 'Data Added Successfully  !!',
-				);
-				$this->session->set_flashdata($data);
-				redirect($_SERVER['HTTP_REFERER']);
+				// $data = array(
+				// 	'success' => 'Data Added Successfully  !!',
+				// );
+                $success = 1;
+                $message = "Data Added Successfully  !!";
+				// $this->session->set_flashdata($data);
+				// redirect($_SERVER['HTTP_REFERER']);
 			} else {
-				$data = array(
-					'errors' => 'Error While adding, please try again !',
-				);
-				$this->session->set_flashdata($data);
-				redirect($_SERVER['HTTP_REFERER']);
+				// $data = array(
+				// 	'errors' => 'Error While adding, please try again !',
+				// );
+                $message ="Error While adding, please try again !";
+				// $this->session->set_flashdata($data);
+				// redirect($_SERVER['HTTP_REFERER']);
 			}
 		}
+        $ret_arr['message'] = $message;
+        $ret_arr['success'] = $success;
+        echo json_encode($ret_arr);
+        exit();
 	}
 	public function add_downtime_name()
 	{
@@ -8552,13 +8602,13 @@ class Welcome extends CommonController
 
 	public function addCustomer()
 	{
-		$customerName = $this->input->post('customerName');
-		$customerLocation = $this->input->post('customerLocation');
+		$customerName = trim($this->input->post('customerName'));
+		$customerLocation = trim($this->input->post('customerLocation'));
 		$customerSaddress = $this->input->post('customerSaddress');
 		$paymentTerms = $this->input->post('paymentTerms');
-		$customerCode = $this->input->post('customerCode');
+		$customerCode = trim($this->input->post('customerCode'));
 		$state = $this->input->post('state');
-		$gst_no = $this->input->post('gst_no');
+		$gst_no = trim($this->input->post('gst_no'));
 		$state_no = $this->input->post('state_no');
 		$vendor_code = $this->input->post('vendor_code');
 		// $bank_details = $this->input->post('bank_details');
@@ -8567,81 +8617,120 @@ class Welcome extends CommonController
 		$address1 = $this->input->post('address1');
 		$location = $this->input->post('location');
 		$pin = $this->input->post('pin');
+        $distance1 = trim($this->input->post('distncFrmClnt1'));
+        $distance2 = trim($this->input->post('distncFrmClnt2'));
+        $distance3 = trim($this->input->post('distncFrmClnt3'));
+
+        $emailId = trim($this->input->post('emailId'));
         $discount = $this->input->post('discount');
         $discountType = $this->input->post('discountType');
 
 		$data = array(
 			"customer_code" => $customerCode,
-
 		);
 		$check = $this->Crud->read_data_where("customer", $data);
-		if ($check != 0) {
-			$data = array(
-				"customer_name" => $customerName,
-			);
+        $message = "Something went wrong";
+        $success = 0;
+        if(count(str_split($state_no)) > 2 || count(str_split($pos)) > 2 || count(str_split($paymentTerms)) > 2){
+            $message = count(str_split($paymentTerms)) > 2 ? "Payment terms must be 2 digit" : (count(str_split($state_no)) > 2 ? "State no must be 2 digit" : "Pos must be 2 digit");
+        }else{
+    		if ($check != 0) {
+    			$data = array(
+    				"customer_name" => $customerName,
+    			);
 
-			$check = $this->Crud->read_data_where("customer", $data);
-			if ($check != 0) {
-				$this->addErrorMessage('Customer Code should be unique. Customer with customer name already exists.');
-			}else {
-				$this->addErrorMessage('Customer Code should be unique.');
-			}
-			$this->redirectMessage('customer');
-			exit();
-		} else {
-			$data = array(
-				"customer_name" => $customerName,
-				"customer_code" => $customerCode,
-				"billing_address" => $customerLocation,
-				"shifting_address" => $customerSaddress,
-				"state" => $state,
-				"gst_number" => $gst_no,
-				"state_no" => $state_no,
-				"vendor_code" => $vendor_code,
-				"pan_no" => $pan_no,
-				"pos" => $pos,
-				"address1" => $address1,
-				"location" => $location,
-				"pin" => $pin,
-                "discount" => $discount,
-                "discountType" => $discountType,
-				// "bank_details" => $bank_details,
-				"payment_terms" => $paymentTerms,
-				"created_id" => $this->user_id,
-				"date" => $this->current_date,
-				"time" => $this->current_time,
-			);
-			$result = $this->Crud->insert_data("customer", $data);
-			if ($result) {
-				$this->addSuccessMessage('Customer added sucessfully.');
-				$this->redirectMessage('customer');
-			} else {
-				$this->addErrorMessage('Unable to add customer.');
-				$this->redirectMessage('customer');
-			}
-		}
+    			$check = $this->Crud->read_data_where("customer", $data);
+    			if ($check != 0) {
+                    $message = "Customer Code should be unique. Customer with customer name already exists.";
+    				// $this->addErrorMessage('Customer Code should be unique. Customer with customer name already exists.');
+    			}else {
+                    $message = "Customer Code should be unique.";
+    				// $this->addErrorMessage('Customer Code should be unique.');
+    			}
+    			// $this->redirectMessage('customer');
+    			// exit();
+    		} else {
+                $data = array(
+                    "gst_number" => $gst_no
+                );
+                $check = $this->Crud->read_data_where("customer", $data);
+               
+                if($check == 0){
+        			$data = array(
+        				"customer_name" => $customerName,
+        				"customer_code" => $customerCode,
+        				"billing_address" => $customerLocation,
+        				"shifting_address" => $customerSaddress,
+        				"state" => $state,
+        				"gst_number" => $gst_no,
+        				"state_no" => $state_no,
+        				"vendor_code" => $vendor_code,
+        				"pan_no" => $pan_no,
+        				"pos" => $pos,
+        				"address1" => $address1,
+        				"location" => $location,
+        				"pin" => $pin,
+                        "distncFrmClnt1"=> $distance1,
+                        "distncFrmClnt2"=> $distance2,
+                        "distncFrmClnt3"=> $distance3,
+                        "emailId" => $emailId,
+                        "discount" => $discount,
+                        "discountType" => $discountType,
+        				// "bank_details" => $bank_details,
+        				"payment_terms" => $paymentTerms,
+        				"created_id" => $this->user_id,
+        				"date" => $this->current_date,
+        				"time" => $this->current_time,
+        			);
+        			$result = $this->Crud->insert_data("customer", $data);
+        			if ($result) {
+                        $success = 1;
+                        $message = "Customer added sucessfully.";
+        				// $this->addSuccessMessage('Customer added sucessfully.');
+        				// $this->redirectMessage('customer');
+        			} else {
+                        $message = "Unable to add customer.";
+        				// $this->addErrorMessage('Unable to add customer.');
+        				// $this->redirectMessage('customer');
+        			}
+                }else{
+                    $message = "GST number already exist";
+                }
+    		}
+        }
+        $return_arr =[
+            "success" =>$success,
+            "message" =>$message
+        ];
+        echo json_encode($return_arr);
+        exit();
+
 	}
 	public function updateCustomer()
 	{
 		$id = $this->input->post('id');
 
-		$customerName = $this->input->post('ucustomerName');
-		$customerCode = $this->input->post('ucustomerCode');
-		$shiftingAddress = $this->input->post('ushiftingAddress');
-		$billingaddress = $this->input->post('ubillingaddress');
-		$paymentTerms = $this->input->post('upaymentTerms');
-		$state = $this->input->post('ustate');
-		$gst_no = $this->input->post('ugst_no');
-		$state_no = $this->input->post('state_no');
-		$vendor_code = $this->input->post('vendor_code');
-		$pan_no = $this->input->post('pan_no');
-		$bank_details = $this->input->post('bank_details');
-		$pos = $this->input->post('pos');
-		$address1 = $this->input->post('address1');
-		$location = $this->input->post('location');
-		$pin = $this->input->post('pin');
-        $discount = $this->input->post('discount');
-        $discountType = $this->input->post('discountType');
+		$customerName = trim($this->input->post('ucustomerName'));
+		$customerCode = trim($this->input->post('ucustomerCode'));
+		$shiftingAddress = trim($this->input->post('ushiftingAddress'));
+		$billingaddress = trim($this->input->post('ubillingaddress'));
+		$paymentTerms = trim($this->input->post('upaymentTerms'));
+		$state = trim($this->input->post('ustate'));
+		$gst_no = trim($this->input->post('ugst_no'));
+		$state_no = trim($this->input->post('state_no'));
+		$vendor_code = trim($this->input->post('vendor_code'));
+		$pan_no = trim($this->input->post('pan_no'));
+		$bank_details = trim($this->input->post('bank_details'));
+		$pos = trim($this->input->post('pos'));
+		$address1 = trim($this->input->post('address1'));
+		$location = trim($this->input->post('location'));
+		$pin = trim($this->input->post('pin'));
+        $distance1 = trim($this->input->post('distncFrmClnt1'));
+        $distance2 = trim($this->input->post('distncFrmClnt2'));
+        $distance3 = trim($this->input->post('distncFrmClnt3'));
+        $emailId = trim($this->input->post('emailId'));
+        $discount = trim($this->input->post('discount'));
+        $discountType = trim($this->input->post('discountType'));
 		// pr($_POST,1);	
 		$data = array(	
 			"customer_name" => $customerName,
@@ -8659,18 +8748,36 @@ class Welcome extends CommonController
 			"address1" => $address1,
 			"location" => $location,
 			"pin" => $pin,
+            "distncFrmClnt1"=> $distance1,
+            "distncFrmClnt2"=> $distance2,
+            "distncFrmClnt3"=> $distance3,
+            "emailId" => $emailId,
             "discount" => $discount,
             "discountType" => $discountType
 		);
+        if(count(str_split($state_no)) > 2 || count(str_split($pos)) > 2 || count(str_split($paymentTerms)) > 2){
+            $message = count(str_split($paymentTerms)) > 2 ? "Payment terms must be 2 digit" : (count(str_split($state_no)) > 2 ? "State no must be 2 digit" : "Pos must be 2 digit");
+        }else{
 		
-		$result = $this->Crud->update_data("customer", $data, $id);
-		if ($result) {
-			$this->addSuccessMessage('Customer updated sucessfully.');
-			$this->redirectMessage('customer');
-		} else {
-			$this->addErrorMessage('Unable to update customer. Please try again.');
-			$this->redirectMessage('customer');
-		}
+    		$result = $this->Crud->update_data("customer", $data, $id);
+    		if ($result) {
+                $success = 1;
+                $message = "Customer updated sucessfully.";
+    			// $this->addSuccessMessage('Customer updated sucessfully.');
+    			// $this->redirectMessage('customer');
+    		} else {
+                $success = 0;
+                $message = "Unable to update customer. Please try again.";
+    			// $this->addErrorMessage('Unable to update customer. Please try again.');
+    			// $this->redirectMessage('customer');
+    		}
+        }
+        $return_arr =[
+            "success" =>$success,
+            "message" =>$message
+        ];
+        echo json_encode($return_arr);
+        exit();
 	}
 
 
@@ -10944,20 +11051,28 @@ class Welcome extends CommonController
 		$fg_rate = $this->input->post('fg_rate');
 		
 		$data = array(
-			"part_description" => $part_description
+			"part_description" => trim($part_description)
 		);
 
 		$dataStock = array(
 			"fg_rate" => $fg_rate
 		);
-
+        $message = "Something went wrong";
+        $success = 0;
 		$query = $this->CustomerPart->updatePartById($data, $id);
 		$query = $this->CustomerPart->updateStockById($dataStock,$id);
 		if ($query) {
-			echo "<script>alert(' Update Success !!!!');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+            $message = "Update Success !!!!";
+            $success = 1;
+			// echo "<script>alert(' Update Success !!!!');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
 		} else {
-			echo "<script>alert('Error While  Updating , Please try Again');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+            $message ="Error While  Updating , Please try Again";
+			// echo "<script>alert('Error While  Updating , Please try Again');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
 		}
+        $ret_arr['message'] = $message;
+        $ret_arr['success'] = $success;
+        echo json_encode($ret_arr);
+        exit();
 	}
     public function forbidden_page(){
      

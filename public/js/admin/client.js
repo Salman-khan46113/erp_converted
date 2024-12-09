@@ -1,4 +1,4 @@
-var table = '';
+    var table = '';
 var file_name = "client";
 var pdf_title = "Client";
 
@@ -22,7 +22,7 @@ $(document).ready(function() {
     $(document).on("click",".edit-part",function(){
         var data = $(this).attr("data-value");
         data = JSON.parse(atob(data)); 
-        console.log(data);
+        console.log(data.emailId);
         $("#client_unit").val(data.client_unit);
         $("#client_unit").val(data.client_unit);
         $("#contact_person").val(data.contact_person);
@@ -38,6 +38,8 @@ $(document).ready(function() {
         $("#location").val(data.location);
         $("#pin").val(data.pin);
         $('#t-id').val(data.id);
+        $('#emailId').val(data.emailId);
+        
        
         // myModal.show();
     })
@@ -225,59 +227,105 @@ $(document).ready(function() {
                 },
                 error: function (response) {
                     // Handle error response
-                    alert("There was an error updating the client information. Please try again.");
+                    toastr.error("There was an error updating the client information. Please try again.");
                 }
             });
             return false; // Prevent default form submission
         }
     });
 
-    $('#add_mold_maintenance_form').validate({
+    $('#addClient').validate({
         rules: {
-            customer_part_id: {
+            clientUnit: {
                 required: true
             },
-            mold_name: {
+            clientName: {
                 required: true
             },
-            ownership: {
+            contactPerson: {
                 required: true
             },
-            no_of_cavity: {
-                required: true,
-                number: true
+            clientBaddress: {
+                required: true
             },
-            target_life: {
-                required: true,
-                number: true
+            clientSaddress: {
+                required: true
             },
-            target_over_life: {
-                required: true,
-                number: true
-            }
+            gst_no: {
+                required: true
+            },
+            pan_no: {
+                required: true
+            },
+            state:{
+                required: true
+            },
+            state_no: {
+                required: true
+            },
+            phone_no: {
+                required: true
+            },
+            bank_details: {
+                required: true
+            },
+            address1: {
+                required: true
+            },
+            location: {
+                required: true
+            },
+            pin: {
+                required: true
+            },
         },
         messages: {
-            customer_part_id: {
-                required: "Please select a customer part."
+            clientUnit: {
+                required: "Please enter client unit."
             },
-            mold_name: {
-                required: "Please enter the mold name."
+            clientName: {
+                required: "Please enter client name."
             },
-            ownership: {
-                required: "Please select ownership."
+            contactPerson: {
+                required: "Please enter contact person."
             },
-            no_of_cavity: {
-                required: "Please enter the number of cavities.",
-                number: "Please enter a valid number."
+            clientBaddress: {
+                required: "Please enter client billing address."
             },
-            target_life: {
-                required: "Please enter the mold PM frequency.",
-                number: "Please enter a valid number."
+            clientSaddress: {
+                required: "Please enter client shipping address."
             },
-            target_over_life: {
-                required: "Please enter the mold life over frequency.",
-                number: "Please enter a valid number."
-            }
+            gst_no: {
+                required: "Please enter gst no."
+            },
+            pan_no: {
+                required: "Please enter pan no."
+            },
+            state:{
+                required: "Please enter state."
+            },
+            state_no: {
+                required: "Please enter state no."
+            },
+            phone_no: {
+                required: "Please enter phone no."
+            },
+            bank_details: {
+                required: "Please enter bank details."
+            },
+            address1: {
+                required: "Please enter address 1."
+            },
+            location: {
+                required: "Please enter location."
+            },
+            pin: {
+                required: "Please enter pin."
+            },
+            emailId: {
+                required: "Please enter email id."
+            },
+            
         },
         submitHandler: function (form) {
             $.ajax({

@@ -24,6 +24,7 @@
               <li class="sidebar-item">
                 <div class="input-group">
                 <select name="part_id_selected" class="form-control select2" id="part_id_selected">
+                  <option value="">Select Part Number</option>
                 <%foreach from=$child_parts_list_distinct item=c %>
                   <option
                      <%if ($part_id_selected === $c->id) %>selected<%/if%>
@@ -59,6 +60,10 @@
 
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
         <%if (checkGroupAccess("inhouse_parts_admin","export","No")) %>
+          <button type="button" class="btn btn-seconday " data-bs-toggle="modal" data-bs-target="#importChildPartStock" title="Import Stock Data"><i class="ti ti-upload"></i></button>
+        <%/if%>
+        <%if (checkGroupAccess("inhouse_parts_admin","export","No")) %>
+        <a class="btn btn-seconday" href="<%base_url('export_parts_stock/inhouse')%>" target="_blank" title="Export Child Parts"><i class="ti ti-download"></i></a>
         <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
         <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
         <%/if%>
@@ -67,7 +72,41 @@
 
       </div>
 
-
+      <!-- Import Modal -->
+                                <div class="modal fade" id="importChildPartStock" tabindex="-1" role="dialog"
+                                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Import Part Stock</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close">
+                                                                       
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="<%base_url('import_parts_stock/inhouse') %>" 
+                                                method="POST" enctype='multipart/form-data' id="import_parts_stock" class="import_parts_stock custom-form">
+                                                    <div class="row">            
+                                                        <div class="col-lg-10">
+                                                            <div class="form-group">
+                                                                <label for="po_num">Upload File</label><span
+                                                                class="text-danger">*</span>
+                                                                <input type="file" name="uploadedDoc"  class="form-control required-input" id="exampleuploadedDoc" placeholder="Upload PO" aria-describedby="uploadDocHelp">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">Import</button>
+                                            </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Import end -->
       <div class="w-100">
             <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
         </div>

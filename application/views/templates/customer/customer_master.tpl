@@ -212,13 +212,14 @@
                                 <table id="example1" class="table  table-striped">
                                     <thead>
                                         <tr>
-                                            <!-- <th>Sr. No.</th> -->   
+                                            <!-- <th>Sr. No.</th> -->  
+                                            <th style="display:none">Id</th> 
                                             <th>Name</th>
                                             <th>Code</th>
                                             <th>Part</th>
                                             <th>Part price</th>
                                             <!-- show PLM if enabled -->
-                                            <%if $entitlements.isPLMEnabled%>
+                                            <%if $entitlements.isPLMEnabled == 1%>
                                                 <th>Part Drawing </th>
                                                 <th>Documents </th>
                                             <%/if%>
@@ -233,6 +234,7 @@
                                             <%foreach $customers as $t%>
                                                 <tr>
                                                     <!-- <td><%$i%></td> -->
+                                                    <td style="display:none"><%$t->id%></td>
                                                     <td><%$t->customer_name%></td>
                                                     <td><%$t->customer_code%></td>
                                                     <td>
@@ -243,7 +245,7 @@
                                                         <a class="btn btn-primary" href="<%$base_url%>customer_part_price/<%$t->id%>">
                                                             Part Price</a>
                                                     </td>
-                                                    <%if $entitlements.isPLMEnabled%>
+                                                    <%if $entitlements.isPLMEnabled == 1%>
                                                         <td>
                                                             <a class="btn btn-secondary" href="<%$base_url%>customer_part_drawing/<%$t->id%>">
                                                                 Part Drawing</a>

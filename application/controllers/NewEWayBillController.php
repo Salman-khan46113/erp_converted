@@ -116,15 +116,15 @@ class NewEWayBillController extends CommonController {
 							  $isServc = $child_part_datas[0]->isservice;
 							  $isInterState = false; //means only IGST is applicable so show it accordingly
 							  
-							  if ((int)$gst_structure_datas[0]->igst === 0) {
-									$gsts = (int)$gst_structure_datas[0]->cgst + (int)$gst_structure_datas[0]->sgst;
-									$cgsts = (int)$gst_structure_datas[0]->cgst;
-									$sgsts = (int)$gst_structure_datas[0]->sgst;
-									$tcss = (float)$gst_structure_datas[0]->tcs;
+							  if ($gst_structure_datas[0]->igst <= 0) {
+									$gsts = $gst_structure_datas[0]->cgst + $gst_structure_datas[0]->sgst;
+									$cgsts = $gst_structure_datas[0]->cgst;
+									$sgsts = $gst_structure_datas[0]->sgst;
+									$tcss = $gst_structure_datas[0]->tcs;
 									$igsts = 0;
 									$total_gst_percentages = $cgsts + $sgsts;
 							  } else {
-									$gsts = (int)$gst_structure_datas[0]->igst;
+									$gsts = $gst_structure_datas[0]->igst;
 									$tcss = (float)$gst_structure_datas[0]->tcs;
 									$cgsts = 0; 
 									$sgsts = 0;
@@ -353,8 +353,6 @@ class NewEWayBillController extends CommonController {
    * Looks fine - Get EWay - from Local DB
    */
   public function view_EwayBill() {
-		//$this->echoToTriage("<br><u><b>view_EwayBill</b></u>");
-		
 		$isDynamic = true;
 		$downloadPDF = false;
 		
@@ -402,16 +400,16 @@ class NewEWayBillController extends CommonController {
 					  $hsn_codes = $child_part_datas[0]->hsn_code;
 					  $isServc = $child_part_datas[0]->isservice;
 					  $isInterState = false; //means only IGST is applicable so show it accordingly
-					  if ((int)$gst_structure_datas[0]->igst === 0) {
-							$gsts = (int)$gst_structure_datas[0]->cgst + (int)$gst_structure_datas[0]->sgst;
-							$cgsts = (int)$gst_structure_datas[0]->cgst;
-							$sgsts = (int)$gst_structure_datas[0]->sgst;
-							$tcss = (float)$gst_structure_datas[0]->tcs;
+					  if ($gst_structure_datas[0]->igst <= 0) {
+							$gsts = $gst_structure_datas[0]->cgst + $gst_structure_datas[0]->sgst;
+							$cgsts = $gst_structure_datas[0]->cgst;
+							$sgsts = $gst_structure_datas[0]->sgst;
+							$tcss = $gst_structure_datas[0]->tcs;
 							$igsts = 0;
 							$total_gst_percentages = $cgsts + $sgsts;
 					  } else {
-							$gsts = (int)$gst_structure_datas[0]->igst;
-							$tcss = (float)$gst_structure_datas[0]->tcs;
+							$gsts = $gst_structure_datas[0]->igst;
+							$tcss = $gst_structure_datas[0]->tcs;
 							$cgsts = 0; 
 							$sgsts = 0;
 							$igsts = $gsts;
@@ -424,6 +422,7 @@ class NewEWayBillController extends CommonController {
 					}else{
 						$subtotal = $ps->total_rate - $ps->gst_amount;
 					}
+					$final_basic_total = $final_basic_total + $subtotal;
 
 					if($ps->part_price > 0) {
 						$rate = $ps->part_price;
@@ -515,7 +514,7 @@ class NewEWayBillController extends CommonController {
 							<td>' . $ps->qty . '</td>
 							<td>' . $rate . '</td>
 							<td></td>
-							<td colspan="2" style="text-align:center;">' . number_format((float)$actual_indv_totalAmt, 2, '.', '') . '</td>
+							<td colspan="2" style="text-align:center;">' . number_format((float)$subtotal,2, '.', '') . '</td>
 						</tr>
 						';
 						
@@ -526,7 +525,7 @@ class NewEWayBillController extends CommonController {
 							<td>' .  $child_part_datas[0]->part_number.'</td>
 							<td colspan="6" style="text-align:left;" >'.$child_part_datas[0]->part_description.'</td>
 							<td>' . $ps->qty . ' '.$ps->uom_id.'</td>
-							<td>' . number_format((float)$actual_indv_totalAmt, 2, '.', '') . '</td>
+							<td>' . number_format((float)$subtotal, 2) . '</td>
 							<td colspan="2"> IGST: '.$igsts.'%</td>
 						</tr>';
 						}else{
@@ -536,7 +535,7 @@ class NewEWayBillController extends CommonController {
 							<td>' .  $child_part_datas[0]->part_number.'</td>
 							<td colspan="6" style="text-align:left;">'.$child_part_datas[0]->part_description.'</td>
 							<td>' . $ps->qty . ' '.$ps->uom_id.'</td>
-							<td>' . number_format((float)$actual_indv_totalAmt, 2, '.', '') . '</td>
+							td>' . number_format((float)$subtotal, 2) . '</td>
 							<td colspan="2"> SGST: '.$sgsts .'%<br> CGST: ' .$cgsts .'</td>
 						</tr>';
 						}
@@ -544,12 +543,26 @@ class NewEWayBillController extends CommonController {
 			 $i++;
 		}
 	
+	//discount related things
+        $isDiscount = false;
+        if($new_sales_data[0]->discountType!='NA'){
+                $isDiscount = true;
+                $discountDetails = "";
+                if ($new_sales_data[0]->discountType === 'Percentage') {
+                    $discountDetails = $new_sales_data[0]->discount . " %";
+                }               
+        }
+        $defaultColumns = 2;
+        $sales_total = $this->Crud->tax_calcuation($gst_structure_datas[0], $final_basic_total, $new_sales_data[0]->discount_amount);
+
+
+
 	//API details:
 	$this->load->model('NewEwayBill');
 	$einvoice_res_id = $this->uri->segment('2');
 	$einvoice_res_data = $this->Crud->get_data_by_id("einvoice_res", $einvoice_res_id, "new_sales_id");
 
-	$issdata = $einvoice_res_data[0]->iss; //TO-DO : what to do with this ?
+	$IRNNo= $einvoice_res_data[0]->Irn
 	$EwbNo= $einvoice_res_data[0]->EwbNo;
 	$EwbDt= $einvoice_res_data[0]->EwbDt;
 	$SignedQRCode= $einvoice_res_data[0]->SignedQRCode;
@@ -644,7 +657,11 @@ class NewEWayBillController extends CommonController {
 				<td colspan="8" align="bottom">
 					Doc No :<b> '.$new_sales_data[0]->sales_number.'</b><br>
 					Date   :<b> '.$new_sales_data[0]->created_date.'</b><br>
-				</td>
+					Generated Date:<b>   '.$EwbDt.'</b><br>
+				  	Valid Upto	:<b>   '.$EwbValidTill.'</b><br><br>
+					IRN    :<span style="font-size:13px;padding-top: 4px;"><b> '.$IRNNo.'</b></span></br>
+			  </td>
+
 				 <td colspan="4" align="bottom">
 					<span class="ewayQRcode"></span>
 				 </td>
@@ -658,14 +675,10 @@ class NewEWayBillController extends CommonController {
 				Generated By   :<b> '.$client_data[0]->gst_number.'</b><br>
 				Supply Type    :<b> Outward-Supply</b><br><br>
 			  </td>
-			  <td colspan="4" align="top">
+			  <td colspan="6" align="top">
 				Mode :<b> '.$new_sales_data[0]->mode.'- Road</b><br>
-				Approximate Distance   :<b>'.$new_sales_data[0]->distance.'</b><br>
+				Approx Distance   :<b>'.$new_sales_data[0]->distance.' KM</b><br>
 				Transaction Type    :<b> Regular</b><br><br>
-			  </td>
-			  <td colspan="2" align="top">
-				  Generated Date:<b>   '.$EwbDt.'</b><br>
-				  Valid Upto	:<b>   '.$EwbValidTill.'</b><br>
 			  </td>
 		</tr>
 		<tr>
@@ -705,7 +718,7 @@ class NewEWayBillController extends CommonController {
 		<tr style="font-size:14px;text-align:center;">
 		  <th>HSN Code</th>
 		  <th>Product Name</th>
-		  <td colspan="6" style="text-align:left;">Product Description</th>
+		  <td colspan="6" style="text-align:left;"><b>Product Description</b></td>
 		  <th>Quantity </th>
 		  <th>Taxable Amt</th>
 		  <th colspan="2">Rate</th>
@@ -715,33 +728,38 @@ class NewEWayBillController extends CommonController {
 			<td colspan="12" style="height:25px"></td>
 		</tr>
 		<tr>
-			  <td colspan="4" width="33%"> 
-				Tot.Taxable Amt: <b>'.number_format((float)$all_final_totals, 2, '.', '').'</b><br>
-				Other Amt :<b>'.number_format((float)$all_totalOther, 2, '.', '').'</b><br>
-				
+			  <td colspan="4" width="33%">
+				Discount ('.$discountDetails.') : ₹ <b>'.$new_sales_data[0]->discount_amount.'</b><br> 
+				Tot.Taxable Amt: <b>'.number_format($final_basic_total,2).'</b><br>
+
 			  </td>
               <td colspan="4" width="33%">
-			    CGST Amt: <b>'.number_format((float)$all_cgst_amounts, 2, '.', '').'</b><br>
-				SGST Amt : <b>'.number_format((float)$all_sgst_amounts, 2, '.', '').'</b><br>
-				IGST Amt : <b>'.number_format((float)$all_igst_amounts, 2, '.', '').'</b>
+			    CGST Amt: <b>'.number_format($sales_total['sales_cgst'],2).'</b><br>
+				SGST Amt : <b>'.number_format($sales_total['sales_sgst'],2).'</b><br>';
+
+			if($sales_total['sales_igst']>0){
+				$html_content = $html_content.'IGST Amt :<b>'.number_format($sales_total['sales_igst'],2).'</b>';
+			}
+				$html_content = $html_content.'
 			  </td>
-			  <td colspan="4" width="33%"><br>
-				Total Inv Amt :<b>'.number_format((float)$final_final_amount, 2, '.', '').'</b><br>
+			  <td colspan="4" width="33%">Total Inv Amt :<b> ₹ '.number_format($final_po_amount,2).'</b><br>
 			  </td>
+
 			</tr>
 		<tr>
 			<td colspan="12" style="text-align:left; font-size:16px"><b>4. Transportation Details</b></th>
 		</tr>
 		<tr>
 			<td colspan="12" align="top">
-				Transporter ID :'.$transporter_data[0]->transporter_id.'<br>
-				Name :'.$transporter_data[0]->name.'<br>
+				Transporter ID :<b>'.$transporter_data[0]->transporter_id.'</b><br>
+				Name :<b>'.$transporter_data[0]->name.'</b><br>
 			</td>
 			<!--  <td colspan="6" align="top">
 				Doc No:<br>
 				Date<br>
 			  </td> -->
 		</tr>
+
 		
 		<tr>
 			<td colspan="12" style="text-align:left; font-size:16px"><b>5. Vehicle Details</b></th>

@@ -371,12 +371,9 @@ class InhousePartsController extends CommonController
 			$part_id_selected = $this->input->post("part_id_selected");
 		}	
 
-		if (!empty($part_id_selected)) {
-			$data['child_part'] = $this->InhouseParts->getInhousePartById($part_id_selected);
-		} else {
-			$data['child_part'] = "";
-		}
+		$data['child_part'] = $this->InhouseParts->getInhousePartById($part_id_selected);
 		$data['enableStockUpdate'] = $this->isEnableStockUpdate();
+		
 		$this->loadView('admin/inhouse_parts_admin', $data);
 	}
 

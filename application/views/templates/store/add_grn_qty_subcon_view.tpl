@@ -165,20 +165,23 @@
                                     
                                     <%if ($r->child_part_new_new) %>
                                     <tr>
-                                       <form method="post" action="<%base_url('add_challan_parts_history') %>" id="add_challan_parts_history<%$i%>" class="add_challan_parts_history<%$i%> add_challan_parts_history">
-                                          <td><%$r->child_part_new_new[0]->part_number %>/ <%$r->child_part_new_new[0]->part_description%></td>
-                                          <td><%$r->inwarding_qty %></td>
-                                          <td><%$r->input_part_req_qty %> <input type="hidden" name="required_qty" value="<%$qty * $r->qty%>"> </td>
-                                          <td><%$r->recevied_req_qty%>
-                                          </td>
+                                          <%assign var="inwardCompleted" value=false%>
                                           <%if ($r->recevied_req_qty == $r->input_part_req_qty) %>
                                           <%assign var="completed" value=$completed+1%>
                                           <%assign var="inwardCompleted" value=true%>
                                           <%assign var="disabled" value=true%>
                                           <%/if%> 
+                                       <%if ($inwardCompleted != true) %>
+                                       <form method="post" action="<%base_url('add_challan_parts_history') %>" id="add_challan_parts_history<%$i%>" class="add_challan_parts_history<%$i%> add_challan_parts_history">
+                                       <%/if%>
+                                          <td><%$r->child_part_new_new[0]->part_number %>/ <%$r->child_part_new_new[0]->part_description%></td>
+                                          <td><%$r->inwarding_qty %></td>
+                                          <td><%$r->input_part_req_qty %> <input type="hidden" name="required_qty" value="<%$qty * $r->qty%>"> </td>
+                                          <td><%$r->recevied_req_qty%>
+                                          </td>
+                                         
                                           <td >
                                             <%if $r->selected_challan > 0%>
-                                            <%pr($r->selected_challan)%>
                                                 <%if ($r->challan_parts_data) %>
                                                    <%foreach from=$r->challan_parts_data item=ch_parts %>
                                                       <%if ($ch_parts->challan_data) %>
@@ -230,11 +233,14 @@
                                              inwarding added
                                              <%else %> 
                                              <button type="submit" class="btn btn-info">Submit</button>
+                                             </form>
                                              <%/if%> 
                                           </td>
                                           <td> <a class="btn btn-danger" href="<%base_url('subcon_po_inwarding_history/')%><%$r->id %>">History</a> </td>
-                                       </form>
+                                       <!-- </form> -->
+                                       
                                     </tr>
+
                                     <%assign var="ro" value=$ro+1%>
                                     <%else %>
                                     Part Not Found
@@ -264,8 +270,9 @@
                                              <input type="hidden" name="tax_id" value="<%$po_parts[0]->tax_id %>" class="form-control"> 
                                              
                                              <button type="submit" class="btn btn-primary"> Complete Challan Process </button>
-                                            
                                           </form>
+                                       </td>
+
                                        </td>
                                     </tr>
                                      <%/if%> 

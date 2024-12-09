@@ -45,7 +45,7 @@
                   <p class="tgdp-rgt-tp-ttl">Supplier Name</p>
                   <p class="tgdp-rgt-tp-txt"><%$supplier[0]->supplier_name %></p>
                </div>
-               <div class="tgdp-rgt-tp-sect">
+               <div class="tgdp-rgt-tp-sect hide">
                   <p class="tgdp-rgt-tp-ttl">Supplier No</p>
                   <p class="tgdp-rgt-tp-txt"><%$supplier[0]->supplier_number %></p>
                </div>
@@ -63,15 +63,15 @@
                   <p class="tgdp-rgt-tp-txt"><%$inwarding_data[0]->delivery_unit %></p>
                </div>
                <%/if%>
-               <div class="tgdp-rgt-tp-sect">
+               <div class="tgdp-rgt-tp-sect hide">
                   <p class="tgdp-rgt-tp-ttl">Invoice Amount</p>
                   <p class="tgdp-rgt-tp-txt"><%$inwarding_data[0]->invoice_amount %></p>
                </div>
-               <div class="tgdp-rgt-tp-sect">
+               <div class="tgdp-rgt-tp-sect hide">
                   <p class="tgdp-rgt-tp-ttl">Software Calculated Amount</p>
                   <p class="tgdp-rgt-tp-txt"><%$inwarding_data[0]->invoice_amount %></p>
                </div>
-               <div class="tgdp-rgt-tp-sect">
+               <div class="tgdp-rgt-tp-sect hide">
                   <p class="tgdp-rgt-tp-ttl">Invoice Amount Validate Status</p>
                   <p class="tgdp-rgt-tp-txt"><%$status %></p>
                </div>

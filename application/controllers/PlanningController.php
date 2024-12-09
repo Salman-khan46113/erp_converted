@@ -305,43 +305,57 @@ class PlanningController extends CommonController
 		$data['financial_year'] = $financial_year;
 		$data['month'] = $month;
 		
-		$arr = array(
-				"financial_year" => $financial_year,
-				//"month" => $month,
-				"clientId" =>  $this->Unit->getSessionClientId()
-			);
-			
-		// $data['planing_data'] = $this->Crud->get_data_by_id_multiple("planing", $arr);
-		//$data['planing_data'] = $this->Crud->get_data_by_id("planing", $financial_year, "financial_year");
-		$data['customer_part'] = $this->Crud->read_data("customer_part");
-		$data['customer'] = $this->Crud->read_data("customer");
+		/*		-- Make sure these indexes are in place
+				-- CREATE INDEX idx_child_part_master ON child_part_master(child_part_id, id);
+				-- CREATE INDEX idx_child_part_stock ON child_part_stock(childPartId, clientId);
+		*/
+		$role_management_data = $this->db->query('
+				SELECT cp.id, cpm.id as cpm_id, cp.part_number, cp.part_description, cps.stock, cpm.part_rate
+				FROM child_part cp
+				INNER JOIN child_part_master cpm ON cp.id = cpm.child_part_id
+				LEFT JOIN child_part_stock cps ON cp.id = cps.childPartId AND cps.clientId = '.$this->Unit->getSessionClientId().'
+				INNER JOIN (
+					SELECT child_part_id, MAX(id) AS max_id
+					FROM child_part_master
+					GROUP BY child_part_id
+				) max_cpm 
+					ON cpm.child_part_id = max_cpm.child_part_id 
+					AND cpm.id = max_cpm.max_id
+				ORDER BY cpm.id DESC');
 
-		$role_management_data = $this->db->query('SELECT  id,part_number FROM `child_part` ');
-		$data['child_part_master_main'] = $role_management_data->result();
+		$data['child_part_master'] = $role_management_data->result();
+		$child_part_master = $data['child_part_master'];
+		foreach ($child_part_master as $key=>$t) {
+		    $subtotal=0;
+		    $array = array("child_part_id" => $t->id, "financial_year" => $financial_year, "month" => $month);
+		    $planing_data = $this->Crud->get_data_by_id_multiple_condition("planing_data", $array);
+		    $req_qty = 0;
+		    if ($planing_data) {
+		        foreach ($planing_data as $pd) {
+		            $schedule_qty_2 = $pd->schedule_qty_2;
+		            $schedule_qty = $pd->schedule_qty;
+		            $net_schedule = 0;
 
-
-		if ($data['child_part_master_main']) {
-			foreach ($data['child_part_master_main'] as $t) {
-				$subtotal=0;
-				$shortage_qty=0;
-				$actual_stock=0;                                                
-				$data['child_part_master'][$t->part_number] = $this->Crud->get_data_by_id("child_part_master", $t->part_number, "part_number");
-				$data['child_part_data'][$t->part_number] = $this->SupplierParts->getSupplierPartByPartNumber($t->part_number);
-				$array = array(
-					"child_part_id" => $data['child_part_master'][$t->part_number] [0]->child_part_id,
-					"financial_year" => $financial_year,
-					"month" => $month,
-				);
-
-				$data['planing_data'] [$data['child_part_master'][$t->part_number][0]->child_part_id]= $this->Crud->get_data_by_id_multiple_condition("planing_data", $array);
-				
-			}
-
+		            if ($schedule_qty_2 != 0) {
+		                $net_schedule = $schedule_qty_2 - $schedule_qty;
+		                $req_qty = $req_qty + $pd->required_qty + ($net_schedule * $pd->bom_qty);
+		            }
+		            else {
+		                $req_qty = $req_qty + ($pd->schedule_qty * $pd->bom_qty);
+		            }
+		        }
+		    }
+		    $child_part_master[$key]->req_qty = $req_qty;
+		    $child_part_master[$key]->subtotal = $subtotal = $t->part_rate * $req_qty;
+		    $child_part_master[$key]->total = $total + $subtotal;
+		    $child_part_master[$key]->net_mrp_req = $req_qty - $t->stock;
 		}
+		$data['child_part_master'] = $child_part_master ;
 		// pr($data['planing_data'],1);
 		// $this->load->view('header');
 		// $this->load->view('view_all_child_parts_schedule', $data);
 		// $this->load->view('footer');
+		// pr($data,1);
 		$this->loadView('customer/view_all_child_parts_schedule', $data);
 
 	}

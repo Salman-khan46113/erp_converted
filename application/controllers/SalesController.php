@@ -135,7 +135,7 @@ class SalesController extends CommonController
 		// $data['bom_list'] = $this->Crud->get_data_by_id("bom", $data['id'], "customer_part_id");
 		//$child_part_list = $this->db->query('SELECT DISTINCT po_number,po_end_date FROM `customer_po_tracking`');
 		//$data['new_po'] = $child_part_list->result();
-		//$data['client_list'] = $this->Crud->read_data_acc("client");
+		$data['distanceCol'] = $this->Unit->getClientToCustomerDistanceTbColName();
 		$data['consignee_list'] = $this->Crud->read_data_acc("consignee");
 		$this->loadView('sales/new_sales', $data);
 	}
@@ -287,23 +287,26 @@ class SalesController extends CommonController
 	public function get_customer_parts_for_sale()
 	{
 		$customer_id = $this->input->post('id');
-	
-		$customer_parts = $this->Crud->get_data_by_id("customer_part", $customer_id, 'customer_id');
-		echo '<select>Select Part Number // Description // FG Stock // Rate // Tax Structure';
+	    $customer_parts = $this->Crud->get_data_by_id("customer_part", $customer_id, 'customer_id');
+		
 		if ($customer_parts) {
+			$response1 = '';
+			$response1 .= '<option value="">Select</option>';
 			foreach ($customer_parts as $value) {
 				$customer_parts_master_data = $this->CustomerPart->getCustomerPartByPartNumber($value->part_number);
 				$gst_structure = $this->Crud->get_data_by_id("gst_structure", $value->gst_id, 'id');
 				$customer_part_rate = $this->Crud->get_data_by_id("customer_part_rate", $value->id, 'customer_master_id');
 				if (!empty($customer_part_rate[0]->rate)) {
-					echo '<option value="' . $value->id . '">'.$value->part_number . ' // ' . $value->part_description . ' // ' . $customer_parts_master_data[0]->fg_stock . ' // ' . $customer_part_rate[0]->rate . ' // ' . $gst_structure[0]->code . '</option>';
+					$response1.='<option value="' . $value->id . '">'.$value->part_number . ' // ' . $value->part_description . ' // ' . $customer_parts_master_data[0]->fg_stock . ' // ' . $customer_part_rate[0]->rate . ' // ' . $gst_structure[0]->code . '</option>';
 				}
 			}
 		} else {
-			echo '<option value="">Select</option>';
+			$response1 .= '<option value="">No Parts Defined</option>';
 		}
-		echo '</select>';
+		
+		echo $response1;
 	}
+
 
 	public function get_customer_parts_using_po_details_for_sale()
 	{
@@ -369,6 +372,8 @@ class SalesController extends CommonController
 			$data['child_part_data'][$p->part_id] = $this->Crud->get_data_by_id("customer_part", $p->part_id, "id");
 			$data['gst_structure2'][$p->part_id] = $this->Crud->get_data_by_id("gst_structure", $p->tax_id, "id");
 		}
+		$configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration", $criteria);
+		$data['configuration'] = array_column($configuration, "config_value", "config_name");
 		
 
 		$this->loadView('sales/view_new_sales_by_id', $data);
@@ -423,70 +428,80 @@ class SalesController extends CommonController
 			);
 
 			$po_part_details = $this->Crud->get_data_by_id_multiple_condition("parts_customer_trackings", $po_part_criteria);
-			if ($qty > $po_part_details[0]->qty) {
-				$msg = "Insufficient PO Part balance qty. PO Part balance qty is " . $po_part_details[0]->qty;
+			$customer_po_tracking_data = $this->Crud->get_data_by_id("customer_po_tracking", $po_id, "id");
+			$role_management_data = $this->db->query("SELECT SUM(parts.qty) AS MAINSUM from `sales_parts`as parts , 
+				new_sales as sales WHERE  parts.part_id = ".$part_id." 
+				AND parts.po_number = '".$customer_po_tracking_data[0]->po_number."' 
+				AND parts.sales_id = sales.id");
+			$used_qty = $role_management_data->row();
+			$used_qty = $used_qty->MAINSUM > 0 ? $used_qty->MAINSUM  : 0;
+			$total_available_qty = $po_part_details[0]->qty - $used_qty;
+			$falg = 0;
+			if ($qty > $total_available_qty) {
+				$msg = "Insufficient PO Part balance qty. PO Part balance qty is " . $total_available_qty;
 				// $this->addErrorMessage("Insufficient PO Part balance qty. PO Part balance qty is " . $po_part_details[0]->qty);
 				// $this->redirectMessage();
 				// exit();
+				$falg = 1;
 			}
+			if($falg == 0){
+				$prod_qty_new = 0;
+				if ($job_card_data) {
+					foreach ($job_card_data as $j) {
+						$job_card_prod_qty_ = $this->db->query('SELECT DISTINCT operation_id FROM `job_card_prod_qty` where job_card_id = ' . $j->id . ' ORDER BY operation_id ASC ');
+						$job_card_prod_qty_data = $job_card_prod_qty_->result();
+						if ($job_card_prod_qty_data) {
+							$array_count = count($job_card_prod_qty_data);
 
-			$prod_qty_new = 0;
-			if ($job_card_data) {
-				foreach ($job_card_data as $j) {
-					$job_card_prod_qty_ = $this->db->query('SELECT DISTINCT operation_id FROM `job_card_prod_qty` where job_card_id = ' . $j->id . ' ORDER BY operation_id ASC ');
-					$job_card_prod_qty_data = $job_card_prod_qty_->result();
-					if ($job_card_prod_qty_data) {
-						$array_count = count($job_card_prod_qty_data);
+							$operation_id_prod = $job_card_prod_qty_data[$array_count - 1]->operation_id;
+							$array_main = array(
+								"operation_id" => $operation_id_prod,
+								"job_card_id" => $j->id,
+							);
 
-						$operation_id_prod = $job_card_prod_qty_data[$array_count - 1]->operation_id;
-						$array_main = array(
-							"operation_id" => $operation_id_prod,
-							"job_card_id" => $j->id,
-						);
+							$job_card_prod_qty_prod = $this->Crud->get_data_by_id_multiple_condition("job_card_prod_qty", $array_main);
 
-						$job_card_prod_qty_prod = $this->Crud->get_data_by_id_multiple_condition("job_card_prod_qty", $array_main);
-
-						if ($job_card_prod_qty_prod) {
-							foreach ($job_card_prod_qty_prod as $jcp) {
-								$prod_qty_new = $prod_qty_new + $jcp->production_qty;
+							if ($job_card_prod_qty_prod) {
+								foreach ($job_card_prod_qty_prod as $jcp) {
+									$prod_qty_new = $prod_qty_new + $jcp->production_qty;
+								}
 							}
-						}
-					
-					} 
-				}
-			}
-			
-			if ($qty > $customer_parts_master_data[0]->fg_stock) {
-				// $this->addErrorMessage("Please check FG stock");
-				// $this->redirectMessage();
-				// exit();
-				$msg = "Please check FG stock";
-			} else {
-				$customer_part_rate = $this->Crud->get_data_by_id("customer_part_rate", $part_id, "customer_master_id");
-				$total_rate_old = $customer_part_rate[0]->rate * $qty;
-				$this->load->model('Sales');
-				$discountValue = $this->Sales->isSalesItemDiscount($total_rate_old, $discountType, $discount);
-				if($discountValue > 0) {
-					$total_rate_old = $total_rate_old - $discountValue;
-				}
-				$gst_structure2 = $this->Crud->get_data_by_id("gst_structure", $customer_part[0]->gst_id, "id");
-				$taxData = $this->Sales->getSalesPartTaxDetails($total_rate_old, $gst_structure2[0]);
-				
-				/*
-					$cgst_amount = ($total_rate_old * $gst_structure2[0]->cgst) / 100;
-					$sgst_amount = ($total_rate_old * $gst_structure2[0]->sgst) / 100;
-					$igst_amount = ($total_rate_old * $gst_structure2[0]->igst) / 100;
-
-					if ($gst_structure2[0]->tcs_on_tax == "no") {
-						$tcs_amount =   (($total_rate_old * $gst_structure2[0]->tcs) / 100);
-					} else {
-						$tcs_amount =  ((($cgst_amount + $sgst_amount + $igst_amount + $total_rate_old) * $gst_structure2[0]->tcs) / 100);
+						
+						} 
 					}
-					$gst_amount = $cgst_amount + $sgst_amount + $igst_amount;
-					$total_rate = $total_rate_old + $cgst_amount + $sgst_amount + $igst_amount;
-				*/
-		
-				$customer_po_tracking_data = $this->Crud->get_data_by_id("customer_po_tracking", $po_id, "id");
+				}
+				
+				if ($qty > $customer_parts_master_data[0]->fg_stock) {
+					// $this->addErrorMessage("Please check FG stock");
+					// $this->redirectMessage();
+					// exit();
+					$msg = "Please check FG stock";
+				} else {
+					$customer_part_rate = $this->Crud->get_data_by_id("customer_part_rate", $part_id, "customer_master_id");
+					$total_rate_old = $customer_part_rate[0]->rate * $qty;
+					$this->load->model('Sales');
+					$discountValue = $this->Sales->isSalesItemDiscount($total_rate_old, $discountType, $discount);
+					if($discountValue > 0) {
+						$total_rate_old = $total_rate_old - $discountValue;
+					}
+					$gst_structure2 = $this->Crud->get_data_by_id("gst_structure", $customer_part[0]->gst_id, "id");
+					$taxData = $this->Sales->getSalesPartTaxDetails($total_rate_old, $gst_structure2[0]);
+					
+					/*
+						$cgst_amount = ($total_rate_old * $gst_structure2[0]->cgst) / 100;
+						$sgst_amount = ($total_rate_old * $gst_structure2[0]->sgst) / 100;
+						$igst_amount = ($total_rate_old * $gst_structure2[0]->igst) / 100;
+
+						if ($gst_structure2[0]->tcs_on_tax == "no") {
+							$tcs_amount =   (($total_rate_old * $gst_structure2[0]->tcs) / 100);
+						} else {
+							$tcs_amount =  ((($cgst_amount + $sgst_amount + $igst_amount + $total_rate_old) * $gst_structure2[0]->tcs) / 100);
+						}
+						$gst_amount = $cgst_amount + $sgst_amount + $igst_amount;
+						$total_rate = $total_rate_old + $cgst_amount + $sgst_amount + $igst_amount;
+					*/
+			
+					$customer_po_tracking_data = $this->Crud->get_data_by_id("customer_po_tracking", $po_id, "id");
 
 					$data = array(
 						"sales_id" => $sales_id,
@@ -530,6 +545,7 @@ class SalesController extends CommonController
 					}
 					// $this->redirectMessage();
 				}
+			}
 		}
 		$ret_arr['msg'] = $msg;
 		$ret_arr['sucess'] = $sucess;
@@ -555,24 +571,33 @@ class SalesController extends CommonController
 		}
 
 		//avoid double post so check whether the lock status is there before locking...
-		if (strpos($po_parts[0]->sales_number, $this->getSalesNoFormat(false,false)) !== false) {
-			$new_sales_number = $po_parts[0]->sales_number;
-			$sales_data = $this->Crud->get_data_by_id("new_sales", $po_parts[0]->sales_number, "sales_number");
-			if ($sales_data[0]->status == 'lock') {
-				$isLocked = true;
-			}
-		} 
+		if (strpos($po_parts[0]->sales_number, 'TEMP') === false) {
+			if (strpos($po_parts[0]->sales_number, $this->getSalesNoFormat(false,false)) !== false) {
+				$new_sales_number = $po_parts[0]->sales_number;
+				$sales_data = $this->Crud->get_data_by_id("new_sales", $po_parts[0]->sales_number, "sales_number");
+				if ($sales_data[0]->status == 'lock') {
+					$isLocked = true;
+				} if ($sales_data[0]->status == 'unlocked') {
+					$isUnLocked = true;
+				}
+				 if ($sales_data[0]->status == 'pending') {
+					$isReusedInvoice = true;
+				}
+			} 
+		}
 		$messages = "Something went wrong!.";
 		$success =0;
-		if ($isLocked == false) {
-			$sql = "SELECT actualSalesNo FROM new_sales WHERE status!='pending' AND sales_number like'" . $this->getSalesNoFormat(false,true) . "' order by actualSalesNo  desc LIMIT 1";
-			$latestSalesNo = $this->Crud->customQuery($sql);
-			foreach ($latestSalesNo as $p) {
-				$currentSaleNo = $p->actualSalesNo;
-			}
+		if ($isLocked == false && $isUnLocked == false) {
+			if($isReusedInvoice == false) {
+				$sql = "SELECT actualSalesNo FROM new_sales WHERE status!='pending' AND sales_number like'" . $this->getSalesNoFormat(false,true) . "' order by actualSalesNo  desc LIMIT 1";
+				$latestSalesNo = $this->Crud->customQuery($sql);
+				foreach ($latestSalesNo as $p) {
+					$currentSaleNo = $p->actualSalesNo;
+				}
 
-			$new_lockCount = $currentSaleNo + 1;
-			$new_sales_number = $this->getLockSalesNumber($new_lockCount);
+				$new_lockCount = $currentSaleNo + 1;
+				$new_sales_number = $this->getLockSalesNumber($new_lockCount);
+			}
 			//updated created date when the invoice is locked..
 			$cretd_dt = date('d/m/Y', strtotime($this->current_date));
 
@@ -629,6 +654,30 @@ class SalesController extends CommonController
 				// $this->addSuccessMessage('Updated Sucessfully');
 				// $this->redirectMessage();
 			}
+		}else if($isUnLocked) { 
+			$cretd_dt = date('d/m/Y', strtotime($this->current_date));
+			$sales_data = array(
+						"status" => 'lock',
+						"total_sales_amount" => $total_sales_amount,
+						"total_gst_amount" => $total_gst_amount,
+						"discount_amount" => $discount_amount,
+						"created_date" => $cretd_dt,
+					);
+			$result = $this->Crud->update_data("new_sales", $sales_data, $id);
+			if ($result) {
+					$sale_part_data = array(
+						"created_date" => $this->current_date,
+					);
+					$result = $this->Crud->update_data_column("sales_parts", $sale_part_data, $id, "sales_id");
+					if ($po_parts) {
+						$this->load->model('Sales');
+						$this->Sales->updateFGStockForSales($id, $this->Unit->getSessionClientId(), "lock");
+					}
+			}
+			$success = 1;
+			$messages = "Updated Sucessfully.";
+			// $this->addSuccessMessage('Updated Sucessfully');
+			// $this->redirectMessage();
 		} else {
 			// $this->addWarningMessage('Invoice already locked.');
 			// $this->redirectMessage("sales_invoice_released");
@@ -880,18 +929,18 @@ class SalesController extends CommonController
 			$data2->addChild('SVCURRENTCOMPANY', "TESTING");	//$this->getCustomerNameDetails()
 			$request = $data->addChild('REQUESTDATA');
 
-			$sales_details = $this->Crud->customQuery('SELECT parts.sales_id, parts.sales_number, sales.created_date, customer_name, 
-			ROUND(sum(total_rate),2) as Total, ROUND(sum(cgst_amount),2) as CGST_AMT, ROUND(sum(sgst_amount),2) as SGST_AMT, 
-			ROUND(sum(igst_amount),2) as IGST_AMT ,ROUND(sum(tcs_amount),2) as TCS_AMT, ROUND(sum(gst_amount),2) as GST_AMT, 
-			tax.cgst, tax.sgst, tax.igst, tax.tcs, tax.tcs_on_tax, sales.status
-			FROM  sales_parts as parts, new_sales as sales, gst_structure tax, customer
-			WHERE sales.status in ("lock","Cancelled")
+			$sales_details = $this->Crud->customQuery('SELECT parts.sales_id, parts.sales_number, sales.created_date, customer_name,
+			ROUND(sum(total_rate),2) as Total, ROUND(sum(cgst_amount),2) as CGST_AMT, ROUND(sum(sgst_amount),2) as SGST_AMT,
+			ROUND(sum(igst_amount),2) as IGST_AMT ,ROUND(sum(tcs_amount),2) as TCS_AMT, ROUND(sum(gst_amount),2) as GST_AMT,
+			tax.cgst, tax.sgst, tax.igst, tax.tcs, tax.tcs_on_tax, sales.status,sales.discount_amount,sales.discount
+            FROM  sales_parts as parts, new_sales as sales, gst_structure tax, customer
+            WHERE sales.status in ("lock")
 			AND parts.sales_id =  sales.id
 			AND parts.tax_id = tax.id
-			AND customer.id = parts.customer_id '.
-			$where_condition.
-			' GROUP BY parts.sales_id '
-			);
+			AND customer.id = parts.customer_id ' .
+                $where_condition .
+                ' GROUP BY parts.sales_id '
+            );
 			// pr($this->db->last_query(),1);
 			if(empty($sales_details)){
 				$message = "No records found for this export criteria.";
@@ -903,6 +952,7 @@ class SalesController extends CommonController
 			}
 
 			if($message != ""){
+
 				$return_arr = array(
 			        'message' => $message,
 			        'success' => 0
@@ -931,14 +981,19 @@ class SalesController extends CommonController
 
 			// Get the formatted XML as a string
 			//$formattedXml = $dom->saveXML();
-
-			$filename = 'tally_sales-'.$this->current_date_time.'.xml';
 			
-			header('Content-Type: application/xml');
-			header('Content-Disposition: attachment; filename="' . $filename . '"');
+			$filename = $filename = 'dist/uploads/sales_export_tally/tally_sales-'.$this->current_date_time.'.xml';
 
-			// Output the result
-			echo $xmlStringWithoutDeclaration;
+			file_put_contents($filename, $xmlStringWithoutDeclaration);
+			
+			$return_arr = array(
+			        'pdf_utl' => $this->config->item("base_url").$filename,
+			        'message' => "Export successfully.",
+			        'success' => 1
+			);
+
+			echo json_encode($return_arr);
+			exit();
 			
 			// Output the XML
 			//echo $xml->asXML();
@@ -1054,7 +1109,7 @@ class SalesController extends CommonController
         ];
         $column[] = [
             "data" => "cgst_amount",
-            "title" => "SGST",
+            "title" => "CGST",
             "width" => "7%",
             "className" => "dt-center",
         ];
@@ -1096,7 +1151,7 @@ class SalesController extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
+        $data["sorting_column"] = json_encode([[2, 'desc']]);
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
@@ -1142,7 +1197,7 @@ class SalesController extends CommonController
 			$data[$key]['subtotal'] = $subtotal;
 			$data[$key]['rate'] =  $rate;
 			$data[$key]['sales_discount'] =  ($val['sales_discount'] > 0) ? $val['sales_discount']." %": display_no_character();
-			$data[$key]['row_total'] = $row_total;
+			$data[$key]['row_total'] = number_format($row_total, 2);
 			
 		}
 		$data["data"] = $data;
@@ -1636,16 +1691,16 @@ class SalesController extends CommonController
 						if(is_array($sales_parts) && count($sales_parts) > 0){
 						$data = [];
 						foreach ($sales_parts as $key => $value) {
-							if ((int) $value->igst === 0) {
-					                $gst = (int) $value->cgst + (int) $value->sgst;
-					                $cgst = (int) $value->cgst;
-					                $sgst = (int) $value->sgst;
-					                $tcs = (float) $value->tcs;
+							if ($value->igst <= 0) {
+					                $gst = $value->cgst + $value->sgst;
+					                $cgst = $value->cgst;
+					                $sgst = $value->sgst;
+					                $tcs = $value->tcs;
 					                $igst = 0;
 					                $total_gst_percentage = $cgst + $sgst;
 					        } else {
-					                $gst = (int) $value->igst;
-					                $tcs = (float) $value->tcs;
+					                $gst =  $value->igst;
+					                $tcs =  $value->tcs;
 					                $cgst = 0;
 					                $sgst = 0;
 					                $igst = $gst;
@@ -1885,169 +1940,675 @@ class SalesController extends CommonController
 	}
 
 	// Function to add sales data request
-	function requestSalesXML($data,$sales_details)
-	{
-		$isCreate = true;
-		if($sales_details->status =='Cancelled') {
-			$isCreate = false;
+	// Function to add sales data request
+    public function requestSalesXML($data, $sales_details)
+    {
+
+		$isWithInventory = false;
+		$isSalesExportWithInventory = $this->GlobalConfig->readConfiguration("isSalesExportWithInventory", "No");
+		if (strcasecmp($isSalesExportWithInventory, "Yes") == 0) {
+			$isWithInventory = true;
 		}
-		$voucher = $data->addChild('TALLYMESSAGE');
-		// Encode special characters
-		$customer_name = htmlspecialchars($sales_details->customer_name, ENT_XML1 | ENT_COMPAT, 'UTF-8');
-
-		//$customer_name  = $sales_details->customer_name;
-		$sales_number  = $sales_details->sales_number;
-
-		//Get GUID and RANDOMID :
-		$guid = str_replace("-","0",$sales_number);
-		$guid = str_replace("/","0",$guid);
 		
-		$voucher_child = $voucher->addChild('VOUCHER');
-		$voucher_child->addAttribute('REMOTEID', $guid); 				//Fixed pattern - with sales number etc as this can be used for cancel too.
-		$voucher_child->addAttribute('VCHTYPE', 'Sales'); 				//Hard-Coded
-		//Hard coded values ?? 
-		$voucher_child->addChild('ISOPTIONAL', 'No'); 
-		$voucher_child->addChild('USEFORGAINLOSS', 'No'); 
-		$voucher_child->addChild('USEFORCOMPOUND', 'No'); 
-		$voucher_child->addChild('VOUCHERTYPENAME', 'Sales'); 
+
+        $isCreate = true;
+        if ($sales_details->status == 'Cancelled') {
+            $isCreate = false;
+        }
+        $voucher = $data->addChild('TALLYMESSAGE');
+        // Encode special characters
+        $customer_name = htmlspecialchars($sales_details->customer_name, ENT_XML1 | ENT_COMPAT, 'UTF-8');
+
+        //$customer_name  = $sales_details->customer_name;
+        $sales_number = $sales_details->sales_number;
 
 		// Create a DateTime object using the input date and the specified format
-		$dateTimeObject = DateTime::createFromFormat('d/m/Y', $sales_details->created_date);
-		// Format the DateTime object to the desired output format "Ymd"
-		$sales_date = $dateTimeObject->format('Ymd');
-				
-		$voucher_child->addChild('DATE', $sales_date);
-		$voucher_child->addChild('EFFECTIVEDATE', $sales_date);
+        $dateTimeObject = DateTime::createFromFormat('d/m/Y', $sales_details->created_date);
+        // Format the DateTime object to the desired output format "Ymd"
+        $sales_date = $dateTimeObject->format('Ymd');
 
-		$voucher_child->addChild('USETRACKINGNUMBER', 'No');
-		$voucher_child->addChild('ISPOSTDATED', 'No');
-		$voucher_child->addChild('ISINVOICE', 'No');
-		
-		
-		if($isCreate == true) {
-			$this->inoviceExportForCreate($sales_details,$voucher_child ,$customer_name,$guid);
-			//Inventory type data
-			$isInvExport = $this->GlobalConfig->readConfiguration("isSalesExportWithInventory", "No");
-			if (strcasecmp($isInvExport, "Yes") == 0) {
+        //Get GUID and RANDOMID :
+        $guid = str_replace("-", "0", $sales_number);
+        $guid = str_replace("/", "0", $guid);
 
-				//There would be multiple entries here for INVENTORYENTRIES
-				$inventory_details = $this->Crud->customQuery("select cp.part_number, part.uom_id, part.qty, part.part_price,
-												(part.total_rate - part.gst_amount) as part_amount
+        $voucher_child = $voucher->addChild('VOUCHER');
+        $voucher_child->addAttribute('REMOTEID', $guid); //Fixed pattern - with sales number etc as this can be used for cancel too.
+        $voucher_child->addAttribute('VCHTYPE', 'Sales'); //Hard-Coded
+        if ($isWithInventory) {
+			if($isCreate){
+				$voucher_child->addAttribute('ACTION', 'Create');
+			}
+			$voucher_child->addAttribute('OBJVIEW', 'Invoice Voucher View'); //Hard-Coded
+	    }
+
+        if ($isWithInventory && $isCreate) {
+
+            //get the address details
+            $addressDetails = $this->Crud->customQuery("SELECT 
+                            CASE 
+                                WHEN sales.shipping_addressType = 'customer' THEN cust.shifting_address
+                                WHEN sales.shipping_addressType = 'consignee' THEN adm.address
+                            END AS shippingAddress,
+                            CASE 
+                                WHEN sales.shipping_addressType = 'customer' THEN cust.customer_name
+                                WHEN sales.shipping_addressType = 'consignee' THEN cons.consignee_name
+                            END AS consigneeName,
+                            CASE 
+                                WHEN sales.shipping_addressType = 'customer' THEN cust.state
+                                WHEN sales.shipping_addressType = 'consignee' THEN adm.state
+                            END AS consignee_state,
+                            CASE 
+                                WHEN sales.shipping_addressType = 'customer' THEN cust.gst_number
+                                WHEN sales.shipping_addressType = 'consignee' THEN cons.gst_number
+                            END AS consignee_gst_number,
+                            cust.billing_address as billing_address,
+                            cust.gst_number as billing_GSTIN
+                        FROM 
+                            new_sales sales
+                        INNER JOIN 
+                            customer cust ON cust.id = sales.customer_id
+                        LEFT JOIN 
+                            consignee cons ON cons.id = sales.consignee_id
+                        LEFT JOIN 
+                            address_master adm ON adm.id = cons.address_id
+                        WHERE 
+                            sales.id = ".$sales_details->sales_id);
+
+            if ($sales_details) {
+               $shippingAddress = $addressDetails[0]->shippingAddress;
+               $billingAddress = $addressDetails[0]->billing_address;
+               $billing_GSTIN = $addressDetails[0]->billing_GSTIN;
+               $consigneeName = $addressDetails[0]->consigneeName;
+               $consignee_state = $addressDetails[0]->consignee_state;
+               $consignee_gst_number = $addressDetails[0]->consignee_gst_number;
+            }
+
+            $addr_type = $voucher_child->addChild('ADDRESS.LIST'); //bill to address
+            $addr_type->addAttribute('TYPE', 'String'); //Hard-Coded
+            $addr_type->addChild('ADDRESS',$billingAddress);
+
+            $basicbuyaddr_type = $voucher_child->addChild('BASICBUYERADDRESS.LIST');//ship to address
+            $basicbuyaddr_type->addAttribute('TYPE', 'String'); //Hard-Coded
+            $basicbuyaddr_type->addChild('ADDRESS', $shippingAddress);
+
+            /** <BASICORDERTERMS.LIST TYPE="String">
+             *  <BASICORDERTERMS>By Road</BASICORDERTERMS>
+             *  </BASICORDERTERMS.LIST> */
+
+            $voucher_child->addChild('DATE', $sales_date);
+			$voucher_child->addChild('VCHSTATUSDATE', $sales_date);		
+			$voucher_child->addChild('GUID', $guid);
+
+            $voucher_child->addChild('GSTREGISTRATIONTYPE', 'Regular'); //Hard-Coded ?
+            $voucher_child->addChild('VATDEALERTYPE', 'Regular'); //Hard-Coded ?
+            $voucher_child->addChild('STATENAME', 'Maharashtra'); //TO-DO		- Customer state ?
+            $voucher_child->addChild('ENTEREDBY', 'admin'); //TO-DO
+			$voucher_child->addChild('COUNTRYOFRESIDENCE', 'India'); //TO-DO	
+            $voucher_child->addChild('PARTYGSTIN', $billing_GSTIN);
+			$voucher_child->addChild('PLACEOFSUPPLY', 'Maharashtra'); //TO-DO		- Customer state ?
+			$voucher_child->addChild('PARTYNAME', $customer_name);
+            
+			$gst_registration = $voucher_child->addChild('GSTREGISTRATION','Maharashtra Registration'); //TO-DO
+			$gst_registration->addAttribute('TAXTYPE', 'GST');
+			$gst_registration->addAttribute('TAXREGISTRATION', '');
+			
+			$voucher_child->addChild('VOUCHERTYPENAME', 'Sales'); //Hard coded
+			$voucher_child->addChild('PARTYLEDGERNAME', $customer_name);
+
+			$voucher_child->addChild('VOUCHERNUMBER', $sales_details->sales_number); 
+            $voucher_child->addChild('BASICBUYERNAME',$consigneeName); //ship to buyer name
+            $voucher_child->addChild('CMPGSTREGISTRATIONTYPE', 'Regular'); 
+            $voucher_child->addChild('PARTYMAILINGNAME', $customer_name); 
+            $voucher_child->addChild('CONSIGNEEGSTIN', $consignee_gst_number);
+            $voucher_child->addChild('CONSIGNEEMAILINGNAME', $consigneeName);
+            $voucher_child->addChild('CONSIGNEESTATENAME',$consignee_state);
+            $voucher_child->addChild('CMPGSTSTATE', 'Maharashtra'); //TO-DO
+            $voucher_child->addChild('CONSIGNEECOUNTRYNAME', 'India'); //TO-DO
+            $voucher_child->addChild('BASICBASEPARTYNAME', $consigneeName);
+            $voucher_child->addChild('NUMBERINGSTYLE', 'Auto Retain'); //Hard Coded
+            $voucher_child->addChild('CSTFORMISSUETYPE', 'Not Applicable'); //Hard Coded
+            $voucher_child->addChild('CSTFORMRECVTYPE', 'Not Applicable'); //Hard Coded
+
+            $voucher_child->addChild('FBTPAYMENTTYPE', 'Default'); //Hard Coded
+            $voucher_child->addChild('PERSISTEDVIEW', 'Invoice Voucher View'); //Hard Coded
+            $voucher_child->addChild('VCHSTATUSTAXADJUSTMENT', 'Default'); //Hard Coded
+            $voucher_child->addChild('VCHSTATUSVOUCHERTYPE', 'Sales'); //Hard Coded
+            $voucher_child->addChild('VCHSTATUSTAXUNIT', 'Maharashtra Registration'); //TO-DO Maharashtra Registration
+            $voucher_child->addChild('VCHGSTCLASS', 'Not Applicable'); //Hard Coded
+            $voucher_child->addChild('VCHENTRYMODE', 'Item Invoice'); //Hard Coded
+			
+            $voucher_child->addChild('EFFECTIVEDATE', $sales_date); 
+            $voucher_child->addChild('DIFFACTUALQTY', 'No'); // Hard Coded
+            $voucher_child->addChild('ISMSTFROMSYNC', 'No'); // Hard Coded
+
+            $voucher_child->addChild('HASDISCOUNTS', ($sales_details->discount_amount >0) ? 'Yes' :'No');
+
+            $this->vocher_inventory_default_fields($voucher_child);
+        }else{
+			$voucher_child->addChild('ISOPTIONAL', 'No');
+			$voucher_child->addChild('USEFORGAINLOSS', 'No');
+			$voucher_child->addChild('USEFORCOMPOUND', 'No');
+			$voucher_child->addChild('VOUCHERTYPENAME', 'Sales');
+			$voucher_child->addChild('DATE', $sales_date);
+			$voucher_child->addChild('EFFECTIVEDATE', $sales_date);
+
+			$voucher_child->addChild('USETRACKINGNUMBER', 'No');
+			$voucher_child->addChild('ISPOSTDATED', 'No');
+			$voucher_child->addChild('ISINVOICE', 'No');
+
+		}
+        
+
+        if ($isCreate == true) {
+            //There would be multiple entries here for INVENTORYENTRIES
+                $inventory_details = $this->Crud->customQuery("select cp.part_number, part.uom_id, part.hsn_code, part.qty, part.part_price,
+												(part.total_rate - part.gst_amount) as part_amount, discounted_amount,
+												part.sales_number, part.tax_id, part.total_rate as Total, part.basic_total ,part.cgst_amount, part.sgst_amount, part.igst_amount, 
+												part.tcs_amount, part.gst_amount, tax.cgst, tax.sgst, tax.igst, tax.tcs, tax.tcs_on_tax
 												FROM sales_parts part
 												INNER JOIN customer_part cp ON cp.id = part.part_id
+												INNER JOIN gst_structure tax ON tax.id = part.tax_id
 												WHERE part.sales_id = " . $sales_details->sales_id);
+
+			//vocher without inventory details
+            if (!$isWithInventory) {			
+				$voucher_child->addAttribute('ACTION', 'Create'); //Hard Coded
+				$voucher_child->addChild('ISCANCELLED', 'No'); //Hard Coded
+				$voucher_child->addChild('DIFFACTUALQTY', 'Yes'); //Hard Coded
+				$voucher_child->addChild('VOUCHERNUMBER', $sales_details->sales_number);
+				$voucher_child->addChild('REFERENCE', $sales_details->sales_number);
+				$voucher_child->addChild('PARTYLEDGERNAME', $customer_name);
+				$voucher_child->addChild('NARRATION', 'Invoice No. ' . $sales_details->sales_number);
+				$voucher_child->addChild('ASPAYSLIP', 'No'); //Hard Coded
+				$voucher_child->addChild('GUID', $guid);
+				$voucher_child->addChild('ALTERID', '1'); //TO-D0 For isWithInventory ??
+
+				//What is this ? Need TO-DO action
+				$haryanavat_list = $voucher_child->addChild('HARYANAVAT.LIST'); //Hard Coded
+				$haryanavat_list->addAttribute('DESC', '`HARYANAVAT`'); //Hard Coded
+
+				$this->inoviceExportForCreate($voucher_child, $sales_details,$customer_name, $guid,$isWithInventory);
 
 				if ($inventory_details) {
 					foreach ($inventory_details as $inventory_part) {
 						$inventory = $voucher_child->addChild('INVENTORYENTRIES.LIST');
 
-						$inventory->addChild('STOCKITEMNAME', $inventory_part->part_number);
+						$inventory->addChild('STOCKITEMNAME', $inventory_part->part_number); 
 						$inventory->addChild('ISDEEMEDPOSITIVE', 'No'); //Hard Coded
 						$inventory->addChild('RATE', $inventory_part->part_price);
+						$inventory->addChild('DISCOUNT', $sales_details->discount); //DISCOUNT IS IN PERCENTAGE
 						$inventory->addChild('AMOUNT', $inventory_part->part_amount);
 						$inventory->addChild('ACTUALQTY', $inventory_part->qty);
 						$inventory->addChild('BILLEDQTY', $inventory_part->qty);
 						$inventory->addChild('UOM', $inventory_part->uom_id);
 					}
 				}
-			} 
-			//Inventory ends
-		}else {
-			$this->inoviceExportForCancel($voucher_child,$guid);
-	  }
+			}else{
+				//vocher with inventory details
+                if ($inventory_details) {
+                    foreach ($inventory_details as $inventory_part) {
+                        $inventory = $voucher_child->addChild('ALLINVENTORYENTRIES.LIST');
+                        $inventory->addChild('STOCKITEMNAME', $inventory_part->part_number);					
+						$inventory->addChild('GSTOVRDNISREVCHARGEAPPL', 'Not Applicable'); //Hard Coded
+						$inventory->addChild('GSTOVRDNTAXABILITY', 'Taxable'); //Hard Coded
+						$inventory->addChild('GSTSOURCETYPE', 'Stock Item'); //Hard Coded
+						$inventory->addChild('GSTITEMSOURCE', $inventory_part->part_number);
+						$inventory->addChild('HSNSOURCETYPE', 'Stock Item'); //Hard Coded
+						$inventory->addChild('HSNITEMSOURCE', $inventory_part->part_number);
+						$inventory->addChild('GSTOVRDNSTOREDNATURE', ''); //Hard Coded
+
+						$inventory->addChild('GSTOVRDNTYPEOFSUPPLY', 'Goods'); //Hard Coded
+						$inventory->addChild('GSTRATEINFERAPPLICABILITY', 'As per Masters/Company'); //Hard Coded
+						$inventory->addChild('GSTHSNNAME', $inventory_part->hsn_code); //TO-DO
+						$inventory->addChild('GSTHSNINFERAPPLICABILITY', 'As per Masters/Company'); //Hard Coded
+						$inventory->addChild('ISDEEMEDPOSITIVE', 'No'); //Hard Coded
+						$inventory->addChild('ISGSTASSESSABLEVALUEOVERRIDDEN', 'No'); //Hard Coded
+						$inventory->addChild('STRDISGSTAPPLICABLE', 'No'); //Hard Coded
+						$inventory->addChild('CONTENTNEGISPOS', 'No'); //Hard Coded
+						$inventory->addChild('ISLASTDEEMEDPOSITIVE', 'No'); //Hard Coded
+						$inventory->addChild('ISAUTONEGATE', 'No'); //Hard Coded
+						$inventory->addChild('ISCUSTOMSCLEARANCE', 'No'); //Hard Coded
+						$inventory->addChild('ISTRACKCOMPONENT', 'No'); //Hard Coded
+						$inventory->addChild('ISTRACKPRODUCTION', 'No'); //Hard Coded
+						$inventory->addChild('ISPRIMARYITEM', 'No'); //Hard Coded
+						$inventory->addChild('ISSCRAP', 'No'); //Hard Coded
+
+
+                        $inventory->addChild('RATE', $inventory_part->part_price.'/'.$inventory_part->uom_id);
+						$inventory->addChild('AMOUNT', $inventory_part->part_amount);
+						$inventory->addChild('DISCOUNT', $sales_details->discount); //DISCOUNT IS IN PERCENTAGE
+						$inventory->addChild('ACTUALQTY', $inventory_part->qty.' '.$inventory_part->uom_id);
+						$inventory->addChild('BILLEDQTY', $inventory_part->qty.' '.$inventory_part->uom_id);
+                        $inventory->addChild('UOM', $inventory_part->uom_id);
+
+						$batchAllocations = $inventory->addChild('BATCHALLOCATIONS.LIST');
+						$batchAllocations->addChild('GODOWNNAME', 'Main Location'); //Hard Coded
+						$batchAllocations->addChild('BATCHNAME', 'Primary Batch'); //Hard Coded
+						$batchAllocations->addChild('INDENTNO', 'Not Applicable'); //Hard Coded
+						$batchAllocations->addChild('ORDERNO', 'Not Applicable'); //Hard Coded
+						$batchAllocations->addChild('TRACKINGNUMBER', 'Not Applicable'); //Hard Coded
+						$batchAllocations->addChild('DYNAMICCSTISCLEARED', 'No'); //Hard Coded
+						$batchAllocations->addChild('AMOUNT', $inventory_part->part_amount); //Hard Coded
+						$batchAllocations->addChild('DISCOUNT', $sales_details->discount); 
+						$batchAllocations->addChild('ACTUALQTY', $inventory_part->qty.' '.$inventory_part->uom_id); //Hard Coded
+						$batchAllocations->addChild('BILLEDQTY', $inventory_part->qty.' '.$inventory_part->uom_id); //Hard Coded
+						$batchAllocations->addChild('ADDITIONALDETAILS.LIST', ''); //Hard Coded
+						$batchAllocations->addChild('VOUCHERCOMPONENTLIST.LIST', ''); //Hard Coded
+
+
+						$acctingAllocations = $inventory->addChild('ACCOUNTINGALLOCATIONS.LIST');
+						$acctingAllocations->addChild('LEDGERNAME', 'Sales'); //Hard Coded
+						$acctingAllocations->addChild('GSTCLASS', 'Not Applicable'); //Hard Coded
+						$acctingAllocations->addChild('ISDEEMEDPOSITIVE', 'No'); //Hard Coded
+						$acctingAllocations->addChild('LEDGERFROMITEM', 'No'); //Hard Coded
+						$acctingAllocations->addChild('REMOVEZEROENTRIES', 'No'); //Hard Coded
+						$acctingAllocations->addChild('ISPARTYLEDGER', 'No'); //Hard Coded
+						$acctingAllocations->addChild('GSTOVERRIDDEN', 'No'); //Hard Coded
+						$acctingAllocations->addChild('ISGSTASSESSABLEVALUEOVERRIDDEN', 'No'); //Hard Coded
+						$acctingAllocations->addChild('STRDISGSTAPPLICABLE', 'No'); //Hard Coded
+						$acctingAllocations->addChild('STRDGSTISPARTYLEDGER', 'No'); //Hard Coded
+						$acctingAllocations->addChild('STRDGSTISDUTYLEDGER', 'No'); //Hard Coded
+						$acctingAllocations->addChild('CONTENTNEGISPOS', 'No'); //Hard Coded
+						$acctingAllocations->addChild('ISLASTDEEMEDPOSITIVE', 'No'); //Hard Coded
+						$acctingAllocations->addChild('ISCAPVATTAXALTERED', 'No'); //Hard Coded
+						$acctingAllocations->addChild('ISCAPVATNOTCLAIMED', 'No'); //Hard Coded
+						$acctingAllocations->addChild('AMOUNT', $inventory_part->part_amount);
+						
+						//RATEDETAILS
+						$this->inventoriesExportForCreate($inventory, $inventory_part, $customer_name, $guid,$isWithInventory);
+		
+				    }
+                }
+
+				//last part of vocher
+				$this->vocher_withInventories_after_inventories_defaults($voucher_child);
+
+				//ledger with Inventories
+				$this->ledgerWithInventories($voucher_child,$sales_details,$leger_arr,$customer_name);
+
+				$gst_list = $voucher_child->addChild('GST.LIST');
+				$gst_list->addChild('PURPOSETYPE', 'GST'); //Hard Coded
+				$stat_gst_list = $gst_list->addChild('STAT.LIST');
+				$stat_gst_list->addChild('PURPOSETYPE', 'GST'); //Hard Coded
+				$stat_gst_list->addChild('STATKEY', $sales_date.'Invoice'.$sales_number); //Hard Coded
+				$stat_gst_list->addChild('ISFETCHEDONLY', 'No'); //Hard Coded
+				$stat_gst_list->addChild('ISDELETED', 'No'); //Hard Coded
+				$stat_gst_list->addChild('TALLYCONTENTUSER', ''); //Hard Coded
+            }
+
+        } else {
+            $this->inoviceExportForCancel($voucher_child, $guid);
+        }
+    }
+
+	private function vocher_withInventories_after_inventories_defaults($voucher_child){
+		$voucher_child->addChild('CONTRITRANS.LIST', ''); //Hard Coded
+		$voucher_child->addChild('EWAYBILLERRORLIST.LIST', ''); //Hard Coded
+		$voucher_child->addChild('IRNERRORLIST.LIST', ''); //Hard Coded
+		$voucher_child->addChild('HARYANAVAT.LIST', ''); //Hard Coded
+		$voucher_child->addChild('SUPPLEMENTARYDUTYHEADDETAILS.LIST', ''); //Hard Coded
+		$voucher_child->addChild('INVOICEDELNOTES.LIST', ''); //Hard Coded
+		$voucher_child->addChild('INVOICEORDERLIST.LIST', ''); //Hard Coded
+		$voucher_child->addChild('INVOICEINDENTLIST.LIST', ''); //Hard Coded
+		$voucher_child->addChild('ATTENDANCEENTRIES.LIST', ''); //Hard Coded
+		$voucher_child->addChild('ORIGINVOICEDETAILS.LIST', ''); //Hard Coded
+		$voucher_child->addChild('INVOICEEXPORTLIST.LIST', ''); //Hard Coded
+
 	}
+    /**
+     * Cancel invoice specific fields
+     */
+    private function inoviceExportForCancel($voucher_child, $guid)
+    {
+        $voucher_child->addAttribute('ACTION', 'Cancel');
+        $voucher_child->addChild('ISCANCELLED', 'Yes');
+        $voucher_child->addChild('VOUCHERNUMBER');
+        $voucher_child->addChild('REFERENCE');
+        $voucher_child->addChild('ASPAYSLIP', 'No');
+        $voucher_child->addChild('GUID', $guid);
+        $voucher_child->addChild('ALTERID', '1');
+        $haryanavat_list = $voucher_child->addChild('HARYANAVAT.LIST');
+        $haryanavat_list->addAttribute('DESC', '`HARYANAVAT`');
+    }
 
-	/**
-	 * Cancel invoice specific fields
-	 */
-	private function inoviceExportForCancel($voucher_child,$guid) {
-		$voucher_child->addAttribute('ACTION', 'Cancel'); 
-		$voucher_child->addChild('ISCANCELLED', 'Yes');
+    /**
+     * Create invoice specific fields
+     */
+    private function inoviceExportForCreate($voucher_child, $sales_details, $customer_name, $guid, $isWithInventory)
+    {
+        $gst_percntg = $sales_details->cgst + $sales_details->sgst + $sales_details->igst + $sales_details->tcs;
+        $gst_all = $sales_details->CGST_AMT + $sales_details->SGST_AMT + $sales_details->IGST_AMT + $sales_details->TCS_AMT;
+        $gst_on_amount = ($sales_details->Total - $gst_all);
 
-		$voucher_child->addChild('VOUCHERNUMBER');
-		$voucher_child->addChild('REFERENCE');
-		
-		$voucher_child->addChild('ASPAYSLIP', 'No');
-		$voucher_child->addChild('GUID', $guid);
-		$voucher_child->addChild('ALTERID', '1');
-
-		$haryanavat_list = $voucher_child->addChild('HARYANAVAT.LIST');
-		$haryanavat_list->addAttribute('DESC', '`HARYANAVAT`'); 
-	}
-
-	/**
-	 * Create invoice specific fields
-	 */
-	private function inoviceExportForCreate($sales_details,$voucher_child ,$customer_name,$guid) {
-		$voucher_child->addAttribute('ACTION', 'Create');
-		$voucher_child->addChild('ISCANCELLED', 'No');
-		
-		$gst_percntg = $sales_details->cgst + $sales_details->sgst + $sales_details->igst + $sales_details->tcs;
-		$gst_all = $sales_details->CGST_AMT + $sales_details->SGST_AMT + $sales_details->IGST_AMT + $sales_details->TCS_AMT;
-		$gst_on_amount = ($sales_details->Total - $gst_all);
-		
 		$leger_arr = array(
-			"Total" => $sales_details->Total,			   								// Entire amount
-			"SALES GST @ ".$gst_percntg."%" => $gst_on_amount,  						//<LEDGERNAME>SALES GST @ 28%</LEDGERNAME>
-			"OUTPUT CGST @ ".$sales_details->cgst."%"  => $sales_details->CGST_AMT, 	//<LEDGERNAME>OUTPUT CGST @ 14%</LEDGERNAME>
-			"OUTPUT SGST @ ".$sales_details->sgst."%"  => $sales_details->SGST_AMT,		//<LEDGERNAME>OUTPUT SGST @ 14%</LEDGERNAME>
-			"OUTPUT TCS @ ".$sales_details->tcs."%"   => $sales_details->TCS_AMT, 		//<LEDGERNAME>OUTPUT TCS @ 0%</LEDGERNAME>
-			"OUTPUT IGST @ ".$sales_details->igst."%"   => $sales_details->IGST_AMT,	//<LEDGERNAME>OUTPUT IGST @ 28%</LEDGERNAME>
+				"Total" => $sales_details->Total, // Entire amount
+				"SALES GST @ " . $gst_percntg . "%" => $gst_on_amount, //<LEDGERNAME>SALES GST @ 28%</LEDGERNAME>
+				"OUTPUT CGST @ " . $sales_details->cgst . "%" => $sales_details->CGST_AMT, //<LEDGERNAME>OUTPUT CGST @ 14%</LEDGERNAME>
+				"OUTPUT SGST @ " . $sales_details->sgst . "%" => $sales_details->SGST_AMT, //<LEDGERNAME>OUTPUT SGST @ 14%</LEDGERNAME>
+				"OUTPUT TCS @ " . $sales_details->tcs . "%" => $sales_details->TCS_AMT, //<LEDGERNAME>OUTPUT TCS @ 0%</LEDGERNAME>
+				"OUTPUT IGST @ " . $sales_details->igst . "%" => $sales_details->IGST_AMT, //<LEDGERNAME>OUTPUT IGST @ 28%</LEDGERNAME>
 		);
-		
+
 		//remove those items which are with 0 values.
-		foreach ($leger_arr as $key => $value) {
-			if ($value < 0.01) {
-				unset($leger_arr[$key]);
-			}
-		}
-		
-		$voucher_child->addChild('DIFFACTUALQTY', 'Yes');
-		$voucher_child->addChild('VOUCHERNUMBER', $sales_details->sales_number);
-		$voucher_child->addChild('REFERENCE', $sales_details->sales_number);
-		$voucher_child->addChild('PARTYLEDGERNAME', $customer_name);
-		$voucher_child->addChild('NARRATION', 'Invoice No. '.$sales_details->sales_number);
-		$voucher_child->addChild('ASPAYSLIP', 'No');
-		$voucher_child->addChild('GUID', $guid);		//TO-DO This should be randomly generated and should be unique no.
-		$voucher_child->addChild('ALTERID', '1');
+        foreach ($leger_arr as $key => $value) {
+            if ($value < 0.01) {
+                unset($leger_arr[$key]);
+            }
+        }
 
-		//What is this ? Need TO-DO action
-		$haryanavat_list = $voucher_child->addChild('HARYANAVAT.LIST');
-		$haryanavat_list->addAttribute('DESC', '`HARYANAVAT`'); 
-		
-		//There would be multiple entries here for ALLLEDGERENTRIES
-		// Add ledger details
-		foreach ($leger_arr as $key => $value) {
-			$ledger_entries = $voucher_child->addChild('ALLLEDGERENTRIES.LIST');
-			//Hard Coded
-			$ledger_entries->addChild('REMOVEZEROENTRIES', 'No');
-			
+        //There would be multiple entries here for ALLLEDGERENTRIES
+        // Add ledger details for vocher without inventories
+		$this->ledger_WithoutInventories($voucher_child, $sales_details, $leger_arr, $customer_name);
+    }
 
-			//Should be replaced with appr values 
-			if($key=="Total") {
-				$ledger_entries->addChild('ISDEEMEDPOSITIVE', 'Yes');	// <!-- Specifies whether the ledger entry is positive or negative (e.g., "Yes" for positive). -->				
-				$ledger_entries->addChild('LEDGERFROMITEM', 'No');
-				$ledger_entries->addChild('LEDGERNAME', $customer_name); // Replace with the customer's ledger name
-				$ledger_entries->addChild('AMOUNT', "-".$value);
+	private function ledger_WithoutInventories($voucher_child,$sales_details,$leger_arr,$customer_name) {
+	   foreach ($leger_arr as $key => $value) {
+            $ledger_entries = $voucher_child->addChild('ALLLEDGERENTRIES.LIST');
+            //Hard Coded
+            $ledger_entries->addChild('REMOVEZEROENTRIES', 'No');
 
-				$bill_allocations = $ledger_entries->addChild('BILLALLOCATIONS.LIST');
-				$bill_allocations->addChild('NAME', $sales_details->sales_number);
-				$bill_allocations->addChild('BILLTYPE', $key);
-				$bill_allocations->addChild('BILLCREDITPERIOD', '0');	//<!-- NO IDEA Hard Code ? -->
-				$bill_allocations->addChild('AMOUNT', "-".$value);
-			} else {
-				$ledger_entries->addChild('ISDEEMEDPOSITIVE', 'No');	
-				$ledger_entries->addChild('LEDGERFROMITEM', 'No');
-				$ledger_entries->addChild('LEDGERNAME', $key); // Replace with the customer's ledger name
-				$ledger_entries->addChild('AMOUNT', $value);
-					
-			}
-		}
-	  
-	} 
+            //Should be replaced with appr values
+            if ($key == "Total") {
+                $ledger_entries->addChild('ISDEEMEDPOSITIVE', 'Yes'); // <!-- Specifies whether the ledger entry is positive or negative (e.g., "Yes" for positive). -->
+                $ledger_entries->addChild('LEDGERFROMITEM', 'No');
+                $ledger_entries->addChild('LEDGERNAME', $customer_name); // Replace with the customer's ledger name
+                $ledger_entries->addChild('AMOUNT', "-" . $value);
+
+                $bill_allocations = $ledger_entries->addChild('BILLALLOCATIONS.LIST');
+                $bill_allocations->addChild('NAME', $sales_details->sales_number);
+                $bill_allocations->addChild('BILLTYPE', $key);
+                $bill_allocations->addChild('BILLCREDITPERIOD', '0'); //<!-- NO IDEA Hard Code ? -->
+                $bill_allocations->addChild('AMOUNT', "-" . $value);
+            } else {
+                $ledger_entries->addChild('ISDEEMEDPOSITIVE', 'No');
+                $ledger_entries->addChild('LEDGERFROMITEM', 'No');
+                $ledger_entries->addChild('LEDGERNAME', $key); // Replace with the customer's ledger name
+                $ledger_entries->addChild('AMOUNT', $value);
+            }
+        }
+	}
+	
+
+	private function inventoriesExportForCreate($inventory, $inventory_part, $customer_name, $guid)
+    {
+		$leger_arr = array(
+				"CGST" => $inventory_part->cgst, 
+				"SGST/UTGST" => $inventory_part->sgst,
+				"TCS" => $inventory_part->tcs, 
+				"IGST" => $inventory_part->igst
+			);
+	    
+		//remove those items which are with 0 values.
+        foreach ($leger_arr as $key => $value) {
+            if ($value < 0.01) {
+                unset($leger_arr[$key]);
+            }
+        }
+
+        $this->ledger_Inventories($inventory, $leger_arr);
+    }
+
+
+    private function ledger_Inventories($inventory, $leger_arr) {
+	   foreach ($leger_arr as $key => $value) {
+			$rateDetails = $inventory->addChild('RATEDETAILS.LIST');
+			$rateDetails->addChild('GSTRATEDUTYHEAD', $key); 
+			$rateDetails->addChild('GSTRATEVALUATIONTYPE', 'Based on Value'); 
+			$rateDetails->addChild('GSTRATE', $value);
+	     }
+	}
+
 	/**
-	 * Calculate sticker quantity as multiple of fix numbers
+	 * Vocher with inventories ledger
 	 */
+	private function ledgerWithInventories($voucher_child,$sales_details,$leger_arr,$customer_name) {
+		$gst_percntg = $sales_details->cgst + $sales_details->sgst + $sales_details->igst + $sales_details->tcs;
+        $gst_all = $sales_details->CGST_AMT + $sales_details->SGST_AMT + $sales_details->IGST_AMT + $sales_details->TCS_AMT;
+        $gst_on_amount = ($sales_details->Total - $gst_all);
+
+		$leger_arr = array(
+				"Total" => $sales_details->Total,
+				"CGST"  => $sales_details->CGST_AMT,
+				"SGST"  => $sales_details->SGST_AMT,
+				"TCS"   => $sales_details->TCS_AMT, 
+				"IGST"  => $sales_details->IGST_AMT,
+		);
+
+		//remove those items which are with 0 values.
+        foreach ($leger_arr as $key => $value) {
+            if ($value < 0.01) {
+                unset($leger_arr[$key]);
+            }
+        }
+
+	   foreach ($leger_arr as $key => $value) {
+            $ledger_entries = $voucher_child->addChild('LEDGERENTRIES.LIST');
+            if ($key == "Total") {
+                $ledger_entries->addChild('LEDGERNAME', $customer_name); 
+				$this->legder_entries_defaults1($ledger_entries);
+
+				$ledger_entries->addChild('AMOUNT', "-" . $value);
+				$ledger_entries->addChild('SERVICETAXDETAILS.LIST', ''); //Hard Coded
+				$ledger_entries->addChild('BANKALLOCATIONS.LIST', ''); //Hard Coded
+              
+                $bill_allocations = $ledger_entries->addChild('BILLALLOCATIONS.LIST');
+                $bill_allocations->addChild('NAME', $sales_details->sales_number);
+                $bill_allocations->addChild('BILLTYPE', 'New Ref');	//New Ref
+				$bill_allocations->addChild('TDSDEDUCTEEISSPECIALRATE', 'No');
+				$bill_allocations->addChild('AMOUNT', "-" . $value);
+                $bill_allocations->addChild('INTERESTCOLLECTION.LIST', ''); //Hard Coded
+				$bill_allocations->addChild('STBILLCATEGORIES.LIST', ''); //Hard Coded
+
+				//$this->legder_entries_defaults2($ledger_entries);
+				                
+            } else {
+                $ledger_entries->addChild('APPROPRIATEFOR', 'Not Applicable');
+                $ledger_entries->addChild('LEDGERNAME', $key); // Replace with the customer's ledger name
+				$ledger_entries->addChild('AMOUNT', $value);
+				$ledger_entries->addChild('VATEXPAMOUNT', $value);
+
+				$ledger_entries->addChild('GSTCLASS', 'Not Applicable');
+				$ledger_entries->addChild('ISDEEMEDPOSITIVE', 'No');
+				$ledger_entries->addChild('LEDGERFROMITEM', 'No');
+				$ledger_entries->addChild('REMOVEZEROENTRIES', 'No');
+				$ledger_entries->addChild('ISPARTYLEDGER', 'No');
+				$ledger_entries->addChild('GSTOVERRIDDEN', 'No');
+				$ledger_entries->addChild('ISGSTASSESSABLEVALUEOVERRIDDEN', 'No');
+				$ledger_entries->addChild('STRDISGSTAPPLICABLE', 'No');
+				$ledger_entries->addChild('STRDGSTISPARTYLEDGER', 'No');
+				$ledger_entries->addChild('STRDGSTISDUTYLEDGER', 'No');
+				$ledger_entries->addChild('CONTENTNEGISPOS', 'No');
+				$ledger_entries->addChild('ISLASTDEEMEDPOSITIVE', 'No');
+				$ledger_entries->addChild('ISCAPVATTAXALTERED', 'No');
+				$ledger_entries->addChild('ISCAPVATNOTCLAIMED', 'No');
+                
+            }
+        }
+	}
+
+	private function legder_entries_defaults1($ledger_entries){
+			$ledger_entries->addChild('GSTCLASS', 'Not Applicable'); //Hard Coded
+			$ledger_entries->addChild('ISDEEMEDPOSITIVE', 'Yes'); // <!-- Specifies whether the ledger entry is positive or negative (e.g., "Yes" for positive). -->
+			$ledger_entries->addChild('LEDGERFROMITEM', 'No'); //Hard Coded
+			$ledger_entries->addChild('REMOVEZEROENTRIES', 'No'); //Hard Coded
+			$ledger_entries->addChild('ISPARTYLEDGER', 'Yes'); //TO-DO
+			$ledger_entries->addChild('GSTOVERRIDDEN', 'No'); //Hard Coded
+			$ledger_entries->addChild('ISGSTASSESSABLEVALUEOVERRIDDEN', 'No'); //Hard Coded
+			$ledger_entries->addChild('STRDISGSTAPPLICABLE', 'No'); //Hard Coded
+			$ledger_entries->addChild('STRDGSTISPARTYLEDGER', 'No'); //Hard Coded
+			$ledger_entries->addChild('STRDGSTISDUTYLEDGER', 'No'); //Hard Coded
+			$ledger_entries->addChild('CONTENTNEGISPOS', 'No'); //Hard Coded
+			$ledger_entries->addChild('ISLASTDEEMEDPOSITIVE', 'Yes'); //Hard Coded
+			$ledger_entries->addChild('ISCAPVATTAXALTERED', 'No'); //Hard Coded
+			$ledger_entries->addChild('ISCAPVATNOTCLAIMED', 'No'); //Hard Coded
+	}
+
+	private function legder_entries_defaults2($ledger_entries){
+		$ledger_entries->addChild('INTERESTCOLLECTION.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('OLDAUDITENTRIES.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('ACCOUNTAUDITENTRIES.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('AUDITENTRIES.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('INPUTCRALLOCS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('DUTYHEADDETAILS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('EXCISEDUTYHEADDETAILS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('RATEDETAILS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('SUMMARYALLOCS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('CENVATDUTYALLOCATIONS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('STPYMTDETAILS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('EXCISEPAYMENTALLOCATIONS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('TAXBILLALLOCATIONS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('TAXOBJECTALLOCATIONS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('TDSEXPENSEALLOCATIONS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('VATSTATUTORYDETAILS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('COSTTRACKALLOCATIONS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('REFVOUCHERDETAILS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('INVOICEWISEDETAILS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('VATITCDETAILS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('ADVANCETAXDETAILS.LIST', ''); //Hard Coded
+		$ledger_entries->addChild('TAXTYPEALLOCATIONS.LIST', ''); //Hard Coded
+	}
+
+    /**
+     * Inventory specific voucher child default fields
+     */
+    private function vocher_inventory_default_fields($voucher_child)
+    {
+        
+        $voucher_child->addChild('ISDELETED', 'No'); //Hard Coded
+        $voucher_child->addChild('ISSECURITYONWHENENTERED', 'No'); //Hard Coded
+        $voucher_child->addChild('ASORIGINAL', 'No');//Hard Coded
+        $voucher_child->addChild('AUDITED', 'No');//Hard Coded
+        $voucher_child->addChild('ISCOMMONPARTY', 'No');//Hard Coded
+        $voucher_child->addChild('FORJOBCOSTING', 'No');//Hard Coded
+		$voucher_child->addChild('ISOPTIONAL', 'No');//Hard Coded
+
+        $voucher_child->addChild('USEFOREXCISE', 'No');//Hard Coded
+        $voucher_child->addChild('ISFORJOBWORKIN', 'No');//Hard Coded
+        $voucher_child->addChild('ALLOWCONSUMPTION', 'No');//Hard Coded
+        $voucher_child->addChild('USEFORINTEREST', 'No');//Hard Coded
+		$voucher_child->addChild('USEFORGAINLOSS', 'No');//Hard Coded
+        $voucher_child->addChild('USEFORGODOWNTRANSFER', 'No');//Hard Coded
+		$voucher_child->addChild('USEFORCOMPOUND', 'No');//Hard Coded
+        $voucher_child->addChild('USEFORSERVICETAX', 'No');//Hard Coded
+        $voucher_child->addChild('ISREVERSECHARGEAPPLICABLE', 'No');//Hard Coded
+        $voucher_child->addChild('ISSYSTEM', 'No');//Hard Coded
+        $voucher_child->addChild('ISFETCHEDONLY', 'No');//Hard Coded
+        $voucher_child->addChild('ISGSTOVERRIDDEN', 'No');//Hard Coded
+		$voucher_child->addChild('ISCANCELLED', 'No');//Hard Coded
+        $voucher_child->addChild('ISONHOLD', 'No');//Hard Coded
+        $voucher_child->addChild('ISSUMMARY', 'No');//Hard Coded
+        $voucher_child->addChild('ISECOMMERCESUPPLY', 'No');//Hard Coded
+        $voucher_child->addChild('ISBOENOTAPPLICABLE', 'No');//Hard Coded
+        $voucher_child->addChild('ISGSTSECSEVENAPPLICABLE', 'No');//Hard Coded
+        $voucher_child->addChild('IGNOREEINVVALIDATION', 'No');//Hard Coded
+        $voucher_child->addChild('CMPGSTISOTHTERRITORYASSESSEE', 'No');//Hard Coded
+
+        $voucher_child->addChild('PARTYGSTISOTHTERRITORYASSESSEE', 'No');//Hard Coded
+        $voucher_child->addChild('IRNJSONEXPORTED', 'No');//Hard Coded
+		$voucher_child->addChild('IRNCANCELLED', 'No'); //Hard Coded
+        $voucher_child->addChild('IGNOREGSTCONFLICTINMIG', 'No');//Hard Coded
+        $voucher_child->addChild('ISOPBALTRANSACTION', 'No');//Hard Coded
+        $voucher_child->addChild('IGNOREGSTFORMATVALIDATION', 'No');//Hard Coded
+        $voucher_child->addChild('ISELIGIBLEFORITC', 'Yes'); //TO-DO
+
+        $voucher_child->addChild('UPDATESUMMARYVALUES', 'No');//Hard Coded
+		$voucher_child->addChild('ISEWAYBILLAPPLICABLE', 'No'); //Hard Coded
+
+		$voucher_child->addChild('ISDELETEDRETAINED', 'No'); //Hard Coded
+        $voucher_child->addChild('ISNULL', 'No'); //Hard Coded
+        $voucher_child->addChild('ISEXCISEVOUCHER', 'No'); //Hard Coded
+        $voucher_child->addChild('EXCISETAXOVERRIDE', 'No'); //Hard Coded
+        $voucher_child->addChild('USEFORTAXUNITTRANSFER', 'No'); //Hard Coded
+        $voucher_child->addChild('ISEXER1NOPOVERWRITE', 'No'); //Hard Coded
+        $voucher_child->addChild('ISEXF2NOPOVERWRITE', 'No'); //Hard Coded
+        $voucher_child->addChild('ISEXER3NOPOVERWRITE', 'No'); //Hard Coded
+        $voucher_child->addChild('IGNOREPOSVALIDATION', 'No'); //Hard Coded
+        $voucher_child->addChild('EXCISEOPENING', 'No'); //Hard Coded
+        $voucher_child->addChild('USEFORFINALPRODUCTION', 'No'); //Hard Coded
+        $voucher_child->addChild('ISTDSOVERRIDDEN', 'No'); //Hard Coded
+        $voucher_child->addChild('ISTCSOVERRIDDEN', 'No'); //Hard Coded
+        $voucher_child->addChild('ISTDSTCSCASHVCH', 'No'); //Hard Coded
+        $voucher_child->addChild('INCLUDEADVPYMTVCH', 'No'); //Hard Coded
+        $voucher_child->addChild('ISSUBWORKSCONTRACT', 'No'); //Hard Coded
+        $voucher_child->addChild('ISVATOVERRIDDEN', 'No'); //Hard Coded
+        $voucher_child->addChild('IGNOREORIGVCHDATE', 'No'); //Hard Coded
+        $voucher_child->addChild('ISVATPAIDATCUSTOMS', 'No'); //Hard Coded
+        $voucher_child->addChild('ISDECLAREDTOCUSTOMS', 'No'); //Hard Coded
+        $voucher_child->addChild('VATADVANCEPAYMENT', 'No'); //Hard Coded
+        $voucher_child->addChild('VATADVPAY', 'No'); //Hard Coded
+        $voucher_child->addChild('ISCSTDELCAREDGOODSSALES', 'No'); //Hard Coded
+        $voucher_child->addChild('ISVATRESTAXINV', 'No'); //Hard Coded
+        $voucher_child->addChild('ISSERVICETAXOVERRIDDEN', 'No'); //Hard Coded
+        $voucher_child->addChild('ISISDVOUCHER', 'No'); //Hard Coded
+        $voucher_child->addChild('ISEXCISEOVERRIDDEN', 'No'); //Hard Coded
+        $voucher_child->addChild('ISEXCISESUPPLYVCH', 'No'); //Hard Coded
+        $voucher_child->addChild('GSTNOTEXPORTED', 'No'); //Hard Coded
+        $voucher_child->addChild('IGNOREGSTINVALIDATION', 'No'); //Hard Coded
+        $voucher_child->addChild('ISGSTREFUND', 'No'); //Hard Coded
+        $voucher_child->addChild('OVRDNEWAYBILLAPPLICABILITY', 'No'); //Hard Coded
+        $voucher_child->addChild('ISVATPRINCIPALACCOUNT', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHSTATUSISVCHNUMUSED', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSISINCLUDED', 'No'); //Hard Coded
+		$voucher_child->addChild('VCHGSTSTATUSISUNCERTAIN', 'Yes'); //TO-DO
+        $voucher_child->addChild('VCHGSTSTATUSISEXCLUDED', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSISAPPLICABLE', 'Yes'); //TO-DO
+        $voucher_child->addChild('VCHGSTSTATUSISGSTR2BRECONCILED', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSISGSTR2BONLYINPORTAL', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSISGSTR2BONLYINBOOKS', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSISGSTR2BMISMATCH', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSISGSTR2BINDIFFPERIOD', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSISRETEFFDATEOVERRDN', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSISOVERRDN', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSISSTATINDIFFDATE', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSISRETINDIFFDATE', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSMAINSECTIONEXCLUDED', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSISBRANCHTRANSFEROUT', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHGSTSTATUSISSYSTEMSUMMARY', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHSTATUSISUNREGISTEREDRCM', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHSTATUSISOPTIONAL', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHSTATUSISCANCELLED', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHSTATUSISDELETED', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHSTATUSISOPENINGBALANCE', 'No'); //Hard Coded
+        $voucher_child->addChild('VCHSTATUSISFETCHEDONLY', 'No'); //Hard Coded
+        $voucher_child->addChild('PAYMENTLINKHASMULTIREF', 'No'); //Hard Coded
+        $voucher_child->addChild('ISSHIPPINGWITHINSTATE', 'No'); //Hard Coded
+        $voucher_child->addChild('ISOVERSEASTOURISTTRANS', 'No'); //Hard Coded
+        $voucher_child->addChild('ISDESIGNATEDZONEPARTY', 'No'); //Hard Coded
+        $voucher_child->addChild('HASCASHFLOW', 'No'); //Hard Coded
+		
+		$voucher_child->addChild('ISPOSTDATED', 'No'); //Hard Coded
+		$voucher_child->addChild('USETRACKINGNUMBER', 'No'); //Hard Coded
+		$voucher_child->addChild('ISINVOICE', 'Yes'); //TO-DO
+
+        $voucher_child->addChild('MFGJOURNAL', 'No'); //Hard Coded
+        $voucher_child->addChild('HASDISCOUNTS', 'No');  //Hard Coded
+		$voucher_child->addChild('ASPAYSLIP', 'No'); //Hard Coded
+		$voucher_child->addChild('ISCOSTCENTRE', 'No');  //Hard Coded
+        $voucher_child->addChild('ISSTXNONREALIZEDVCH', 'No'); //Hard Coded
+        $voucher_child->addChild('ISEXCISEMANUFACTURERON', 'No');  //Hard Coded
+        $voucher_child->addChild('ISBLANKCHEQUE', 'No');  //Hard Coded
+        $voucher_child->addChild('ISVOID', 'No');  //Hard Coded
+        $voucher_child->addChild('ORDERLINESTATUS', 'No');  //Hard Coded
+        $voucher_child->addChild('VATISAGNSTCANCSALES', 'No');  //Hard Coded
+        $voucher_child->addChild('VATISPURCEXEMPTED', 'No');  //Hard Coded
+        $voucher_child->addChild('ISVATRESTAXINVOICE', 'No');  //Hard Coded
+        $voucher_child->addChild('VATISASSESABLECALCVCH', 'No');  //Hard Coded
+		$voucher_child->addChild('ISVATDUTYPAID', 'Yes'); //TO-DO
+        $voucher_child->addChild('ISDELIVERYSAMEASCONSIGNEE', 'No');  //Hard Coded
+        $voucher_child->addChild('ISDISPATCHSAMEASCONSIGNOR', 'No');  //Hard Coded
+        $voucher_child->addChild('ISDELETEDVCHRETAINED', 'No');  //Hard Coded
+        $voucher_child->addChild('CHANGEVCHMODE', 'No');  //Hard Coded
+        $voucher_child->addChild('RESETIRNQRCODE', 'No');  //Hard Coded
+
+		//$voucher_child->addChild('ALTERID', '5'); //TO-D0 For isWithInventory ??
+		//$voucher_child->addChild('MASTERID', '1'); //TO-DO
+		//$voucher_child->addChild('VOUCHERKEY', '194914205827080'); //TO-DO
+		//$voucher_child->addChild('VOUCHERRETAINKEY', '1'); //TO-DO
+		$voucher_child->addChild('VOUCHERNUMBERSERIES', 'Default'); //TO-DO
+
+    }
+
+    
 	
 	/* public function getFactorsForSticker($requiredQty,$defaultQty) {
 		if($defaultQty > 1){
@@ -2712,6 +3273,7 @@ class SalesController extends CommonController
 		} 
 		else 
 		{
+
 			$data = array(
 				"sales_number" => $sales_number,
 				"payment_receipt_date" => $payment_receipt_date,
@@ -2721,6 +3283,7 @@ class SalesController extends CommonController
 				"remark" => $remark
 				
 			);
+			// pr($data,1);
 			$result = $this->Crud->update_data_column("receivable_report", $data, $sales_number, "sales_number");
 		// echo "<script>alert('Updated Sucessfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
 			$message = "Updated Sucessfully";

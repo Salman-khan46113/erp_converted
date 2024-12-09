@@ -35,16 +35,16 @@ class NewEInvoiceController extends CommonController {
 	 function calculateGST($gst_structure)
 		{
 			$gstData = [];
-			if ((int) $gst_structure->igst === 0) {
-				$gstData['cgst'] = (int) $gst_structure->cgst;
-				$gstData['sgst'] = (int) $gst_structure->sgst;
+			if ($gst_structure->igst <= 0) {
+				$gstData['cgst'] = $gst_structure->cgst;
+				$gstData['sgst'] = $gst_structure->sgst;
 				$gstData['igst'] = 0;
 				$gstData['total_gst_percentages'] = $gstData['cgst'] + $gstData['sgst'];
 				$gstData['isInterState'] = false;
 			} else {
 				$gstData['cgst'] = 0;
 				$gstData['sgst'] = 0;
-				$gstData['igst'] = (int) $gst_structure->igst;
+				$gstData['igst'] = $gst_structure->igst;
 				$gstData['total_gst_percentages'] = $gstData['igst'];
 				$gstData['isInterState'] = true;
 			}
@@ -130,7 +130,7 @@ class NewEInvoiceController extends CommonController {
 
 	 function createHtmlRow($child_part_data, $hsn_codes, $ps, $rate, $actual_indv_totalAmt, $i, $isInterState, $igsts, $cgsts, $sgsts, $discount)
 		{
-			$parts_html = '
+			$current_parts_html = '
 				<tr style="font-size:14px;text-align:center;">
 					<td style="width:20px;">' . $i . '</td>
 					<td>'.$child_part_data->part_number.'</td>
@@ -139,12 +139,11 @@ class NewEInvoiceController extends CommonController {
 					<td>'.$ps->uom_id.'</td>
 					<td>'.$ps->qty.'</td>
 					<td>'.$rate.'</td>
-					<td>'.$discount.'</td>
 					<td colspan="2" style="text-align:center;">'.number_format((float) $actual_indv_totalAmt, 2, '.', '') .'</td>
 				</tr>';
 
 			if ($isInterState) {
-				$eway_parts_html = '
+				$current_eway_parts_html = '
 					<tr style="font-size:14px;text-align:center;">
 						<td>' . $hsn_codes . '</td>
 						<td>' . $child_part_data->part_number . '</td>
@@ -154,7 +153,7 @@ class NewEInvoiceController extends CommonController {
 						<td colspan="2"> IGST: ' . $igsts . '%</td>
 					</tr>';
 			} else {
-				$eway_parts_html = '
+				$current_eway_parts_html = '
 					<tr style="font-size:14px;text-align:center;">
 						<td>'. $hsn_codes . '</td>
 						<td>'. $child_part_data->part_number . '</td>
@@ -165,8 +164,9 @@ class NewEInvoiceController extends CommonController {
 					</tr>';
 			}
 
-			return [$parts_html, $eway_parts_html];
+			return [$current_parts_html, $current_eway_parts_html];
 		}
+
 
 	  
 	/*
@@ -285,7 +285,9 @@ class NewEInvoiceController extends CommonController {
 						array_push($unsortedHSNCodes,$unsortedHSN);
 			
 				// Create HTML rows
-				[$parts_html, $eway_parts_html] = $this->createHtmlRow($child_part_data, $child_part_data->hsn_code, $ps, $rate, $ps->qty * $rate, $i, $gstData['isInterState'], $gstData['igst'], $gstData['cgst'], $gstData['sgst'], $discount);
+				$current_parts_html = $current_eway_parts_html = $this->createHtmlRow($child_part_data, $child_part_data->hsn_code, $ps, $rate, $subtotal, $i, $gstData['isInterState'], $gstData['igst'], $gstData['cgst'], $gstData['sgst'], $discount);
+				$parts_html = $parts_html.$current_parts_html;
+				$eway_parts_html = $eway_parts_html.$current_eway_parts_html;
 				$i++;
 		}
 
@@ -514,7 +516,7 @@ class NewEInvoiceController extends CommonController {
 			$isSuccess = true;
 			$infoDet = $result['info'];
 			$this->echoToTriage("EInvoice generated successfully.");
-			$alertCode = "<script>alert('EInvoice generated successfully.');</script>";
+			$alertCode = "<script>alert('EInvoice generated successfully. Refresh main page for View Einvoice/Eway Bill PDF');</script>";
 			echo $alertCode;
 			
 			foreach($infoDet as $info) {
@@ -567,483 +569,12 @@ class NewEInvoiceController extends CommonController {
 			);
 
 		$insert = $this->checkEinvoiceAndInsert($new_sales_id , $response_data);
-		$this->echoToTriage("<br><br>IRN information from Response: <br><b>IRN: ". $IrnNo ." ,<br>Ack No: " .$AckNo ." ,<br>AckDt: " . $AckDt."<br><br>");
+		$this->echoToTriage("<br><br>IRN information from Response: <br><b>IRN: ". $IrnNo ." ,<br>Ack No: " .$AckNo ." ,<br>AckDt: " . $AckDt."<br><br>
+		<br>Close this page and check refresh the main window to access the Einvoice/Eway Bill copy");
+		echo '<script>window.close();</script>';
 
-		$final_total = 0;
-		$cgst_amount = 0;
-		$sgst_amount = 0;
-		$igst_amount = 0;
-		$tcs_amount = 0;
-		$height = "350px";
-
-    if ($i == 2) {
-      $height = "200px";
-    }
-    if ($i == 3) {
-      $height = "200px";
-    }
-    if ($i == 4) {
-      $height = "200px";
-    }
-    if ($i == 5) {
-      $height = "200px";
-    }
-    if ($i >= 6) {
-      $height = "200px";
-    }
-    if ($i >= 7) {
-      $height = "200px";
-    }
-    if ($i >= 8) {
-      $height = "200px";
-    }
-    if ($i >= 9) {
-      $height = "200px";
-    }
-    if ($i >= 10) {
-      $height = "200px";
-    }
-    if ($i >= 11) {
-      $height = "30px";
-    }
-    if ($i >= 12) {
-      $height = "0px";
-    }
-    if ($i >= 13) {
-      $height = "0px";
-    }
-    if ($i >= 14) {
-      $height = "0px";
-    }
-    if ($i >= 15) {
-      $height = "0px";
-    }
-
-	$all_totalOther = $all_cgst_amounts + $all_sgst_amounts + $all_igst_amounts + $all_tcs_amounts;
-    $final_final_amount = $all_final_totals + $all_cgst_amounts + $all_sgst_amounts + $all_igst_amounts + $all_tcs_amounts;
-   
-    // Sort the multidimensional array by the 'hsn_code' column in ascending order
-	$this->Crud->sort_by_column($unsortedHSNCodes, 'hsn_code');
-	$this->load->model('NewEInvoice');
-	$hsn_code_table_html = $this->NewEInvoice->getHSNTableData($unsortedHSNCodes);
-	$transportMode = $this->NewEInvoice->getModeOfTransport($new_sales_data[0]->mode);
-    $html_content = '
-	    <!DOCTYPE html>
-        <head>
-			<style> html { margin: 1px}
-			@media print {
-				  .article { page-break-after: always; }
-				  a[href]:after {
-					content: none !important;
-				  }
-				  
-				  table { /* Or specify a table class */
-					max-height: 100%;
-					overflow: hidden;
-					page-break-after: always;
-					 border: 1px solid black;
-					 border-collapse: collapse;
-				  }
-				  @page 
-					{
-						size: auto;   /* auto is the initial value */
-						margin: 2mm;  /* this affects the margin in the printer settings */
-					}
-				  body {
-					   margin-top: 5mm; 
-					   margin-left: 2mm;
-					   margin-bottom: 5mm; 
-					   margin-right: 2mm
-				 }
-				}
-				
-			th, td {
-			  border: 1px solid black;
-			  border-collapse: collapse;
-			  padding-top: 3px;
-			  padding-bottom: 3px;
-			  padding-left: 8px;
-			  padding-right: 8px;
-			}
-			
-			</style>
-			<script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
-		</head>
-        <body>
 		
-		<script>
-		function printSection() {
-			var printContent = document.getElementById("print-section").innerHTML;
-			var originalContent = document.body.innerHTML;
-			document.body.innerHTML = printContent;
-			window.print();
-			document.body.innerHTML = originalContent;
-		}
-		</script>
-		<div style>
-		<button style="color: white;background-color: red;"onclick="printSection()">Print E-Invoice</button>
-		</div>
-		<br>
-		<div id="print-section">
-		<table padding="2" cellspacing="0" border="1px">
-			<tr>
-				<th colspan="12" style="text-align:center; font-size:16px">EInvoice</th>
-			</tr>
-			<tr>
-				<td colspan="6" align="bottom">
-					IRN No :<b>'.$IrnNo.'</b><br>
-					Ack No :<b>'.$AckNo.'</b><br>
-					Act Date :<b>'.$AckDt.'</b><br><br>
-					e-Way Bill No :<b>'.$EwbNo.'</b><br>
-					e-Way Bill Date :<b>'.$EwbDt.'</b>
-				  </td>
-				<td colspan="6" style="padding-top: 5px;padding-bottom: 5px;">    
-					<span class="qrcode"></span>
-			  </td>
-			  <script>
-				var qrData ="'.$SignedQRCode.'"; 
-				var qrcode = new QRCode(document.querySelector(".qrcode"), {
-					text: qrData,
-					width: 128,
-					height: 128,
-					colorDark : "#000000",
-					colorLight : "#ffffff",
-					correctLevel : QRCode.CorrectLevel.H
-				});
-			  </script>
-			</tr>
-			<!-- <tr> 
-				  <td colspan="6" >IRN No.'.$IrnNo.'</td>      
-				  <td colspan="6" rowspan="3" ><img colspan="" src="' . base_url('Logo.jpg') . '" style="float:left;" "></td> 
-			</tr> -->    
-			<tr style="font-size:14px">
-				<td colspan="6"  width="60%">
-					<b>'.$client_data[0]->client_name.'</b><br>
-					'.$client_data[0]->address1.'<br>
-					STATE : ' . $client_data[0]->state . ', STATE CODE : ' . $client_data[0]->state_no . '<br>
-					GSTIN/UIN : '  . $client_data[0]->gst_number . '<br>
-					PAN NO : ' . $client_data[0]->pan_no . '<br>
-				</td>
-				<td colspan="6" align="left" width="40%">
-					Invoice NO. <b> ' . $new_sales_data[0]->sales_number . '</b><br>
-					Invoice Date . <b>' . $po_parts_data[0]->created_date . '</b><br>
-					Time of Supply <b> . ' . $po_parts_data[0]->created_time . '</b><br>
-					WHETHER TAX ON REVERSE CHARGE  : <b>No</b><br>
-				</td>
-			</tr>
-            <tr style="font-size:14px">
-			<td colspan="6">
-				<b> Details of Consignee (Shipped to)</b> ,<br>
-				<b>' . $shipping_data['shipping_name'] . '</b><br>
-				' . $shipping_data['ship_address'] . ' <br>
-				STATE : </b>' . $shipping_data['state'] . '<br>
-				STATE CODE : ' . $shipping_data['state_no'] . '<br>
-				PAN NO : ' . $shipping_data['pan_no'] . '<br>
-				GSTIN/UIN : ' . $shipping_data['gst_number'] . '
-			</td>
-			<td colspan="6">
-				<b>Details of Receiver (Billed To)</b><br> 
-				<b>' . $customer_data[0]->customer_name . '</b><br>
-				' . $customer_data[0]->billing_address . '<br>
-				STATE : ' . $customer_data[0]->state . '<br>
-				STATE CODE : ' . $customer_data[0]->state_no . '<br>
-				PAN NO : ' . $customer_data[0]->pan_no . '<br>
-				GSTIN/UIN : ' . $customer_data[0]->gst_number . '
-			</td>
-        </tr>
-        <tr  style="font-size:14px">
-			<td colspan="6">
-				<b>PO Number  :</b>' . $po_parts_data[0]->po_number . '     
-				<b style="margin-left:10px">PO Date  :</b>' . $po_parts_data[0]->po_date . '
-			</td>
-			<td colspan="6">
-				<b>Vendor Code  . :</b>' . $customer_data[0]->vendor_code . '<br>
-			</td>
-		</tr>
-        <tr style="font-size:12px;text-align:center">
-          <th style="width:20px;">Sr No</th>
-		  <th style="width:70px;">Part Number</th>
-		  <th colspan="3" style="width:200px;">Part Description</th>
-		  <th style="width:50px;">HSN / SAC</th>
-		  <th style="width:20px;">UOM</th>
-		  <th style="width:20px;">QTY</th>
-		  <th style="width:20px;">Rate/Unit  </th>
-		  <th style="width:20px;">Disc. %</th>
-		  <th colspan="2">Amount</th>
-        </tr>
-          ' . $parts_html . '
-        <tr>
-            <td colspan="12" style="height:' . $height . '"></td>
-        </tr>
-		<tr style="font-size:12px">
-            <td rowspan="3" colspan="7">
-				<b>
-				Mode Of Transport : ' . $transportMode . ' <br> <br> 
-				Transporter : ' . $transporter_data[0]->transporter_id . ' <br> <br>
-				Vehicle No : ' . $new_sales_data[0]->vehicle_number . ' <br> <br>
-				L.R No : ' . $new_sales_data[0]->lr_number . ' <br> <br>
-				</b>
-            </td>         
-            <th colspan="3" style="text-align:right">TAXABLE VALUE </th>
-            <th colspan="2">'  . number_format((float)$final_basic_total, 2, '.', '') . '</th>
-        </tr>
-        <tr style="font-size:12px">
-            <th colspan="3" style="text-align:right">CGST Amt' . $cgst . '</th>
-            <th colspan="2">' .  number_format((float)$all_cgst_amounts, 2, '.', '') . '</th>
-          </tr>
-          
-          <tr style="font-size:12px">
-            <th colspan="3" style="text-align:right">SGST Amt' . $sgst . '</th>
-            <th colspan="2">'  . number_format((float)$all_sgst_amounts, 2, '.', '') . '</th>
-          </tr>
-          <tr style="font-size:12px">
-          <td rowspan="3" colspan="7">
-            <b>Payment Terms : ' . $customer_data[0]->payment_terms . '</b> <br><br>
-            <span><b>Bank Details :</b> ' . $client_data[0]->bank_details . '</span><br> <br>
-            <b>Electronic Reference No.</b> <br> <br>
-            <span> <b>Invoice Value (In Words):</b> ' . strtoupper($this->getIndianCurrency(number_format((float)$final_final_amount, 2, '.', ''))) . '</span> 
-          </td>
-		    <th colspan="3" style="text-align:right">IGST Amt' . $igst . '</th>
-            <th colspan="2">' .  number_format((float)$all_igst_amounts, 2, '.', '') . '</th>
-          </tr>
-		  <tr style="font-size:12px">
-            <th colspan="3" style="text-align:right">TCS Amt' . $tcs . '</th>
-            <th colspan="2">' .  number_format((float)$all_tcs_amounts, 2, '.', '') . '</th>
-          </tr>
-          <tr style="font-size:12px">
-            <th colspan="3" style="text-align:right">GRAND TOTAL (Rs) </th>
-            <th colspan="2">' . number_format((float)$final_final_amount, 2, '.', '') . '</th>
-          </tr>
-		  </table>
-		  <!-- <div style="page-break-inside:avoid;page-break-after:always"></div> -->
-		  <table padding="0" cellspacing="0" border="1px">
-			<tr>
-			<th colspan="12" style="text-align:center; font-size:16px"></th>
-			</tr>
-			<tr style="font-size:12px;text-align:center">
-				<th colspan="2" width="30%" rowspan="2">HSN/SAC</th>
-				<th colspan="2" width="30%" rowspan="2">Taxable</th>
-				<th colspan="2" width="10%">Central Tax</th>
-				<th colspan="2" width="10%">State Tax</th>
-				<th colspan="2" width="10%">IGST</th>
-				<th colspan="1" width="10%">TCS</th>
-				<th colspan="2" rowspan="2" width="10%">Total Tax Amount</th>
-			</tr>
-			<tr style="font-size:12px;text-align:center">
-				<th>Rate</th>
-				<th>Amount</th>
-				<th>Rate</th>
-				<th>Amount</th>
-				<th>Rate</th>
-				<th>Amount</th>
-				<th>Amount</th>
-			</tr>'		
-			.$hsn_code_table_html.'
-			<tr style="font-size:15px;text-align:right">
-			
-				<td colspan="2"><b>Total</b></td>
-				<td colspan="2"><b>Rs.'.$sortedHSNCodesAssAmt.'</b></td>
-				<td colspan="2"><b>Rs.'.$sortedHSNCodesCgstAmt.'</b></td>
-				<td colspan="2"><b>Rs.'.$sortedHSNCodesSgstAmt.'</b></td>
-				<td colspan="2"><b>Rs.'.$sortedHSNCodesIgstAmt.'</b></td>
-				<td colspan="1"><b>Rs.'.$sortedHSNCodesTCSAmt.'</b></td>
-				<td colspan="2"><b>Rs.'.($sortedHSNCodesCgstAmt + $sortedHSNCodesSgstAmt +$sortedHSNCodesIgstAmt + $sortedHSNCodesTCSAmt).'</b></td>
-			</tr>
-	      <tr style="font-size:9px">
-            <td colspan="6">
-			<p>We hereby certify that my/our registration certificate under the Goods and Service Tax
-                Act, 2017 is in force on the date on which the sale of the goods specified in this Tax
-                invoice is made by me/us and that the transaction of sale covered by this taxinvoice has
-                been effected by me/us and it shall be accounted for in the turnover of sales while filling
-                of return and the due tax. If any, payable on the sale has been paid or shall be paid.
-                <br>
-                Certified that the particulars given above are true and correct and the amount indicated
-                represents the price actully charged and that there is no flow of additional consideration
-    directly or indirectly from byuer.
-    Interest @24% P.A. will be charged on all overdue invoices.<br>
-    Subject To Pune Jurisdiction.</p>
-          </td>
-          <td colspan="3" >
-          <br>
-          <br>
-          <br>
-          <br>  
-          <br>
-          <br>
-
-          <h4 style="text-align: left;margin-left:25px; font-size:11px"> Receiver Signature </h4>
-          </td>
-          <td colspan="3" >
-          
-          <h4 style="text-align: right;margin-right:25px; font-size:12px"> For, '.$this->getCustomerNameDetails().' </h4>
-          <h6 style="text-align: right">  </h6>
-          <h6 style="text-align: right">  </h6>
-          <h6 style="text-align: right">  </h6>
-          <br>
-          <br>
-          <h4 style="text-align: right;margin-right:25px; font-size:11px"> Authorized Signatory </h4>
-         
-          <h6 style="text-align: right">  </h6>
-          <h6 style="text-align: right">  </h6>
-
-          </td>
-        </tr>
-        </table>
-		<p><p>
-		<div style="page-break-inside:avoid;page-break-after:always"></div>
-		<table padding="2" cellspacing="0" border="1px">
-			<tr>
-				<th colspan="12" style="width:500px; text-align:center; font-size:16px">e-Way Bill</th>
-			</tr>
-			<tr>
-				<td colspan="8" align="bottom">
-					Doc No :<b> '.$new_sales_data[0]->sales_number.'</b><br>
-					Date   :<b> '.$new_sales_data[0]->created_date.'</b><br>
-					IRN    :<b> '.$IrnNo.'</b><br><br>
-					Ack No :<b> '.$AckNo.'</b><br>
-					Ack Date :<b>'.$AckDt.'</b>
-				 </td>
-				 <td colspan="4" align="bottom">
-					<span class="ewayQRcode"></span>
-				 </td>
-				  <script>
-					var qrData ="'.$EwbNo.'"; 
-					var qrcode = new QRCode(document.querySelector(".ewayQRcode"), {
-						text: qrData,
-						width: 128,
-						height: 128,
-						colorDark : "#000000",
-						colorLight : "#ffffff",
-						correctLevel : QRCode.CorrectLevel.H
-					});
-				</script>
-			</tr>
-			<tr>
-				<td colspan="12" style="text-align:left; font-size:16px" ><b>1. e-Way Bill Details</b><br></th>
-			</tr>
-			<tr>
-				<td colspan="6" align="top">
-					e-Way Bill No :<b> '.$EwbNo.'</b><br>
-					Generated By   :<b> '.$client_data[0]->gst_number.'</b><br>
-					Supply Type    :<b> Outward-Supply</b><br><br>
-					Ack No :<b> '.$AckNo.'</b><br>
-					Ack Date :<b>'.$AckDt.'</b>
-				  </td>
-				  <td colspan="4" align="top">
-					Mode :<b> '.$new_sales_data[0]->mode.'- Road</b><br>
-					Approximate Distance   :<b>'.$new_sales_data[0]->distance.'</b><br>
-					Transaction Type    :<b> Regular</b><br><br>
-					Ack No :<b> '.$AckNo.'</b><br>
-					Ack Date :<b>'.$AckDt.'</b>
-				  </td>
-				  <td colspan="2" align="top">
-					  Generated Date:<b>   '.$EwbDt.'</b><br>
-					  Valid Upto	:<b>   '.$EwbValidTill.'</b><br>
-				  </td>
-			</tr>
-			<tr>
-				<td colspan="12" style="text-align:left; font-size:16px"><b>2. Address Details</b></th>
-			</tr>
-			<tr>
-				<td colspan="6" align="top">
-					<b>From :</b><br>
-					'.$client_data[0]->client_name.'<br>
-					'.$client_data[0]->address1.','.$client_data[0]->state.' '.$client_data[0]->pin.'<br>
-					GSTIN : '.$client_data[0]->gst_number.'<br>
-				  </td>
-				  <td colspan="6" align="top">
-				  <b>To :</b><br>
-					'.$customer_data[0]->customer_name.'<br>
-					'.$customer_data[0]->billing_address.','.$customer_data[0]->state.' '.$customer_data[0]->pin.'<br>
-					GSTIN : '.$customer_data[0]->gst_number .'<br>
-				  </td>
-			</tr>
-			<tr>
-				<td colspan="8" align="top">
-					<b>Dispatched From :</b><br>
-					'.$client_data[0]->client_name.'<br>
-					'.$client_data[0]->address1.','.$client_data[0]->state.' '.$client_data[0]->pin.'<br>
-					GSTIN : '.$client_data[0]->gst_number.'<br>
-				  </td>
-				  <td colspan="4" align="top">
-				  <b>Ship To :</b><br>
-					'.$shipping_data['shipping_name'].'<br>
-					'.$shipping_data['ship_address'].','.$shipping_data['state'].' '.$shipping_data['pin_code'].'<br>
-					GSTIN : '.$shipping_data['gst_number'] .'<br>
-				  </td>
-			</tr>
-			<tr>
-				<td colspan="12" style="text-align:left; font-size:16px"><b>3. Goods Details</b></th>
-			</tr>
-			<tr style="font-size:14px;text-align:center;">
-				<th>HSN Code</th>
-				<th>Product Name</th>
-				<th colspan="6" style="text-align:left;">Product Description</th>
-				<th>Quantity </th>
-				<th>Taxable Amt</th>
-				<th colspan="2">Rate</th>
-			</tr>
-			' . $eway_parts_html . '
-			<tr>
-				<td colspan="12" style="height:25px"></td>
-			</tr>
-			<tr>
-			  <td colspan="4" width="33%"> 
-				Tot.Taxable Amt: <b>'.number_format((float)$all_final_totals, 2, '.', '').'</b><br>
-				Other Amt :<b>'.number_format((float)$all_totalOther, 2, '.', '').'</b><br>
-				
-			  </td>
-              <td colspan="4" width="33%">
-			    CGST Amt : <b>'.number_format((float)$all_cgst_amounts, 2, '.', '').'</b><br>
-				SGST Amt : <b>'.number_format((float)$all_sgst_amounts, 2, '.', '').'</b><br>
-				IGST Amt : <b>'.number_format((float)$all_igst_amounts, 2, '.', '').'</b><br>
-				TCS Amt  : <b>'.number_format((float)$all_tcs_amounts, 2, '.', '').'</b>
-			  </td>
-			  <td colspan="4" width="33%"><br>
-				Total Inv Amt :<b>'.number_format((float)$final_final_amount, 2, '.', '').'</b><br>
-			  </td>
-			</tr>
-			<tr>
-				<td colspan="12" style="text-align:left; font-size:16px"><b>4. Transportation Details</b></th>
-			</tr>
-			<tr>
-				<td colspan="12" align="top">
-					Transporter ID :'.$transporter_data[0]->transporter_id.'<br>
-					Name :'.$transporter_data[0]->name.'<br>
-				</td>
-				<!-- <td colspan="6" align="top">
-					Doc No:<br>
-					Date<br>
-				  </td> -->
-			</tr>
-			<tr>
-				<td colspan="12" style="text-align:left; font-size:16px"><b>5. Vehicle Details</b></th>
-			</tr>
-			<tr>
-				<td colspan="4" align="top">
-					Vehicle No : <b>'.$new_sales_data[0]->vehicle_number.'</b><br>
-				</td>
-				<td colspan="4" align="top">
-					From : <br>
-				</td>
-				<td colspan="4" align="top">
-					CEWB No : <br>
-				</td>
-			</tr>
-		</table>
-		</div>
-        </body>
-      </html>
-	 ';
-
-		if($downloadPDF == true){
-			$this->pdf->loadHtml($html_content);
-			$this->pdf->render();
-			$this->pdf->stream("E-Invoice-Details.pdf", array("Attachment" => 1));
-		}else{
-			echo $html_content;
 			die;
-		}
 	  }
   }
 }
@@ -1432,9 +963,30 @@ class NewEInvoiceController extends CommonController {
 					$heights = "150px";
 			
 					// Create HTML rows
-				[$parts_html, $eway_parts_html] = $this->createHtmlRow($child_part_data, $child_part_data->hsn_code, $ps, $rate, $ps->qty * $rate, $i, $gstData['isInterState'], $gstData['igst'], $gstData['cgst'], $gstData['sgst'], $discount);
+				$current_parts_html=$current_eway_parts_html = $this->createHtmlRow($child_part_data, $child_part_data->hsn_code, $ps, $rate, $subtotal, $i, $gstData['isInterState'], $gstData['igst'], $gstData['cgst'], $gstData['sgst'], $discount);
+				$parts_html = $parts_html . $current_parts_html;
+				$eway_parts_html = $eway_parts_html . $current_eway_parts_html;
+
 				$i++;
 		}
+		//discount related things
+        $isDiscount = false;
+	    if($new_sales_data[0]->discountType!='NA'){
+                $isDiscount = true;
+                $discountDetails = "";
+                if ($new_sales_data[0]->discountType === 'Percentage') {
+                    $discountDetails = $new_sales_data[0]->discount . " %";
+                }               
+        }
+
+		$defaultColumns = "2";
+		if ($isDiscount == true) {
+				$defaultColumns = "3";
+				$discountSection =
+				'<td colspan="2" style="text-align:center;margin-left:10px;">DISCOUNT ' . $discountDetails . '</td>
+						<td colspan="2" style="text-align:center"> (-) ' . $new_sales_data[0]->discount_amount . '</td>';
+		}
+		$sales_total = $this->Crud->tax_calcuation($gst_structure, $totals['final_basic_total'], $new_sales_data[0]->discount_amount);
 	
 		$final_basic_total = $totals['final_basic_total'];
 		$all_final_totals = $totals['all_final_totals'];
@@ -1559,19 +1111,19 @@ class NewEInvoiceController extends CommonController {
 		</div>
 		<br>
 		<div id="print-section">
-		<table cellspacing="0" border="1px">
+		<table cellspacing="0" border="1px" padding="2">
 		<tr>
 			<th colspan="12" style="text-align:center; font-size:16px">EInvoice</th>
 		</tr>
 		<tr>
 			<td colspan="6" align="bottom">
-				IRN No :<b>'.$IrnNo.'</b><br>
+				IRN No :<span style="font-size:13px;padding-top: 4px;"><b>'.$IrnNo.'</b></span><br>
 				Ack No :<b>'.$AckNo.'</b><br>
 				Act Date :<b>'.$AckDt.'</b><br><br>
 				e-Way Bill No :<b>'.$EwbNo.'</b><br>
 				e-Way Bill Date :<b>'.$EwbDt.'</b>
 			  </td>
-			<td colspan="6" style="padding-top: 5px;padding-bottom: 5px;"> 
+			<td colspan="6" style="padding-top: 5px;padding-bottom: 5px;padding-left: 10px;">
 				<span class="qrcode"></span>
 		  </td>
 		  <script>
@@ -1639,7 +1191,6 @@ class NewEInvoiceController extends CommonController {
 		  <th style="width:20px;">UOM </th>
 		  <th style="width:20px;">QTY </th>
 		  <th style="width:20px;">Rate/Unit  </th>
-		  <th style="width:20px;">Disc. %</th>
 		  <th colspan="2">Amount</th>
 	</tr>
 	  ' . $parts_html . '
@@ -1649,16 +1200,23 @@ class NewEInvoiceController extends CommonController {
 
 	  <!-- New -->
 	  <tr style="font-size:10px">
-            <td rowspan="2" colspan="8">
+            <td rowspan="'.$defaultColumns.'" colspan="8">
               <b>&nbsp;Mode Of Transport : </b>' . $transportMode . '&nbsp;&nbsp;&nbsp;&nbsp;<b>&nbsp;Vehicle No : </b>' . $new_sales_data[0]->vehicle_number . '&nbsp;&nbsp;&nbsp;&nbsp;<b>&nbsp;L.R No : </b>' . $new_sales_data[0]->lr_number . '
               <br><b>&nbsp;Transporter : </b>' . $transporter_data[0]->transporter_id . '<br>
-            </td>
-            <td colspan="2" style="text-align:center;margin-left:10px;">TAXABLE VALUE1 </td>
+            </td>';
+
+			 if($isDiscount==true) {
+                 $html_content = $html_content.$discountSection.'
+                 </tr><tr style="font-size:10px">';
+            }
+			 $html_content = $html_content.'
+			<td colspan="2" style="text-align:center;margin-left:10px;">TAXABLE VALUE</td>
+
             <td colspan="2" style="text-align:center">' . number_format((float) $final_basic_total, 2, '.', '') . '</td>
           </tr>
           <tr style="font-size:10px">
             <td colspan="2" style="text-align:center">IGST Amt</td>
-            <td colspan="2" style="text-align:center">' . number_format((float) $all_igst_amounts, 2, '.', '') . '</td>
+            <td colspan="2" style="text-align:center">' . number_format($sales_total['sales_igst'], 2) . '</td>
          </tr>
           <tr style="font-size:10px">
           <td rowspan="5" colspan="8">
@@ -1668,23 +1226,23 @@ class NewEInvoiceController extends CommonController {
             <span> <b> &nbsp;Invoice Value (In Words) : </b> ' . strtoupper($this->getIndianCurrency(number_format((float)$final_final_amount, 2, '.', ''))) . '</span>
             </td>
             <td colspan="2" style="text-align:center;margin-left:10px;">CGST Amt</td>
-            <td colspan="2" style="text-align:center">' . number_format((float) $all_cgst_amounts, 2, '.', '') . '</td>
+            <td colspan="2" style="text-align:center">' . number_format($sales_total['sales_cgst'], 2) . '</td>
         </tr>
           <tr style="font-size:10px">
             <td colspan="2" style="text-align:center;margin-left:10px;">SGST Amt</td>
-            <td colspan="2" style="text-align:center">' . number_format((float) $all_sgst_amounts, 2, '.', '') . '</td>
+            <td colspan="2" style="text-align:center">' . number_format($sales_total['sales_sgst'], 2, '.', '') . '</td>
           </tr>
           <tr style="font-size:10px">
             <td colspan="2" style="text-align:center">TCS Amt</td>
-            <td colspan="2" style="text-align:center">' . number_format((float) $all_tcs_amounts, 2, '.', '') . '</td>
+            <td colspan="2" style="text-align:center">' . number_format($sales_total['sales_tcs'], 2, '.', '') . '</td>
           </tr>
           <tr style="font-size:10px">
-            <td colspan="2" style="text-align:center;margin-left:10px;">Freight Charges</td>
+            <td colspan="2" style="text-align:center;margin-left:10px;">P&F Charges</td>
             <td colspan="2" style="text-align:center">' . '0.00' . '</td>
           </tr>
           <tr style="font-size:10px">
             <th colspan="2" style="text-align:center">GRAND TOTAL</th>
-            <th colspan="2" style="text-align:center">Rs. ' . number_format((float) $final_final_amount, 2, '.', '') . '</th>
+            <th colspan="2" style="text-align:center">Rs. ' . number_format($sales_total['sales_total'], 2, '.', '') . '</th>
           </tr>
 		<!-- New end -->
 
@@ -1772,10 +1330,11 @@ Subject To Pune Jurisdiction</p>
 				<td colspan="8" align="bottom">
 					Doc No :<b> '.$new_sales_data[0]->sales_number.'</b><br>
 					Date   :<b> '.$new_sales_data[0]->created_date.'</b><br>
-					IRN    :<b> '.$IrnNo.'</b><br><br>
-					Ack No :<b> '.$AckNo.'</b><br>
-					Ack Date :<b>'.$AckDt.'</b>
-				 </td>
+					Generated Date:<b>   '.$EwbDt.'</b><br>
+				  	Valid Upto	:<b>   '.$EwbValidTill.'</b><br><br>
+					IRN    :<span style="font-size:13px;padding-top: 4px;"><b> '.$IrnNo.'</b></span></br>
+			  </td>
+
 				 <td colspan="4" align="bottom">
 					<span class="ewayQRcode"></span>
 				 </td>
@@ -1799,20 +1358,13 @@ Subject To Pune Jurisdiction</p>
 				e-Way Bill No :<b> '.$EwbNo.'</b><br>
 				Generated By   :<b> '.$client_data[0]->gst_number.'</b><br>
 				Supply Type    :<b> Outward-Supply</b><br><br>
-				Ack No :<b> '.$AckNo.'</b><br>
-				Ack Date :<b>'.$AckDt.'</b>
 			  </td>
-			  <td colspan="4" align="top">
+			   <td colspan="6" align="top">
 				Mode :<b> '.$new_sales_data[0]->mode.'- Road</b><br>
-				Approximate Distance   :<b>'.$new_sales_data[0]->distance.'</b><br>
+				Approx Distance   :<b>'.$new_sales_data[0]->distance.' KM</b><br>
 				Transaction Type    :<b> Regular</b><br><br>
-				Ack No :<b> '.$AckNo.'</b><br>
-				Ack Date :<b>'.$AckDt.'</b>
 			  </td>
-			  <td colspan="2" align="top">
-				  Generated Date:<b>   '.$EwbDt.'</b><br>
-				  Valid Upto	:<b>   '.$EwbValidTill.'</b><br>
-			  </td>
+
 		</tr>
 		<tr>
 			<td colspan="12" style="text-align:left; font-size:16px"><b>2. Address Details</b></th>
@@ -1860,35 +1412,38 @@ Subject To Pune Jurisdiction</p>
 		<tr>
 			<td colspan="12" style="height:25px"></td>
 		</tr>
-		<tr>
-			  <td colspan="4" width="33%"> 
-				Tot.Taxable Amt: <b>'.number_format((float)$all_final_totals, 2, '.', '').'</b><br>
-				Other Amt :<b>'.number_format((float)$all_totalOther, 2, '.', '').'</b><br>
-				
+		<tr>	
+			   <td colspan="4" width="33%">
+				Discount ('.$discountDetails.') : ₹ <b>'.$new_sales_data[0]->discount_amount.'</b><br> 
+				Tot.Taxable Amt: <b>'.number_format($final_basic_total,2).'</b><br>
+			  </td>		
+			 <td colspan="4" width="33%">
+			    CGST Amt: <b>'.number_format($sales_total['sales_cgst'],2).'</b><br>
+				SGST Amt : <b>'.number_format($sales_total['sales_sgst'],2).'</b><br>';
+			if($sales_total['sales_igst']>0){
+				$html_content = $html_content.'IGST Amt :<b>'.number_format($sales_total['sales_igst'],2).'</b>';
+			}
+				$html_content = $html_content.'
 			  </td>
-              <td colspan="4" width="33%">
-			    CGST Amt : <b>'.number_format((float)$all_cgst_amounts, 2, '.', '').'</b><br>
-				SGST Amt : <b>'.number_format((float)$all_sgst_amounts, 2, '.', '').'</b><br>
-				IGST Amt : <b>'.number_format((float)$all_igst_amounts, 2, '.', '').'</b><br>
-				TCS Amt  : <b>'.number_format((float)$all_tcs_amounts, 2, '.', '').'</b>
-			  </td>
-			  <td colspan="4" width="33%"><br>
-				Total Inv Amt :<b>'.number_format((float)$final_final_amount, 2, '.', '').'</b><br>
+			  <td colspan="4" width="33%">
+				Total Inv Amt :<b>'.number_format($sales_total['sales_total'],2).'</b><br>
 			  </td>
 			</tr>
 		<tr>
+
 			<td colspan="12" style="text-align:left; font-size:16px"><b>4. Transportation Details</b></th>
 		</tr>
 		<tr>
 			<td colspan="12" align="top">
-				Transporter ID :'.$transporter_data[0]->transporter_id.'<br>
-				Name :'.$transporter_data[0]->name.'<br>
+				Transporter ID :<b>'.$transporter_data[0]->transporter_id.'</b><br>
+				Name :<b>'.$transporter_data[0]->name.'</b><br>
 			</td>
 			<!--  <td colspan="6" align="top">
 				Doc No:<br>
 				Date<br>
 			  </td> -->
 		</tr>
+
 		
 		<tr>
 			<td colspan="12" style="text-align:left; font-size:16px"><b>5. Vehicle Details</b></th>

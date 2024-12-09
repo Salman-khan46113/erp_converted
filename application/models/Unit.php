@@ -172,4 +172,16 @@ class Unit extends CI_Model
         return $stock_column_name; */
 	}
 	
+	/**
+	 * Get stock or production db column name
+	 */
+	public function getClientToCustomerDistanceTbColName() {
+		$clientUnit = $this->session->userdata['clientUnit'];
+		$fieldNameDBName = "distncFrmClnt";
+		if ($clientUnit) {
+			$fieldNameDBName = $fieldNameDBName . $clientUnit;
+		}
+		return $fieldNameDBName;
+	}
+
 }

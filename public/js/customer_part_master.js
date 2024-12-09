@@ -59,11 +59,17 @@ const page = {
                   type: form.method,
                   data: $(form).serialize(),
                   success: function(response) {
-                     // handle success response
-                     toastr.success('Part Updated Sucessfully.')
-                     setTimeout(() => {
-                        window.location.reload();
-                     }, 1000);
+                     var responseObject = JSON.parse(response);
+                      var msg = responseObject.message;
+                      var success = responseObject.success;
+                      if(success == 1){
+                          toastr.success(msg)
+                           setTimeout(() => {
+                              window.location.reload();
+                           }, 1000);
+                      }else{
+                          toastr.error(msg)
+                      }
                   },
                   error: function(xhr, status, error) {
                      // handle error response
@@ -100,10 +106,18 @@ const page = {
                   data: $(form).serialize(),
                   success: function(response) {
                      // handle success response
-                     toastr.success('Part Updated Sucessfully.')
-                     setTimeout(() => {
-                        window.location.reload();
-                     }, 1000);
+                     var responseObject = JSON.parse(response);
+                      var msg = responseObject.message;
+                      var success = responseObject.success;
+                      if(success == 1){
+                          toastr.success(msg)
+                           setTimeout(() => {
+                              window.location.reload();
+                           }, 1000);
+                      }else{
+                          toastr.error(msg)
+                      }
+                     
                   },
                   error: function(xhr, status, error) {
                      // handle error response
@@ -128,7 +142,7 @@ const page = {
                             var lines = csv.split('\n');
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
-                                values.splice(13, 1);
+                                values.splice(14, 1);
                                 return values.join(',');
                             });
                             return modifiedLines.join('\n');
@@ -166,7 +180,7 @@ const page = {
                                 }
                                 cell.alignment = alignment;
                             });
-                            row.splice(14, 1);
+                            row.splice(15, 1);
                         });
                     }
                 },
@@ -196,6 +210,7 @@ const page = {
             //     leftColumns: 2,
             //     // end: 1
             // },
+            order: sorting_column,
             ajax: {
                 data: {'search':data},    
                 url: "welcome/getCustomerpartsAjax",

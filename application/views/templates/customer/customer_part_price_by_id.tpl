@@ -118,6 +118,7 @@ Customer Master"><i class="ti ti-arrow-left"></i></a>
                                     <thead>
                                         <tr>
                                             <!--<th>Sr. No.</th> -->
+                                            <th style="display: none">Id</th>
                                             <th>Add Revision</th>
                                             <th>Revision Number</th>
                                             <th>Revision Date</th>
@@ -139,6 +140,7 @@ Customer Master"><i class="ti ti-arrow-left"></i></a>
                                                 <%if $customer_data[$po[$poo->customer_master_id][0]->customer_id][0]->id == $customer_id%>
                                                     <tr>
                                                         <!-- <td><%$i%></td> -->
+                                                        <td style="display: none"><%$poo->customer_master_id%></td>
                                                         <td>
                                                             <a type="submit" data-bs-toggle="modal" class=" add-revision" data-value="<%base64_encode(json_encode($customer_part_rate_data[$poo->customer_master_id][0]))%>" data-bs-target="#revision_part" title="Add Revision"><i class="ti ti-square-rounded-plus"></i></a>
                                                             <a href="<%$base_url%>view_part_rate_history/<%$poo->customer_master_id%>" class=" btn-sm" title="history"><i class="ti ti-history"></i></a>

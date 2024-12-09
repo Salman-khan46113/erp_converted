@@ -41,7 +41,7 @@
                                                     <option value=''>Select</option>
                                                     <%if !empty($customer)%>
                                                         <%foreach from=$customer item=s%>
-                                                            <option value="<%$s->id%>"><%$s->customer_name%></option>
+                                                            <option value="<%$s->id%>" data-distance="<%$s->$distanceCol%>"><%$s->customer_name%></option>
                                                         <%/foreach%>
                                                     <%/if%>
                                                 </select>
@@ -60,7 +60,7 @@
                                     <div class="col-lg-4">
                                         <div class="form-group mb-3">
                                             <label for="" class="form-label">Mode Of Transport<span class="text-danger">*</span></label>
-                                            <select name="mode" class="form-control" >
+                                            <select name="mode" class="form-control select2" >
                                                 <option value="">Select</option>
                                                 <option value="1">Road</option>
                                                 <option value="2">Rail</option>
@@ -101,7 +101,7 @@
                                     <div class="col-lg-4 ">
                                         <div class="form-group mb-3">
                                             <label for="" class="form-label">Distance of Transportation<span class="text-danger">*</span></label>
-                                            <input type="text" placeholder="Enter Distance of Transportation" value="" name="distance"  class="form-control">
+                                            <input type="text" placeholder="Enter Distance of Transportation" value="" name="distance"  class="form-control" id="distance">
                                         </div>
                                     </div>
                                    
@@ -116,14 +116,14 @@
                                             </div>
                                             <div class="col-lg-5">
                                                 <div class="form-group mb-3 mt-2">   
-                                                    <input type="radio" name="ship_addressType" value="consignee" onchange="toggleConsigneeSelection()">
+                                                    <input type="radio" name="ship_addressType" value="consignee" onchange="toggleConsigneeSelection()" id="customerAddress">
                                                     &nbsp;<label >Select Consignee Address</label><br>
                                                 </div>
-                                                <div class="form-group">
-                                                    <select name="consignee" id="consigneeSelect"  disabled class="form-control">
+                                                <div class="form-group" id="consigneeSelect">
+                                                    <select name="consignee"   disabled class="form-control select2" id="consigneeSelectInput">
                                                         <option value="">Select</option>
                                                         <%foreach from=$consignee_list item=c%>
-                                                            <option value="<%$c->id%>">
+                                                            <option value="<%$c->id%>" data-distance="<%$c->$distanceCol %>">
                                                                 <%$c->consignee_name%> - <%$c->location%>
                                                             </option>
                                                         <%/foreach%>
@@ -178,9 +178,11 @@
              consigneeSelect.disabled = true;
              consigneeSelect.style.display = "none";
              consigneeSelect.value = ''; //change to default value as select.
+             // $("[name='consignee']").prop("disabled",true).trigger("update");
         } else if (shipAddressType === "consignee") {
             consigneeSelect.disabled = false;
             consigneeSelect.style.display = "block";
+            // $("[name='consignee']").prop("disabled",false).trigger("update");
         }
     }
 
@@ -225,20 +227,30 @@
                 cache: false,
                 beforeSend: function() {
                      // Show the loading icon
-                    $("#loading-overlay").show();
+                    // $("#loading-overlay").show();
                 },
                 success: function(response) {
+                    
                     if (response) {
                         $('#part_id').html(response);
+                        $('#part_id').trigger("change");
                     } else {
                         $('#part_id').html(response);
                     }
                 },
                 complete: function() {
                     // Hide the loading icon
-                    $("#loading-overlay").hide();
+                    // $("#loading-overlay").hide();
                 }        
             });
+            //var customers = <php echo json_encode($customer); ?>;
+            //alert(JSON . stringify(customers, null, 2)); // Pretty-print with indentation
+            var selectedCustomer = $(this).find('option:selected');
+            var distance = selectedCustomer.data('distance'); // Get the distance from the data attribute
+            // if (distance) {
+               $('#distance').val(distance);
+            // }
+
         })
     // jqeuery form validation.
         $("form").validate({
@@ -342,11 +354,31 @@
 
             $("input[name='ship_addressType']").change(function() {
                 if ($(this).val() === "consignee") {
-                    $("#consigneeSelect").prop("disabled", false);
+                   $("[name='consignee']").prop("disabled",false).trigger("update");
                 } else {
-                    $("#consigneeSelect").prop("disabled", true);
+                    $("[name='consignee']").prop("disabled",true).trigger("update");
                 }
             });
+            //set the distance to consinee one
+        $('#consigneeSelectInput').change(function () {
+            var selectedCustomer = $(this).find('option:selected');
+            var distance = selectedCustomer.data('distance'); // Get the distance from the data attribute
+               $('#distance').val(distance);
+            
+        });
+
+        //set the distance to customer one
+        $('input[name="ship_addressType"]').change(function() {
+            const selectedValue = $(this).val();
+           if (selectedValue === "customer") {
+              var selectedCustomer = $('#customer_tracking').find('option:selected');
+              var distance = selectedCustomer.data('distance'); // Get the distance from the data attribute
+              if (distance) {
+               $('#distance').val(distance);
+            }
+          } 
+        });
+
 
     });
 </script>

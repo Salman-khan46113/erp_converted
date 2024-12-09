@@ -23,7 +23,7 @@ class SalesModel extends CI_Model {
         $this->db->join('customer_part AS cp', 'parts.part_id = cp.id', 'inner');
         $this->db->where('sales.clientId', $clientId);
         $this->db->where('sales.sales_number NOT LIKE', 'TEMP%');
-        $this->db->where_not_in('sales.status', ['pending']);
+        $this->db->where_not_in('sales.status', ['pending','unlocked']);
         if (is_array($search_params) && count($search_params) > 0) {
             if ($search_params["month_number"] != "") {
                 $this->db->where("sales.created_month", $search_params["month_number"]);
@@ -72,7 +72,7 @@ class SalesModel extends CI_Model {
         $this->db->join('customer_part AS cp', 'parts.part_id = cp.id', 'inner');
         $this->db->where('sales.clientId', $clientId);
         $this->db->where('sales.sales_number NOT LIKE', 'TEMP%');
-        $this->db->where_not_in('sales.status', ['pending']);
+        $this->db->where_not_in('sales.status', ['pending','unlocked']);
         
         // Apply conditions based on $condition_arr
         if (count($condition_arr) > 0) {
@@ -135,17 +135,16 @@ class SalesModel extends CI_Model {
             cus.customer_name, 
             cus.payment_terms, 
             rrp.payment_receipt_date,
-            SUM(rrp.amount_received) as amount_received, 
+            rrp.amount_received as amount_received, 
             rrp.transaction_details, 
             ns.created_date,
-           SUM(rrp.tds_amount) as tds_amount,
+           rrp.tds_amount as tds_amount,
             rrp.remark as remark_val,
-            SUM(ROUND(
+            ROUND(SUM(
                 IF(s.total_rate > 0,s.total_rate,0) + 
-                IF(s.tcs_amount > 0,s.tcs_amount,0) -
-                IF(rrp.amount_received > 0,rrp.amount_received,0) - 
+                IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - 
                 IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
-                2)) AS bal_amnt');
+                2) AS bal_amnt');
         
         $this->db->from('sales_parts s');
         

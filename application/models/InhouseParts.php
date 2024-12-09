@@ -84,12 +84,17 @@ class InhouseParts extends CI_Model {
      * Read specific part details including stock
      */
     public function getInhousePartById($id) {
+        $where ='';
+        if($id > 0){
+            $where = "WHERE parts.id = ".$id."";
+        }
+        
         $part_details = $this->Crud->customQuery("SELECT parts.*, stock.* 
             FROM  inhouse_parts parts
             LEFT JOIN inhouse_parts_stock stock
             ON parts.id = stock.inhouse_parts_id
             AND stock.clientId = " . $this->Unit->getSessionClientId() . " 
-            WHERE parts.id = ".$id."
+           $where
             ORDER BY parts.id desc");
         return $part_details;
     }
@@ -331,6 +336,22 @@ class InhouseParts extends CI_Model {
 
         // pr($this->db->last_query(),1);
         return $ret_data;
+    }
+    public function updateImportedStockDetails($clientId,$partNo,$newStockRate,$newStock) {
+        // This will update the actual child part master as child_part table is for master and child_part_master is for linked supplier part
+            $sql = "UPDATE inhouse_parts_stock ips
+                    JOIN inhouse_parts ip ON ip.id = ips.inhouse_parts_id
+                    SET ip.store_stock_rate = ".$newStockRate.", ips.production_qty = ".$newStock."
+                    WHERE ip.part_number = '".$partNo."' AND ips.clientId = ".$clientId;
+          
+            if ($this->db->query($sql)) {
+                //if ($this->db->affected_rows() > 0) {//incase need to check whether record is updated or not
+                    return true;
+               //
+            } else {
+                // Query failed
+                return false;
+            }
     }
 
 }

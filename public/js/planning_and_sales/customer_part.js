@@ -4,11 +4,11 @@ var pdf_title = "Customer Part";
 var table = '';
 var start_skip_row = 0;
 if(isPlastic){
-  start_skip_row = 17;
+  start_skip_row = 15;
 }else{
-  start_skip_row = 12;
+  start_skip_row = 10;
   if(TusharEngg){
-    start_skip_row = 14;
+    start_skip_row = 13;
   }
 }
 const datatable = {
@@ -92,6 +92,7 @@ const datatable = {
                     }
                 },
             ],
+            order: [[0, 'desc']],
              pagingType: "full_numbers",
     });
       $('.dataTables_length').find('label').contents().filter(function() {

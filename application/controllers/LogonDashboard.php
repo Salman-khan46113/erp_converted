@@ -122,6 +122,7 @@ class LogonDashboard extends CommonController
 				$this->session->set_userdata('clientUnitName', $clientDetails[0]->client_unit); //set the clientUnit to session..
 				$this->session->set_userdata('isMultipleClientUnits',$this->isMultiClientSupport()); //Update client unit for session.
 				$this->session->set_userdata('noOfClients',$this->getNoOfClients()); //Total no of client in DB
+				$this->session->set_userdata('AROMCustomerType', $this->getAROMCustomerName());
 				$this->session->set_flashdata('login', 'success');
 				if(checkGroupAccess("dashboard","list","No")){
 					$redirect_url = "dashboard";

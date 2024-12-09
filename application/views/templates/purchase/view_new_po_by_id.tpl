@@ -425,13 +425,22 @@
                   </div>
                   <div class="card mt-4">
                      <div class="">
+                     <div class="tabTitle">
+                           <h2 id="cc_sh_sys_static_field_3">
+                              <span>Parts</span>
+
+                           </h2>
+                           <input type="text" name="reason" placeholder="Filter Search" class="form-control parts-global-seacrh" id="serarch-filter-input" fdprocessedid="bxkoib">
+                           
+                           
+                        </div>
                         <table class="table  table-striped w-100" id="example1">
                            <thead>
                               <tr>
                                  <!-- <th>Sr No</th> -->
                                  <th width="10%">Part Number</th>
                                  <th>Part Description</th>
-                                 <th>GST Strucutre Code</th>
+                                 <th>Tax Code</th>
                                  <th>UOM</th>
                                  <th>QTY</th>
                                  <%if ($new_po[0]->po_discount_type == "Part Level") %>
@@ -469,7 +478,8 @@
                                     <%if ($new_po[0]->po_discount_type == "Part Level") %>
                                        <%assign var='part_rate_discount_amount' value=($part_rate_new*$p->discount)/100%>
                                        <%assign var='after_dicount_part_rate' value=$part_rate_new-$part_rate_discount_amount%>
-                                       <%assign var='total_rate' value=$after_dicount_part_rate*$p->qty%>
+                                       <%assign var='total_rate_old' value=$after_dicount_part_rate*$p->qty%>
+                                       <%assign var='total_rate' value=($after_dicount_part_rate*$p->qty)+$gst_amount%>
                                     <%/if%>
                                     <%assign var='final_po_amount' value=$final_po_amount+$total_rate%>
                                  

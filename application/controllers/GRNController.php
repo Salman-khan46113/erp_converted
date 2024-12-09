@@ -391,18 +391,41 @@ class GRNController extends CommonController
 				$tax_id = $this->input->post('tax_id');
 				$pending_qty = $this->input->post('pending_qty');
 				$inwarding_price = ($part_rate * round($qty,2));
-				$gst_structure = $this->Crud->get_data_by_id("gst_structure", $tax_id, "id");
-				$cgst_amount = ($inwarding_price * $gst_structure[0]->cgst) / 100;
-				$sgst_amount = ($inwarding_price * $gst_structure[0]->sgst) / 100;
-				$igst_amount = ($inwarding_price * $gst_structure[0]->igst) / 100;
-
-				if ($gst_structure[0]->tcs_on_tax == "no") {
-					$tcs_amount =  (($inwarding_price * $gst_structure[0]->tcs) / 100);
-				} else {
-					$tcs_amount =  ((($cgst_amount + $sgst_amount + $igst_amount + $inwarding_price) * $gst_structure[0]->tcs) / 100);
+				$new_po_data = $this->Crud->get_data_by_id("new_po", $po_number, "id");
+				if($new_po_data[0]->po_discount_type == "Part Level"){
+					$part_data = $this->Crud->customQuery("
+						SELECT part.*
+						FROM po_parts part
+						WHERE part.id = '".$po_part_id."' 
+						AND part.po_id = ".$po_number);
+					$part_discount = $part_data[0]->discount > 0 ? $part_data[0]->discount : 0; 
+					$inwarding_price = $inwarding_price - $inwarding_price * $part_discount/100;
+					$gst_structure = $this->Crud->get_data_by_id("gst_structure", $tax_id, "id");
+					$cgst_amount = ($inwarding_price * $gst_structure[0]->cgst) / 100;
+					$sgst_amount = ($inwarding_price * $gst_structure[0]->sgst) / 100;
+					$igst_amount = ($inwarding_price * $gst_structure[0]->igst) / 100;
+					if ($gst_structure[0]->tcs_on_tax == "no") {
+						$tcs_amount =  (($inwarding_price * $gst_structure[0]->tcs) / 100);
+					} else {
+						$tcs_amount =  ((($cgst_amount + $sgst_amount + $igst_amount + $inwarding_price) * $gst_structure[0]->tcs) / 100);
+					}
+					$inwarding_price = (float)$inwarding_price + (float)$cgst_amount + (float)$sgst_amount + (float)$igst_amount + (float)$tcs_amount;
+				}else if($new_po_data[0]->po_discount_type != "PO Level"){
+					$gst_structure = $this->Crud->get_data_by_id("gst_structure", $tax_id, "id");
+					$cgst_amount = ($inwarding_price * $gst_structure[0]->cgst) / 100;
+					$sgst_amount = ($inwarding_price * $gst_structure[0]->sgst) / 100;
+					$igst_amount = ($inwarding_price * $gst_structure[0]->igst) / 100;
+					if ($gst_structure[0]->tcs_on_tax == "no") {
+						$tcs_amount =  (($inwarding_price * $gst_structure[0]->tcs) / 100);
+					} else {
+						$tcs_amount =  ((($cgst_amount + $sgst_amount + $igst_amount + $inwarding_price) * $gst_structure[0]->tcs) / 100);
+					}
+					$inwarding_price = (float)$inwarding_price + (float)$cgst_amount + (float)$sgst_amount + (float)$igst_amount + (float)$tcs_amount;
 				}
-
-				$inwarding_price = (float)$inwarding_price + (float)$cgst_amount + (float)$sgst_amount + (float)$igst_amount + (float)$tcs_amount;
+				
+				
+				
+				
 
 				$data = array(
 					"inwarding_id" => $inwarding_id,

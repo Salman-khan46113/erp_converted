@@ -62,7 +62,7 @@ const page = {
                             var lines = csv.split('\n');
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
-                                values.splice(13, 1);
+                                // values.splice(13, 1);
                                 return values.join(',');
                             });
                             return modifiedLines.join('\n');
@@ -100,7 +100,7 @@ const page = {
                                 }
                                 cell.alignment = alignment;
                             });
-                            row.splice(14, 1);
+                            // row.splice(14, 1);
                         });
                     }
                 },
@@ -126,6 +126,7 @@ const page = {
             info: true,
             autoWidth: true,
             lengthChange: true,
+            order: sorting_column,
             fixedColumns: {
                 leftColumns: 2,
                 // end: 1
@@ -194,7 +195,7 @@ const page = {
                         if (success == 1) {
                             toastr.success(msg);
                             setTimeout(function(){
-                                window.location.reload();
+                                 window.open(responseObject.pdf_utl, "_blank");
                             },1000);
 
                         } else {

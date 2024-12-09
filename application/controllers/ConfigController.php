@@ -14,11 +14,14 @@ class ConfigController extends AROMConfigController {
 	 const COMMON_SHEET_METAL = 'COMMON_SHEET_METAL';
 	 const COMMON_PLASTIC = 'COMMON_PLASTIC';
 	 const BSP_SMF = 'BSP';
-
+	 const BUDHALE_SMF = 'BUDHALE_SMF';
+	
 	 const MAYURESH_PLASTIC = 'Mayuresh';
 	 const SP_PLASTIC = "SUPER_POLYMER";
 	 const ARMS_PLASTIC = "ARMS_PLASTIC";
 	 const AIMS_PLASTIC = "AIMS_PLASTIC";
+	 const SIDHANT_PLASTIC = 'SIDHANT_PLASTIC';
+
 
 	 const C_SHEET_METAL = C_SHEET_METAL;
 	 const C_PLASTIC = C_PLASTIC;
@@ -38,9 +41,11 @@ class ConfigController extends AROMConfigController {
 			return $this->getCustomizedLockSalesNumber($saleNo);
 		} else { */
 
-		if(self::TUSHAR_ENGG_SMF == $this->getAROMCustomerName()) {
+		if(self::TUSHAR_ENGG_SMF == $this->getAROMCustomerName()
+			|| self::SIDHANT_PLASTIC == $this->getAROMCustomerName()
+				|| self::BUDHALE_SMF == $this->getAROMCustomerName()) {
 			return $this->getCustomizedLockSalesNumber($saleNo);
-		} else { 
+		}else { 
 			return $this->getCustomerSerialNo().$saleNo;
 		}
 	}
@@ -51,8 +56,11 @@ class ConfigController extends AROMConfigController {
 					self::AIMS_PLASTIC == $this->getAROMCustomerName()) {
 				return $this->getCustomizedSalesNoFormat($isTemp,$withLike);
 		} else { */
+			
 
-		if(self::TUSHAR_ENGG_SMF == $this->getAROMCustomerName()) {
+		if(self::TUSHAR_ENGG_SMF == $this->getAROMCustomerName() 
+			|| self::SIDHANT_PLASTIC == $this->getAROMCustomerName() 
+			|| self::BUDHALE_SMF == $this->getAROMCustomerName()) {
 				return $this->getCustomizedSalesNoFormat($isTemp,$withLike);
 		} else {
 			if($isTemp == true) {
@@ -71,7 +79,9 @@ class ConfigController extends AROMConfigController {
 				return $this->getCustomizedSalesNumber($currentSaleNo);
 		} else { */
 		
-		if(self::TUSHAR_ENGG_SMF == $this->getAROMCustomerName()) {
+		if(self::TUSHAR_ENGG_SMF == $this->getAROMCustomerName() 
+			|| self::SIDHANT_PLASTIC == $this->getAROMCustomerName()
+			|| self::BUDHALE_SMF == $this->getAROMCustomerName()) {
 				return $this->getCustomizedSalesNumber($currentSaleNo);
 		} else { 
 				$sales_num = substr($currentSaleNo, strlen($this->getSalesNoFormat($isTemp)));
@@ -87,7 +97,12 @@ class ConfigController extends AROMConfigController {
 	public function getCustomizedLockSalesNumber($saleNo) {
 		if (self::TUSHAR_ENGG_SMF == $this->getAROMCustomerName()) {
     		return $saleNo;
-		} /*else if(self::SP_PLASTIC == $this->getAROMCustomerName()) {
+		} else if(self::SIDHANT_PLASTIC == $this->getAROMCustomerName()) {
+			return $this->getFinancialYear()."/".$saleNo;
+		} else if(self::BUDHALE_SMF == $this->getAROMCustomerName()) {
+			return $saleNo."/".$this->getFinancialYear();
+		}
+		/*else if(self::SP_PLASTIC == $this->getAROMCustomerName()) {
 			return $saleNo."/".$this->getFinancialYear();
 		} else if (self::ARMS_PLASTIC == $this->getAROMCustomerName()) {
 			return $saleNo;
@@ -98,7 +113,9 @@ class ConfigController extends AROMConfigController {
 	}
 
 	public function getCustomizedSalesNumber($currentSaleNo) {
-		if (self::TUSHAR_ENGG_SMF == $this->getAROMCustomerName()) {
+		if (self::TUSHAR_ENGG_SMF == $this->getAROMCustomerName()
+			|| self::SIDHANT_PLASTIC == $this->getAROMCustomerName()
+			|| self::BUDHALE_SMF == $this->getAROMCustomerName()) {
 			$sales_num = substr($currentSaleNo, strlen($this->getCustomizedSalesNoFormat(true)."/")); // Format is TEMP/23-24/1 ;
 			$nextSalesNo = $sales_num + 1;
 			return "TEMP/".$this->getFinancialYear()."/".$nextSalesNo;	// Format is TEMP/23-24/1 ;
@@ -128,6 +145,23 @@ class ConfigController extends AROMConfigController {
 				return $withLike==true ? "%" : "";
 			}
 		}
+		if (self::SIDHANT_PLASTIC == $this->getAROMCustomerName()) {
+			if ($isTemp == true) {
+				return $withLike == true ? "TEMP/" . $this->getFinancialYear() . "/" . "%" : "TEMP/" . $this->getFinancialYear();
+			} else {
+				return $withLike == true ? $this->getFinancialYear()."/"."%" : $this->getFinancialYear()."/";
+			}
+		}
+
+		if (self::BUDHALE_SMF == $this->getAROMCustomerName()) {
+			if ($isTemp == true) {
+				return $withLike == true ? "TEMP/" . $this->getFinancialYear() . "/" . "%" : "TEMP/" . $this->getFinancialYear();
+			} else {
+				return $withLike == true ? "%"."/".$this->getFinancialYear(): "/".$this->getFinancialYear();
+			}
+		}
+
+
 		/* else if(self::SP_PLASTIC == $this->getAROMCustomerName()) {
 			if($isTemp==true) {
 				return $withLike==true ? "%"."/TEMP/".$this->getFinancialYear() : "/TEMP/".$this->getFinancialYear();
@@ -204,13 +238,15 @@ class ConfigController extends AROMConfigController {
 	public function getCommodity(){
 		if(self::BSP_SMF == $this->getAROMCustomerName()
 			|| self::TUSHAR_ENGG_SMF == $this->getAROMCustomerName()
-			|| self::COMMON_SHEET_METAL == $this->getAROMCustomerName()){
+			|| self::COMMON_SHEET_METAL == $this->getAROMCustomerName()
+			|| self::BUDHALE_SMF == $this->getAROMCustomerName()) {
 			return C_SHEET_METAL;
 		}else if(self::MAYURESH_PLASTIC == $this->getAROMCustomerName()
 		    || self::SP_PLASTIC == $this->getAROMCustomerName()
 			|| self::ARMS_PLASTIC == $this->getAROMCustomerName()
 			|| self::COMMON_PLASTIC == $this->getAROMCustomerName()
-			|| self::AIMS_PLASTIC == $this->getAROMCustomerName()){
+			|| self::AIMS_PLASTIC == $this->getAROMCustomerName()
+			|| self::SIDHANT_PLASTIC == $this->getAROMCustomerName()){
 			return C_PLASTIC;
 		}else{
 			return C_JOB_ROOT;
@@ -231,7 +267,7 @@ class ConfigController extends AROMConfigController {
 					"isSheetMetal" => true
 				);
 				return $tushar_engg_entitlements;
-			}else if(self::BSP_SMF == $this->getAROMCustomerName()){
+			} else if(self::BSP_SMF == $this->getAROMCustomerName()){
 					$bsp_entitlements = array(
 						"po_import_export"=> false,
 						"isGrade"=> false,
@@ -239,9 +275,18 @@ class ConfigController extends AROMConfigController {
 						"Commodity" => C_SHEET_METAL,
 						"isSheetMetal" => true
 					); 
-		
 					return $bsp_entitlements;
-			} else if(self::COMMON_SHEET_METAL == $this->getAROMCustomerName()){
+			} else if (self::BUDHALE_SMF == $this->getAROMCustomerName()) {
+					$bsp_entitlements = array(
+						"po_import_export" => false,
+						"isGrade" => false,
+						"isPLMEnabled" => true,
+						"itemCode" => true,
+						"Commodity" => C_SHEET_METAL,
+						"isSheetMetal" => true,
+					);
+					return $bsp_entitlements;
+			} else if(self::COMMON_SHEET_METAL == $this->getAROMCustomerName()) {
 				$entitlements = array(
 					"po_import_export"=> false,
 					"isGrade"=> false,
@@ -268,7 +313,8 @@ class ConfigController extends AROMConfigController {
 			
 			if(self::SP_PLASTIC == $this->getAROMCustomerName()	|| 
 				self::ARMS_PLASTIC == $this->getAROMCustomerName() ||
-				self::AIMS_PLASTIC == $this->getAROMCustomerName()){
+				self::AIMS_PLASTIC == $this->getAROMCustomerName() ||
+				self::SIDHANT_PLASTIC == $this->getAROMCustomerName()){
 				$sp_plastic = array(
 					"po_import_export"=> false,
 					"isGrade"=> true,
@@ -327,7 +373,8 @@ class ConfigController extends AROMConfigController {
 		}
 		return $client;
 	}
-	
+
+
 	/* get credit note/debit note / performa invice code */
 	public function getFomrmateData($type = "",$prifix = "",$is_temp = "No") {
 

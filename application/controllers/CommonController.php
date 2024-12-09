@@ -9,7 +9,6 @@ function __construct() {
 		parent::__construct();
 
 		date_default_timezone_set('Asia/Kolkata');
-
 		// $this->current_date = date('Y-m-d');
 		// $this->current_time = date('h:i:s');
 

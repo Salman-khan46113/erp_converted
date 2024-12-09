@@ -487,7 +487,8 @@ class SupplierPartsController extends CommonController
 			} else {
 				$this->addErrorMessage('Unable to update record. Please try again.');
 			}
-		$this->child_parts($id);
+		// $this->child_parts($id);
+		redirect('child_parts');
 	}
 
 

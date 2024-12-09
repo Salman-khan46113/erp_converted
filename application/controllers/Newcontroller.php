@@ -438,14 +438,20 @@ class Newcontroller extends CommonController
             $uom_data = $this->Crud->get_data_by_id("uom", $p->uom_id, "id");
             $po_part[$key]->uom_data = $uom_data;  
             $total_rate_old = $part_rate_new * $p->qty;
+            
+            if ($new_po[0]->po_discount_type == "Part Level"){
+            	$part_rate_discount_amount = ($part_rate_new*$p->discount)/100;
+				$after_dicount_part_rate = $part_rate_new-$part_rate_discount_amount;
+				$total_rate_old1 = $after_dicount_part_rate*$p->qty;
+            }
             $gst_structure = $this->Crud->get_data_by_id("gst_structure", $p->tax_id, "id");
             $po_part[$key]->gst_structure = $gst_structure;  
             $po_part[$key]->total_rate_old = $total_rate_old;  
-            $po_part[$key]->cgst_amount = $cgst_amount = ($total_rate_old * $gst_structure[0]->cgst) / 100;
-            $po_part[$key]->sgst_amount= $sgst_amount  = ($total_rate_old * $gst_structure[0]->sgst) / 100;
-            $po_part[$key]->igst_amount= $igst_amount  = ($total_rate_old * $gst_structure[0]->igst) / 100;
+            $po_part[$key]->cgst_amount = $cgst_amount = ($total_rate_old1 * $gst_structure[0]->cgst) / 100;
+            $po_part[$key]->sgst_amount= $sgst_amount  = ($total_rate_old1 * $gst_structure[0]->sgst) / 100;
+            $po_part[$key]->igst_amount= $igst_amount  = ($total_rate_old1 * $gst_structure[0]->igst) / 100;
             $po_part[$key]->gst_amount= $gst_amount  = $cgst_amount + $sgst_amount + $igst_amount;
-            $po_part[$key]->total_rate = $total_rate = $total_rate_old + $cgst_amount + $sgst_amount + $igst_amount;
+            $po_part[$key]->total_rate = $total_rate = $total_rate_old1 + $cgst_amount + $sgst_amount + $igst_amount;
             $final_po_amount = $final_po_amount + $total_rate;
         }
         // pr($new_po,1);
@@ -639,7 +645,7 @@ public function get_po_sales_parts()
 	$customer_tracking_parts = $this->Crud->get_data_by_id("parts_customer_trackings", $po_id, 'customer_po_tracking_id');
 	//$customer_part = $this->Crud->get_data_by_id("customer_part", $customer_tracking_parts[0]->part_id,'id');
 
-	echo '<select>Select Part Number // Description // FG Stock // Rate // Tax Structure // Po Balance Qty';
+	echo '';
 	if ($customer_tracking_parts) {
 		foreach ($customer_tracking_parts  as $val) {
 			$query = "SELECT * FROM customer_part WHERE id = " . $val->part_id . "";
@@ -676,7 +682,7 @@ public function get_po_sales_parts()
 
 	echo '<option value=""></option>';
 }
-echo '</select>';
+echo '';
 }
 
 
@@ -1946,7 +1952,7 @@ public function rejected_po()
 				$result2 = $this->Crud->update_data("challan_parts", $challan_parts_update_array, $challan_parts_data[0]->id);
 				$result3 = $this->SupplierParts->updateStockById($child_part_update_array, $part_id);
 				// echo "<script>alert('Successfully Added');document.location='" . base_url('grn_subcon_view/') . $child_part_id . "/" . $new_po_id ."/" .$inwarding_id. "/" .$child_part_id."'</script>";
-				$message = "'Successfully Added";
+				$message = "Successfully Added";
 				$success = 1;
 
 			} else {

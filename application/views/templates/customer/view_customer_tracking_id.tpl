@@ -144,7 +144,7 @@
                             </div>
 
                             <div class="card-header pt-0">
-                                <%if $parts_customer_trackings%>
+                                <%if $parts_customer_trackings && false%>
                                     <%if $new_po[0]->status == "pending"%>
 
                                         <%if $smarty.session.type == 'admin' || $smarty.session.type == 'Admin'%>

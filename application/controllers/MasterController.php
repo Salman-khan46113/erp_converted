@@ -34,20 +34,21 @@ class MasterController extends CommonController {
 
 	public function addClient()
 	{
-		$clientUnit = $this->input->post('clientUnit');
-		$clientName = $this->input->post('clientName');
-		$contactPerson = $this->input->post('contactPerson');
-		$clientSaddress = $this->input->post('clientSaddress');
-		$clientBaddress = $this->input->post('clientBaddress');
-		$pan_no = $this->input->post('pan_no');
-		$gst_no = $this->input->post('gst_no');
-		$phone_no = $this->input->post('phone_no');
-		$state = $this->input->post('state');
-		$state_no = $this->input->post('state_no');
-		$bank_details = $this->input->post('bank_details');
-		$address1 = $this->input->post('address1');
-		$location = $this->input->post('location');
-		$pin = $this->input->post('pin');
+		$clientUnit = trim($this->input->post('clientUnit'));
+		$clientName = trim($this->input->post('clientName'));
+		$contactPerson = trim($this->input->post('contactPerson'));
+		$clientSaddress = trim($this->input->post('clientSaddress'));
+		$clientBaddress = trim($this->input->post('clientBaddress'));
+		$pan_no = trim($this->input->post('pan_no'));
+		$gst_no = trim($this->input->post('gst_no'));
+		$phone_no = trim($this->input->post('phone_no'));
+		$state = trim($this->input->post('state'));
+		$state_no = trim($this->input->post('state_no'));
+		$bank_details = trim($this->input->post('bank_details'));
+		$address1 = trim($this->input->post('address1'));
+		$location = trim($this->input->post('location'));
+		$pin = trim($this->input->post('pin'));
+		$email = trim($this->input->post('emailId'));
 
 		$data = array(
 			"client_unit" => $clientUnit,
@@ -57,8 +58,10 @@ class MasterController extends CommonController {
 
 		$check = $this->Crud->read_data_where("client", $data);
 		if ($check != 0) {
-			$this->addWarningMessage('Record already exists.');
-			$this->redirectToParent();
+			$msg = 'Record already exists.';
+				$success = 0;
+			// $this->addWarningMessage('Record already exists.');
+			// $this->redirectToParent();
 		} else {
 			$data = array(
 				"client_unit" => $clientUnit,
@@ -75,19 +78,25 @@ class MasterController extends CommonController {
 				"address1" => $address1,
 				"location" => $location,
 				"pin" => $pin,
+				"emailId" => $email,
 				"created_id" => $this->user_id,
 				"date" => $this->current_date,
 				"time" => $this->current_time,
 			);
-
 			$result = $this->Crud->insert_data("client", $data);
 			if ($result) {
-				$this->addSuccessMessage('Client added.');
+				$msg = 'Client added successfully.';
+				$success = 1;
 			} else {
-				$this->addErrorMessage('Failed to add client');
+				// $this->addErrorMessage('Failed to add client');
+				$msg = 'Failed to add or similar data exists.';
+				$success = 0;
 			}
-			$this->redirectToParent();
 		}
+		$ret_arr['msg'] = $msg;
+			$ret_arr['success'] = $success;
+			echo json_encode($ret_arr);
+			exit();
 	}
 	
 	
@@ -96,22 +105,23 @@ class MasterController extends CommonController {
 		$ret_arr = [];
 		$msg = '';
 		$success = 1;
-		$clientUnit = $this->input->post('uclientUnit');
-		$clientName = $this->input->post('uclientName');
-		$contactPerson = $this->input->post('ucontactPerson');
-		$clientSaddress = $this->input->post('uclientSaddress');
-		$clientBaddress = $this->input->post('uclientBaddress');
-		$gst_no = $this->input->post('ugst_no');
-		$phone_no = $this->input->post('uphone_no');
-		$pan_no = $this->input->post('pan_no');
+		$clientUnit = trim($this->input->post('uclientUnit'));
+		$clientName = trim($this->input->post('uclientName'));
+		$contactPerson = trim($this->input->post('ucontactPerson'));
+		$clientSaddress = trim($this->input->post('uclientSaddress'));
+		$clientBaddress = trim($this->input->post('uclientBaddress'));
+		$gst_no = trim($this->input->post('ugst_no'));
+		$phone_no = trim($this->input->post('uphone_no'));
+		$pan_no = trim($this->input->post('pan_no'));
 
-		$id = $this->input->post('id');
-		$state = $this->input->post('state');
-		$state_no = $this->input->post('state_no');
-		$bank_details = $this->input->post('bank_details');
-		$address1 = $this->input->post('address1');
-		$location = $this->input->post('location');
-		$pin = $this->input->post('pin');
+		$id = trim($this->input->post('id'));
+		$state = trim($this->input->post('state'));
+		$state_no = trim($this->input->post('state_no'));
+		$bank_details = trim($this->input->post('bank_details'));
+		$address1 = trim($this->input->post('address1'));
+		$location = trim($this->input->post('location'));
+		$pin = trim($this->input->post('pin'));
+		$email = trim($this->input->post('email'));
 
 		$data = array(
 				"client_unit" => $clientUnit,
@@ -128,15 +138,17 @@ class MasterController extends CommonController {
 				"address1" => $address1,
 				"location" => $location,
 				"pin" => $pin,
+				"emailId" => $email,
 				"created_id" => $this->user_id,
 				"date" => $this->current_date,
 				"time" => $this->current_time,
 			);
-			// pr($_POST,1);
+			
 			$result = $this->Crud->update_data("client", $data, $id);
 			if ($result) {
 				// $this->addSuccessMessage('Client updated');
 				$msg = 'Client updated successfully.';
+				$success = 1;
 			} else {
 				// $this->addErrorMessage('Failed to update or similar data exists.');
 				$msg = 'Failed to update or similar data exists.';
@@ -146,6 +158,7 @@ class MasterController extends CommonController {
 			$ret_arr['msg'] = $msg;
 			$ret_arr['success'] = $success;
 			echo json_encode($ret_arr);
+			exit();
 	}
 
 	public function update_session_unit() {
@@ -396,7 +409,7 @@ class MasterController extends CommonController {
 		foreach ($data['consignee_list'] as $key => $value) {
 			$data['consignee_list'][$key]->encode_data = base64_encode(json_encode($value));
 		}
-		
+		 $data['currentUnit'] = $this->Unit->getNoOfClients();
 		$this->loadView('customer/consignee', $data);	
 		// $this->load->view('footer');
 		
@@ -405,15 +418,19 @@ class MasterController extends CommonController {
 	
 	public function add_consignee()
 	{
-		$consignee_name = $this->input->post('cconsignee_name');
-		$location = $this->input->post('clocation');
-		$address = $this->input->post('caddress');
-		$state = $this->input->post('cstate');
-		$state_no = $this->input->post('cstate_no');
-		$pin_code = $this->input->post('cpin_code');
-		$gst_number = $this->input->post('gst_number');
-		$pan_no = $this->input->post('cpan_no');
-		$phone_no = $this->input->post('cphone_no');
+		$consignee_name = trim($this->input->post('cconsignee_name'));
+		$location = trim($this->input->post('clocation'));
+		$address = trim($this->input->post('caddress'));
+		$state = trim($this->input->post('cstate'));
+		$state_no = trim($this->input->post('cstate_no'));
+		$pin_code = trim($this->input->post('cpin_code'));
+		$gst_number = trim($this->input->post('gst_number'));
+		$pan_no = trim($this->input->post('cpan_no'));
+		$phone_no = trim($this->input->post('cphone_no'));
+		$distance1 = trim($this->input->post('distncFrmClnt1'));
+        $distance2 = trim($this->input->post('distncFrmClnt2'));
+        $distance3 = trim($this->input->post('distncFrmClnt3'));
+
 
 		$data = array(
 			"consignee_name" => $consignee_name,
@@ -423,55 +440,70 @@ class MasterController extends CommonController {
 		$msg = '';
 		$sucess = 1;
 		$check = $this->Crud->read_data_where("consignee", $data);
-		if ($check != 0) {
-			// $this->addWarningMessage('Record already exists with Consignee Name and Location');
-			// $this->redirectToParent();
-			$sucess = 0;
-			$msg = 'Record already exists with Consignee Name and Location. Can not add duplicate entry.';
-			
-		} else {
-			$address_data = array(
-				"address" => $address,
-				"location" => $location,
-				"state" => $state,
-				"state_no" => $state_no,
-				"pin_code" => $pin_code,
-				"addressType" => 'consignee',
-				"created_dttm" => $this->current_dttm,
-				"updated_user" => $this->user_name
-			);
-			$result = $this->Crud->insert_data("address_master", $address_data);
-			if ($result) {
-				$consignee_data = array(
-					"address_id" => $result,
-					"location" => $location,
-					"consignee_name" => $consignee_name,
-					"pan_no" => $pan_no,
-					"phone_no" => $phone_no,
-					"gst_number" => $gst_number,
-					"deleted" => 0,
-					"created_dttm" => $this->current_dttm,
-					"updated_user" => $this->user_name,
-				);
-			
-				$result = $this->Crud->insert_data("consignee", $consignee_data);
-				if ($result) {
-					// $this->addSuccessMessage('Consignee added successfully.');
-					$sucess = 1;
-					$msg = 'Consignee added successfully.';
-				} else {
-					//$this->addErrorMessage('Failed to add Consignee. Please try again.');
-					$sucess = 1;
-					$msg = 'Failed to add Consignee. Please try again.';
-				}
+
+		
+			if ($check != 0) {
+				// $this->addWarningMessage('Record already exists with Consignee Name and Location');
+				// $this->redirectToParent();
+				$sucess = 0;
+				$msg = 'Record already exists with Consignee Name and Location. Can not add duplicate entry.';
 			} else {
-				// $this->addErrorMessage('Failed to add Consignee. Please try again.');
-				$sucess = 1;
-				$msg = 'Failed to add Consignee. Please try again.';
-				
+				$data = array(
+					"gst_number" => $gst_number
+				);
+				$check = $this->Crud->read_data_where("consignee", $data);
+
+				if($check == 0){
+					$address_data = array(
+						"address" => $address,
+						"location" => $location,
+						"state" => $state,
+						"state_no" => $state_no,
+						"pin_code" => $pin_code,
+						"addressType" => 'consignee',
+						"created_dttm" => $this->current_dttm,
+						"updated_user" => $this->user_name
+					);
+					$result = $this->Crud->insert_data("address_master", $address_data);
+					if ($result) {
+						$consignee_data = array(
+							"address_id" => $result,
+							"location" => $location,
+							"consignee_name" => $consignee_name,
+							"pan_no" => $pan_no,
+							"phone_no" => $phone_no,
+							"gst_number" => $gst_number,
+							"distncFrmClnt1"=> $distance1,
+						    "distncFrmClnt2"=> $distance2,
+						    "distncFrmClnt3"=> $distance3,
+							"deleted" => 0,
+							"created_dttm" => $this->current_dttm,
+							"updated_user" => $this->user_name,
+						);
+					
+						$result = $this->Crud->insert_data("consignee", $consignee_data);
+						if ($result) {
+							// $this->addSuccessMessage('Consignee added successfully.');
+							$sucess = 1;
+							$msg = 'Consignee added successfully.';
+						} else {
+							//$this->addErrorMessage('Failed to add Consignee. Please try again.');
+							$sucess = 1;
+							$msg = 'Failed to add Consignee. Please try again.';
+						}
+					} else {
+						// $this->addErrorMessage('Failed to add Consignee. Please try again.');
+						$sucess = 1;
+						$msg = 'Failed to add Consignee. Please try again.';
+						
+					}
+				}else{
+					$sucess = 0;
+					$msg = 'GST number already exist.';
+				}
+				// $this->redirectToParent();
 			}
-			// $this->redirectToParent();
-		}
+		
 		$ret_arr['msg'] = $msg;
 		$ret_arr['sucess'] = $sucess;
 		echo json_encode($ret_arr);
@@ -483,15 +515,18 @@ class MasterController extends CommonController {
 		$id = $this->input->post('consignee_id');
 		$address_id = $this->input->post('address_id');
 
-		$consignee_name = $this->input->post('uconsignee_name');
-		$location = $this->input->post('ulocation');
-		$address = $this->input->post('uaddress');
-		$state = $this->input->post('ustate');
-		$state_no = $this->input->post('ustate_no');
-		$pin_code = $this->input->post('upin_code');
-		$gst_number = $this->input->post('ugst_number');
-		$pan_no = $this->input->post('upan_no');
-		$phone_no = $this->input->post('uphone_no');
+		$consignee_name = trim($this->input->post('uconsignee_name'));
+		$location = trim($this->input->post('ulocation'));
+		$address = trim($this->input->post('uaddress'));
+		$state = trim($this->input->post('ustate'));
+		$state_no = trim($this->input->post('ustate_no'));
+		$pin_code = trim($this->input->post('upin_code'));
+		$gst_number = trim($this->input->post('ugst_number'));
+		$pan_no = trim($this->input->post('upan_no'));
+		$phone_no = trim($this->input->post('uphone_no'));
+		$distance1 = trim($this->input->post('distncFrmClnt1'));
+        $distance2 = trim($this->input->post('distncFrmClnt2'));
+        $distance3 = trim($this->input->post('distncFrmClnt3'));
 
 		$data = array(
 			"consignee_name" => $consignee_name,
@@ -527,6 +562,9 @@ class MasterController extends CommonController {
 					"pan_no" => $pan_no,
 					"phone_no" => $phone_no,
 					"gst_number" => $gst_number,
+					"distncFrmClnt1"=> $distance1,
+						    "distncFrmClnt2"=> $distance2,
+						    "distncFrmClnt3"=> $distance3,
 					"created_dttm" => $this->current_dttm,
 					"updated_user" => $this->user_name,
 				);
