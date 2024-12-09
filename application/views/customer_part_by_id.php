@@ -217,13 +217,20 @@ $entitlements = $this->session->userdata['entitlements'];
                                                             </select>
                                                         </div>
                                                         <div class="form-group">
-                                                            <label>Select Is Service </label><span class="text-danger">*</span>
+                                                            <label>Is Service </label><span class="text-danger">*</span>
                                                             <select class="form-control select2" required name="isservice" style="width: 100%;">
                                                                 <option value="">Select</option>
                                                                 <option value="Y">YES</option>
                                                                 <option value="N">NO</option>
                                                             </select>
                                                         </div>
+                                                        <%if ($entitlements['itemCode']!=null && $entitlements['itemCode']==true) %>
+                                                            <div class="form-group">
+                                                                    <label for="itemCode">Item Code</label>
+                                                                    <input type="text" name="itemCd" class="form-control" id="itemCodeId" aria-describedby="itemCodeHelp">
+                                                            </div>
+                                                        <%/if%>
+
 
                                                     </div>
                                                     <div class="col-lg-6">
@@ -277,6 +284,10 @@ $entitlements = $this->session->userdata['entitlements'];
                                             <?php }
                                             } ?>
                                             <th>Is Service</th>
+                                            <%if ($entitlements['itemCode']!=null && $entitlements['itemCode']==true) %>
+                                                <th>Item Code</th>
+                                            <%/if%>
+
                                             <th>Update</th>
                                             <th>Drawing Parameters</th>
                                             <!-- <th>BOM</th>
@@ -454,6 +465,10 @@ $entitlements = $this->session->userdata['entitlements'];
                                                         } else {
                                                             echo 'NO';
                                                         } ?></td>
+                                                         <%if ($entitlements['itemCode']!=null && $entitlements['itemCode']==true) %>
+                                                       <td><%$po[0]->itemCode %></td>
+                                                    <%/if%>
+
                                                     <td>
                                                         <button type="submit" data-toggle="modal" class="btn btn-sm btn-primary" data-target="#exampleModaledit2333<?php echo $i ?>"> <i class="fas fa-edit"></i></button>
                                                         <!-- <a href="<?php echo base_url(); ?>" class="btn btn-sm btn-primary">
@@ -598,7 +613,7 @@ $entitlements = $this->session->userdata['entitlements'];
                                                                                         <input type="number" min="0" step="1" name="packaging_qty" value="<?php echo $po[0]->packaging_qty ?>" required class="form-control" id="packaging_quantity">
                                                                                     </div>
                                                                                     <div class="form-group">
-                                                                                        <label> Select Is Service </label><span class="text-danger">*</span>
+                                                                                        <label>Is Service </label><span class="text-danger">*</span>
                                                                                         <select class="form-control select2" required name="isservice" style="width: 100%;">
                                                                                             <option value="">Select Is-Service</option>
                                                                                             <option value="Y" <?php if ($po[0]->isservice == 'Y') {
@@ -610,6 +625,13 @@ $entitlements = $this->session->userdata['entitlements'];
 
                                                                                         </select>
                                                                                     </div>
+                                                                                    <%if ($entitlements['itemCode']!=null && $entitlements['itemCode']==true) %>
+                                                                                            <div class="form-group">
+                                                                                                    <label for="itemCode">Item Code</label>
+                                                                                                    <input type="text" name="itemCd" value="<%$po[0]->itemCode %>" class="form-control" id="itemCodeId" aria-describedby="itemCodeHelp">
+                                                                                            </div>
+                                                                                        <%/if%>
+
                                                                                 </div>
                                                                                 <div class="col-lg-6">
                                                                                 </div>

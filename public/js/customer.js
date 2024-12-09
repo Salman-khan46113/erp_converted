@@ -19,7 +19,7 @@ const datatable = {
             var data = $(this).attr("data-value");
           
             data = JSON.parse(atob(data)); 
-            
+            // console.log(data)
             $("#ucustomer_id").val(data['id']);
             $("#ucustomer_name").val(data.customer_name);
             $("#ucustomer_code").val(data.customer_code);
@@ -44,6 +44,11 @@ const datatable = {
             }else{
               $("#NA").prop('checked', true);
             }
+            for (var i = 1; i <= currentUnit; i++) {
+                var customer_unit = "distncFrmClnt"+i;
+                $('#distncFrmClnt'+i).val(data[customer_unit])
+            }
+            $("#updateEmailId").val(data['emailId']);
             myModal.show();
         })
     },
@@ -85,6 +90,7 @@ const datatable = {
             searching: true,
       // scrollX: true,
       scrollY: true,
+      order: [[0,"desc"]],
       bScrollCollapse: true,
       // columnDefs: [{ sortable: false, targets: 9 }],
       pagingType: "full_numbers",
@@ -110,6 +116,9 @@ const datatable = {
 }
 
 const validationFunc = () => {
+  $.extend($.validator.messages, {
+        required: "Please enter distance.", // Customize required message
+    });
     $('#addCustomerForm').validate({
         rules: {
            customerName: {
@@ -155,7 +164,10 @@ const validationFunc = () => {
            },
            pin: {
               required: true
-           }
+           },
+           "[name^='distncFrmClnt']": { // Select all inputs where the name attribute starts with 'distncFrmClnt'
+                required: true,
+            }
         },
         messages: {
            customerName: {
@@ -201,7 +213,10 @@ const validationFunc = () => {
            },
            pin: {
               required: "Please enter the pin"
-           }
+           },
+           "[name^='distncFrmClnt']": { // Select all inputs where the name attribute starts with 'distncFrmClnt'
+                required: "Please enter distance.",
+            }
         },
         submitHandler: function(form) {
            $.ajax({
@@ -210,10 +225,17 @@ const validationFunc = () => {
               data: $(form).serialize(),
               success: function(response) {
                  // handle success response
-                 toastr.success('Customer Added succesfully.');
-                 setTimeout(() => {
-                    window.location.reload();
-                 }, 1000);
+                 var responseObject = JSON.parse(response);
+                      var msg = responseObject.message;
+                      var success = responseObject.success;
+                      if(success == 1){
+                          toastr.success(msg)
+                           setTimeout(() => {
+                              window.location.reload();
+                           }, 1000);
+                      }else{
+                          toastr.error(msg)
+                      }
               },
               error: function(xhr, status, error) {
                  // handle error response
@@ -255,9 +277,9 @@ const validationFunc = () => {
            pan_no: {
               required: true
            },
-           bank_details: {
-              required: true
-           },
+           // bank_details: {
+           //    required: true
+           // },
            pos: {
               required: true
            },
@@ -269,7 +291,10 @@ const validationFunc = () => {
            },
            pin: {
               required: true
-           }
+           },
+           "[name^='distncFrmClnt']": { // Select all inputs where the name attribute starts with 'distncFrmClnt'
+                required: true,
+            }
         },
         messages: {
            ucustomerName: {
@@ -316,7 +341,10 @@ const validationFunc = () => {
            },
            pin: {
               required: "Please enter the pin"
-           }
+           },
+           "[name^='distncFrmClnt']": { // Select all inputs where the name attribute starts with 'distncFrmClnt'
+                required: "Please enter distance.",
+            }
         },
         submitHandler: function(form) {
            $.ajax({
@@ -325,10 +353,17 @@ const validationFunc = () => {
               data: $(form).serialize(),
               success: function(response) {
                  // handle success response
-                 toastr.success('Customer Updated succesfully.');
-                 setTimeout(() => {
-                    window.location.reload();
-                 }, 1000);
+                 var responseObject = JSON.parse(response);
+                      var msg = responseObject.message;
+                      var success = responseObject.success;
+                      if(success == 1){
+                          toastr.success(msg)
+                           setTimeout(() => {
+                              window.location.reload();
+                           }, 1000);
+                      }else{
+                          toastr.error(msg)
+                      }
               },
               error: function(xhr, status, error) {
                  // handle error response

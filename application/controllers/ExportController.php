@@ -598,17 +598,17 @@ class ExportController extends CommonController
         }
 
         foreach ($getTaxDetails as $p) {
-            if ((int) $p->igst === 0) {
+            if ($p->igst <= 0) {
                 $total_cgst_sgst_amount = $p->cgst_amount + $p->sgst_amount;
-                $gst = (int) $p->cgst + (int) $p->sgst;
-                $cgst = (int) $p->cgst;
-                $sgst = (int) $p->sgst;
-                $tcs = (float) $p->tcs;
+                $gst = $p->cgst +  $p->sgst;
+                $cgst = $p->cgst;
+                $sgst =  $p->sgst;
+                $tcs = $p->tcs;
                 $tcs_on_tax = $p->tcs_on_tax;
                 $igst = 0;
             } else {
                 $total_igst_amount = $p->igst_amount;
-                $gst = (int) $p->igst;
+                $gst = $p->igst;
                 $cgst = 0;
                 $sgst = 0;
                 $tcs = (float) $p->tcs;
@@ -650,7 +650,7 @@ class ExportController extends CommonController
         if ($getTaxDetails[0]->freight_amount > 0) {
             // New entry to be added
             $newEntry = array(
-                "name" => "Freight Charges",
+                "name" => "P&F Charges",
                 "value" => round($getTaxDetails[0]->freight_amount, 2),
                 // "gstRate" => $tcs,
             );
@@ -1425,6 +1425,255 @@ class ExportController extends CommonController
             echo json_encode($result);
             exit();
             // $this->getPage('customer_master',$data);
+    
+    }
+     /**
+     * Export parts stock
+     */
+    function export_parts_stock() {
+        $expType = $this->uri->segment('2');
+        $this->load->library("excel");
+        $clientId = $this->Unit->getSessionClientId();
+        $unitName = $this->Unit->getSessionClientUnitName();
+        
+        $object = new PHPExcel();
+        $object->setActiveSheetIndex(0);
+        $sheet = $object->getActiveSheet();
+
+        $headingsStyle = array(
+            'font' => array('bold' => true),
+            'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID, 'startcolor' => array('rgb' => 'cce6ff')), 
+        );
+        $sheet->getStyle('A1:C1')->applyFromArray($headingsStyle);
+
+        $headingsStyle1 = array(
+            'font' => array('bold' => true),
+            'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID, 'startcolor' => array('rgb' => 'F9C40E')), 
+        );
+        
+        if($expType != 'customer') {
+            $table_columns = array("Part Number", "Part Description", "UOM", "Rate", "Stock");
+            $sheet->getStyle('D1:E1')->applyFromArray($headingsStyle1);
+            $sheet->getStyle('D:D')->applyFromArray($headingsStyle1);
+            $sheet->getStyle('E:E')->applyFromArray($headingsStyle1);
+
+        } else {
+            $table_columns = array("Part Number", "Part Description", "Rate", "Stock");
+            $sheet->getStyle('C1:D1')->applyFromArray($headingsStyle1);
+            $sheet->getStyle('C:C')->applyFromArray($headingsStyle1);
+            $sheet->getStyle('D:D')->applyFromArray($headingsStyle1);
         }
+
+        $column = 0;
+        foreach ($table_columns as $field) {
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 1, $field);
+            $column++;
+        }
+        
+        $sheet->fromArray([$headings], NULL, 'A1');
+    
+        switch ($expType){
+            case 'supplier':
+                    $sheet->setTitle('SupplierParts');
+                    $select_sql="SELECT cp.part_number,cp.part_description, u.uom_name, cp.store_stock_rate as rate, cps.stock
+                        FROM child_part cp
+                        LEFT JOIN child_part_stock cps ON cp.id = cps.childPartId
+                        INNER JOIN uom u ON cp.uom_id = u.id
+                        AND cps.clientId = " . $clientId;
+                    $fileName="Supplier_Parts_".$unitName.".xls";
+                    break;
+            case 'customer':
+                    $sheet->setTitle('CustomerParts');
+                    $select_sql = "SELECT cpm.part_number,cpm.part_description, cpm.fg_rate as rate, cpms.fg_stock as stock
+                        FROM customer_parts_master cpm
+                        LEFT JOIN customer_parts_master_stock cpms ON cpm.id = cpms.customer_parts_master_id
+                        AND cpms.clientId = " . $clientId;
+                    $fileName = "Customer_Parts_" . $unitName . ".xls";
+                    break;
+            case 'inhouse':
+                    $sheet->setTitle('InhouseParts');
+                    $select_sql = "SELECT ip.part_number,ip.part_description, u.uom_name, ip.store_stock_rate as rate, ips.production_qty as stock
+                        FROM inhouse_parts ip
+                        LEFT JOIN inhouse_parts_stock ips ON ip.id = ips.inhouse_parts_id
+                        INNER JOIN uom u ON ip.uom_id = u.id
+                        AND ips.clientId = " . $clientId;
+                    $fileName = "Inhouse_Parts_" . $unitName . ".xls";
+                    break;
+        }
+
+        $customer_parts = $this->Crud->customQuery($select_sql);
+        
+        if ($customer_parts) {
+            $excel_row = 2;
+            $rowNo = 1;
+            
+            foreach ($customer_parts as $p) {
+                $colNo = 0;
+                $object->getActiveSheet()->setCellValueByColumnAndRow($colNo++, $excel_row, $p->part_number);
+                $object->getActiveSheet()->setCellValueByColumnAndRow($colNo++, $excel_row, $p->part_description);
+                if($expType != 'customer'){
+                    $object->getActiveSheet()->setCellValueByColumnAndRow($colNo++, $excel_row, $p->uom_name);
+                }
+                $object->getActiveSheet()->setCellValueByColumnAndRow($colNo++, $excel_row, $p->rate);
+                $object->getActiveSheet()->setCellValueByColumnAndRow($colNo++, $excel_row, $p->stock);
+                $excel_row++;
+                $rowNo++;
+            }
+
+            for ($i = 'A'; $i !=  $object->getActiveSheet()->getHighestColumn(); $i++) {
+                $object->getActiveSheet()->getColumnDimension($i)->setAutoSize(true);
+            }
+
+            
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename='.$fileName);
+            header('Cache-Control: max-age=0');
+            $objWriter = PHPExcel_IOFactory::createWriter($object, 'Excel5');
+            ob_end_clean();
+            ob_start();
+            $objWriter->save('php://output');
+        } else {
+            // echo "<script>alert('No Child Part Found');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+        }
+    }
+
+
+    /**
+     *  Import parts stock
+     */
+    public function import_parts_stock(){
+       $uploadedDoc = $this->input->post('uploadedDoc');
+       $importType = $this->uri->segment('2');
+       $clientId = $this->Unit->getSessionClientId();
+       
+       //only valid types are allowed.
+       $messages = "Something went wron.";
+       $success = 0;
+       if($this->isValidUploadFileType()=="false"){
+            $messages = "Only Excel sheets are allowed.";
+            // $this->addErrorMessage("Only Excel sheets are allowed.");
+       } else {
+        if (!empty($_FILES["uploadedDoc"]["name"])) {
+                $error;
+                $inputFileName = $_FILES["uploadedDoc"]["tmp_name"];
+                    try {
+                        $inputFileType = PHPExcel_IOFactory::identify($inputFileName);
+                        $objReader = PHPExcel_IOFactory::createReader($inputFileType);
+                        $objPHPExcel = $objReader->load($inputFileName);
+                        $allDataInSheet = $objPHPExcel->getActiveSheet()->toArray(null, true, true, true);
+                        $flag = true;
+                        $i=1;
+
+                        $EXCEL_IMPORT_ITEM_COLUMN = 'A';
+                        $EXCEL_IMPORT_ITEM_DESC_COLUMN = 'B';
+                        if($importType != 'customer'){
+                            $EXCEL_IMPORT_STOCK_RATE_COLUMN = 'D';
+                            $EXCEL_IMPORT_STOCK_COLUMN = 'E';
+                        }else{
+                            $EXCEL_IMPORT_STOCK_RATE_COLUMN = 'C';
+                            $EXCEL_IMPORT_STOCK_COLUMN = 'D';
+                        }
+                      
+                        foreach ($allDataInSheet as $value) {
+                            // Check if the row is empty
+                                if (!empty(array_filter($value))) {
+                                if($flag) {
+                                    $flag =false;
+                                    continue;
+                                }
+
+                                $rowNum = $i+1;
+                                $errorThisRow=null; 
+                                $errorCount;
+
+                                $part_no = empty($value[$EXCEL_IMPORT_ITEM_COLUMN]) ? $errorThisRow = $errorThisRow." Part Number required," : trim($value[$EXCEL_IMPORT_ITEM_COLUMN]);
+                                $part_description = empty($value[$EXCEL_IMPORT_ITEM_DESC_COLUMN]) ? $errorThisRow = $errorThisRow." Part Description required,": trim($value[$EXCEL_IMPORT_ITEM_DESC_COLUMN]);
+                                
+                                if(!is_numeric(trim($value[$EXCEL_IMPORT_STOCK_RATE_COLUMN]))){
+                                    $errorThisRow = $errorThisRow." Invalid value for rate ,";
+                                }else if(trim($value[$EXCEL_IMPORT_STOCK_RATE_COLUMN]) < 0){
+                                    $errorThisRow = $errorThisRow."Rate should be greater than or equal to 0";
+                                }else {
+                                    $part_stock_rate = trim($value[$EXCEL_IMPORT_STOCK_RATE_COLUMN]);
+                                }
+
+                                if (!is_numeric(trim($value[$EXCEL_IMPORT_STOCK_COLUMN]))) {
+                                    $errorThisRow = $errorThisRow . " Invalid value for rate ,";
+                                } else if (trim($value[$EXCEL_IMPORT_STOCK_COLUMN]) < 0) {
+                                    $errorThisRow = $errorThisRow . "Stock should be greater than or equal to 0";
+                                } else {
+                                    $part_stock = trim($value[$EXCEL_IMPORT_STOCK_COLUMN]);
+                                }
+
+
+                                if(!empty($errorThisRow)){
+                                    $error = $error."<br>Row No: ".$rowNum." - ".$errorThisRow;
+                                }
+                                
+                                $inserdata[$i]['part_no'] = $part_no;
+                                $inserdata[$i]['row_no'] = $rowNum;
+                                $inserdata[$i]['part_stock_rate'] = $part_stock_rate;
+                                $inserdata[$i]['part_stock'] = $part_stock;
+                                $i++;
+                            }
+                        }
+
+                        
+                        if(empty($error)){
+                            //there are no errors so lets move ahead with executing the file.
+                            foreach($inserdata as $po_item) {
+
+                                switch ($importType){
+                                    case 'supplier':
+                                                $this->load->model('SupplierParts');
+                                                $result = $this->SupplierParts->updateImportedStockDetails($clientId, $po_item['part_no'], $po_item['part_stock_rate'], $po_item['part_stock']);
+                                                break;
+                                    case 'customer':
+                                                $this->load->model('CustomerPart');
+                                                $result = $this->CustomerPart->updateImportedStockDetails($clientId, $po_item['part_no'], $po_item['part_stock_rate'], $po_item['part_stock']);
+                                                break;
+                                    case 'inhouse':
+                                                $this->load->model('InhouseParts');
+                                                $result = $this->InhouseParts->updateImportedStockDetails($clientId, $po_item['part_no'], $po_item['part_stock_rate'], $po_item['part_stock']);
+                                                break;
+                                }
+                                        
+                                if($result === false){
+                                    $partMessage = $po_item['row_no'].",";
+                                    $error = $error.$partMessage;
+                                }
+                            }
+
+                            if($error){
+                                $messages = $error;
+                                // $this->addErrorMessage("Check Part No exists or record data already exists for row nos: ".$error);
+                            }else{
+                                $messages = "Data imported successfully.";
+                                $success = 1;
+                                // $this->addSuccessMessage("Data imported successfully.");
+                            }
+
+                        } else {
+                            $messages = $error."<br>Please correct the data and import again.";
+                            // $this->addErrorMessage($error);
+                        }   
+
+                    } catch (Exception $e) {
+                    //     die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME)
+                    // . '": ' .$e->getMessage());
+                        $messages = 'Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME)
+                    . '": ' .$e->getMessage();
+                    }
+                
+                }
+            }
+            $result = [];
+            $result['messages'] = $messages;
+            $result['success'] = $success;
+            echo json_encode($result);
+            exit();
+           // $this->redirectToParent();
+    }
+    
 
 }

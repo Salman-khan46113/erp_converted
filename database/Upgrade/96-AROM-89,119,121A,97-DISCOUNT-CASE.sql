@@ -42,8 +42,6 @@ CREATE TABLE `category` (
   `added_date` datetime NOT NULL
 ) ENGINE=InnoDB;
 
-ALTER TABLE `child_part` ADD `sub_category` VARCHAR(255) NULL DEFAULT NULL AFTER `deflashing_stock`;
-
 -- add current category which already use in system by below query
 INSERT INTO category (category_id, parent_id, category_name, added_by, added_date) VALUES
 (1, 0, 'Regular grn', 3, '2024-10-03 22:37:57'),
@@ -54,19 +52,11 @@ INSERT INTO category (category_id, parent_id, category_name, added_by, added_dat
 
 
 --
--- Indexes for dumped tables
---
-
---
 -- Indexes for table `category`
 --
 ALTER TABLE `category`
   ADD PRIMARY KEY (`category_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
+  
 --
 -- AUTO_INCREMENT for table `category`
 --
@@ -75,6 +65,9 @@ ALTER TABLE `category`
 COMMIT;
 
 -- category changes ----
+
+ALTER TABLE `child_part` ADD `sub_category` VARCHAR(255) NULL DEFAULT NULL AFTER `deflashing_stock`;
+
 
 INSERT INTO `DB_Upgrade` (`Script_name`, `updated_time`) 
 VALUES ('96-AROM-89,119,121A,97-DISCOUNT-CASE.sql', CURRENT_TIMESTAMP);

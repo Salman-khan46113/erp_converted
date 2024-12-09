@@ -704,7 +704,7 @@ class Crud extends CI_Model
 		$gst_amount = $cgst_amount + $sgst_amount + $igst_amount;
 		$sales_total["bfre_disc_sub_total"] = round($subTotal,2);
 		$sales_total["sales_sub_total"] = round($final_basic_total,2);
-		$sales_total["sales_total"] = round($final_basic_total + $cgst_amount + $sgst_amount + $igst_amount,2);
+		$sales_total["sales_total"] = round($final_basic_total + $cgst_amount + $sgst_amount + $igst_amount+ $tcs_amount,2);
 		$sales_total["sales_gst"] = round($cgst_amount + $sgst_amount + $igst_amount,2);
 		$sales_total["sales_cgst"] = round($cgst_amount,2);
 		$sales_total["sales_sgst"] = round($sgst_amount,2);

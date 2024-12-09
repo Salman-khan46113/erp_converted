@@ -106,6 +106,7 @@ const page = {
             scrollCollapse: true,
             scrollX: true,
             // scrollY: true,
+            order: sorting_column,
             paging: is_paging_enable,
             fixedHeader: false,
             info: true,

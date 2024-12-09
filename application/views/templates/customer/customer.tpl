@@ -61,7 +61,7 @@
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
       <%if checkGroupAccess("customer","add","No") %>
-      <button type="button" class="btn btn-seconday float-left" data-bs-toggle="modal" data-bs-target="#exampleModal">
+      <button type="button" class="btn btn-seconday float-left" data-bs-toggle="modal" data-bs-target="#exampleModal" id="addCustomer">
                                     <i class="ti ti-plus "></i>
                                 </button>
       <%/if%>
@@ -163,7 +163,7 @@
                                                 <div class="col-lg-6">
                                                   <div class="form-group">
                                                      <label for="payment_terms">Payment Terms</label><span class="text-danger">*</span>
-                                                     <input type="number" min="0" name="paymentTerms" class="form-control onlyNumericInput" id="payment_terms" placeholder="Payment Terms">
+                                                     <input type="text" min="0" name="paymentTerms" class="form-control onlyNumericInput" id="payment_terms" placeholder="Payment Terms">
                                                   </div>
                                                 </div>
                                                 <div class="col-lg-6">
@@ -190,6 +190,29 @@
                                                      <input type="text" name="pin" class="form-control" id="pin" placeholder="Pin">
                                                   </div>
                                                </div>
+                                               <div class="col-lg-6">
+                                               <div class="form-group">
+                                                   <label for="DistanceFromClient">Distance from Client (in KM)</label><span class="text-danger">*</span>
+                                                   <div class="row">
+                                                    <%assign var='unitNo' value=1%>
+                                                    <%while $unitNo <= $currentUnit %>
+                                                      <%assign var='distanceCol' value="distncFrmClnt$unitNo"%>
+                                                      <div class="col-lg-4 mb-3">
+                                                         <label for="DistanceFromClient">From Client <%$unitNo %></label><span class="text-danger">*</span>
+                                                         <input type="text" step="any" required min="1"  name="<%$distanceCol%>" class="form-control onlyNumericInput" aria-describedby="distanceHelp" placeholder="Distance from Client PIN">
+                                                      </div>
+                                                      <%assign var='unitNo' value=$unitNo+1%>
+                                                       <%/while%>
+                                                                                     
+                                                   </div>
+                                                </div>
+                                              </div>
+                                              <div class="col-lg-6">
+                                                <div class="form-group">
+                                                   <label for="email">Email ID (For multiple address use Comma seperated list)</label><span class="text-danger"></span>
+                                                   <input type="text" name="emailId" class="form-control" aria-describedby="emailHelp" placeholder="e.g. user1@example.com,user2@example.com">
+                                                </div>
+                                              </div>
                                               <div class="col-lg-6">
                                                 <div class="form-group">
                                                   <label>Discount</label><span class="text-danger"></span>
@@ -229,6 +252,7 @@
                                     <thead>
                                         <tr>
                                             <!-- <th>Sr. No.</th> -->
+                                            <th style="display: none;">Customer Id</th>
                                             <th>Customer Name</th>
                                             <th>Customer Code</th>
                                             <th>Customer Billing Address</th>
@@ -249,6 +273,7 @@
                                             <%foreach from=$customers item=t%>
                                                 <tr>
                                                     <!-- <td><%$i%></td> -->
+                                                    <td style="display: none;"><%$t->id%></td>
                                                     <td><%$t->customer_name%></td>
                                                     <td><%$t->customer_code%></td>
                                                     <td><%$t->billing_address%></td>
@@ -396,6 +421,28 @@
                         </div>
                     </div>
                     <div class="col-lg-6">
+                       <div class="form-group">
+                          <label for="DistanceFromClient">Distance from Client (in KM)</label><span class="text-danger">*</span>
+                          <div class="row">
+                             <%assign var='unitNo' value=1%>
+                             <%while $unitNo <= $currentUnit %>
+                             <%assign var='distanceCol' value="distncFrmClnt$unitNo"%>
+                             <div class="col-lg-4 mb-3">
+                                <label for="DistanceFromClient">From Client <%$unitNo %></label><span class="text-danger">*</span>
+                                <input type="text" step="any" required min="1"  name="<%$distanceCol%>" class="form-control onlyNumericInput" aria-describedby="distanceHelp" placeholder="Distance from Client PIN" id="<%$distanceCol%>">
+                             </div>
+                             <%assign var='unitNo' value=$unitNo+1%>
+                             <%/while%>
+                          </div>
+                       </div>
+                    </div>
+                    <div class="col-lg-6">
+                       <div class="form-group">
+                          <label for="email">Email ID (For multiple address use Comma seperated list)</label><span class="text-danger"></span>
+                          <input type="text" name="emailId" class="form-control" aria-describedby="emailHelp" placeholder="e.g. user1@example.com,user2@example.com" id="updateEmailId">
+                       </div>
+                    </div>
+                    <div class="col-lg-6">
                                                 <div class="form-group">
                                                   <label>Discount</label><span class="text-danger"></span>
                                                     <input type="text" step="any" id="discount_val" value="0" name="discount" class="form-control onlyNumericInput" aria-describedby="emailHelp" placeholder="Discount">
@@ -431,5 +478,13 @@
     border-radius: 50%;
     border: 0px solid #d9dee3;
   }
+
 </style>
+<script>
+    var currentUnit = <%json_encode($currentUnit)%>
+</script>
+
+
+
+
 <script src="<%$base_url%>/public/js/customer.js"></script>

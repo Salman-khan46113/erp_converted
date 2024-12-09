@@ -142,6 +142,7 @@
                                 <table id="customer_part_table" class="table table-striped">
                                     <thead>
                                         <tr>
+                                            <th>id</th>
                                             <th>Part Number</th>
                                             <th>Part Description</th>
                                             <th>FG Stock</th>

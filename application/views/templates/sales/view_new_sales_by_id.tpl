@@ -30,7 +30,7 @@
           <input type="hidden" value="<%$new_sales[0]->sales_number %>" id="invoice_no" class="form-control">
           <input type="hidden" value="<%$new_sales[0]->sales_number %>" id="sales_number" class="form-control">
             <!-- /.card -->
-            <%if (empty($e_invoice_status) &&  $new_sales[0]->status == "pending" ) || $new_sales[0]->status == "unlocked"%>
+            <%if (empty($e_invoice_status) && ($einvoice_res_data[0]->EwbStatus) &&  $new_sales[0]->status == "pending" ) || $new_sales[0]->status == "unlocked"%>
             <div class="card p-0 mt-4">
                <div class="card-header">
                   <form action="<%$base_url%>generate_new_sales_update" method="POST">
@@ -355,28 +355,28 @@
                       <%/if%>
                     <%/if%>
                   
-                    <%if $new_sales[0]->status == "lock"%>
-                    <div class="col-lg-1 original" >
+                    <%if $new_sales[0]->status == "lock" %>
+                    <div class="col-lg-1 original hide" >
                         <div class="form-group">
                             <a class="btn btn-success" href="<%$base_url%>generate_sales_invoice/<%$uri_segment_2%>/ORIGINAL_FOR_RECIPIENT">Original</a>
                         </div>
                     </div>
-                    <div class="col-lg-1 duplicate" >
+                    <div class="col-lg-1 duplicate hide" >
                         <div class="form-group">
                             <a class="btn btn-success" href="<%$base_url%>generate_sales_invoice/<%$uri_segment_2%>/DUPLICATE_FOR_TRANSPORTER">Duplicate</a>
                         </div>
                     </div>
-                    <div class="col-lg-1 triplicate" >
+                    <div class="col-lg-1 triplicate hide" >
                         <div class="form-group">
                             <a class="btn btn-success" href="<%$base_url%>generate_sales_invoice/<%$uri_segment_2%>/TRIPLICATE_FOR_SUPPLIER">Triplicate</a>
                         </div>
                     </div>
-                    <div class="col-lg-1 acknowledge" >
+                    <div class="col-lg-1 acknowledge hide" >
                         <div class="form-group" >
                             <a class="btn btn-success" href="<%$base_url%>generate_sales_invoice/<%$uri_segment_2%>/ACKNOWLEDGEMENT_COPY">Acknowledge</a>
                         </div>
                     </div>
-                    <div class="col-lg-1 extra-copy" >
+                    <div class="col-lg-1 extra-copy hide" >
                         <div class="form-group">
                             <a class="btn btn-success" href="<%$base_url%>generate_sales_invoice/<%$uri_segment_2%>/EXTRA_COPY">Extra Invoice</a>
                         </div>
@@ -495,6 +495,18 @@
                   <div class="col-lg-1 print-btn">
                      <div class="form-group">
                         <button type="submit" onclick="this.form.target='_blank';return true;" class="btn btn-info btn"> Print </button>
+                     </div>
+                  </div>
+                  <%if $configuration['enable_email_notification'] eq 'Yes'%>
+                  <div class="col-lg-1 print-btn">
+                     <div class="form-group">
+                        <button type="submit" name="action" value="email" onclick="this.form.target='_blank';return true;" class="btn btn-info btn"> Send Email </button>
+                     </div>
+                  </div>
+                  <%/if%>
+                  <div class="col-lg-1 print-btn">
+                     <div class="form-group">
+                        <button type="submit" name="action" value="download" class="btn btn-info btn"> Download </button>
                      </div>
                   </div>
                </div>
@@ -754,8 +766,8 @@
       </div>
             <div class="card mt-3">
             
-                  <div class="table-responsive text-nowrap">
-                     <table  width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped scrollable" style="border-collapse: collapse;" border-color="#e1e1e1" id="part_data">
+                  <div class="table-responsive text-nowrap ">
+                     <table  width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped scrollable w-100" style="border-collapse: collapse;" border-color="#e1e1e1" id="part_data">
                         <thead>
                            <tr>
                               <!-- <th>Sr No</th> -->
@@ -859,13 +871,13 @@
                         </tbody>
                         <tfoot>
                            <%assign var="noOfColumns" value=13%>
-                           <%if $new_sales[0]->status == "pending"%>
+                           <%if $new_sales[0]->status == "pending" || $new_sales[0]->status == "unlocked"%>
                            <%assign var="noOfColumns" value=14%>
                            <%/if%>
                            <%if $po_parts%>
                            <tr >
                               <th colspan='<%$noOfColumns%>' style="width: 100%;" class="text-right ">Total
-                              <%if ($new_sales[0]->discountType!='NA') %>
+                              <%if ($new_sales[0]->discountType != 'NA') %>
                                   After Discount of 
                                   <%if ($new_sales[0]->discountType === 'Amount') %> 
                                     In Rs.<%$new_sales[0]->discount%> <%else%><%$new_sales[0]->discount %>%<%/if%></th>
@@ -945,9 +957,9 @@
                },
                success: function(response) {
                    if (response) {
-                       $('#part_id').html(response);
+                       $('#part_id').html(response).trigger("change");
                    } else {
-                       $('#part_id').html(response);
+                       $('#part_id').html(response).trigger("change");
                    }
                },
                complete: function() {

@@ -63,6 +63,7 @@
       <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
       <%*<button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button> *%>
       <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
+      <a class="btn btn-seconday" href="<%$base_url%>planing_data/<%$financial_year%>/<%$month%>/0"><i class="ti ti-arrow-left"></i></a>
     </div>
 
     <!-- Content Wrapper. Contains page content -->
@@ -75,21 +76,13 @@
                 <div class="row">
                     <div class="col-12">
                         <!-- /.card -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title"></h3>
-                                <a class="btn btn-dark" href="<%$base_url%>planing_data/<%$financial_year%>/<%$month%>/0">Back</a>
-                                <!-- <button type="button" class="btn btn-primary " data-toggle="modal" data-target="#exampleModal">
-                                    Update Schedule Qty 2 </button> -->
-                                <!-- Button trigger modal -->
-                                <!-- <button type="button" class="btn btn-primary " data-toggle="modal" data-target="#exampleModal">
-                                    Add Planing</button> -->
-                                <!-- Modal -->
-                              
-                            </div>
+                        <div class="w-100 hide">
+                        <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
+                    </div>
+                        <div class="card w-100">
                             <!-- /.card-header -->
-                            <div class="card-body">
-                                <table id="example1" class="table table-bordered table-striped">
+                            <div class="">
+                                <table id="example1" class="table  table-striped">
                                    <thead>
                                         <tr>
                                             <th>Sr. No.</th>
@@ -106,49 +99,20 @@
                                         <%assign var="i" value=1%>
                                         <%assign var="total" value=0%>
                                      
-                                        <%if $child_part_master%>
-                                            <%foreach from=$child_part_master_main item=t%>
-                                                <%assign var="subtotal" value=0%>
-                                                <%assign var="shortage_qty" value=0%>
-                                                <%assign var="actual_stock" value=0%>
-                                                <%if $child_part_master[$t->part_number]%>
-                                                    
-                                                    <%assign var="req_qty" value=0%>
-                                                    <%if $planing_data[$child_part_master[$t->part_number][0]->child_part_id]%>
-                                                        <%foreach from=$planing_data[$child_part_master[$t->part_number][0]->child_part_id] item=t1%>
-                                                            <%assign var="schedule_qty_2" value=$t1->schedule_qty_2%>
-                                                            <%assign var="schedule_qty" value=$t1->schedule_qty%>
-                                                            <%assign var="net_schedule" value=0%>
-
-                                                            <%if $schedule_qty_2 != 0%>
-                                                                <%assign var="net_schedule" value=$schedule_qty_2 - $schedule_qty%>
-                                                                <%assign var="req_qty" value=$req_qty + $t1->required_qty + ($net_schedule * $t1->bom_qty)%>
-                                                            <%else%>
-                                                                <%assign var="req_qty" value=$req_qty + ($t1->schedule_qty * $t1->bom_qty)%>
-                                                            <%/if%>
-                                                            
-                                                            <%assign var="actual_stock" value=$actual_stock + $t1->actual_stock%>
-                                                            <%assign var="shortage_qty" value=$shortage_qty + ($req_qty - $child_part_data[$t->part_number][0]->stock)%>
-                                                            <%assign var="subtotal" value=$child_part_master[$t->part_number][0]->part_rate * $req_qty%>
-                                                            <%assign var="total" value=$total + $subtotal%>
-                                                            <%assign var="net_mrp_req" value=$req_qty - $child_part_data[$t->part_number][0]->stock%>
-                                                            <%/foreach%>
-                                                    <%/if%>
-                                                    
-                                                <%/if%>
-                                                
-                                                
+                                        <%if ($child_part_master) %>
+                                            <%foreach from=$child_part_master item=t %>
+                                            <%assign var="total" value=$total+($t->total)%>
                                                 <tr>
                                                     <td><%$i%></td>
-                                                    <td><%$child_part_data[$t->part_number][0]->part_number%></td>
-                                                    <td><%$child_part_data[$t->part_number][0]->part_description%></td>
-                                                    <td><%$child_part_data[$t->part_number][0]->stock%></td>
-                                                    <td class="<%if $net_mrp_req > 0%> text-danger <%else%> text-success <%/if%>"><%$net_mrp_req%></td>
-                                                    <td><%$req_qty%></td>
-                                                    <td><%$child_part_master[$t->part_number][0]->part_rate%></td>
-                                                    <td><%$subtotal%></td>
+                                                    <td><%$t->part_number %></td>
+                                                    <td><%$t->part_description %></td>
+                                                    <td><%$t->stock %></td>
+                                                    <td class="<%if ($t->net_mrp_req > 0) %>text-danger<%else %>text-success<%/if%>"><%$t->net_mrp_req %></td>
+                                                    <td><%$t->req_qty %></td>
+                                                    <td><%$t->part_rate %></td>
+                                                    <td><%$t->subtotal %></td>
                                                 </tr>
-                                                <%assign var="i" value=$i+1%>
+                                               <%assign var="i" value=$i+1%>
                                             <%/foreach%>
                                         <%/if%>
                                     </tbody>
@@ -178,7 +142,7 @@ var file_name = "monthly_mrp_req";
 var pdf_title = "Monthly MRP Req";
    
    // datatable initilization.
-   new DataTable('#example1',{
+   var table = new DataTable('#example1',{
       dom: 'Bfrtip',
       buttons: [
               {     
@@ -237,4 +201,7 @@ var pdf_title = "Monthly MRP Req";
                 },
             ],
    });
+   $('#serarch-filter-input').on('keyup', function() {
+            table.search(this.value).draw();
+        });
 </script>

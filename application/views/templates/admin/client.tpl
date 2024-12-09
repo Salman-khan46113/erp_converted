@@ -87,44 +87,44 @@
               </button>
             </div>
             <div class="modal-body">
-              <form action="<%base_url('addClient') %>" method="POST">
+              <form action="<%base_url('addClient') %>" method="POST" id="addClient">
                 <div class="row">
                   <div class="col-lg-12">
                     <div class="form-group">
                       <label for="Client_name">Client Unit</label><span class="text-danger">*</span>
-                      <input type="text" maxlength="30" name="clientUnit" required class="form-control" id="exampleInputUnit" aria-describedby="unitHelp" placeholder="Client Unit">
+                      <input type="text" maxlength="30" name="clientUnit"  class="form-control" id="exampleInputUnit" aria-describedby="unitHelp" placeholder="Client Unit">
                     </div>
                     <div class="form-group">
                       <label for="Client_name">Client Name</label><span class="text-danger">*</span>
-                      <input type="text" name="clientName" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Client Name">
+                      <input type="text" name="clientName"  class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Client Name">
                     </div>
                     <div class="form-group">
                       <label for="contactPerson">Contact Person</label><span class="text-danger">*</span>
-                      <input type="text" name="contactPerson" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Contact Person">
+                      <input type="text" name="contactPerson"  class="form-control"  aria-describedby="emailHelp" placeholder="Contact Person">
                     </div>
                     <div class="form-group">
                       <label for="Client_location">Client billing address</label><span class="text-danger">*</span>
-                      <input type="text" name="clientBaddress" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Client Billing Address">
+                      <input type="text" name="clientBaddress"  class="form-control"  aria-describedby="emailHelp" placeholder="Client Billing Address">
                     </div>
                     <div class="form-group">
                       <label for="Client_location">Client Shipping address</label><span class="text-danger">*</span>
-                      <input type="text" name="clientSaddress" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Client Shipping Address">
+                      <input type="text" name="clientSaddress"  class="form-control"  aria-describedby="emailHelp" placeholder="Client Shipping Address">
                     </div>
                     <div class="form-group">
                       <label for="Client_location">Add GST Number</label><span class="text-danger">*</span>
-                      <input type="text" name="gst_no" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Add GST Number">
+                      <input type="text" name="gst_no"  class="form-control"  aria-describedby="emailHelp" placeholder="Add GST Number">
                     </div>
                     <div class="form-group">
                       <label for="Client_location">Add PAN</label><span class="text-danger">*</span>
-                      <input type="text" name="pan_no" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Add GST Number">
+                      <input type="text" name="pan_no"  class="form-control"  aria-describedby="emailHelp" placeholder="Add GST Number">
                     </div>
                     <div class="form-group">
                       <label for="Client_location">State</label><span class="text-danger">*</span>
-                      <input type="text" name="state" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Add GST Number">
+                      <input type="text" name="state"  class="form-control"  aria-describedby="emailHelp" placeholder="State">
                     </div>
                     <div class="form-group">
                       <label for="Client_location">State Code</label><span class="text-danger">*</span>
-                      <input type="text" name="state_no" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Add GST Number">
+                      <input type="text" name="state_no"  class="form-control"  aria-describedby="emailHelp" placeholder="State Code">
                     </div>
                     <!-- Example single danger button -->
                     <!-- <div class="form-group">
@@ -133,24 +133,29 @@
                   </div> -->
                   <div class="form-group">
                     <label for="payment_terms">Phone Number</label><span class="text-danger">*</span>
-                    <input type="number" min="0" name="phone_no" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Payment Terms">
+                    <input type="number" min="0" name="phone_no"  class="form-control"  aria-describedby="emailHelp" placeholder="Payment Terms">
                   </div>
                   <div class="form-group">
                     <label for="payment_terms">Bank Details</label><span class="text-danger">*</span>
-                    <input type="text" name="bank_details" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Bank Details">
+                    <input type="text" name="bank_details"  class="form-control"  aria-describedby="emailHelp" placeholder="Bank Details">
                   </div>
                   <div class="form-group">
                     <label for="payment_terms">Address 1</label><span class="text-danger">*</span>
-                    <input type="text" name="address1" required class="form-control" aria-describedby="emailHelp" placeholder="Address 1">
+                    <input type="text" name="address1"  class="form-control" aria-describedby="emailHelp" placeholder="Address 1">
                   </div>
                   <div class="form-group">
                     <label for="payment_terms">Location</label><span class="text-danger">*</span>
-                    <input type="text" name="location" required class="form-control" aria-describedby="emailHelp" placeholder="Location">
+                    <input type="text" name="location"  class="form-control" aria-describedby="emailHelp" placeholder="Location">
                   </div>
                   <div class="form-group">
                     <label for="payment_terms">Pin</label><span class="text-danger">*</span>
-                    <input type="text" name="pin" required class="form-control" aria-describedby="emailHelp" placeholder="Pin">
+                    <input type="text" name="pin"  class="form-control" aria-describedby="emailHelp" placeholder="Pin">
                   </div>
+                  <div class="form-group">
+                      <label for="email">Email ID (For multiple address use Comma seperated list)</label><span class="text-danger"></span>
+                      <input type="text" name="emailId" class="form-control" aria-describedby="emailHelp" placeholder="e.g. user1@example.com,user2@example.com">
+                  </div>
+
                 </div>
               </div>
               <div class="modal-footer">
@@ -274,11 +279,11 @@
                               </div>
                               <div class="form-group col-6">
                                 <label for="Client_location">State</label><span class="text-danger">*</span>
-                                <input type="text" value="<%$t->state  %>" name="state" required class="form-control" id="state" aria-describedby="emailHelp" placeholder="Add GST Number">
+                                <input type="text" value="<%$t->state  %>" name="state" required class="form-control" id="state" aria-describedby="emailHelp" placeholder="State">
                               </div>
                               <div class="form-group col-6">
                                 <label for="Client_location">State Code</label><span class="text-danger">*</span>
-                                <input type="text" value="<%$t->state_no  %>" name="state_no" required class="form-control" id="state_no" aria-describedby="emailHelp" placeholder="Add GST Number">
+                                <input type="text" value="<%$t->state_no  %>" name="state_no" required class="form-control" id="state_no" aria-describedby="emailHelp" placeholder="State Cod">
                               </div>
                               <div class="form-group col-6">
                                 <label for="payment_terms">Phone Number</label><span class="text-danger">*</span>
@@ -301,6 +306,11 @@
                                 <label for="payment_terms">Pin</label><span class="text-danger">*</span>
                                 <input type="text" value="<%$t->pin %>" name="pin" required class="form-control" id="pin" aria-describedby="emailHelp" placeholder="Pin">
                               </div>
+                              <div class="form-group col-6">
+                                                                                        <label for="email">Email ID (For multiple address use Comma seperated list)</label><span class="text-danger"></span>
+                                                                                        <input type="text" value="<%$t->emailId  %>" name="email" class="form-control" aria-describedby="emailHelp" placeholder="e.g. user1@example.com,user2@example.com"  id="emailId">
+                                                                                     </div>
+
                           
                           </div>
                           <div class="modal-footer">

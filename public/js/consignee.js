@@ -18,7 +18,7 @@ const datatable = {
             var data = $(this).attr("data-value");
           
             data = JSON.parse(atob(data)); 
-            console.log(data)
+            // console.log(data)
            
             $("#uconsignee_name").val(data['consignee_name']);
             $("#uconsignee_ref").val(data.c_id);
@@ -31,6 +31,10 @@ const datatable = {
             $("#uaddress").val(data.address);
             $("#ulocation").val(data.location);
             $("#uPIN").val(data.pin_code);
+            for (var i = 1; i <= currentUnit; i++) {
+                var customer_unit = "distncFrmClnt"+i;
+                $('#distncFrmClnt'+i).val(data[customer_unit])
+            }
             myModal.show();
         })
     },
@@ -78,10 +82,11 @@ const datatable = {
                 },
             ],
         searching: true,
-      // scrollX: true,
+      scrollX: true,
+      order: [[0, 'desc']],
       scrollY: true,
       bScrollCollapse: true,
-      columnDefs: [{ sortable: false, targets: 9 }],
+      columnDefs: [{ sortable: false, targets: 8 }],
       pagingType: "full_numbers",
     });
       $('.dataTables_length').find('label').contents().filter(function() {
@@ -104,6 +109,9 @@ const datatable = {
 }
 
 const validationFunc = () => {
+    $.extend($.validator.messages, {
+        required: "Please enter a distance.", // Customize required message
+    });
     $("#update_form").validate({
         rules: {
             uconsignee_name: "required",
@@ -118,7 +126,10 @@ const validationFunc = () => {
             upin_code: "required",
             ugst_number: "required",
             upan_no: "required",
-            uphone_no: "required"
+            uphone_no: "required",
+            "[name^='distncFrmClnt']": { // Select all inputs where the name attribute starts with 'distncFrmClnt'
+                required: true,
+            }
         },
         messages: {
             uconsignee_name: "Please enter the consignee name",
@@ -133,11 +144,14 @@ const validationFunc = () => {
             upin_code: "Please enter the PIN code",
             ugst_number: "Please enter the GST number",
             upan_no: "Please enter the PAN number",
-            uphone_no: "Please enter the phone number"
+            uphone_no: "Please enter the phone number",
+            "[name^='distncFrmClnt']": {
+                required: "Please enter a distance.",
+            }
         },
         submitHandler: function(form) {
             // Custom submit handler
-            debugger;
+           
             $.ajax({
                 url: form.action,
                 type: form.method,
@@ -181,7 +195,10 @@ const validationFunc = () => {
             cpin_code: "required",
             gst_number: "required",
             cpan_no: "required",
-            cphone_no: "required"
+            cphone_no: "required",
+            "[name^='distncFrmClnt']": { // Select all inputs where the name attribute starts with 'distncFrmClnt'
+                required: true,
+            }
         },
         messages: {
             cconsignee_name: "Please enter the consignee name",
@@ -196,7 +213,10 @@ const validationFunc = () => {
             cpin_code: "Please enter the PIN code",
             gst_number: "Please enter the GST number",
             cpan_no: "Please enter the PAN number",
-            cphone_no: "Please enter the phone number"
+            cphone_no: "Please enter the phone number",
+            "[name^='distncFrmClnt']": {
+               required: "Please enter distance.",
+            }
         },
         submitHandler: function(form) {
             // Custom submit handler

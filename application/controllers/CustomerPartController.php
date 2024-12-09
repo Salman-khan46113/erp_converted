@@ -100,9 +100,9 @@ class CustomerPartController extends CommonController
 		
 
 		$data['customer_data'] = $this->Crud->get_data_by_id("customer", $data['customer_part_list'][0]->customer_id, "id");
+		// pr($data['customer_part_list'],1);
 		$data['entitlements'] = $this->session->userdata['entitlements'];
-
-
+		
 		$this->getPage('customer/customer_part_by_id', $data);
 	}
 
@@ -122,7 +122,7 @@ class CustomerPartController extends CommonController
 
 		$customer_id = $this->input->post('customer_id');
 		$customer_part_id = $this->input->post('customer_part_id');
-		$hsn_code = $this->input->post('hsn_code');
+		$hsn_code = trim($this->input->post('hsn_code'));
 		$uom = $this->input->post('uom');
 		$packaging_qty = $this->input->post('packaging_qty');
 		$safety_stock = $this->input->post('safety_stock');
@@ -137,6 +137,7 @@ class CustomerPartController extends CommonController
 		$thickness = $this->input->post('thickness');
 		$passivationType = $this->input->post('passivationType');
 		$isservice = $this->input->post('isservice');
+		$itemCode = $this->input->post('itemCd');
 
 		$data = array(
 			"part_number" => $part_number,
@@ -200,6 +201,7 @@ class CustomerPartController extends CommonController
 				"rm_grade" => $rm_grade,
 				"thickness" => $thickness,
 				"passivationType" => $passivationType,
+				"itemCode" => $itemCode,
 				"created_id" => $this->user_id,
 				"date" => $this->current_date,
 				"time" => $this->current_time,
@@ -247,13 +249,14 @@ class CustomerPartController extends CommonController
 		$thickness = $this->input->post('thickness');
 		$passivationType = $this->input->post('passivationType');
 		$part_description = $this->input->post('upart_description');
-		$hsn_code = $this->input->post('hsn_code');
+		$hsn_code = trim($this->input->post('hsn_code'));
 		$safety_stock = $this->input->post('safety_stock');
 		$gst_id = $this->input->post('gst_id');
 
 		$customer_id = $this->input->post('ucustomer_id');
 		$customer_part_id = $this->input->post('ucustomer_part_id');
 		$isservice = $this->input->post('isservice');
+		$itemCode = $this->input->post('itemCd');
 		$success = 0;
         $messages = "Something went wrong.";
 		if (false) {
@@ -279,6 +282,7 @@ class CustomerPartController extends CommonController
 				"hsn_code" => $hsn_code,
 				"gst_id" => $gst_id,
 				"isservice" => $isservice,
+				"itemCode" => $itemCode
 			);
 			$result = $this->Crud->update_data("customer_part", $data, $id);
 			if ($result) {

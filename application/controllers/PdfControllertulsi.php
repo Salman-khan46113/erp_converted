@@ -504,7 +504,7 @@ class PdfControllertulsi extends CommonController
         foreach ($data['part_arr'] as $key => $value) {
            // pr(($key+1)%9 == 0);
            $part_chunks_arr[$key_count][$key] = $value;
-            if(($key+1)%8 == 0){
+            if(($key+1)%6 == 0){
              $key_count++;
            }
         }
@@ -521,17 +521,24 @@ class PdfControllertulsi extends CommonController
         $billing_address = $new_po_data[0]->billing_address;
         $shipping_address = $new_po_data[0]->shipping_address;
 
+        $billing_address = $new_po_data[0]->billing_address;
+        $shipping_address = $new_po_data[0]->shipping_address;
+
         if (empty($billing_address)) {
-            $billing_address = $client_data[0]->billing_address;
+            $billing_address = $client_data[0]->billing_address."<br><b>GSTIN</b>: ".$client_data[0]->gst_number;
         }
         if (empty($shipping_address)) {
-            $shipping_address = $client_data[0]->shifting_address;
+            $shipping_address = $client_data[0]->shifting_address."<br><b>GSTIN</b>: ".$client_data[0]->gst_number;
+        }
+
+        if(strlen($billing_address) < 140 && strlen($shipping_address) < 140) {
+            $add_more_spacing = "<br>";
         }
         $sub_total_amount = $final_total;
         // pr($sub_total_amount);
         $discount_amount = 0;
         $discount_amount_after_subtotal = "";
-        
+       
         if($po_discount_type == "PO Level"){
             if($discount != ""){
                 if($discount_type == "Percentage"){
@@ -548,24 +555,22 @@ class PdfControllertulsi extends CommonController
             $final_total = $final_total - $discount_amount;
             // $final_final_amount = $final_final_amount - $discount_amount;
             $gst_structure_data = $this->Crud->get_data_by_id("gst_structure", $part_val->tax_id, "id");
-
             if ((int) $gst_structure_data[0]->igst === 0) {
-                $gst = (int) $gst_structure_data[0]->cgst + (int) $gst_structure_data[0]->sgst;
-                $cgst = (int) $gst_structure_data[0]->cgst;
-                $sgst = (int) $gst_structure_data[0]->sgst;
+                 // pr($gst_structure_data,1);
+                $gst = (float) $gst_structure_data[0]->cgst + (float) $gst_structure_data[0]->sgst;
+                $cgst = (float) $gst_structure_data[0]->cgst;
+                $sgst = (float) $gst_structure_data[0]->sgst;
                 $tcs = (float) $gst_structure_data[0]->tcs;
                 $tcs_on_tax = $gst_structure_data[0]->tcs_on_tax;
                 $igst = 0;
             } else {
-
-                $gst = (int) $gst_structure_data[0]->igst;
+                $gst = (float) $gst_structure_data[0]->gst;
                 $cgst = 0;
                 $sgst = 0;
                 $tcs = (float) $gst_structure_data[0]->tcs;
                 $tcs_on_tax = $gst_structure_data[0]->tcs_on_tax;
                 $igst = $gst;
             }
-
             $cgst_amount +=  (($final_total * $cgst) / 100);
             $sgst_amount += (($final_total * $sgst) / 100);
             $igst_amount += (($final_total * $igst) / 100);
@@ -578,7 +583,7 @@ class PdfControllertulsi extends CommonController
             $final_total = $final_total + $new_po_data[0]->loading_unloading + $new_po_data[0]->freight_amount;
             $discount_amount_after_subtotal = ' 
                     <tr>
-                        <td width="26.3%" style="text-align:center;font-size:10.3px;" >Sub Total After Discount (' . $discount . ')</td>
+                        <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;Sub Total After Discount (' . $discount . ')</td>
                             <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $final_total, 2, '.', '') . '</td>
                         </tr>';
             // pr($igst_amount,1);
@@ -594,29 +599,29 @@ class PdfControllertulsi extends CommonController
         
         $footer_gst = '
                 <tr>
-                    <td width="26.3%" style="text-align:center;font-size:10.3px;" >CGST Amount</td>
+                    <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;CGST Amount</td>
                     <td width="18.7%" style="text-align:center;font-size:10.3px;" ></td>
                 </tr>
                 <tr>
-                    <td width="26.3%" style="text-align:center;font-size:10.3px;" >SGST Amount</td>
+                    <td width="26.3%" style="text-align:left;font-size:10.3px;" >SGST Amount</td>
                     <td width="18.7%" style="text-align:center;font-size:10.3px;" ></td>
                 </tr>';
         $gst_block_html = "";
         if ($with_in_state == "yes") {
             $footer_gst = '
                 <tr>
-                    <td width="26.3%" style="text-align:center;font-size:10.3px;" >CGST Amount</td>
+                    <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;CGST Amount</td>
                     <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $cgst_amount, 2, '.', '') . '</td>
                 </tr>
                 <tr>
-                    <td width="26.3%" style="text-align:center;font-size:10.3px;" >SGST Amount</td>
+                    <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;SGST Amount</td>
                     <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $sgst_amount, 2, '.', '') . '</td>
                 </tr>';
                 } else {
                     
             $footer_gst = '
                 <tr>
-                    <td width="26.3%" style="text-align:center;font-size:10.3px;" >IGST Amount</td>
+                    <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;IGST Amount</td>
                     <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $igst_amount, 2, '.', '') . '</td>
                 </tr>
                 ';
@@ -677,17 +682,19 @@ class PdfControllertulsi extends CommonController
        <table cellspacing="0" cellpadding="4.4" border="1">
             <tbody>
                 <tr>
-                    <td width="80%" style="text-align:center;font-size:20.8px;" rowspan="2" colspan="2"><b>PURCHASE ORDER</b></td>
-                    <td width="20%" style="text-align:left;font-size:10.6px;"><b>&nbsp;Format No : '.$po_formate_number.'</b></td>
+                    <td width="70%" style="text-align:center;" rowspan="2" colspan="2">
+                    <b style="font-size:12.8px;">PURCHASE ORDER</b><br>
+                    <b style="font-size:15.8px;">'.$client_data[0]->client_name.'</b>
+                    </td>
+                    <td width="30%" style="text-align:left;font-size:10.6px;"><b>&nbsp;Format No : '.$po_formate_number.'</b></td>
                 </tr>
                 <tr>
-                    
-                    <td width="20%" style="text-align:left;font-size:10.6px;"><b>&nbsp;Rev No : '.$po_rev_number.'</b></td>
+                    <td width="30%" style="text-align:left;font-size:10.6px;"><b>&nbsp;Rev No : '.$po_rev_number.'</b></td>
                 </tr>
                 <tr>
                     <td width="40%" style="text-align:left;font-size:10.6px;"  colspan="2"><b>&nbsp;PO. NO.:</b>&nbsp;<span style="font-size:12.6px">' . $new_po_data[0]->po_number . '</span></td>
-                    <td width="40%" style="text-align:left;font-size:10.6px;"  colspan="2"><b>&nbsp;PO DATE:</b> '.$new_po_data[0]->created_date.'</td>
-                    <td width="20%" style="text-align:left;font-size:11.6px;"><b>&nbsp;Rev Date : '.$po_rev_date.'</b></td>
+                    <td width="30%" style="text-align:left;font-size:10.6px;"  colspan="2"><b>&nbsp;PO DATE:</b> '.$new_po_data[0]->created_date.'</td>
+                    <td width="30%" style="text-align:left;font-size:11.6px;"><b>&nbsp;Rev Date : '.$po_rev_date.'</b></td>
                 </tr>
                 <tr>
                     <td width="50%" style="text-align:left;font-size:10.6px;"><b>&nbsp;SUPPLIER:</b> ' . $supplier_data[0]->supplier_name . '</td>
@@ -802,28 +809,28 @@ class PdfControllertulsi extends CommonController
                         <tr>
                             <td width="55%" style="text-left:center;font-size:10.3px;" rowspan="2">&nbsp;&nbsp;<b> Payment Days : </b> ' . $payment_days . ' days after GRN clearance <br>
                                 <b> Payment Terms : </b> ' . $payment_terms . ' days after GRN clearance </td>
-                            <td width="26.3%" style="text-align:center;font-size:10.3px;" >Sub Total</td>
+                            <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;Sub Total</td>
                             <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $sub_total_amount, 2, '.', '') . '</td>
                         </tr>
                         <tr>
-                            <td width="26.3%" style="text-align:center;font-size:10.3px;" >Loading / Unloading charges</td>
+                            <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;Loading / Unloading charges</td>
                             <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $new_po_data[0]->loading_unloading, 2, '.', '') . '</td>
                         </tr>
                         <tr>
-                            <td width="55%" style="text-align:left;font-size:10.6px;" rowspan="11">'.$notes.' </td>
-                             <td width="26.3%" style="text-align:center;font-size:10.3px;" >Freight Charges</td>
+                            <td width="55%" style="text-align:left;font-size:8px;" rowspan="11">'.$notes.' </td>
+                             <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;P&F Charges</td>
                             <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $new_po_data[0]->freight_amount, 2, '.', '') . '</td>
                         </tr>
                         
                         '.$discount_amount_after_subtotal.$footer_gst.'
                         <tr>
                             
-                            <td width="26.3%" style="text-align:center;font-size:10.3px;" >TCS Amount</td>
+                            <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;TCS Amount</td>
                             <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $tcs_amount, 2, '.', '') . '</td>
                         </tr>
                        
                         <tr>
-                            <td width="26.3%" style="text-align:center;font-size:10.3px;" ><b>GRAND TOTAL</b></td>
+                            <td width="26.3%" style="text-align:left;font-size:10.3px;" ><b>&nbsp;GRAND TOTAL</b></td>
                             <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $final_final_amount, 2, '.', '') . '</td>
                         </tr>
                         '.$gst_block_html.'
@@ -863,7 +870,7 @@ class PdfControllertulsi extends CommonController
             $html_content = $this->smarty->fetch('purchase/po_generate_pdf.tpl', $data, TRUE);
             // pr($html_content,1);
             // $pdf = new Pdf1(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-        $pdf = new Pdf1('P', 'mm', 'A4', true, 'UTF-8', false,'',$header_html,$footer_html,4,-85.8);
+            $pdf = new Pdf1('P', 'mm', 'A4', true, 'UTF-8', false,'',$header_html,$footer_html,4, -83.8);
 
             $pdf->SetMargins(5, 103.6, 5, 5);
 
@@ -1137,6 +1144,7 @@ TECHNIQUE </td>
 
     public function print_sales_invoice()
     {
+        $action = $_POST['action'];
         $configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
         $configuration = array_column($configuration, "config_value","config_name");
         $digitalSignature = "No";
@@ -1179,6 +1187,8 @@ TECHNIQUE </td>
                 $html_content_full = $html_content_header;
                     $isEinvoicePresent = false;
                     $einvoice_data = $this->Crud->get_data_by_id("einvoice_res", $new_sales_id, "new_sales_id");
+                    $new_sales_data = $this->Crud->get_data_by_id("new_sales", $new_sales_id, "id");
+
                     if (!empty($einvoice_data[0]->Irn)) {
                         $isEinvoicePresent = true;
                     }
@@ -1186,6 +1196,7 @@ TECHNIQUE </td>
                         $html_content_full .= '<div style="page-break-after: always;">' . $this->for_print_download_generate_sales_invoice($interest, $new_sales_id,$configuration) . '</div>';
                     }
                     $html_content_full .= $this->getFooter();
+                    // pr($html_content_full,1);
                     //Aarbaj
                     // echo $html_content_full;
                     // exit();
@@ -1213,10 +1224,96 @@ TECHNIQUE </td>
                         digitalSignature($fileName,$sign_position,$signer,$certpwd,$certid,$customerPrefix,$digital_signature_url);
                     }
                     $fileDownloadPath = base_url().$fileName;
-                    header("Location: ".$fileDownloadPath);
+                    if($action == "download"){
+                        $pdf_content = file_get_contents($fileDownloadPath);
+                        header("Content-Type: application/pdf");
+                        header("Content-Disposition: attachment; filename=".$copy. ".pdf");
+                        header("Content-Length: " . strlen($pdf_content));
+                        echo $pdf_content;
+                        exit();
+                    }else if($action == ""){
+                        header("Location: ".$fileDownloadPath);
+                    }
+                    if($action === "email" && $configuration['enable_email_notification'] == 'Yes'){
+                        $new_sales_data = $this->Crud->get_data_by_id("new_sales", $new_sales_id, "id");
+                        $customer_data = $this->Crud->get_data_by_id("customer", $new_sales_data[0]->customer_id, "id");
+                        $emailAddr = $customer_data[0]->emailId;
+                            if(empty($emailAddr)){
+                                echo "Please add email address to Customer.";
+                                die;
+                            }
+
+                        $filePath = $fileName;
+                        $fileName = $copy.".pdf";
+                        $customer_data = $this->Crud->get_data_by_id("customer", $new_sales_data[0]->customer_id, "id");
+                        
+                        $toEmailAddr = $customer_data[0]->emailId;
+                        $data['sales_number'] = $new_sales_data[0]->sales_number;
+                        $this->email_sender($data, $toEmailAddr, $configuration, $filePath, $fileName);
+                    }else{
+                        echo "Something went wrong";
+                    }
+                    
             }
         } else {
             echo "No Options Selected.";
+        }
+    }
+     //send this Sales pdf as attachment
+    public function email_sender($data = array(), $toEmailAddr = "", $configuration = [], $filePath, $fileName)
+    {
+        
+        $data['base_url'] = $this->config->item('base_url');
+        $mail = $this->phpmailer_lib->load();
+        $mail->isSMTP(); // Set mailer to use SMTP
+        $mail->Host = 'arominfotech.com'; // 'smtp.gmail.com'; //'smtpout.secureserver.net';          // Specify main and backup SMTP servers
+        $mail->SMTPAuth = true; // Enable SMTP authentication
+        $mail->Username = $configuration['SMTPUserName']; // SMTP username
+        $mail->Password = $configuration['SMTPUserPassword']; // SMTP password
+        $mail->SMTPSecure = 'tls'; // Enable TLS encryption, `ssl` also accepted
+        $mail->Port = 25; //465; //587;                       // TCP port to connect to
+        $mail->From = $configuration['SMTPUserName'];
+        $mail->setFrom('no-reply@arominfotech.com', $configuration['customerNameDetails']); //TO-DO :this should be client address ?
+        //$mail->FromName = $configuration['customerNameDetails']."- Sales Invoice";
+
+        //TO address
+        $toEmailAddr = explode(",", $toEmailAddr);
+        foreach ($toEmailAddr as $key => $value) {
+            $mail->addAddress($value);
+        }
+
+        $ccEmailAddr = $configuration['SalesInvoiceCCEmailAddress'];
+        $ccEmailAddr = explode(",", $ccEmailAddr);
+        foreach ($ccEmailAddr as $key => $value) {
+            $mail->addCC($value);
+        }
+      
+        $mail->isHTML(true); // Set email format to HTML
+        $mail->Subject = "Sales invoice {$data['sales_number']} from {$configuration['customerNameDetails']}"; //TO-DO : this will have client name
+        if (!file_exists($filePath)) {
+            echo "<script>alert('File Not Found to send! Please try again');window.close();document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+            die;            
+        }
+        $mail->addAttachment($filePath, $fileName); // Attach the PDF
+
+        $mail->Body = "Dear Sir/Madam,
+          <p>Please find attached sales invoice <b>{$data['sales_number']}</b>.</p>
+          <p>You may review the detailed breakdown of this invoice in the attached PDF.</p>
+          <p>For any questions, feel free to reach out to us.</p>
+          <br><p>With Regards,<br>{$configuration['customerNameDetails']}<br></p>
+          <br><br><br><br>
+          <p><small>Powered By <br>
+          <a href='https://arominfotech.net'>AROM Infotech</a><small></p>";
+
+        //pr($mail->send(),1);
+        if (!$mail->send()) {
+
+            echo "<script>alert('Failed to send email. <br>Mailer Error: ".$mail->ErrorInfo." Please try again.');window.close();document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+            die;
+        } else {
+
+            echo "<script>alert('Message has been sent.');window.close();document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+            die;
         }
     }
 
@@ -1280,6 +1377,7 @@ TECHNIQUE </td>
         $height = "350px";
 
         $i = 1;
+        $itemCdPresent = false;
         foreach ($po_parts_data as $p) {
 
             $child_part_data = $this->Crud->get_data_by_id("customer_part", $p->part_id, "id");
@@ -1379,23 +1477,43 @@ TECHNIQUE </td>
              <td colspan="2" style="text-align:center"> (-) ' . $new_sales_data[0]->discount_amount . '</td>';
         }
 
+        if($itemCdPresent){
+            if ($i == 2) {
+                $height = 240;
+            } elseif ($i == 3) {
+                $height = 210;
+            } elseif ($i == 4) {
+                $height = 155;
+            } elseif ($i == 5) {
+                $height = 95;
+            } elseif ($i == 6) {
+                $height = 50;
+            } elseif ($i == 7) {
+                $height = 10;
+            } elseif ($i == 8) {
+                $height = 0;
+            } elseif ($i == 9) {
+                $height = 20;
+            }
+        }else{
 
-        if ($i == 2) {
-            $height = 260;
-        } elseif ($i == 3) {
-            $height = 220;
-        } elseif ($i == 4) {
-            $height = 200;
-        } elseif ($i == 5) {
-            $height = 140;
-        } elseif ($i == 6) {
-            $height = 100;
-        } elseif ($i == 7) {
-            $height = 80;
-        } elseif ($i == 8) {
-            $height = 30;
-        } elseif ($i == 9) {
-            $height = 30;
+            if ($i == 2) {
+                $height = 240;
+            } elseif ($i == 3) {
+                $height = 220;
+            } elseif ($i == 4) {
+                $height = 200;
+            } elseif ($i == 5) {
+                $height = 140;
+            } elseif ($i == 6) {
+                $height = 100;
+            } elseif ($i == 7) {
+                $height = 80;
+            } elseif ($i == 8) {
+                $height = 30;
+            } elseif ($i == 9) {
+                $height = 30;
+            }
         }
 
        // $final_final_amount = $final_total + $cgst_amount + $sgst_amount + $igst_amount + $tcs_amount;
@@ -1416,23 +1534,44 @@ TECHNIQUE </td>
             $isEinvoicePresent = true;
         }else{
             // pr($i,1);
-            if ($i == 2) {
-                $height += 30;
-            } elseif ($i == 3) {
-               $height += 30;
-            } elseif ($i == 4) {
-                $height += 30;
-            } elseif ($i == 5) {
-                $height += 50;
-            } elseif ($i == 6) {
-                 $height += 50;
-            } elseif ($i == 7) {
-                 $height += 40;
-            } elseif ($i == 8) {
-                 $height += 60;
-            }
-            elseif ($i == 9) {
-                $height = 30;
+            if($itemCdPresent){
+                if ($i == 2) {
+                    $height += 30;
+                } elseif ($i == 3) {
+                   $height += 30;
+                } elseif ($i == 4) {
+                    $height += 30;
+                } elseif ($i == 5) {
+                    $height += 50;
+                } elseif ($i == 6) {
+                     $height += 50;
+                } elseif ($i == 7) {
+                     $height += 40;
+                } elseif ($i == 8) {
+                     $height += 0;
+                }
+                elseif ($i == 9) {
+                    $height = 30;
+                }
+            }else{
+                if ($i == 2) {
+                    $height += 30;
+                } elseif ($i == 3) {
+                   $height += 30;
+                } elseif ($i == 4) {
+                    $height += 30;
+                } elseif ($i == 5) {
+                    $height += 50;
+                } elseif ($i == 6) {
+                     $height += 50;
+                } elseif ($i == 7) {
+                     $height += 40;
+                } elseif ($i == 8) {
+                     $height += 60;
+                }
+                elseif ($i == 9) {
+                    $height = 30;
+                }
             }
         }
         
@@ -1614,7 +1753,7 @@ TECHNIQUE </td>
             <td colspan="2" style="text-align:center">' . number_format($sales_total['sales_tcs'],2). '</td>
           </tr>
           <tr style="font-size:10px">
-            <td colspan="3" style="text-align:center;margin-left:10px;">Freight Charges</td>
+            <td colspan="3" style="text-align:center;margin-left:10px;">P&F Charges</td>
             <td colspan="2" style="text-align:center">' . '0.00' . '</td>
           </tr>
           <tr style="font-size:10px">
@@ -1779,10 +1918,16 @@ TECHNIQUE </td>
                 }
             }
 
+            $custItemCd = $child_part_data[0]->itemCode;
+            if(!empty($custItemCd)) {
+                $custItemCd = "<b><u><span style='background-color: lightgray;'>Item Code - ".$custItemCd."</span></u></b>";
+                $itemCdPresent = true;
+            }
+
             $parts_html .= '
        <tr style="font-size:10px;">
         <td style="text-align:center;">' . $i . '</td>
-        <td colspan="4" style="max-width:28px;word-wrap: break-word;text-align:left;">' . substr($child_part_data[0]->part_description, 0, 50) . '<br><b>' . wordwrap($child_part_data[0]->part_number, 12, "\n", true) . '</b></td>
+        <td colspan="4" style="max-width:28px;word-wrap: break-word;text-align:left;">' . substr($child_part_data[0]->part_description, 0, 50) . '<br><b>' . wordwrap($child_part_data[0]->part_number, 12, "\n", true) .'<br>'.$custItemCd. '</b></td>
         <td style="text-align:center;">' . $hsn_code . '</td>
         <td style="text-align:center;"><span style="text-size:small">' . $packagingQtyFactors . '</span></td>
         <td style="text-align:center;">' . $p->uom_id . '</td>
@@ -2038,7 +2183,7 @@ TECHNIQUE </td>
             <td colspan="3" style="text-align:center">' . number_format((float) $tcs_amount, 2, '.', '') . '</td>
           </tr>
           <tr style="font-size:10px">
-            <td colspan="2 style="text-align:center;margin-left:10px;">Freight Charges</td>
+            <td colspan="2 style="text-align:center;margin-left:10px;">P&F Charges</td>
             <td colspan="3" style="text-align:center">' . '0.00' . '</td>
           </tr>
           <tr style="font-size:10px">
@@ -2160,15 +2305,15 @@ TECHNIQUE </td>
             // $gst_structure_data = $child_part_master_data[0]->gst_id;
             $hsn_code = $child_part_data[0]->hsn_code;
             if ((int) $gst_structure_data[0]->igst === 0) {
-                $gst = (int) $gst_structure_data[0]->cgst + (int) $gst_structure_data[0]->sgst;
-                $cgst = (int) $gst_structure_data[0]->cgst;
-                $sgst = (int) $gst_structure_data[0]->sgst;
+                $gst = (float) $gst_structure_data[0]->cgst + (float) $gst_structure_data[0]->sgst;
+                $cgst = (float) $gst_structure_data[0]->cgst;
+                $sgst = (float) $gst_structure_data[0]->sgst;
                 $igst = 0;
                 $tcs = (float) $gst_structure_data[0]->tcs;
                 $tcs_on_tax = $gst_structure_data[0]->tcs_on_tax;
                 $total_gst_percentage = $cgst + $sgst;
             } else {
-                $gst = (int) $gst_structure_data[0]->igst;
+                $gst = (float) $gst_structure_data[0]->igst;
                 $cgst = 0;
                 $sgst = 0;
                 $igst = $gst;

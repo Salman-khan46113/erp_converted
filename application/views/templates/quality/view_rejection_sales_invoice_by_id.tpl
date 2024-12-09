@@ -130,8 +130,8 @@
                 </div>
                 <div class="col-lg-3 mb-3">
                    <div class="form-group">
-                      <label for="" class="form-label">Freight Charges</label>
-                      <input type="text" placeholder="Enter Freight Charges" value="<%$new_sales[0]->freight_charges%>" name="freight_charges" class="form-control">
+                      <label for="" class="form-label">P&F Charges</label>
+                      <input type="text" placeholder="Enter P&F Charges" value="<%$new_sales[0]->freight_charges%>" name="freight_charges" class="form-control">
                    </div>
                 </div>
                 <div class="col-lg-3 hide">

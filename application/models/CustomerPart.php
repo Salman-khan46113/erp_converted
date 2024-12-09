@@ -695,6 +695,22 @@ class CustomerPart extends CI_Model {
         // pr($this->db->last_query(),1);
         return $ret_data;
     }
+    
+    public function updateImportedStockDetails($clientId,$partNo,$newStockRate,$newStock) {
+        // This will update the actual child part master as child_part table is for master and child_part_master is for linked supplier part
+            $sql = "UPDATE customer_parts_master_stock cpms
+                    JOIN customer_parts_master cpm ON cpm.id = cpms.customer_parts_master_id
+                    SET cpm.fg_rate = ".$newStockRate.", cpms.fg_stock = ".$newStock."
+                    WHERE cpm.part_number = '".$partNo."' AND cpms.clientId = ".$clientId;
+            if ($this->db->query($sql)) {
+                //if ($this->db->affected_rows() > 0) {//incase need to check whether record is updated or not
+                    return true;
+               //
+            } else {
+                // Query failed
+                return false;
+            }
+    }
 
     
 }

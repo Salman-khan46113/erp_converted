@@ -154,6 +154,23 @@
                                                                 <input type="text" name="cphone_no" required class="form-control" id="phone" aria-describedby="phone" placeholder="Phone No">
                                                             </div>
                                                         </div>
+                                                        <div class="col-lg-6">
+                                                           <div class="form-group">
+                                                               <label for="DistanceFromClient">Distance from Client (in KM)</label><span class="text-danger">*</span>
+                                                               <div class="row">
+                                                                <%assign var='unitNo' value=1%>
+                                                                <%while $unitNo <= $currentUnit %>
+                                                                  <%assign var='distanceCol' value="distncFrmClnt$unitNo"%>
+                                                                  <div class="col-lg-4 mb-3">
+                                                                     <label for="DistanceFromClient">From Client <%$unitNo %></label><span class="text-danger">*</span>
+                                                                     <input type="text" step="any" required min="1"  name="<%$distanceCol%>" class="form-control onlyNumericInput" aria-describedby="distanceHelp" placeholder="Distance from Client PIN">
+                                                                  </div>
+                                                                  <%assign var='unitNo' value=$unitNo+1%>
+                                                                   <%/while%>
+                                                                                                 
+                                                               </div>
+                                                            </div>
+                                                          </div>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -169,10 +186,11 @@
                             </div>
                             <!-- /.card-header -->
                             <div class="">
-                                <table id="example1" class="table  table-striped">
+                                <table id="example1" class="table  table-striped w-100">
                                     <thead>
                                         <tr>
-                                            <th>Sr. No.</th>
+                                            <th  style="display: none;">Id</th>
+                                            <!-- <th>Sr. No.</th> -->
                                             <th>Consignee Name</th>
                                             <th>Location</th>
                                             <th>Phone No</th>
@@ -190,7 +208,8 @@
                                             <%assign var="i" value=1%>
                                             <%foreach from=$consignee_list item=t%>
                                                 <tr>
-                                                    <td><%$i%></td>
+                                                    <td style="display: none;"><%$t->id%></td>
+                                                    <!-- <td><%$i%></td> -->
                                                     <td><%$t->consignee_name%></td>
                                                     <td><%$t->location%></td>
                                                     <td><%$t->phone_no%></td>
@@ -267,7 +286,7 @@
 
                             <div class="form-group">
                                 <label for="customer_name">Consignee Name</label><span class="text-danger">*</span>
-                                <input value="<%$t->consignee_name%>" type="text" name="uconsignee_name"  class="form-control" id="uconsignee_name" aria-describedby="emailHelp" placeholder="Consignee Name">
+                                <input value="<%$t->consignee_name%>" type="text" name="uconsignee_name"  class="form-control" id="uconsignee_name" aria-describedby="emailHelp" placeholder="Consignee Name" readonly>
                                 <input value="<%$t->c_id%>" type="hidden" name="consignee_id"  class="form-control" id="uconsignee_ref">
                                 <input value="<%$t->address_id%>" type="hidden" name="address_id"  class="form-control" id="uaddressRef">
                             </div>
@@ -305,7 +324,7 @@
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <label for="customer_location">GST Number</label><span class="text-danger">*</span>
-                                <input type="text" name="ugst_number" value="<%$t->gst_number%>"  class="form-control" id="ugst_no" aria-describedby="emailHelp" placeholder="GST Number">
+                                <input type="text" name="ugst_number" value="<%$t->gst_number%>"  class="form-control" id="ugst_no" aria-describedby="emailHelp" placeholder="GST Number" readonly>
                             </div>
                         </div>
                         <div class="col-lg-6">
@@ -320,6 +339,23 @@
                                 <input type="text" name="uphone_no" value="<%$t->phone_no%>"  class="form-control" id="uphone" aria-describedby="phone" placeholder="Phone No">
                             </div>
                         </div>
+                        <div class="col-lg-6">
+                                                           <div class="form-group">
+                                                               <label for="DistanceFromClient">Distance from Client (in KM)</label><span class="text-danger">*</span>
+                                                               <div class="row">
+                                                                <%assign var='unitNo' value=1%>
+                                                                <%while $unitNo <= $currentUnit %>
+                                                                  <%assign var='distanceCol' value="distncFrmClnt$unitNo"%>
+                                                                  <div class="col-lg-4 mb-3">
+                                                                     <label for="DistanceFromClient">From Client <%$unitNo %></label><span class="text-danger">*</span>
+                                                                     <input type="text" step="any" required min="1"  name="<%$distanceCol%>" id="<%$distanceCol%>" class="form-control onlyNumericInput" aria-describedby="distanceHelp" placeholder="Distance from Client PIN">
+                                                                  </div>
+                                                                  <%assign var='unitNo' value=$unitNo+1%>
+                                                                   <%/while%>
+                                                                                                 
+                                                               </div>
+                                                            </div>
+                                                          </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -330,5 +366,8 @@
         </div>
     </div>
 </div>
+<script>
+    var currentUnit = <%json_encode($currentUnit)%>
+</script>
 <script src="<%$base_url%>/public/js/consignee.js"></script>
     <!-- /.content-wrapper -->

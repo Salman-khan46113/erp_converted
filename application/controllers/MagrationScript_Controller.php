@@ -113,16 +113,16 @@ class MagrationScript_Controller extends CommonController
             $update_arr = [];
             foreach ($part_data as $key => $value) {
                 $basic_total = $value->qty * $value->fg_rate;
-                if ((int) $value->igst === 0) {
-                        $gst = (int) $value->cgst + (int) $value->sgst;
-                        $cgst = (int) $value->cgst;
-                        $sgst = (int) $value->sgst;
-                        $tcs = (float) $value->tcs;
+                if ($value->igst <= 0) {
+                        $gst = $value->cgst + $value->sgst;
+                        $cgst = $value->cgst;
+                        $sgst = $value->sgst;
+                        $tcs = $value->tcs;
                         $igst = 0;
                         $total_gst_percentage = $cgst + $sgst;
                 } else {
-                            $gst = (int) $value->igst;
-                            $tcs = (float) $value->tcs;
+                            $gst = $value->igst;
+                            $tcs = $value->tcs;
                             $cgst = 0;
                             $sgst = 0;
                             $igst = $gst;

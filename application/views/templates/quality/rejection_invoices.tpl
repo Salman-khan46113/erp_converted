@@ -130,8 +130,8 @@
                                     </div>
                                     <div class="col-lg-4 mb-3">
                                         <div class="form-group">
-                                            <label for="" class="form-label">Freight Charges</label>
-                                            <input type="text" placeholder="Enter Freight Charges" value="" name="freight_charges" class="form-control">
+                                            <label for="" class="form-label">P&F Charges</label>
+                                            <input type="text" placeholder="Enter P&F Charges" value="" name="freight_charges" class="form-control">
                                         </div>
                                     </div>
                                     
@@ -211,7 +211,7 @@
                                             <th>Transporter</th>
                                             <th>Vehicle No.</th>
                                             <th>L.R No</th>
-                                            <th>Freight Charges</th>
+                                            <th>P&F Charges</th>
                                             <!-- <th>GST Amount</th> -->
                                             <th>View Details</th>
                                         </tr>

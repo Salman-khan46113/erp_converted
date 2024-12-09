@@ -458,7 +458,7 @@ $route['part_family'] = 'welcome/part_family';
 $route['process'] = 'welcome/process';
 $route['customer_parts_master'] = 'welcome/customer_parts_master';
 $route['update_customer_parts_master'] = 'welcome/update_customer_parts_master';
-$route['add_users_data'] = 'welcome/add_users_data';
+$route['add_users_data'] = 'welcome/group_menu';
 $route['update_users_data'] = 'welcome/update_users_data';
 $route['update_p_q'] = 'welcome/update_p_q';
 $route['update_accept_parts_rejection_sales_invoice'] = 'welcome/update_parts_rejection_sales_invoice';
@@ -550,7 +550,6 @@ $route['update_child_stock'] = 'SupplierPartsController/update_child_stock';
 $route['stock_down'] = 'SupplierPartsController/stock_down';
 $route['stock_up'] = 'SupplierPartsController/stock_up';
 $route['add_stock/(:any)'] = 'SupplierPartsController/add_stock';
-
 
 
 
@@ -734,6 +733,9 @@ $route['grn_export'] = 'ExportController/grn_export';
 $route['grn_excel_export'] = 'ExportController/grn_excel_export';
 $route['operation_bom_template_excel_export'] = 'ExportController/operation_bom_template_excel_export';
 $route['import_operation_bom'] = 'ExportController/import_operation_bom';
+$route['export_parts_stock/(:any)'] = 'ExportController/export_parts_stock';
+$route['import_parts_stock/(:any)'] = 'ExportController/import_parts_stock';
+
 
 
 

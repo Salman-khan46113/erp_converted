@@ -145,9 +145,12 @@ class ReportsController extends CommonController
 		
 		
 		$data = $this->SupplierParts->getStockReportDataModel($condition_arr,$post_data["search"]);
+
 		foreach ($data as $key => $value) {
-			$data[$key]['stock_value'] = $value['stock'] * $value['store_stock_rate'];
-            $data[$key]['stock_value'] = number_format($value['stock_value'],2,".","");
+			$stock_value = $value['stock'] * $value['store_stock_rate'];
+
+            $data[$key]['stock_value'] = number_format($stock_value,2,".","");
+            
 
 		}
 		
@@ -338,7 +341,7 @@ class ReportsController extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
+        $data["sorting_column"] = json_encode([8, 'desc']);
         $data["page_length_arr"] = [[10,50,100,200,500,1000], [10,50,100,200,500,1000]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
@@ -371,7 +374,6 @@ class ReportsController extends CommonController
         $condition_arr["length"] = $post_data["length"];
         $base_url = $this->config->item("base_url");
 		$data = $this->SupplierParts->getGNRepotData($condition_arr,$post_data["search"]);
-		pr($data,1);
 		foreach($data as $k=>$v){
 			$data[$k]['po_date']= defaultDateFormat($v['po_date']);
 			$data[$k]['invoice_date'] = defaultDateFormat($v['invoice_date']);
@@ -882,7 +884,7 @@ class ReportsController extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
+        $data["sorting_column"] = json_encode([[3, 'desc']]);
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();

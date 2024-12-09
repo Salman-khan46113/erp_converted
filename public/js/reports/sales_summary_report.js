@@ -158,6 +158,7 @@ const page = {
             info: true,
             autoWidth: true,
             lengthChange: true,
+            order: sorting_column,
             fixedColumns: {
                 leftColumns: 2,
                 // end: 1

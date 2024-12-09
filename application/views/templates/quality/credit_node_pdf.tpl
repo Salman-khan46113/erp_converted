@@ -169,7 +169,7 @@
          <td colspan="3" style="text-align:center"><%$igst_amount %></td>
       </tr>
       <tr style="font-size:10px">
-         <td colspan="2 style=" text-align:center;margin-left:10px;">Freight Charges</td>
+         <td colspan="2 style=" text-align:center;margin-left:10px;">P&F Charges</td>
          <td colspan="3" style="text-align:center"><%$rejection_sales_invoice->freight_charges %></td>
       </tr>
       <tr style="font-size:10px">
