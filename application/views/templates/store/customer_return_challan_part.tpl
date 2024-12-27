@@ -97,13 +97,16 @@
                             </div>
                         </div>
                         <%/if%>
-                        <div class="card mt-4">
+                        <div class="w-100 mt-3">
+            <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
+        </div>
+                        <div class="card mt-4 w-100">
 
                             <div class="">
                                 <table id="challan_inward" class="table table-striped">
                                     <thead>
                                         <tr>
-                                            <th>Sr No</th>
+                                            <!-- <th>Sr No</th> -->
                                             <th>CR NO</th>
                                             <th>Customer</th>
                                             <th>Reference Challan Number</th>
@@ -117,7 +120,7 @@
                                         <%assign var='i' value=1 %>
                                         <%foreach from=$customer_challan_part_return item=u %>
                                                   <tr>
-                                                    <td><%$i%></td>
+                                                    <!-- <td><%$i%></td> -->
                                                     <td><%$u->grn_code %></td>
                                                     <td><%$u->customer_name %></td>
                                                     <td><%display_no_character($u->customer_challan_no)%></td>

@@ -90,7 +90,7 @@ class Welcome extends CommonController
         ];
         $column[] = [
             "data" => "expiry_po_date",
-            "title" => "Expiry Date<",
+            "title" => "Expiry Date",
             "width" => "17%",
             "className" => "dt-center",
 			'orderable' => false
@@ -121,6 +121,13 @@ class Welcome extends CommonController
             "width" => "7%",
             "className" => "dt-center",
         ];
+        $column[] = [
+            "data" => "po_id",
+            "title" => "PO ID",
+            "width" => "7%",
+            "className" => "dt-center",
+            "visible" => false
+        ];
 
 		$data['created_year'] = $created_year;
 		$data['created_month'] = $created_month;
@@ -142,7 +149,7 @@ class Welcome extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
+        $data["sorting_column"] = json_encode([[10, 'desc']]);
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
@@ -343,9 +350,9 @@ class Welcome extends CommonController
 		foreach ($data as $key => $value) {
 			$data[$key]['po_date'] = defaultDateFormat($value['po_date']);
             $inwarding = $this->Crud->get_data_by_id("inwarding", $value['inwarding_id'], "id");
-            if($inwarding[0]->status != "validate_grn"){
-                $data[$key]['verified_qty'] = 0;
-            }
+            // if($inwarding[0]->status != "validate_grn"){
+            //     $data[$key]['verified_qty'] = 0;
+            // }
             // $data[$key]['grn_number_val'] = $inwarding[0]->grn_number;
 		}
 
@@ -500,6 +507,14 @@ class Welcome extends CommonController
             "className" => "dt-center",
 			'orderable' => false
         ];
+        $column[] = [
+            "data" => "id_val",
+            "title" => "Id",
+            "width" => "7%",
+            "className" => "dt-center",
+            'orderable' => false,
+            "visible" => false
+        ];
 
 
 
@@ -517,7 +532,7 @@ class Welcome extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
+        $data["sorting_column"] = json_encode([[10, 'desc']]);
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
@@ -583,7 +598,6 @@ class Welcome extends CommonController
         $base_url = $this->config->item("base_url");
 
 		$data = $this->SupplierParts->getIncomeReportView($condition_arr,$post_data["search"]);
-
 		foreach ($data as $key => $value) {
 			if($value['status'] != "accept"){
                 $data[$key]['accept_qty'] = 0;
@@ -845,9 +859,10 @@ class Welcome extends CommonController
 		$subcon_po_inwarding_history_id = $this->uri->segment('2');
 		// $data['tool_list'] =  $this->Crud->read_data("tools");
 		$subcon_po_inwarding_history = $this->Crud->get_data_by_id("subcon_po_inwarding_history", $subcon_po_inwarding_history_id, 'subcon_po_inwarding_parts_id');
-        foreach ($subcon_po_inwarding_history as $p) {
+        foreach ($subcon_po_inwarding_history as $key=> $p) {
             $challan_data = $this->Crud->get_data_by_id("challan", $p->challan_id, "id");
-            $subcon_po_inwarding_history->challan_data = $challan_data;
+            $subcon_po_inwarding_history[$key]->challan_data = $challan_data[0];
+            
         }
         $data['subcon_po_inwarding_history'] = $subcon_po_inwarding_history;
 
@@ -1169,9 +1184,10 @@ class Welcome extends CommonController
 			FROM inwarding as i
 			LEFT JOIN new_po as np ON  np.id  = i.po_id
 			LEFT JOIN supplier as s ON  s.id  = np.supplier_id
-			WHERE i.delivery_unit = '".$this->Unit->getSessionClientUnitName()."'");
-
-
+			WHERE i.delivery_unit = '".$this->Unit->getSessionClientUnitName()."'"." 
+            ORDER BY i.id DESC");
+        
+        // pr($this->db->last_query());
 		$data['isMultiClient'] = $this->session->userdata['isMultipleClientUnits'];
 		// $this->load->view('header');
 		$this->loadView('quality/accept_reject_validation', $data);
@@ -1259,15 +1275,15 @@ class Welcome extends CommonController
             $actual_price -= $discount_amount;
             $gst_structure_data = $this->Crud->get_data_by_id("gst_structure", $po_parts[0]->tax_id, "id");
             if ((int) $gst_structure_data[0]->igst === 0) {
-                $gst = (int) $gst_structure_data[0]->cgst + (int) $gst_structure_data[0]->sgst;
-                $cgst = (int) $gst_structure_data[0]->cgst;
-                $sgst = (int) $gst_structure_data[0]->sgst;
+                $gst = (float) $gst_structure_data[0]->cgst + (float) $gst_structure_data[0]->sgst;
+                $cgst = (float) $gst_structure_data[0]->cgst;
+                $sgst = (float) $gst_structure_data[0]->sgst;
                 $tcs = (float) $gst_structure_data[0]->tcs;
                 $tcs_on_tax = $gst_structure_data[0]->tcs_on_tax;
                 $igst = 0;
             } else {
 
-                $gst = (int) $gst_structure_data[0]->igst;
+                $gst = (float) $gst_structure_data[0]->igst;
                 $cgst = 0;
                 $sgst = 0;
                 $tcs = (float) $gst_structure_data[0]->tcs;
@@ -3205,6 +3221,14 @@ class Welcome extends CommonController
             "width" => "2%",
             "className" => "dt-center",
         ];
+        $column[] = [
+            "data" => "id",
+            "title" => "Id",
+            "width" => "14%",
+            "className" => "dt-left",
+            "visible" => false
+        ];
+        // pr($column,1);
         $data["data"] = $column;
         $data["is_searching_enable"] = true;
         $data["is_paging_enable"] = true;
@@ -3216,7 +3240,7 @@ class Welcome extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Supplier data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
+        $data["sorting_column"] = json_encode([[17, 'desc']]);
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
@@ -6019,8 +6043,9 @@ class Welcome extends CommonController
 			}
 		}
 		
-
+        
 		foreach ($data['customer_part_rate'] as $poo ) {
+
 			$data['customer_part_rate_data'][$poo->customer_master_id] = $this->Crud->get_data_by_id("customer_part_rate", $poo->customer_master_id, "customer_master_id");
 			$data['po'][$poo->customer_master_id] = $this->Crud->get_data_by_id("customer_part", $poo->customer_master_id, "id");
 			$data['customer_data'][$data['po'][$poo->customer_master_id][0]->customer_id] = $this->Crud->get_data_by_id("customer", $data['po'][$poo->customer_master_id][0]->customer_id, "id");
@@ -6037,6 +6062,7 @@ class Welcome extends CommonController
 		// $this->load->view('header');
 		// $this->load->view('customer_part_price_by_id', $data);
 		// $this->load->view('footer');
+        
 		$this->loadView('customer/customer_part_price_by_id',$data);
 	}
 	public function customer_part_operation_by_id()

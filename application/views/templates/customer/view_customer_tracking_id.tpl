@@ -324,12 +324,12 @@
                                                                                 <span aria-hidden="true">&times;</span>
                                                                             </button>
                                                                         </div>
-                                                                        <form action="<%$base_url%>update_parts_customer_trackings" method="POST" class="update_qty">
+                                                                        <form action="<%$base_url%>update_parts_customer_trackings" method="POST" class="update_qty custom-form update_parts_customer_trackings<%$i%>" id="update_parts_customer_trackings<%$i%>">
                                                                         <div class="modal-body">
                                                                             <div class="col-lg-12">
                                                                                 <div class="form-group">
                                                                                         <label for="">Enter Qty <span class="text-danger">*</span></label>
-                                                                                        <input type="text" name="qty" value="<%$p->qty%>" placeholder="Enter QTY " required class="form-control onlyNumericInput">
+                                                                                        <input type="text" name="qty" value="<%$p->qty%>" placeholder="Enter QTY "  class="form-control onlyNumericInput required-input">
                                                                                         <input type="hidden" name="id" value="<%$p->id%>" required class="form-control">
                                                                                 </div>
                                                                             </div>
@@ -450,48 +450,104 @@ $("#myForm").validate({
 
     
 });
+$(".update_qty").submit(function(e){
+        e.preventDefault();
+       
+        var href = $(this).attr("action");
+        var id = $(this).attr("id");
+        let flag = formValidate(id);
 
-$(".update_qty").validate({
-        rules: {
-            qty: {
-                required: true,
-                number: true
-            }
-        },
-        messages: {
-            qty: {
-                required: "Please enter the quantity",
-                number: "Please enter a valid number"
-            }
-        },
-        submitHandler: function(form) {
-            // Custom submit handler
-            $.ajax({
-                url: form.action,
-                type: form.method,
-                data: $(form).serialize(),
-                success: function(response) {
-                    // Handle the success response here
-                    if(response != '' && response != null && typeof response != 'undefined'){
-                        let res = JSON.parse(response);
-                        if(res['success'] == 1){
-                            toastr.success(res['msg']);
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1000);
-                        }else{
-                            toastr.error(res['msg']);
-                        }
-                    }
-                },
-                error: function(xhr, status, error) {
-                    // Handle the error response here
-                    toastr.error('Form submission failed');
-                    // console.error('Form submission failed:', error);
-                }
-            });
+        if(flag){
+          return;
         }
-    });
+        var formData = new FormData($('.'+id)[0]);
+
+        $.ajax({
+          type: "POST",
+          url: href,
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            var responseObject = JSON.parse(response);
+            var msg = responseObject.messages;
+            var success = responseObject.success;
+            if (success == 1) {
+              toastr.success(msg);
+              $(this).parents(".modal").modal("hide")
+              setTimeout(function(){
+                window.location.reload();
+              },1000);
+
+            } else {
+              toastr.error(msg);
+            }
+          },
+          error: function (error) {
+            console.error("Error:", error);
+          },
+        });
+      });
+
+function formValidate(form_class = ''){
+        let flag = false;
+        $(".custom-form."+form_class+" .required-input").each(function( index ) {
+          var value = $(this).val();
+          var dataMax = parseFloat($(this).attr('data-max'));
+          var dataMin = parseFloat($(this).attr('data-min'));
+          if(value == ''){
+            flag = true;
+            var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+              return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+            }).text().trim();
+            var exit_ele = $(this).parents(".form-group").find("label.error");
+            if(exit_ele.length == 0){
+              var start ="Please enter ";
+              if($(this).prop("localName") == "select"){
+                var start ="Please select ";
+              }
+              label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+              var validation_message = start+(label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+              var label_html = "<label class='error'>"+validation_message+"</label>";
+              $(this).parents(".form-group").append(label_html)
+            }
+          }
+          else if(dataMin !== undefined && dataMin > value){
+            flag = true;
+            var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+              return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+            }).text().trim();
+            var exit_ele = $(this).parents(".form-group").find("label.error");
+            if(exit_ele.length == 0){
+              var end =" must be greater than or equal to "+dataMin;
+              label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+              label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+              label = label.charAt(0).toUpperCase() + label.slice(1);
+              var validation_message =label +end;
+              var label_html = "<label class='error'>"+validation_message+"</label>";
+              $(this).parents(".form-group").append(label_html)
+            }
+            }else if(dataMax !== undefined && dataMax < value){
+              flag = true;
+              var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+                return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+              }).text().trim();
+              var exit_ele = $(this).parents(".form-group").find("label.error");
+              if(exit_ele.length == 0){
+                var end =" must be less than or equal to "+dataMax;
+                label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+                label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+                label = label.charAt(0).toUpperCase() + label.slice(1)
+                var validation_message =label +end;
+                var label_html = "<label class='error'>"+validation_message+"</label>";
+                $(this).parents(".form-group").append(label_html)
+              }
+          }
+        });
+       
+        return flag;
+    }
+
 
     $(".delete_form").on("submit", function(event) {
         event.preventDefault(); // Prevent the default form submission

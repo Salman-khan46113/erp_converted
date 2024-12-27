@@ -609,6 +609,7 @@ class NewEInvoiceController extends CommonController {
    */
   public function cancel_E_invoice_update()
 	{
+
 		$new_sales_id = $this->input->post('new_sales_id');
 		$new_sales=array(
 			"new_sales_id"=>$new_sales_id,
@@ -622,13 +623,15 @@ class NewEInvoiceController extends CommonController {
 		$CancelReason = $this->input->post('CancelReason');
 		$CancelRemark = $this->input->post('CancelRemark');
 
-		$this->echoToTriage("<br> CancelReason : ".$CancelReason." <br>CancelRemark : ". $CancelRemark. " <br>IRN No: ".$IrnNo);
+		// $this->echoToTriage("<br> CancelReason : ".$CancelReason." <br>CancelRemark : ". $CancelRemark. " <br>IRN No: ".$IrnNo);
 
 		$data = array(
 			"Status" => 'CANCELLED',
 			"CancelReason" => $CancelReason,
 			"CancelRemark" => $CancelRemark,
 		);
+		$success = 0;
+        $messages = "Something went wrong.";
 
 		$this->load->model('NewGSTCommon');
 		$token = $this->NewGSTCommon->authentication($new_sales_id);
@@ -649,31 +652,40 @@ class NewEInvoiceController extends CommonController {
 			$requestData = json_encode($jsondata);
 			$this->load->model('NewEInvoice');
 			$cancelResult=$this->NewEInvoice->execute($url,$requestData,$action,$Authorization); 
-			$this->echoToTriage("<br><br><b>Response For Cancel :</b><br>" .json_encode($cancelResult) . "<br>");
+			// $this->echoToTriage("<br><br><b>Response For Cancel :</b><br>" .json_encode($cancelResult) . "<br>");
 
 			if (isset($cancelResult['success']) && $cancelResult['success'] == false) {
-				$this->echoToTriage("API error occured for Cancel Request...");
+				// $this->echoToTriage("API error occured for Cancel Request...");
 				$errorDet = $cancelResult['message'];
 
-				$this->echoToTriage("<br><br><u>GST Errors for Cancel Request:</u><br>");
-				$this->echoToTriage("\n GST Error Response for Cancel Request:
-										\n ErrorMsg: " . $errorDet);
-				$this->addErrorMessage($errorDet);
+				// $this->echoToTriage("<br><br><u>GST Errors for Cancel Request:</u><br>");
+				// $this->echoToTriage("\n GST Error Response for Cancel Request:
+				// 						\n ErrorMsg: " . $errorDet);
+				// $this->addErrorMessage($errorDet);
+				$messages = $errorDet;
 				$this->load->model('NewEInvoice');
-				$this->NewEInvoice->redirect($new_sales_id);
+				// $this->NewEInvoice->redirect($newt_button(left, top, text)_sales_id);
 
 			} else if (isset($cancelResult['success']) && $cancelResult['success'] == true) {
 				$resultUpdate = $this->Common_admin_model->update("einvoice_res", $data, "new_sales_id", $new_sales_id);
 				if ($resultUpdate) {
-					$this->addSuccessMessage('Envoice Canceled Sucessfully');
-					$this->redirectMessage();
+					$messages = "Envoice Canceled Sucessfully";
+					$success = 1;
+					// $this->addSuccessMessage('Envoice Canceled Sucessfully');
+					// $this->redirectMessage();
 				} else {
-					$this->addErrorMessage('Not Updated. Please try again.');
-					$this->redirectMessage();
+					$messages = "Not Updated. Please try again.";
+					// $this->addErrorMessage('Not Updated. Please try again.');
+					// $this->redirectMessage();
 				}
 			}
 
-        }      
+        } 
+        $result = [];
+        $result['messages'] = $messages;
+        $result['success'] = $success;
+        echo json_encode($result);
+        exit();     
 	}
 	
 	

@@ -283,7 +283,7 @@ class StockController extends CommonController
 			// pr($plastic_prod_details,1);
 			// if($value['stock'] > 0){
 				$stock_temp = base64_encode(json_encode($value)); 
-				if(checkGroupAccess("part_stocks","update","No")){
+				if(checkGroupAccess("part_stocks","update","No") && $value['stock'] > 0){
 					$stock_temp_html = '<button type="button" class="btn btn-primary edit-fg" data-bs-toggle="modal"  data-value='.$stock_temp.' data-bs-target="#storeToStore">
 											'.$value['stock'].'
 											</button>';

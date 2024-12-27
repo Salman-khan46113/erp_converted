@@ -716,7 +716,7 @@
                      </ul>
                   </li>
                   <%/if%>
-                  <%if checkGroupAccess("sales_report","list","No") || checkGroupAccess("sales_summary_report","list","No") || checkGroupAccess("receivable_report","list","No") || checkGroupAccess("payable_report","list","No") || ($entitlements['isSheetMetal']!=null && (checkGroupAccess("report_stock_transfer","list","No") || checkGroupAccess("customer_part_wip_stock_report","list","No"))) || checkGroupAccess("child_part_view","list","No") || checkGroupAccess("approved_supplier","list","No") || checkGroupAccess("child_part_supplier_report","list","No") || checkGroupAccess("supplier_parts_stock_report","list","No") || checkGroupAccess("reports_po_balance_qty","list","No") || checkGroupAccess("reports_grn","list","No") || checkGroupAccess("grn_summary_report","list","No") || ($entitlements['isPlastic']!=null && (checkGroupAccess("report_prod_rejection","list","No") || checkGroupAccess("machine_request_completed","list","No") || checkGroupAccess("molding_stock_transfer","list","No") )) || checkGroupAccess("reports_incoming_quality","list","No") || checkGroupAccess("reports_inspection","list","No") || checkGroupAccess("grn_rejection","list","No") || checkGroupAccess("part_stocks","list","No") || checkGroupAccess("planing_data_report","list","No") || checkGroupAccess("subcon_supplier_challan_part_report","list","No") || checkGroupAccess("mold_maintenance_report","list","No") || checkGroupAccess("pending_po","list","No") || checkGroupAccess("rejected_po","list","No") || checkGroupAccess("expired_po","list","No") || checkGroupAccess("closed_po","list","No") || checkGroupAccess("downtime_report","list","No")%>
+                  <%if checkGroupAccess("sales_report","list","No") || checkGroupAccess("hsn_report","list","No") || checkGroupAccess("sales_summary_report","list","No") || checkGroupAccess("receivable_report","list","No") || checkGroupAccess("payable_report","list","No") || ($entitlements['isSheetMetal']!=null && (checkGroupAccess("report_stock_transfer","list","No") || checkGroupAccess("customer_part_wip_stock_report","list","No"))) || checkGroupAccess("child_part_view","list","No") || checkGroupAccess("approved_supplier","list","No") || checkGroupAccess("child_part_supplier_report","list","No") || checkGroupAccess("supplier_parts_stock_report","list","No") || checkGroupAccess("reports_po_balance_qty","list","No") || checkGroupAccess("reports_grn","list","No") || checkGroupAccess("grn_summary_report","list","No") || ($entitlements['isPlastic']!=null && (checkGroupAccess("report_prod_rejection","list","No") || checkGroupAccess("machine_request_completed","list","No") || checkGroupAccess("molding_stock_transfer","list","No") )) || checkGroupAccess("reports_incoming_quality","list","No") || checkGroupAccess("reports_inspection","list","No") || checkGroupAccess("grn_rejection","list","No") || checkGroupAccess("part_stocks","list","No") || checkGroupAccess("planing_data_report","list","No") || checkGroupAccess("subcon_supplier_challan_part_report","list","No") || checkGroupAccess("mold_maintenance_report","list","No") || checkGroupAccess("pending_po","list","No") || checkGroupAccess("rejected_po","list","No") || checkGroupAccess("expired_po","list","No") || checkGroupAccess("closed_po","list","No") || checkGroupAccess("downtime_report","list","No") || checkGroupAccess("customer_challan_report","list","No")%>
                   <li class="nav-item dropdown">
                      <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdownMenuLinkReport" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                      Reports
@@ -724,6 +724,9 @@
                      <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkReportSubmenu">
                         <%if checkGroupAccess("sales_report","list","No") %>
                         <li><a href="<%base_url('sales_report')%>" class="dropdown-item">Sales Report </a></li>
+                        <%/if%>
+                        <%if checkGroupAccess("hsn_report","list","No") %>
+                        <li><a href="<%base_url('hsn_report')%>" class="dropdown-item">HSN Report </a></li>
                         <%/if%>
                         <%if checkGroupAccess("sales_summary_report","list","No") %>
                         <li><a href="<%base_url('sales_summary_report')%>" class="dropdown-item">Sales Summary report </a></li>
@@ -823,8 +826,9 @@
                            <%if ($entitlements['isPlastic']!=null && checkGroupAccess("molding_stock_transfer","list","No")) %>
                               <li><a href="<%base_url('molding_stock_transfer ')%>" class="dropdown-item">Molding Stock Transfer </a></li>
                            <%/if%>
-                        <%if checkGroupAccess("downtime_report","list","No") %>
-                           <li><a href="<%base_url('downtime_report ')%>" class="dropdown-item">Downtime Report</a></li>
+                        <%if checkGroupAccess("customer_challan_report","list","No") %>
+                           <li><a href="<%base_url('customer_challan_report ')%>" class="dropdown-item">
+Customer Challan Report</a></li>
                         <%/if%>
                      </ul>
                   </li>

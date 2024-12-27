@@ -18,10 +18,11 @@ const datatable = {
         that.dataTable();
         $(document).on('click','.search-filter',function(e){
             let customer_name = $("#customer_name").val();
-            table.column(1).search(customer_name).draw();
-            $(".close-filter-btn").trigger( "click" )
+            table.column(2).search(customer_name).draw();
+            $(".close-filter-btn").trigger("click")
         })
         $(document).on('click','.reset-filter',function(e){
+          $("#customer_name").val("").trigger("change");
            that.resetFilter();
         })
         $(document).on("click",".edit-part",function(){
@@ -207,7 +208,7 @@ const datatable = {
         return flag;
     },
     resetFilter:function(){
-        table.column(1).search('').draw();
+        table.column(2).search('').draw();
     }
 
 }

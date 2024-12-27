@@ -82,12 +82,14 @@ class GlobalConfigModel extends CI_Model {
             if(is_valid_array($group_rights_data)){
                 $group_rights = array_values($group_rights_data);
                 $group_rights = $group_rights[0];
+
                 if($group_rights[$type] == "Yes"){
                     $access = true;
                 }
             }
             
         }
+        
         // $user_role = $session['role'];
         // $group_data = $this->checkGroupCodeExist($user_role);
         // if(is_valid_array($group_data)){
@@ -145,6 +147,9 @@ class GlobalConfigModel extends CI_Model {
             }
             if(!isset($group_rights_arr[$value['menu_master_id']]['export'])  || (isset($group_rights_arr[$value['menu_master_id']]['export']) && $group_rights_arr[$value['menu_master_id']]['export'] == "No")){
                 $group_rights_arr[$value['menu_master_id']]['export'] = $value['export'];
+            }
+            if(!isset($group_rights_arr[$value['menu_master_id']]['import'])  || (isset($group_rights_arr[$value['menu_master_id']]['import']) && $group_rights_arr[$value['menu_master_id']]['import'] == "No")){
+                $group_rights_arr[$value['menu_master_id']]['import'] = $value['import'];
             }
         }
         // pr($group_rights_arr,1);

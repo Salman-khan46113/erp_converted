@@ -48,7 +48,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <form action="<%$base_url%>test" method="post">
+                                <form action="javascript:void(0)" method="post" id="submitByPartId">
                                     <div class="row">
                                         <div class="col-sm-4">
                                             <div class="form-group mb-3">
@@ -70,7 +70,7 @@
 
                                         <div class="col-sm-1 mt-3">
                                             <div class="form-group">
-                                            <button type="submit" id="submitByPartId" class="btn btn-primary" >Submit</button>
+                                            <button type="submit"  class="btn btn-primary" >Submit</button>
                                               <%*  <input type="button" id="submitByPartId" class="btn btn-primary mt-2" value="Submit"> *%>
                                             </div>
                                         </div>
@@ -104,10 +104,11 @@
 <!-- /.content-wrapper -->
 <script>
     //on click of submit : to auto submit observation values
-    $(document).on("click", "#submitByPartId", function() {
+    $("#submitByPartId").submit(function(e){
+        e.preventDefault();
         var sales_part_id_customer_id = $("#sales_part_id").val();
         if (sales_part_id_customer_id == '') {
-            alert("Please select Part Number.");
+            toastr.error("Please select Part Number.");
         } else {
             $.ajax({
                 url: '<%$base_url%>PartInspectionController/auto_submit_inspection_report_observations',
@@ -123,13 +124,16 @@
                 }
             });
         }
-    });
+
+    })
+   
 
     //on click of add : show this modal change
     $(document).on("click", "#addNewPartParms", function() {
         var sales_part_id_customer_id = $("#sales_part_id").val();
         if (sales_part_id_customer_id == '') {
-            alert('Please select Part Number.');
+            // alert('Please select Part Number.');
+            toastr.error("Please select Part Number.");
         } else {
             $.ajax({
                 url: '<%$base_url%>PartInspectionController/auto_submit_inspection_report_observations',
@@ -177,7 +181,8 @@
         var sales_part_id = valuesArray[0];
         getPDILink.href = '<%$base_url%>view_PDI/' + sales_part_id;
         if (sales_part_id == '') {
-            alert('Please select Part Number.');
+            // alert('Please select Part Number.'); 
+            toastr.error("Please select Part Number.");
             e.preventDefault(); // Prevent the link from navigating
         }
     });
@@ -222,7 +227,14 @@
                 critical_parm: critical_parm
             },
             success: function(response) {
-                $("#editModal .modal-body").html(response);
+                var responseObject = JSON.parse(response);
+                var msg = responseObject.message;
+                var success = responseObject.success;
+                if (success == 1) {
+                  toastr.success(msg);
+                } else {
+                  toastr.error(msg);
+                }
             }
         });
     });

@@ -124,6 +124,7 @@ const page = {
             info: true,
             autoWidth: true,
             lengthChange: true,
+            order: sorting_column,
             ajax: {
                 data: {'search':data},    
                 url: "Welcome/reportPoBalanceData",

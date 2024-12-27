@@ -38,12 +38,12 @@ const page = {
                 customer_id: {
                     required: true
                 },
-                customer_debit_note_no: {
-                    required: true
-                },
-                customer_debit_note_date: {
-                    required: true
-                },
+                // customer_debit_note_no: {
+                //     required: true
+                // },
+                // customer_debit_note_date: {
+                //     required: true
+                // },
                 form_type: {
                     required: true
                 },

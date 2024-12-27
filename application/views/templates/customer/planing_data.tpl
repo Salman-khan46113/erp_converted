@@ -387,6 +387,7 @@
                                 <%assign var="i" value=1%>
                                 <%assign var="total1" value=0%>
                                 <%assign var="total2" value=0%>
+                                
                                 <%if $planing_data%>
                                     <%foreach from=$planing_data item=t%>
                                         <%if $month == $t->month%>
@@ -491,6 +492,9 @@
                                                                 <input required value="<%$customer_part_data[$t->customer_part_id][0]->customer_id%>"
                                                                     type="hidden" class="form-control"
                                                                     name="customer_id">
+                                                                    <input required value="<%$planing_data_val[0]->id%>"
+                                                                    type="hidden" class="form-control"
+                                                                    name="planing_id">
                                                             </div>
                                                     </div>
                                                     <div class="modal-footer">

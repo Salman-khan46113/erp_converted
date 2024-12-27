@@ -63,6 +63,7 @@ const page = {
         bScrollCollapse: true,
         columnDefs: [{ sortable: false, targets: 3 }],
         pagingType: "full_numbers",
+        order: [[0, 'desc']],
        
         
     });

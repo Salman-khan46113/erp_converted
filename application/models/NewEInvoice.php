@@ -27,7 +27,7 @@ class NewEInvoice extends NewGSTCommon
      */
     public function execute($url, $data, $action, $Authorization, $XConnectorAuthToken = null)
     {
-        $this->echoToTriage('<br>----- Called execute Method -----');
+        // $this->echoToTriage('<br>----- Called execute Method -----');
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -35,7 +35,7 @@ class NewEInvoice extends NewGSTCommon
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 
         $current_timestamp = time();
-        echo "current_timestamp - " . $current_timestamp;
+        // echo "current_timestamp - " . $current_timestamp;
         $requestid = date("dmyHis", $current_timestamp);
         //echo $date; // Output: 0904241750
 
@@ -50,16 +50,16 @@ class NewEInvoice extends NewGSTCommon
         $array = json_decode(curl_exec($ch), true);
 
         if ($out === false) {
-            $this->echoToTriage('<br> Execute Curl error : ' . curl_error($ch));
+            // $this->echoToTriage('<br> Execute Curl error : ' . curl_error($ch));
             return 1;
         }
 
         curl_close($ch);
         if (isset($array['error']) && $array['error'] == "invalid_token") {
-            $this->echoToTriage('<br>----- error -----');
+            // $this->echoToTriage('<br>----- error -----');
             return 1;
         } else if ($array['errorMsg'] == "Invalid auth token.") {
-            $this->echoToTriage('<br>----- Invalid auth token-----');
+            // $this->echoToTriage('<br>----- Invalid auth token-----');
             return 2;
         } else {
             return $array;

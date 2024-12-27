@@ -9,7 +9,7 @@ const datatable = {
         that.dataTable();
         $(document).on('click','.search-filter',function(e){
             let customer_name = $("#customer_name").val();
-            table.column(0).search(customer_name).draw();
+            table.column(1).search(customer_name).draw();
             $(".close-filter-btn").trigger( "click" )
         })
         $(document).on('click','.reset-filter',function(e){
@@ -110,7 +110,7 @@ const datatable = {
     },
     resetFilter:function(){
         $("#customer_name").val("").trigger("change");
-        table.column(0).search('').draw();
+        table.column(1).search('').draw();
     }
 
 }
@@ -154,7 +154,8 @@ const validationFunc = () => {
               min: 0
            },
            pos: {
-              required: true
+              required: true,
+              min: 1
            },
            address1: {
               required: true
@@ -203,7 +204,8 @@ const validationFunc = () => {
               min: "Value must be greater than or equal to 0"
            },
            pos: {
-              required: "Please enter the pos"
+              required: "Please enter the pos",
+              min: "Value must be greater than or equal to 0"
            },
            address1: {
               required: "Please enter the address"
@@ -281,7 +283,8 @@ const validationFunc = () => {
            //    required: true
            // },
            pos: {
-              required: true
+              required: true,
+              min: 1
            },
            address1: {
               required: true
@@ -331,7 +334,8 @@ const validationFunc = () => {
               required: "Please enter the bank details"
            },
            pos: {
-              required: "Please enter the pos"
+              required: "Please enter the pos",
+              min: "Value must be greater than or equal to 0"
            },
            address1: {
               required: "Please enter the address"

@@ -117,9 +117,9 @@
                   <th>GRN Number </th>
                   <th>Vehicle No</th>
                   <th>Transporter</th>
-                  <?php if($isMultiClient == "true") { ?>
+                  <%if ($isMultiClient == "true") %>
                     <th>Delivery Location</th>
-                  <?php } ?>
+                  <%/if%>
                   <th class="text-center">View Details</th>
                   <th class="text-center">Action</th>
 

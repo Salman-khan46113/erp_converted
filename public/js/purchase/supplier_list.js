@@ -11,7 +11,7 @@ const page = {
     },
     dataTable: function(){
 
-        var data = {};
+        var data = this.serachParams();
         table = new DataTable("#child_part_view", {
             dom: "Bfrtilp",
             buttons: [
@@ -89,6 +89,7 @@ const page = {
             info: true,
             autoWidth: true,
             lengthChange: true,
+            order: sorting_column,              
             fixedColumns: {
                 leftColumns: 2,
                 // end: 1

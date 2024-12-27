@@ -284,7 +284,6 @@
             var sorting_column = <%$sorting_column%> ;
             var api_name = <%$api_name|json_encode%> ;
             var base_url = <%$base_url|json_encode%> ;
-            var supplier_part_select_list = <%$supplier_part_select_list|json_encode%>;
             var sheet_prod_column_name = <%$sheet_prod_column_name|json_encode%>;
             var stock_column_name = <%$stock_column_name|json_encode%>;
             var plastic_prod_column_name = <%$plastic_prod_column_name|json_encode%>;

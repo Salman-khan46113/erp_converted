@@ -239,12 +239,11 @@
                                                 <div class="col-lg-6">
                                                 <div class="form-group">
                                                 <label for="machine_name">Supplier
-                                                Email</label><span
-                                                   class="text-danger">*</span>
+                                                Email</label>
                                                 <input type="email"
                                                    value="<%$s->email %>"
                                                    name="updatesupplierEmail" 
-                                                   class="form-control required-input"
+                                                   class="form-control "
                                                    id="exampleInputEmail1"
                                                    aria-describedby="emailHelp"
                                                    placeholder="Enter Supplier Email">

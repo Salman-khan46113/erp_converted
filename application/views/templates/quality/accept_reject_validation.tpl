@@ -85,6 +85,7 @@
                   <th>Delivery Unit</th>
                   <%/if%>
                   <th>View Details</th>
+                  <th style="display: none">id</th>
                </tr>
             </thead>
 
@@ -113,6 +114,7 @@
                               <%display_no_character()%>
                             <%/if%>
                           </td>
+                          <td  style="display: none"w><%$t->id %></td>
                             
                        </tr>
                       <%assign var='i' value=$i+1%>

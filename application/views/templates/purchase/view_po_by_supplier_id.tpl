@@ -47,9 +47,9 @@
                     <span>Parts</span>
                 </h2>
                  
-                <div class="input-wrapper">
-                  <input type="text" name="datetimes" class="dates form-control" id="date_range_filter" />
-                  <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
+                <div class="input-wrapper ">
+                  <input type="text" name="datetimes" class="dates form-control" id="date_range_filter" style="display: none;"/>
+                  <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib" >
                 </div>
                
                 

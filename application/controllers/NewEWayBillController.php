@@ -353,6 +353,7 @@ class NewEWayBillController extends CommonController {
    * Looks fine - Get EWay - from Local DB
    */
   public function view_EwayBill() {
+  	
 		$isDynamic = true;
 		$downloadPDF = false;
 		
@@ -562,7 +563,7 @@ class NewEWayBillController extends CommonController {
 	$einvoice_res_id = $this->uri->segment('2');
 	$einvoice_res_data = $this->Crud->get_data_by_id("einvoice_res", $einvoice_res_id, "new_sales_id");
 
-	$IRNNo= $einvoice_res_data[0]->Irn
+	$IRNNo= $einvoice_res_data[0]->Irn;
 	$EwbNo= $einvoice_res_data[0]->EwbNo;
 	$EwbDt= $einvoice_res_data[0]->EwbDt;
 	$SignedQRCode= $einvoice_res_data[0]->SignedQRCode;
@@ -661,10 +662,21 @@ class NewEWayBillController extends CommonController {
 				  	Valid Upto	:<b>   '.$EwbValidTill.'</b><br><br>
 					IRN    :<span style="font-size:13px;padding-top: 4px;"><b> '.$IRNNo.'</b></span></br>
 			  </td>
-
+				</td>
 				 <td colspan="4" align="bottom">
 					<span class="ewayQRcode"></span>
 				 </td>
+				 <script>
+					var qrData ="'.$EwbNo.'"; 
+					var qrcode = new QRCode(document.querySelector(".ewayQRcode"), {
+						text: qrData,
+						width: 128,
+						height: 128,
+						colorDark : "#000000",
+						colorLight : "#ffffff",
+						correctLevel : QRCode.CorrectLevel.H
+					});
+				</script>
 			</tr>
 		<tr>
 			<td colspan="12" style="text-align:left; font-size:16px"><b>1. e-Way Bill Details</b><br></th>
@@ -802,7 +814,7 @@ class NewEWayBillController extends CommonController {
 		//get client data based on unit selection
         $client_data = $this->Crud->get_data_by_id("client", $new_sales_data[0]->clientId, "id");
 		
-		$this->echoToTriage("<br><b> Update EwayBill Vehicle details</b>");
+		// $this->echoToTriage("<br><b> Update EwayBill Vehicle details</b>");
 		
 		$new_sales=array(
 			"new_sales_id"=>$new_sales_id
@@ -818,14 +830,15 @@ class NewEWayBillController extends CommonController {
 		$transDocNo 	= $this->input->post('transDocNo');
 		$transDocDate	= $this->input->post('transDocDate');
 
-		$this->echoToTriage("<br> eWayBillNo : ".$eWayBillNo." <br>transMode : ". $transMode. " <br>vehicleNo: ".$vehicleNo."<br>reasonCode : "
-		.$reasonCode." <br>reasonRem : ". $reasonRem. " <br>transDocNo: ".$transDocNo.'<br>transDocDate: '.$transDocDate);
+		// $this->echoToTriage("<br> eWayBillNo : ".$eWayBillNo." <br>transMode : ". $transMode. " <br>vehicleNo: ".$vehicleNo."<br>reasonCode : "
+		// .$reasonCode." <br>reasonRem : ". $reasonRem. " <br>transDocNo: ".$transDocNo.'<br>transDocDate: '.$transDocDate);
 
 		
 		//get the token and all
 		$this->load->model('NewGSTCommon');
 		$token = $this->NewGSTCommon->authentication($new_sales_id);
-		
+		$success = 0;
+        $messages = "Something went wrong.";
 		if($token) {
 			$url = $this->getEwayBillURL()."?action=VEHEWB";
 			$Authorization='Bearer '.$token;         
@@ -842,25 +855,26 @@ class NewEWayBillController extends CommonController {
 			);
 
 			$requestData = json_encode($jsondata);
-			$this->echoToTriage("<br><br><b>Dynamic Request Data  : </b><br>" . $requestData ."<br><br>");		
+			// $this->echoToTriage("<br><br><b>Dynamic Request Data  : </b><br>" . $requestData ."<br><br>");		
 			$this->load->model('NewEwayBill');
 			$result=$this->NewEwayBill->execute($url,$requestData,$action,$Authorization); 
-			$this->echoToTriage("<br><br><b>Response :</b><br>" .json_encode($result) . "<br>");
+			// $this->echoToTriage("<br><br><b>Response :</b><br>" .json_encode($result) . "<br>");
 			
 			if(isset($result['success']) && $result['success'] == false) {
-				$this->echoToTriage("API error occured for Request...");
+				// $this->echoToTriage("API error occured for Request...");
 				$errorDet = $result['message'];
-				$this->echoToTriage( "<br><br><u>GST Errors for Request:</u><br>");
-				$this->echoToTriage("\n GST Error Response for Cancel Request:
-							   \n ErrorMsg: " . $errorDet);
+				// $this->echoToTriage( "<br><br><u>GST Errors for Request:</u><br>");
+				// $this->echoToTriage("\n GST Error Response for Cancel Request:
+				// 			   \n ErrorMsg: " . $errorDet);
 				/*$alertCode = "<script>alert('\\n GST Error Response: \\n ErrorMsg: " . $errorDet . "');</script>";
 				echo $alertCode;*/
-				$this->addErrorMessage($errorDet);
+				// $this->addErrorMessage($errorDet);
+				$messages = $errorDet;
 			} else if(isset($result['success']) && $result['success'] == true) {
-				$this->echoToTriage("<br>Eway Bill Updated sucessfully");
+				// $this->echoToTriage("<br>Eway Bill Updated sucessfully");
 				$gstResponse = $result['data'];
-				$this->echoToTriage( "EwbValidTill: ".$gstResponse['validUpto']);
-				$this->echoToTriage( "vehUpdDate: ".$gstResponse['vehUpdDate']);
+				// $this->echoToTriage( "EwbValidTill: ".$gstResponse['validUpto']);
+				// $this->echoToTriage( "vehUpdDate: ".$gstResponse['vehUpdDate']);
 				$response_data = array(
 					'new_sales_id' => $new_sales_id,
 					'EwbNo' => $eWayBillNo,
@@ -878,28 +892,39 @@ class NewEWayBillController extends CommonController {
 				$dbresult = $this->Common_admin_model->update("einvoice_res", $response_data, "new_sales_id", $new_sales_id);
 				if ($dbresult) {
 					$dbresult = $this->Common_admin_model->update("new_sales", $new_sales_update, "id", $new_sales_id);
-					$this->echoToTriage( "<br>EWAY Bill DB updated");
-					$this->addSuccessMessage('EWAY Bill DB updated');
-					$this->redirectMessage();
+					// $this->echoToTriage( "<br>EWAY Bill DB updated");
+					// $this->addSuccessMessage('EWAY Bill DB updated');
+					// $this->redirectMessage();
 
 					//echo "<script>alert('EWAY Bill updated');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+					$messages = "EWAY Bill DB updated";
+					$success = 1;
 				} else {
-					$this->echoToTriage( "<br>EWAY Bill DB Not Updated");
-					$this->addErrorMessage('EWAY Bill DB Not Updated.');
+					// $this->echoToTriage( "<br>EWAY Bill DB Not Updated");
+					// $this->addErrorMessage('EWAY Bill DB Not Updated.');
+					$messages = "EWAY Bill DB Not Updated.";
+
 					//echo "<script>alert('EWAY Bill not updated');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
 				}
 			}
 			
-			$this->load->model('NewEwayBill');
-			$this->NewEwayBill->redirect($new_sales_id); 
-        }      
+			// $this->load->model('NewEwayBill');
+			// $this->NewEwayBill->redirect($new_sales_id); 
+        }    
+
+        $result = [];
+        $result['messages'] = $messages;
+        $result['success'] = $success;
+        echo json_encode($result);
+        exit();  
 	}	 
 	
   /*
    * Looks fine - Update E-Way Bill for transporter details
    */
 	public function update_EWayBill_transporter()	{
-		$this->echoToTriage("<br> Update Transporter details for EwayBill");
+
+		// $this->echoToTriage("<br> Update Transporter details for EwayBill");
 		$new_sales_id = $this->input->post('new_sales_id');
 		$new_sales=array(
 			"new_sales_id"=>$new_sales_id,
@@ -909,12 +934,13 @@ class NewEWayBillController extends CommonController {
 		$transporterId = $this->input->post('transporterId');
 
 		$transporter = $this->Crud->get_data_by_id("transporter", $transporterId, "id");
-		$this->echoToTriage("<br> new_sales_id :".$new_sales_id." <br>eWayBillNo : ".$eWayBillNo." <br>Transporter ID : ". $transporter[0]->transporter_id);
+		// $this->echoToTriage("<br> new_sales_id :".$new_sales_id." <br>eWayBillNo : ".$eWayBillNo." <br>Transporter ID : ". $transporter[0]->transporter_id);
 		
 		//get the token and all
 		$this -> load->model('NewGSTCommon');
 		$token = $this->NewGSTCommon->authentication($new_sales_id);
-		
+		$success = 0;
+        $messages = "Something went wrong.";
 		if($token) {
 			$url = $this->getEwayBillURL()."?action=UPDATETRANSPORTER";
 			$Authorization='Bearer '.$token;         
@@ -924,25 +950,26 @@ class NewEWayBillController extends CommonController {
 				);
 
 			$requestData = json_encode($jsondata);
-			$this->echoToTriage("<br><br><b>Dynamic Request Data  : </b><br>" . $requestData ."<br><br>");
+			// $this->echoToTriage("<br><br><b>Dynamic Request Data  : </b><br>" . $requestData ."<br><br>");
 			$this->load->model('NewEwayBill');
 			$result=$this->NewEwayBill->execute($url,$requestData,$action,$Authorization); 
-			$this->echoToTriage("<br><br><b>Response :</b><br>" .json_encode($result) . "<br>");
+			// $this->echoToTriage("<br><br><b>Response :</b><br>" .json_encode($result) . "<br>");
 
 			if(isset($result['success']) && $result['success'] == false) {
-				$this->echoToTriage("API error occured for Request...");
+				// $this->echoToTriage("API error occured for Request...");
 				$errorDet = $result['message'];
-				$this->echoToTriage( "<br><br><u>GST Errors for Request:</u><br>");
-				$this->echoToTriage("\n GST Error Response for Cancel Request:
-							   \n ErrorMsg: " . $errorDet);
+				// $this->echoToTriage( "<br><br><u>GST Errors for Request:</u><br>");
+				// $this->echoToTriage("\n GST Error Response for Cancel Request:
+				// 			   \n ErrorMsg: " . $errorDet);
 				$alertCode = "<script>alert('\\n GST Error Response: \\n ErrorMsg: " . $errorDet . "');</script>";
 				//echo $alertCode;
-				$this->addErrorMessage($errorDet);
+				// $this->addErrorMessage($errorDet);
+				$messages = $errorDet;
 				$this->load->model('NewEwayBill');
-				$this->NewEwayBill->redirect($new_sales_id); 
+				// $this->NewEwayBill->redirect($new_sales_id); 
 
 			} else if(isset($result['success']) && $result['success'] == true) {
-				$this->echoToTriage("<br>Eway Bill Updated for transporter");
+				// $this->echoToTriage("<br>Eway Bill Updated for transporter");
 				$gstResponse = $result['data'];
 				$new_sales_update = array(
 					'id' => $new_sales_id,
@@ -952,17 +979,25 @@ class NewEWayBillController extends CommonController {
 				//Store the status in our DB...
 				$dbresult = $this->Common_admin_model->update("new_sales", $new_sales_update, "id" , $new_sales_id);
 				if ($dbresult) {
-					$this->echoToTriage("<br>EWAY Bill DB updated");
-					$this->addSuccessMessage('EWAY Bill DB updated');
-					$this->redirectMessage();
+					// $this->echoToTriage("<br>EWAY Bill DB updated");
+					// $this->addSuccessMessage('EWAY Bill DB updated');
+					// $this->redirectMessage();
+					$messages = "EWAY Bill DB updated";
+					$success = 1;
 				} else {
-					$this->echoToTriage("<br>EWAY Bill DB Not Updated");
-					$this->addErrorMessage('EWAY Bill DB Not Updated.');
-					$this->redirectMessage();
+					// $this->echoToTriage("<br>EWAY Bill DB Not Updated");
+					// $this->addErrorMessage('EWAY Bill DB Not Updated.');
+					// $this->redirectMessage();
+					$messages = "EWAY Bill DB Not Updated.";
 				}
 			}
 			
-        }      
+        } 
+        $result = [];
+        $result['messages'] = $messages;
+        $result['success'] = $success;
+        echo json_encode($result);
+        exit();       
 	}	 
 	
 	
@@ -970,6 +1005,7 @@ class NewEWayBillController extends CommonController {
    * Looks fine - Cancel eWayBill
    */
   public function cancel_eWayBill()	{
+
 		$new_sales_id = $this->input->post('new_sales_id');
 		$new_sales=array(
 			"new_sales_id"=>$new_sales_id,
@@ -980,12 +1016,13 @@ class NewEWayBillController extends CommonController {
 		$cancelReason = $this->input->post('cancelReason');
 		$cancelRemark = $this->input->post('cancelRemark');
 
-		$this->echoToTriage("<br> CancelReason : ".$cancelReason." <br>CancelRemark : ". $cancelRemark);
+		// $this->echoToTriage("<br> CancelReason : ".$cancelReason." <br>CancelRemark : ". $cancelRemark);
 
 		//get the token and all
 		$this -> load-> model('NewGSTCommon');
 		$token = $this-> NewGSTCommon -> authentication($new_sales_id);
-		
+		$success = 0;
+        $messages = "Something went wrong.";
 		if($token) {
 			$url = $this->getEwayBillURL()."?action=CANEWB";
 			$Authorization='Bearer '.$token;         
@@ -998,22 +1035,23 @@ class NewEWayBillController extends CommonController {
 			);
 
 			$requestData = json_encode($jsondata);
-			$this->echoToTriage("<br><br><b>Dynamic Request Data: </b><br>" . $requestData ."<br><br>");
+			// $this->echoToTriage("<br><br><b>Dynamic Request Data: </b><br>" . $requestData ."<br><br>");
 			$this->load->model('NewEwayBill');
 			$result=$this->NewEwayBill->execute($url,$requestData,$action,$Authorization); 
-			$this->echoToTriage("<br><br><b>Response For Cancel Eway Bill :</b><br>" .json_encode($result) . "<br>");
+			// $this->echoToTriage("<br><br><b>Response For Cancel Eway Bill :</b><br>" .json_encode($result) . "<br>");
 
 			if(isset($result['success']) && $result['success'] == false) {
-				$this->echoToTriage("API error occured for Cancel EwayBill Request...");
+				// $this->echoToTriage("API error occured for Cancel EwayBill Request...");
 				$errorDet = $result['message'];
-				$this->echoToTriage( "<br><br><u>GST Errors for Cancel EwayBill Request:</u><br>");
-				$this->echoToTriage("\n GST Error Response for Cancel Request: 
-							   \n ErrorMsg: " .$errorDet);
+				// $this->echoToTriage( "<br><br><u>GST Errors for Cancel EwayBill Request:</u><br>");
+				// $this->echoToTriage("\n GST Error Response for Cancel Request: 
+				// 			   \n ErrorMsg: " .$errorDet);
 				/*$alertCode = "<script>
 							alert('\\n GST Error Response: \\n ErrorMsg: " .$errorDet."');
 							</script>";
 						echo $alertCode;*/
-				$this->addErrorMessage($errorDet);
+				$messages = $errorDet;
+				// $this->addErrorMessage($errorDet);
 				
 			} else if(isset($result['success']) && $result['success'] == true) {
 				
@@ -1024,19 +1062,27 @@ class NewEWayBillController extends CommonController {
 					'EwbCancelRemark' => $cancelRemark
 				);
 				
-				$this->echoToTriage("<br>Eway Bill cancelled sucessfully");
+				// $this->echoToTriage("<br>Eway Bill cancelled sucessfully");
 				$resultUpdate = $this->Common_admin_model->update("einvoice_res", $responseData, "new_sales_id", $new_sales_id);
 				if ($resultUpdate) {
-					$this->addSuccessMessage('Eway Bill cancelled sucessfully');
-					$this->redirectMessage();
+					$messages = "Eway Bill cancelled sucessfully";
+					$success = 1; 
+					// $this->addSuccessMessage('Eway Bill cancelled sucessfully');
+					// $this->redirectMessage();
 				} else {
-					$this->addErrorMessage('EWAY Bill DB Not Updated for cancelled.');
-					$this->redirectMessage();
+					$messages = "EWAY Bill DB Not Updated for cancelled.";
+					// $this->addErrorMessage('EWAY Bill DB Not Updated for cancelled.');
+					// $this->redirectMessage();
 				}
 			}
-			$this->load->model('NewEwayBill');
-			$this->NewEwayBill->redirect($new_sales_id); 
-        }      
+			// $this->load->model('NewEwayBill');
+			// $this->NewEwayBill->redirect($new_sales_id); 
+        }  
+        $result = [];
+        $result['messages'] = $messages;
+        $result['success'] = $success;
+        echo json_encode($result);
+        exit();     
 	}
 	
   	/**

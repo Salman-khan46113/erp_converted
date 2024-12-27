@@ -5,21 +5,21 @@ var pdf_title = "Sales Report";
 const page = {
     init: function(){
         this.dataTable();
-        $('#date_range_filter').daterangepicker({
-               singleDatePicker: true,
-               showDropdowns: true,
-               autoApply: true,
-               locale: {
-                   format: 'DD/MM/YYYY' // Change this format as per your requirement
-               }
-        });
-        $("#date_range_filter").on("change",function(){
-            var date = $(this).val();
-            if (table && date) {
-                table.column(3).search(date).draw();
-            }
-        })
-        $("#date_range_filter").trigger("change")
+        // $('#date_range_filter').daterangepicker({
+        //        singleDatePicker: true,
+        //        showDropdowns: true,
+        //        autoApply: true,
+        //        locale: {
+        //            format: 'DD/MM/YYYY' // Change this format as per your requirement
+        //        }
+        // });
+        // $("#date_range_filter").on("change",function(){
+        //     var date = $(this).val();
+        //     if (table && date) {
+        //         table.column(3).search(date).draw();
+        //     }
+        // })
+        // $("#date_range_filter").trigger("change")
     },
     dataTable: function() {
         var data = {};

@@ -99,7 +99,7 @@
    </div>
 
     <!-- Responsive Table -->
-    <div class="content-wrapper">
+    <div class="content-wrapper card">
       <div class="table-responsive text-nowrap">
       <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="child_part_view">
       <thead>

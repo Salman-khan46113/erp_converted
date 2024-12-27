@@ -1,11 +1,11 @@
-<div class="container-fluid">
+<div class="container-fluid ps-0">
         <div class="row">
             <div class="col-14">
                 <!-- /.card -->
                 <div class="card">
                     <!-- /.card-header -->
-                    <div class="card-body">
-                    <form action="<?php echo base_url('update_inspection_report_observations') ?>" method="post">
+                    <div class="">
+                    <form action="<?php echo base_url('update_inspection_report_observations') ?>" method="post" class="">
                         <table id="example1" class="table table-bordered table-striped">
                             <thead>
                                 <tr>

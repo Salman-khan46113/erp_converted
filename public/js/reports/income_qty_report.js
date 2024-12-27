@@ -31,7 +31,7 @@ const page = {
                             var lines = csv.split('\n');
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
-                                values.splice(13, 1);
+                                values.splice(10, 1);
                                 return values.join(',');
                             });
                             return modifiedLines.join('\n');
@@ -69,7 +69,7 @@ const page = {
                                 }
                                 cell.alignment = alignment;
                             });
-                            row.splice(14, 1);
+                            row.splice(10, 1);
                         });
                     }
                 },
@@ -95,6 +95,7 @@ const page = {
             info: true,
             autoWidth: true,
             lengthChange: true,
+            order: sorting_column,
             fixedColumns: {
                 leftColumns: 2,
                 // end: 1
@@ -108,8 +109,11 @@ const page = {
         $('.dataTables_length').find('label').contents().filter(function() {
             return this.nodeType === 3; // Filter out text nodes
         }).remove();
-        $(".dataTables_length select").select2({
-            minimumResultsForSearch: Infinity
+        
+        table.on('init.dt', function() {
+            $(".dataTables_length select").select2({
+                minimumResultsForSearch: Infinity
+            });
         });
         $('#serarch-filter-input').on('keyup', function() {
             table.search(this.value).draw();

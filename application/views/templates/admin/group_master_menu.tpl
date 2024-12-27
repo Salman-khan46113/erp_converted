@@ -65,10 +65,19 @@
 		                    	<input type="hidden" name="menu[access<%$key%>][group_master_id]" value="<%$menu['group_master_id']%>">
 		                    	<input type="hidden" name="menu[access<%$key%>][menu_master_id]" value="<%$menu['menu_master_id']%>">
 
-			            		<label class="form-label ">
-			                        <lable for="iAdminMenuId_" class="right-label-inline"><%$menu['diaplay_name']%></lable>
+			            			<div class="w-50 float-start"><label class="form-label ">
+			                        <lable for="iAdminMenuId_" class="right-label-inline"><%$menu['diaplay_name']%> 
+			                        	<input type="checkbox"  class="regular-checkbox common-check-box" value="Yes"  
+			                        	 <%if $menu['list'] eq 'Yes' && $menu['add'] eq 'Yes' && $menu['update'] eq 'Yes' && $menu['delete'] eq 'Yes' && $menu['export'] eq 'Yes' && $menu['import'] eq 'Yes'%>checked="true"<%/if%>>
+
+			                        </lable>
+			                        </div>
+			                        <div class="w-50 float-start">
+			                        	<i class="ti ti-circle-arrow-up expand-icon active"></i>
+			                        </div>
+			                        
 			            		</label> 
-					            <div class="form-right-div">
+					            <div class="form-right-div" style="display: none;">
 					                <div class="margin-equilize">
 					                	<input type="checkbox" name="menu[access<%$key%>][access][list]" class="regular-checkbox" value="Yes" <%if $menu['list'] eq 'Yes'%>checked="true"<%/if%> >
 					                    <label class="right-label-inline" for="eList_1">List</label>
@@ -133,6 +142,8 @@
 	    font-size: 17px;
 	    color: #919396;
 	    font-family: 'GilroySemibold', sans-serif !important;
+	    width: 50%;
+    float: left;
 	}
 	.menu-form-row .form-right-div {
 		    margin: 10px 6px 10px 13px;
@@ -160,10 +171,36 @@
 	    border-radius: 0px;
 	    max-height: calc(100vh - 485px);
 	}
-
+	.expand-icon{
+		    float: right;
+    font-size: 29px;
+    cursor: pointer;
+	}
+	.expand-icon.active {
+		transition: 0.9s;
+		    transform: rotate(180deg);
+	}
+	.expand-icon {
+		transition: 0.9s;
+		    transform: rotate(0deg);
+	}
+	.common-check-box{
+		    width: 17px;
+    height: 15px;
+    cursor: pointer;
+    line-height: 14 !important;
+    margin-left: 8px;
+    /* padding-top: 2606px !important; */
+    position: absolute;
+    top: 12px;
+	}
 </style>
     <script type="text/javascript">
     var base_url = <%$base_url|@json_encode%>
     </script>
 
     <script src="<%$base_url%>public/js/admin/group_master_menu.js"></script>
+
+.active {
+	    transform: rotate(180deg);
+}

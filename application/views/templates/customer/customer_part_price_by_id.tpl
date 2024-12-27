@@ -29,9 +29,11 @@ Customer Master"><i class="ti ti-arrow-left"></i></a>
       
     </div>
 
-
+    <div class="w-100">
+<input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
+</div>
     <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper">
+    <div class="content-wrapper w-100">
         <!-- Content Header (Page header) -->
        
         <!-- Main content -->
@@ -113,7 +115,7 @@ Customer Master"><i class="ti ti-arrow-left"></i></a>
 
 
                             <!-- /.card-header -->
-                            <div class="">
+                            <div class="w-100">
                                 <table id="example1" class="table  table-striped">
                                     <thead>
                                         <tr>
@@ -136,11 +138,11 @@ Customer Master"><i class="ti ti-arrow-left"></i></a>
 
                                         <%if $customer_part_rate%>
                                             <%foreach from=$customer_part_rate item=poo%>
-                                                
                                                 <%if $customer_data[$po[$poo->customer_master_id][0]->customer_id][0]->id == $customer_id%>
+                                                
                                                     <tr>
                                                         <!-- <td><%$i%></td> -->
-                                                        <td style="display: none"><%$poo->customer_master_id%></td>
+                                                        <td style="display: none"><%$customer_part_rate_data[$poo->customer_master_id][0]->revision_date%></td>
                                                         <td>
                                                             <a type="submit" data-bs-toggle="modal" class=" add-revision" data-value="<%base64_encode(json_encode($customer_part_rate_data[$poo->customer_master_id][0]))%>" data-bs-target="#revision_part" title="Add Revision"><i class="ti ti-square-rounded-plus"></i></a>
                                                             <a href="<%$base_url%>view_part_rate_history/<%$poo->customer_master_id%>" class=" btn-sm" title="history"><i class="ti ti-history"></i></a>

@@ -105,7 +105,13 @@ class ChallanController extends CommonController {
             "width" => "7%",
             "className" => "dt-center status-row",
         ];
-        
+        $column[] = [
+            "data" => "id",
+            "title" => "Id",
+            "width" => "7%",
+            "className" => "dt-center ",
+            "visible" => false
+        ];
         $data["data"] = $column;
         $data["is_searching_enable"] = true;
         $data["is_paging_enable"] = true;
@@ -117,7 +123,7 @@ class ChallanController extends CommonController {
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No GRN Validation data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
+        $data["sorting_column"] = json_encode([[10, 'desc']]);
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
@@ -998,7 +1004,7 @@ class ChallanController extends CommonController {
 		
 	}
 	public function customer_challan_report(){
-		// pr("ok",1);
+		checkGroupAccess("customer_challan_report","list","Yes");
 		$customer_wise_qty = $this->SupplierParts->getCustomerWiseChallanQty();
 		$customer_name_arr = array_unique(array_column($customer_wise_qty,"customer_name"));
 		if(count($customer_wise_qty) > 0){
@@ -1018,9 +1024,10 @@ class ChallanController extends CommonController {
 		}
 		$data['customer_name_arr'] = $customer_name_arr;
 		$data['customer_wise_qty'] = $customer_wise_qty;
-		$this->load->view('header');
-		$this->load->view('challan/customer_challan_report', $data);
-		$this->load->view('footer');
+		// $this->load->view('header');
+		// pr($data,1);
+		$this->loadView('reports/customer_challan_report', $data);
+		// $this->load->view('footer');
 		
 	}
 	public function generate_customer_challan_part_return_pdf(){

@@ -442,16 +442,17 @@ class Newcontroller extends CommonController
             if ($new_po[0]->po_discount_type == "Part Level"){
             	$part_rate_discount_amount = ($part_rate_new*$p->discount)/100;
 				$after_dicount_part_rate = $part_rate_new-$part_rate_discount_amount;
-				$total_rate_old1 = $after_dicount_part_rate*$p->qty;
+				$total_rate_old = $after_dicount_part_rate*$p->qty;
             }
             $gst_structure = $this->Crud->get_data_by_id("gst_structure", $p->tax_id, "id");
+
             $po_part[$key]->gst_structure = $gst_structure;  
             $po_part[$key]->total_rate_old = $total_rate_old;  
-            $po_part[$key]->cgst_amount = $cgst_amount = ($total_rate_old1 * $gst_structure[0]->cgst) / 100;
-            $po_part[$key]->sgst_amount= $sgst_amount  = ($total_rate_old1 * $gst_structure[0]->sgst) / 100;
-            $po_part[$key]->igst_amount= $igst_amount  = ($total_rate_old1 * $gst_structure[0]->igst) / 100;
+            $po_part[$key]->cgst_amount = $cgst_amount = ($total_rate_old * $gst_structure[0]->cgst) / 100;
+            $po_part[$key]->sgst_amount= $sgst_amount  = ($total_rate_old * $gst_structure[0]->sgst) / 100;
+            $po_part[$key]->igst_amount= $igst_amount  = ($total_rate_old * $gst_structure[0]->igst) / 100;
             $po_part[$key]->gst_amount= $gst_amount  = $cgst_amount + $sgst_amount + $igst_amount;
-            $po_part[$key]->total_rate = $total_rate = $total_rate_old1 + $cgst_amount + $sgst_amount + $igst_amount;
+            $po_part[$key]->total_rate = $total_rate = $total_rate_old + $cgst_amount + $sgst_amount + $igst_amount;
             $final_po_amount = $final_po_amount + $total_rate;
         }
         // pr($new_po,1);
@@ -517,7 +518,7 @@ class Newcontroller extends CommonController
         }
         $data['status_value'] = $status_value;
         $data['statusNew'] = $statusNew;
-		// pr($data['new_po'],1);
+		// pr($data,1);
 		// $this->load->view('header');
 		// $this->load->view('view_new_po_by_id', $data);
 		// $this->load->view('footer');
@@ -860,6 +861,7 @@ public function rejected_po()
 		$ret_arr = [];
 		$msg = '';
 		$success = 1;
+		
 		$result = $this->Crud->update_data("parts_customer_trackings", $data, $id);
 		if ($result) {
 			// echo "<script>alert('Updated Sucessfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
@@ -869,7 +871,7 @@ public function rejected_po()
 			$msg = 'Updated Sucessfully';
 			$success = 0;
 		}
-		$ret_arr['msg'] = $msg;
+		$ret_arr['messages'] = $msg;
 		$ret_arr['success'] =  $success;
 		echo json_encode($ret_arr);
 		//}
@@ -1654,10 +1656,64 @@ public function rejected_po()
 	public function lock_parts_rejection_sales_invoice()
 	{
 		$id = $this->input->post('id');
+		$sql = "SELECT r.* FROM rejection_sales_invoice as r WHERE r.id = ".$id;
+		$rejection_invoice_data = $this->Crud->customQuery($sql);
+		$type = $rejection_invoice_data[0]->type;
+		if($type == "CreditNote"){
+			$structure_type = "credit_note";
+		}else if($type == "DebitNote"){
+			$structure_type = "debit_note";
+		}else if($type == "ProformaInvoice"){
+			$structure_type = "performa_invoice";
+		}
+		$data = $this->Crud->get_data_by_id("global_formate_configuration", $structure_type, "config_name");
+		$patter = $data[0]->formate;
+		$current_year = $this->getFinancialYear();
+		$current_year_arr = explode("-", $current_year);
+		$start_data = $this->createFinatialStartEndDate("start_date",$current_year_arr[0]);
+		$end_data = $this->createFinatialStartEndDate("end_date",$current_year_arr[1]);
+		
+		if($patter != " "){
+
+			$sql = "SELECT count(rejection_invoice_no) as count FROM rejection_sales_invoice WHERE rejection_invoice_no like '%".$patter."%' AND (
+		        STR_TO_DATE(created_date, '%d-%m-%Y') BETWEEN '".$start_data['start']."' AND '".$start_data['end']."'
+		        OR
+		        STR_TO_DATE(created_date, '%d-%m-%Y') BETWEEN '".$end_data['start']."' AND '".$end_data['end']."'
+		    )";
+		    $latestSeqFormat = $this->Crud->customQuery($sql);
+		}else{
+			$sql = "SELECT r.* FROM global_formate_configuration as r WHERE r.config_name IN ('credit_note','debit_note','performa_invoice')";
+			$formate_sample_val = $this->Crud->customQuery($sql);
+			$whreCondition = "";
+			foreach ($formate_sample_val as $key => $value) {
+				# code...
+				if($value->formate != " "){
+					$whreCondition .= "rejection_invoice_no not like '%".$value->formate."%'";
+				}else{
+					$whreCondition .= "rejection_invoice_no not like '%TEMP%'";
+				}
+				if($key < count($formate_sample_val) - 1){
+					$whreCondition .=" AND ";
+				}
+			}
+			
+			$sql = "SELECT count(rejection_invoice_no) as count FROM rejection_sales_invoice WHERE $whreCondition AND (
+		        STR_TO_DATE(created_date, '%d-%m-%Y') BETWEEN '".$start_data['start']."' AND '".$start_data['end']."'
+		        OR
+		        STR_TO_DATE(created_date, '%d-%m-%Y') BETWEEN '".$end_data['start']."' AND '".$end_data['end']."'
+		    )";
+		    $latestSeqFormat = $this->Crud->customQuery($sql);
+		}
+		$count_number = $latestSeqFormat[0]->count+1;
+		// pr($count_number,1);
+		$rejection_invoice_no = $this->getCreditNoteCode($type,$count_number);
+		// pr($rejection_invoice_no,1);
 		$data = array(
+			"rejection_invoice_no" => $rejection_invoice_no,
 			"status" => "completed",
 
 		);
+		$result = $this->Crud->update_data("rejection_sales_invoice", $data, $id);
 		$success = 0;
         $messages = "Something went wrong.";
 		$result = $this->Crud->update_data("rejection_sales_invoice", $data, $id);

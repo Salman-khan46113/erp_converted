@@ -75,7 +75,10 @@
                      </div>
                   </div>
                   <%/if%>
-                  <div class="card mt-4">
+                  <div class="w-100 mt-3">
+            <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
+        </div>
+                  <div class="card mt-4 w-100">
                      <div class="">
                         <table id="challan_inward" class="table  table-striped">
                            <thead>

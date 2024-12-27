@@ -41,10 +41,11 @@
                               <%if ($subcon_po_inwarding_history) %>
                                     <%assign var=final_po_amount value=0 %>
                                     <%assign var=i value=1 %>
+
                                         <%foreach from=$subcon_po_inwarding_history item=p %>
                                           <tr>
                                              <td><%$i%></td>
-                                             <td><%$p->challan_data[0]->challan_number%></td>
+                                             <td><%$p->challan_data->challan_number%></td>
                                              <td><%$p->new_qty%></td>
                                              <td><%$p->created_date%>/<%$p->created_time%></td>
                                              <td>

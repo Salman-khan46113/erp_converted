@@ -368,58 +368,44 @@ class PartInspectionController extends CommonController
         if($observation5!=null) {
             $data["observation5"] = $observation5;
         }
-       
+       $message = "Something went wrong";
+       $success = 0;
         if ($record_id != null) {
             $update = $this->Crud->update_data("cust_part_inspection_report", $data, $record_id);
             if ($update) {
-                $alertCode = "<script>
-							alert('\\n Inspection observations submitted.');
-							</script>";
-                echo $alertCode;
-                exit();
+                $message ="Inspection observations submitted.";
+                $success = 1;
+       //          $alertCode = "<script>
+							// alert('\\n Inspection observations submitted.');
+							// </script>";
+       //          echo $alertCode;
+       //          exit();
                 //$this->addSuccessMessage('Inspection observations updated successfully.');
             } else {
                 if ($this->checkNoDuplicateEntryError()) {
-                    $alertCode = "<script>
-                        alert('\\n Unable to update Inspection observations. Record already exists.');
-                        </script>";
-                    echo $alertCode;
-                    exit();
+                    $message = "Unable to update Inspection observations. Record already exists.";
+                    // $alertCode = "<script>
+                    //     alert('\\n Unable to update Inspection observations. Record already exists.');
+                    //     </script>";
+                    // echo $alertCode;
+                    // exit();
                     //$this->addErrorMessage('Unable to update Inspection observations. Record already exists.');
                 } else {
-                    $alertCode = "<script>
-                        alert('\\n Unable to update Inspection observations. Please try again.');
-                        </script>";
-                    echo $alertCode;
-                    exit();
+                    $message = "Unable to update Inspection observations. Please try again.";
+                    // $alertCode = "<script>
+                    //     alert('\\n Unable to update Inspection observations. Please try again.');
+                    //     </script>";
+                    // echo $alertCode;
+                    // exit();
                     //$this->addErrorMessage('Unable to update Inspection observations. Please try again.');
                 }
             }
-        } /* else {
-			//echo "We need to insert data here... record_id: " . $record_id;
-			$data = array(
-				"cust_part_inspection_masterKy " => $master_id,
-				"sales_partky" => $sales_part_id,
-				"observation1" => $observation1,
-				"observation2" => $observation2,
-				"observation3" => $observation3,
-				"observation4" => $observation4,
-				"observation5" => $observation5,
-				"remark" => $remark
-			);
-
-			$insert = $this->Crud->insert_data("cust_part_inspection_report", $data);
-			if ($insert) {
-				$this->addSuccessMessage('Inspection observations added successfully.');
-			} else {
-				if ($this->checkNoDuplicateEntryError()) {
-					$this->addErrorMessage('Unable to add Inspection observations. Record already exists.');
-				} else {
-					$this->addErrorMessage('Unable to add Inspection observations. Please try again.');
-				}
-			}
-		} */
-        //$this->redirectMessage();
+        }
+        $result = [];
+        $result['message'] = $message;
+        $result['success'] = $success;
+        echo json_encode($result);
+        exit(); 
     }
 
     public function view_PDI()

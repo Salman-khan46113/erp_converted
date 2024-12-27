@@ -30,7 +30,7 @@
           <input type="hidden" value="<%$new_sales[0]->sales_number %>" id="invoice_no" class="form-control">
           <input type="hidden" value="<%$new_sales[0]->sales_number %>" id="sales_number" class="form-control">
             <!-- /.card -->
-            <%if (empty($e_invoice_status) && ($einvoice_res_data[0]->EwbStatus) &&  $new_sales[0]->status == "pending" ) || $new_sales[0]->status == "unlocked"%>
+            <%if (empty($e_invoice_status) && ($einvoice_res_data[0]->EwbStatus) ||  ($new_sales[0]->status == "pending" ) || $new_sales[0]->status == "unlocked")%>
             <div class="card p-0 mt-4">
                <div class="card-header">
                   <form action="<%$base_url%>generate_new_sales_update" method="POST">
@@ -231,10 +231,7 @@
                         <p class="tgdp-rgt-tp-ttl">PO Remark</p>
                         <p class="tgdp-rgt-tp-txt"><%display_no_character($new_sales[0]->remark)%></p>
                      </div>
-                     <div class="tgdp-rgt-tp-sect">
-                        <p class="tgdp-rgt-tp-ttl">PO Remark</p>
-                        <p class="tgdp-rgt-tp-txt"><%display_no_character($new_sales[0]->remark)%></p>
-                     </div>
+                     
                      <div class="tgdp-rgt-tp-sect">
                         <p class="tgdp-rgt-tp-ttl">Apply Discount</p>
                         <p class="tgdp-rgt-tp-txt">
@@ -594,11 +591,11 @@
                     <%/if%>
                   <%else%>
                     <%if ($new_sales[0]->status != "pending" && $new_sales[0]->status != "Cancelled") && $new_sales[0]->status != "unlocked"%>
-                    <button type="button" disabled class="btn btn-success ml-1" data-bs-toggle="modal">
+                    <button type="button" disabled class="btn btn-success ml-1 col-lg-2 " data-bs-toggle="modal">
                     Invoice already released
                     </button>
                     <%elseif $new_sales[0]->status == "Cancelled"%>
-                    <button type="button" disabled class="btn btn-success ml-1" data-bs-toggle="modal">
+                    <button type="button" disabled class="btn btn-success ml-1 col-lg-2 " data-bs-toggle="modal">
                     Invoice already Cancelled
                     </button>
                     <%/if%>
@@ -870,10 +867,17 @@
                            <%/if%>
                         </tbody>
                         <tfoot>
+                          <%if ($new_sales[0]->discountType != 'NA') %>
                            <%assign var="noOfColumns" value=13%>
                            <%if $new_sales[0]->status == "pending" || $new_sales[0]->status == "unlocked"%>
                            <%assign var="noOfColumns" value=14%>
                            <%/if%>
+                          <%else%>
+                            <%assign var="noOfColumns" value=12%>
+                             <%if $new_sales[0]->status == "pending" || $new_sales[0]->status == "unlocked"%>
+                             <%assign var="noOfColumns" value=13%>
+                             <%/if%>
+                          <%/if%>
                            <%if $po_parts%>
                            <tr >
                               <th colspan='<%$noOfColumns%>' style="width: 100%;" class="text-right ">Total

@@ -2,6 +2,38 @@
 <div class="wrapper container-xxl flex-grow-1 container-p-y">
 <div class="content-wrapper">
   <!-- Content Header (Page header) -->
+  <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme filter-popup-block" style="width: 0px;">
+   <div class="app-brand demo justify-content-between">
+      <a href="javascript:void(0)" class="app-brand-link">
+      <span class="app-brand-text demo menu-text fw-bolder ms-2">Filter</span>
+      </a>
+      <div class="close-filter-btn d-block filter-popup cursor-pointer">
+         <i class="ti ti-x fs-8"></i>
+      </div>
+   </div>
+   <nav class="sidebar-nav scroll-sidebar filter-block" data-simplebar="init">
+      <div class="simplebar-content" >
+         <ul class="menu-inner py-1">
+            <!-- Dashboard -->
+            <div class="filter-row">
+               <li class="nav-small-cap">
+                  <span class="hide-menu">Created Date</span>
+                  <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+               </li>
+               <li class="sidebar-item">
+                  <div class="input-group">
+                     <input type="text" name="datetimes" class="dates form-control" id="date_range_filter" />
+                  </div>
+               </li>
+            </div>
+        </ul>
+      </div>
+   </nav>
+   <div class="filter-popup-btn">
+      <button class="btn btn-outline-danger reset-filter">Reset</button>
+      <button class="btn btn-primary search-filter">Search</button>
+   </div>
+</aside>
   <nav aria-label="breadcrumb">
       <div class="sub-header-left pull-left breadcrumb">
         <h1>
@@ -24,6 +56,8 @@
          <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
           <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
         <%/if%>
+        <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
+      <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
     </div>
   <!-- Main content -->
   <section class="content">
@@ -194,10 +228,25 @@
 </div>
 <script>
             var base_url = <%base_url()|json_encode%> ;
+            var start_date = <%$start_date|json_encode%>;
+    var end_date = <%$end_date|json_encode%>;
 </script>
 <!-- /.content-wrapper -->
 <script>
+  var table;
 	var url = <%site_url("P_Molding/get_filtered_clientUnit")|@json_encode%>;
+  let that = this;
+        $('#date_range_filter').daterangepicker({
+            singleDatePicker: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: 'DD/MM/YYYY' // Change this format as per your requirement
+            }
+        });
+        dateRangePicker = $('#date_range_filter').data('daterangepicker');
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
   $(document).ready(function() {
      // $("#clientIdFrom").change(function() {
       var client_id = $("#clientIdFrom").val();
@@ -220,7 +269,7 @@
       });
       var file_name = "material_transfer_request";
       var pdf_title = "Material Transfer Requests";
-      var table = $("#example1").DataTable({
+      table = $("#example1").DataTable({
         dom: "Bfrtilp",
         buttons: [
             {
@@ -285,7 +334,51 @@
                 minimumResultsForSearch: Infinity
             });
         },1000)
+  
+        $(".search-filter").on("click",function(){
+            var date_range_filter = $("#date_range_filter").val();
+            date_range_filter = date_range_filter.split(" - ");  // Split into start and end dates
+
+             var startDate = $('#start-date').val();
+            var endDate = $('#end-date').val();
+
+            table.draw();
+
+            
+            
+            $(".close-filter-btn").trigger( "click" )
+        })
+        $(".reset-filter").on("click",function(){
+            dateRangePicker.setStartDate(start_date);
+            dateRangePicker.setEndDate(end_date);
+            table.draw();
+        })
   });
+  $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+        var date_range_filter = $("#date_range_filter").val();
+        date_range_filter = date_range_filter.split(" - ");
+        
+        var startDate = ((date_range_filter[0]).replaceAll("/","-")).split("-");
+        startDate = startDate[1]+"-"+startDate[0]+"-"+startDate[2];
+        var endDate = (date_range_filter[1]).replaceAll("/","-");
+        var date = data[7]; // Date is in the second column (index 1)
+        // Convert date strings to date objects for comparison
+        var start = startDate ? new Date(startDate) : null;
+        var end = endDate ? new Date(formatDate(endDate)) : null;
+        var rowDate = new Date(formatDate(date));
+        // Check if the row's date is within the range
+        if (
+            (start && rowDate < start) ||
+            (end && rowDate > end)
+        ) {
+            return false;
+        }
+        return true;
+    });
+    function formatDate(dateString) {
+      var parts = dateString.split('-'); // Split the string into parts
+      return parts[2] + '-' + parts[1] + '-' + parts[0]; // Reorder to YYYY-MM-DD
+  }
 
   $("#add_stock_up").submit(function(e){
       e.preventDefault();
