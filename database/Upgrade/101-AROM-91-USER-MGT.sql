@@ -213,6 +213,10 @@ INSERT INTO `menu_master` (`menu_master_id`, `diaplay_name`, `url`, `status`) VA
 (109, 'Dashboard Quality', 'dashboard_quality', 'Active'),
 (110, 'Dashboard Purchase Grn', 'dashboard_purchase_grn', 'Active');
 
+INSERT INTO `menu_master` (`menu_master_id`, `diaplay_name`, `url`, `status`) 
+VALUES (NULL, 'Customer Challan Report', 'customer_challan_report', 'Active');
+INSERT INTO `menu_master` (`menu_master_id`, `diaplay_name`, `url`, `status`) 
+VALUES (NULL, 'HSN Report', 'hsn_report', 'Active');
 --
 -- Indexes for dumped tables
 --

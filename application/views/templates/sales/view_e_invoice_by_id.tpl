@@ -85,12 +85,12 @@
                               </div>
                               <div class="col-lg-2" style="    width: 11%;">
                                  <div class="form-group">
-                                    <button data-bs-toggle="modal" class="btn btn-success mt-4" data-bs-target="#cancelEInvoiceModel<%$sales_id%>">Cancel E-Invoice</i></button>
+                                    <button data-bs-toggle="modal" class="btn btn-success mt-4" data-bs-target="#cancelEInvoiceModel">Cancel E-Invoice</i></button>
                                  </div>
                               </div>
                               <!-- Cancel E-Invoice Model -->
-                              <div class="modal fade" id="cancelEInvoiceModel<%$sales_id%>" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                 <div class="modal-dialog modal-lg" role="document">
+                              <div class="modal fade" id="cancelEInvoiceModel" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                 <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                                     <div class="modal-content">
                                        <div class="modal-header">
                                           <h5 class="modal-title" id="exampleModalLabel">Cancel E - Invoice</h5>
@@ -99,12 +99,12 @@
                                           </button>
                                        </div>
                                        <div class="modal-body">
-                                          <form action="<%$base_url%>cancel_E_invoice_update" method="POST">
+                                          <form action="<%$base_url%>cancel_E_invoice_update" method="POST" id="cancel_E_invoice_update">
                                              <div class="row">
                                                 <div class="col-lg-12">
                                                    <div class="form-group">
                                                       <label for="customer_name">Reason</label><span class="text-danger">*</span>
-                                                      <select name="CancelReason" required class="form-control">
+                                                      <select name="CancelReason"  class="form-control select2" >
                                                          <option value="">Select Reason</option>
                                                          <option value="1">Duplicate</option>
                                                          <option value="2">Data Entry Mistake</option>
@@ -117,7 +117,7 @@
                                                 <div class="col-lg-12">
                                                    <div class="form-group">
                                                       <label for="customer_name">Remark</label><span class="text-danger">*</span>
-                                                      <input type="text" name="CancelRemark" required class="form-control" aria-describedby="emailHelp" placeholder="Remark">
+                                                      <input type="text" name="CancelRemark"  class="form-control" aria-describedby="emailHelp" placeholder="Remark">
                                                    </div>
                                                 </div>
                                              </div>
@@ -225,7 +225,7 @@
                                     </button>
                                  </div>
                                  <div class="modal-body">
-                                    <form action="<%$base_url%>update_e_way_bill" method="POST" enctype="multipart/form-data">
+                                    <form action="<%$base_url%>update_e_way_bill" method="POST" enctype="multipart/form-data" id="update_e_way_bill">
                                        <input value="<%$sales_id%>" type="hidden" name="new_sales_id" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Customer Name">
                                        <div class="form-group">
                                           <label for="on click url">e-Way Bill No</label>
@@ -233,7 +233,7 @@
                                        </div>
                                        <div class="form-group">
                                           <label for="customer_name">Reason</label><span class="text-danger">*</span>
-                                          <select name="reasonCode" required class="form-control">
+                                          <select name="reasonCode" required class="form-control select2">
                                              <option value="">Select Reason</option>
                                              <option value="1">Due to Break Down</option>
                                              <option value="2">Due to Transhipment</option>
@@ -248,7 +248,7 @@
                                        </div>
                                        <div class="form-group">
                                           <label for="">Mode Of Transport<span class="text-danger">*</label>
-                                          <select name="transMode" class="form-control" required>
+                                          <select name="transMode" class="form-control select2" required>
                                              <option value="1" <%if $new_sales[0]->mode == '1'%>selected<%/if%>>Road</option>
                                              <option value="2" <%if $new_sales[0]->mode == '2'%>selected<%/if%>>Rail</option>
                                              <option value="3" <%if $new_sales[0]->mode == '3'%>selected<%/if%>>Air</option>
@@ -282,15 +282,15 @@
                                     </button>
                                  </div>
                                  <div class="modal-body">
-                                    <form action="<%$base_url%>update_EWayBill_transporter" method="POST" enctype="multipart/form-data">
-                                       <input type="hidden" name="new_sales_id" value="<%$new_sales[0]->id%>" required class="form-control">
+                                    <form action="<%$base_url%>update_EWayBill_transporter" method="POST" enctype="multipart/form-data" id="update_EWayBill_transporter">
+                                       <input type="hidden" name="new_sales_id" value="<%$new_sales[0]->id%>"  class="form-control">
                                        <div class="form-group">
                                           <label for="on click url">e-Way Bill No </label> <br>
                                           <input readonly type="text" name="eWayBillNo" class="form-control" value="<%$einvoice_res_data[0]->EwbNo%>" id="">
                                        </div>
                                        <div class="form-group">
                                           <label for="">Transporter<span class="text-danger">*</label>
-                                          <select name="transporterId" required id="transporterId" class="form-control select2">
+                                          <select name="transporterId"  id="transporterId" class="form-control select2">
                                              <option value="">Select Transporter</option>
                                              <%foreach from=$transporter item=tr%>
                                                 <option value="<%$tr->id%>" <%if $new_sales[0]->transporter_id == $tr->id%>selected<%/if%>><%$tr->name%> - <%$tr->transporter_id%></option>
@@ -318,12 +318,12 @@
                                  </button>
                               </div>
                               <div class="modal-body">
-                                 <form action="<%$base_url%>cancel_eWayBill" method="POST">
-                                    <input type="hidden" name="new_sales_id" value="<%$sales_id%>" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Customer Name">
+                                 <form action="<%$base_url%>cancel_eWayBill" method="POST" id="cancel_eWayBill">
+                                    <input type="hidden" name="new_sales_id" value="<%$sales_id%>"  class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Customer Name">
                                     <input type="hidden" name="eWayBillNo" value="<%$einvoice_res_data[0]->EwbNo%>" class="form-control" id="ewayBillNo1">
                                     <div class="form-group">
                                        <label for="customer_name">Reason</label><span class="text-danger">*</span>
-                                       <select name="cancelReason" required class="form-control">
+                                       <select name="cancelReason"  class="form-control select2">
                                           <option value="">Select Reason</option>
                                           <option value="1">Duplicate</option>
                                           <option value="2">Data Entry Mistake</option>
@@ -333,7 +333,7 @@
                                     </div>
                                     <div class="form-group">
                                        <label for="customer_name">Remark</label><span class="text-danger">*</span>
-                                       <input type="text" name="cancelRemark" required class="form-control" aria-describedby="emailHelp" placeholder="Remark">
+                                       <input type="text" name="cancelRemark"  class="form-control" aria-describedby="emailHelp" placeholder="Remark">
                                     </div>
                                     <div class="modal-footer">
                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -412,5 +412,217 @@
            });
    
        })
+       $("#cancel_E_invoice_update").validate({
+           rules: {
+             CancelReason: {
+               required: true,
+             },
+             CancelRemark: {
+               required: true
+             }
+           },
+           messages: {
+             CancelReason: {
+               required: "Please enter reason",
+             },
+             CancelRemark: {
+               required: "Please enter remark"
+             }
+           },
+           errorPlacement: function (error, element) {
+            
+            if (element[0].localName == "select") {
+                element.parents(".form-group").append(error)
+                // error.insertAfter($(element).parents('div').prev($('.question')));
+            } else {
+                error.insertAfter(element);
+                // something else if it's not a checkbox
+            }
+        },
+           submitHandler: function (form) {
+             $.ajax({
+                url: $(form).attr('action'), // Get the form action URL
+                type: 'POST',                // Set the request type
+                data: $(form).serialize(),   // Serialize the form data
+                success: function (response) {
+                  var data = JSON.parse(response);
+                  if (data.success == 1) {
+                     toastr.success(data.messages);
+                      setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                  }else{
+                    toastr.error(data.messages);
+                  }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Handle error response
+                    toastr.error('Error adding planning FG Stock data: ' + textStatus);
+                }
+            });
+           }
+      });
+       $("#update_EWayBill_transporter").validate({
+           rules: {
+             eWayBillNo: {
+               required: true,
+             },
+             transporterId: {
+               required: true
+             }
+           },
+           messages: {
+             eWayBillNo: {
+               required: "Please enter e-Way bill no",
+             },
+             transporterId: {
+               required: "Please select transporter"
+             }
+           },
+           errorPlacement: function (error, element) {
+            
+            if (element[0].localName == "select") {
+                element.parents(".form-group").append(error)
+                // error.insertAfter($(element).parents('div').prev($('.question')));
+            } else {
+                error.insertAfter(element);
+                // something else if it's not a checkbox
+            }
+        },
+           submitHandler: function (form) {
+             $.ajax({
+                url: $(form).attr('action'), // Get the form action URL
+                type: 'POST',                // Set the request type
+                data: $(form).serialize(),   // Serialize the form data
+                success: function (response) {
+                  var data = JSON.parse(response);
+                  if (data.success == 1) {
+                     toastr.success(data.messages);
+                      setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                  }else{
+                    toastr.error(data.messages);
+                  }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Handle error response
+                    toastr.error('Error adding planning FG Stock data: ' + textStatus);
+                }
+            });
+           }
+      });
+       $("#update_e_way_bill").validate({
+           rules: {
+             reasonCode: {
+               required: true,
+             },
+             reasonRem: {
+               required: true
+             },
+             transMode: {
+               required: true
+             },
+             vehicleNo: {
+               required: true
+             }
+           },
+           messages: {
+             reasonCode: {
+               required: "Please enter reason",
+             },
+             reasonRem: {
+               required: "Please enter reason remark"
+             },
+             transMode: {
+               required: "Please select mode Of transport"
+             },
+             vehicleNo: {
+               required: "Please enter vehicle no"
+             }
+           },
+           errorPlacement: function (error, element) {
+            
+            if (element[0].localName == "select") {
+                element.parents(".form-group").append(error)
+                // error.insertAfter($(element).parents('div').prev($('.question')));
+            } else {
+                error.insertAfter(element);
+                // something else if it's not a checkbox
+            }
+        },
+           submitHandler: function (form) {
+             $.ajax({
+                url: $(form).attr('action'), // Get the form action URL
+                type: 'POST',                // Set the request type
+                data: $(form).serialize(),   // Serialize the form data
+                success: function (response) {
+                  var data = JSON.parse(response);
+                  if (data.success == 1) {
+                     toastr.success(data.messages);
+                      setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                  }else{
+                    toastr.error(data.messages);
+                  }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Handle error response
+                    toastr.error('Error adding planning FG Stock data: ' + textStatus);
+                }
+            });
+           }
+      });
+       $("#cancel_eWayBill").validate({
+           rules: {
+             cancelReason: {
+               required: true,
+             },
+             cancelRemark: {
+               required: true
+             }
+           },
+           messages: {
+             cancelReason: {
+               required: "Please enter reason",
+             },
+             cancelRemark: {
+               required: "Please enter remark"
+             }
+           },
+           errorPlacement: function (error, element) {
+            
+            if (element[0].localName == "select") {
+                element.parents(".form-group").append(error)
+                // error.insertAfter($(element).parents('div').prev($('.question')));
+            } else {
+                error.insertAfter(element);
+                // something else if it's not a checkbox
+            }
+        },
+           submitHandler: function (form) {
+             $.ajax({
+                url: $(form).attr('action'), // Get the form action URL
+                type: 'POST',                // Set the request type
+                data: $(form).serialize(),   // Serialize the form data
+                success: function (response) {
+                  var data = JSON.parse(response);
+                  if (data.success == 1) {
+                     toastr.success(data.messages);
+                      setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                  }else{
+                    toastr.error(data.messages);
+                  }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Handle error response
+                    toastr.error('Error adding planning FG Stock data: ' + textStatus);
+                }
+            });
+           }
+      });
    });
 </script>

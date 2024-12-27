@@ -255,7 +255,8 @@ class Reports_model extends CI_Model {
 			SUM(parts.qty) as qty,
 			parts.tax_id as taxid,
 			parts.po_number,
-			parts.hsn_code
+			parts.hsn_code,
+			sales.id as sales_id
 			");
 
 		$this->db->from('new_sales AS sales');

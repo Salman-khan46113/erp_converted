@@ -56,7 +56,7 @@
                             <div class="col-lg-5">
                             <div class="form-group">
                                             <label class="form-label">Sticker From<span class="text-danger">*</label>
-                                            <input type="number" placeholder="" name="stickerFrom" required class="form-control">
+                                            <input type="text" placeholder="" name="stickerFrom" required class="form-control onlyNumericInput">
                                             <input type="hidden" required class="form-control" name="invoice_no" value="<?php echo $invoice_no ?>">
                                             <input type="hidden" required class="form-control" name="invoice_date" value="<?php echo $invoice_date ?>">
                             </div>

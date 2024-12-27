@@ -15,12 +15,13 @@
         <!-- Dashboard -->
         <div class="filter-row">
           <li class="nav-small-cap">
-            <span class="hide-menu">Select Month</span>
+            <span class="hide-menu">Customer</span>
             <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
           </li>
           <li class="sidebar-item">
             <div class="input-group">
               <select name="customer_name" class="form-control select2" id="customer_name">
+                <option value="">Select Customer</option>
               <%foreach $customers as $val%>
               <option value="<%$val->customer_name%>"><%$val->customer_name%></option>
           <%/foreach%>
@@ -63,6 +64,7 @@
     
     <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
     <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
+    
 </div>
 <div class="w-100">
 <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">

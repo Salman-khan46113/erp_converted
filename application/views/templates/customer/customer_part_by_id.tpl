@@ -25,9 +25,10 @@
           <li class="sidebar-item">
             <div class="input-group">
               <select name="customer_name" class="form-control select2" id="customer_name">
+                <option value="">Select Customer Part</option>
               <%foreach $customer_part_list as $val%>
               <option 
-                  value="<%$val->part_number%>"><%$val->part_number%></option>
+                  value="<%trim($val->part_number)%>"><%$val->part_number%></option>
                 <%/foreach%>
               </select>
             </div>
@@ -65,6 +66,8 @@
 <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
 <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
 <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
+<a class="btn btn-seconday" href="<%base_url()%>customer_master" id="downloadPDFBtn" title="Back To 
+Customer Master"><i class="ti ti-arrow-left"></i></a>
 </div>
 <div class="w-100">
     <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">

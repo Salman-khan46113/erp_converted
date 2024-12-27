@@ -866,6 +866,16 @@ class ReportsController extends CommonController
             'orderable' => false
         ];
 
+        $column[] = [
+            "data" => "sales_id",
+            "title" => "Sales Id",
+            "width" => "0%",
+            "className" => "dt-center",
+            'orderable' => false,
+            "visible" => false
+        ];
+
+
        
        
         $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
@@ -884,7 +894,7 @@ class ReportsController extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([[3, 'desc']]);
+        $data["sorting_column"] = json_encode([[14, 'desc']]);
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
@@ -913,7 +923,7 @@ class ReportsController extends CommonController
         $condition_arr["length"] = $post_data["length"];
         $base_url = $this->config->item("base_url");
         $data = $this->Reports_model->getSalesSummaryReportView($condition_arr,$post_data["search"]);
-        // pr($data,1);
+        // pr($this->db->last_query(),1);
         
         foreach ($data as $key => $po) {
             if($po['basic_total'] > 0 ) {

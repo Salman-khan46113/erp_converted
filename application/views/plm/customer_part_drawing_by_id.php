@@ -105,15 +105,15 @@
                                                             <label for="po_num">Part Drawing </label><span class="text-danger">*</span>
                                                             <input type="file" name="drawing" required class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
                                                         </div>
-                                                        <div class="form-group">
+                                                        <div class="form-group hide">
                                                             <label for="po_num">Cad File </label>
                                                             <input type="file" name="cad"  class="form-control" id="exampleCadFile" aria-describedby="emailHelp">
                                                         </div>
-                                                        <div class="form-group">
+                                                        <div class="form-group hide">
                                                             <label for="po_num">3D Model </label>
                                                             <input type="file" name="model"  class="form-control" id="example3DModel" aria-describedby="emailHelp">
                                                         </div>
-                                                        <div class="form-group">
+                                                        <div class="form-group ">
                                                             <label for="po_num">Revision Number </label><span class="text-danger">*</span>
                                                             <input type="text" name="revision_no" required class="form-control" id="exampleInputEmail1" aria-describedby=" emailHelp">
                                                         </div>
@@ -211,11 +211,11 @@
                                                                                             <label for="po_num">Part Drawing </label><span class="text-danger">*</span>
                                                                                             <input type="file" name="drawing" required class="form-control" id="exampleInputEmail1">
                                                                                         </div>
-                                                                                        <div class="form-group">
+                                                                                        <div class="form-group hide">
                                                                                             <label for="po_num">Cad File </label>
                                                                                             <input type="file" name="cad" required class="form-control" id="exampleCadFile">
                                                                                         </div>
-                                                                                        <div class="form-group">
+                                                                                        <div class="form-group hide">
                                                                                             <label for="po_num">3D Model </label>
                                                                                             <input type="file" name="model" required class="form-control" id="example3DModel">
                                                                                         </div>

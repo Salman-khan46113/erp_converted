@@ -616,7 +616,7 @@ class SupplierParts extends CI_Model {
     }
 
     public function getPoRepotData($condition_arr = [],$search_params = []){
-        $this->db->select('po.po_number, po.created_date, po.expiry_po_date, po.status, s.supplier_name, c.part_number, c.part_description, parts.qty, parts.pending_qty');
+        $this->db->select('po.po_number, po.created_date, po.expiry_po_date, po.status, s.supplier_name, c.part_number, c.part_description, parts.qty, parts.pending_qty,po.id as po_id');
         $this->db->from('new_po po');
         $this->db->join('supplier s', 'po.supplier_id = s.id', 'left');
         $this->db->join('po_parts parts', 'po.id = parts.po_id', 'left');
@@ -875,7 +875,8 @@ class SupplierParts extends CI_Model {
         inward.*, 
         supplier.*, 
         child_part.*,
-        po_parts.*
+        po_parts.*,
+        grn.id as id_val
     ');
         $clientId = $this->Unit->getSessionClientId();
         $this->db->from('grn_details grn');

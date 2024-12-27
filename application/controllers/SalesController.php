@@ -572,7 +572,7 @@ class SalesController extends CommonController
 
 		//avoid double post so check whether the lock status is there before locking...
 		if (strpos($po_parts[0]->sales_number, 'TEMP') === false) {
-			if (strpos($po_parts[0]->sales_number, $this->getSalesNoFormat(false,false)) !== false) {
+			// if (strpos($po_parts[0]->sales_number, $this->getSalesNoFormat(false,false)) !== false) {
 				$new_sales_number = $po_parts[0]->sales_number;
 				$sales_data = $this->Crud->get_data_by_id("new_sales", $po_parts[0]->sales_number, "sales_number");
 				if ($sales_data[0]->status == 'lock') {
@@ -583,20 +583,36 @@ class SalesController extends CommonController
 				 if ($sales_data[0]->status == 'pending') {
 					$isReusedInvoice = true;
 				}
-			} 
+			// } 
 		}
 		$messages = "Something went wrong!.";
 		$success =0;
 		if ($isLocked == false && $isUnLocked == false) {
 			if($isReusedInvoice == false) {
+
 				$sql = "SELECT actualSalesNo FROM new_sales WHERE status!='pending' AND sales_number like'" . $this->getSalesNoFormat(false,true) . "' order by actualSalesNo  desc LIMIT 1";
 				$latestSalesNo = $this->Crud->customQuery($sql);
-				foreach ($latestSalesNo as $p) {
-					$currentSaleNo = $p->actualSalesNo;
-				}
 
-				$new_lockCount = $currentSaleNo + 1;
-				$new_sales_number = $this->getLockSalesNumber($new_lockCount);
+				$currentSaleNo = $latestSalesNo[0]->actualSalesNo;
+				
+				$unique_sales_number  = false;
+				$count = 0;
+				$new_sales_number = "";
+				while (!$unique_sales_number) {
+					$new_lockCount = $currentSaleNo + 1;
+					$new_sales_number = $this->getLockSalesNumber($new_lockCount);
+					$sql = "SELECT * FROM new_sales WHERE sales_number ='" .$new_sales_number. "' LIMIT 1";
+					$dublicate_record = $this->Crud->customQuery($sql);
+					if(count($dublicate_record[0]) == 0){
+						$unique_sales_number = true;
+					}else{
+						$currentSaleNo += 1;
+					}
+					$count++;
+					if($count > 10){
+						$unique_sales_number = true;
+					}
+				}
 			}
 			//updated created date when the invoice is locked..
 			$cretd_dt = date('d/m/Y', strtotime($this->current_date));
@@ -982,7 +998,7 @@ class SalesController extends CommonController
 			// Get the formatted XML as a string
 			//$formattedXml = $dom->saveXML();
 			
-			$filename = $filename = 'dist/uploads/sales_export_tally/tally_sales-'.$this->current_date_time.'.xml';
+			$filename = $filename = 'dist/uploads/sales_export_tally/tally_sales_'.date(d_m_Y).'.xml';
 
 			file_put_contents($filename, $xmlStringWithoutDeclaration);
 			
@@ -1209,6 +1225,167 @@ class SalesController extends CommonController
         exit();
 		
 	}
+	public function hsn_report()
+	{
+		checkGroupAccess("sales_report","list","Yes");
+
+		$created_month  = $this->input->post("created_month");
+		$created_year  = $this->input->post("created_year");
+
+		if (empty($created_year)) {
+			$created_year = $this->year;
+		}
+		if (empty($created_month)) {
+			$created_month = $this->month;
+		}
+
+		$data['created_year'] = $created_year;
+		$data['created_month'] = $created_month;
+		$data['fincYears'] = $this->Common_admin_model->getFinancialYears();
+		for ($i = 1; $i <= 12; $i++) {
+			$data['month_data'][$i] = $this->Common_admin_model->get_month($i);
+			$data['month_number'][$i] = $this->Common_admin_model->get_month_number($data['month_data'][$i]);
+		}
+		
+		$data['customer'] = $this->Crud->read_data("customer");
+		// pr($data,1);
+        $column[] = [
+            "data" => "hsn_code",
+            "title" => "HSN",
+            "width" => "7%",
+            "className" => "dt-center status-row",
+        ];
+        $column[] = [
+            "data" => "customer_name",
+            "title" => "CUSTOMER NAME",
+            "width" => "14%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "qty",
+            "title" => "Total Sales QTY",
+            "width" => "17%",
+            "className" => "dt-center",
+        ];
+       
+        
+        $column[] = [
+            "data" => "subtotal",
+            "title" => "Basic Amount",
+            "width" => "15%",
+            "className" => "dt-center",
+            'orderable' => false
+        ];
+        
+        $column[] = [
+            "data" => "sgst_amount",
+            "title" => "SGST",
+            "width" => "7%",
+            "className" => "dt-center",
+        ];
+        $column[] = [
+            "data" => "cgst_amount",
+            "title" => "CGST",
+            "width" => "7%",
+            "className" => "dt-center",
+        ];
+		$column[] = [
+            "data" => "igst_amount",
+            "title" => "IGST",
+            "width" => "7%",
+            "className" => "dt-center",
+        ];
+		
+		$column[] = [
+            "data" => "tcs_amount",
+            "title" => "TCS",
+            "width" => "7%",
+            "className" => "dt-center",
+        ];
+		$column[] = [
+            "data" => "gst_amount",
+            "title" => "TOTAL GST",
+            "width" => "7%",
+            "className" => "dt-center",
+        ];
+		$column[] = [
+            "data" => "row_total",
+            "title" => "TOTAL Amount",
+            "width" => "7%",
+            "className" => "dt-center",
+        ];
+		
+		
+        $data["data"] = $column;
+        $data["is_searching_enable"] = true;
+        $data["is_paging_enable"] = true;
+        $data["is_serverSide"] = true;
+        $data["is_ordering"] = true;
+        $data["is_heading_color"] = "#a18f72";
+        $data["no_data_message"] =
+            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
+            base_url() .
+            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
+        $data["is_top_searching_enable"] = true;
+        $data["sorting_column"] = json_encode([[2, 'desc']]);
+        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["admin_url"] = base_url();
+        $data["base_url"] = base_url();
+		$this->loadView('reports/hsn_reports', $data);
+		
+	}
+
+	public function hsnReportsAjax()
+	{
+		$post_data = $this->input->post();
+		// pr($post_data,1);
+        $column_index = array_column($post_data["columns"], "data");
+        $order_by = "";
+        foreach ($post_data["order"] as $key => $val) {
+            if ($key == 0) {
+                $order_by .= $column_index[$val["column"]] . " " . $val["dir"];
+            } else {
+                $order_by .=
+                    "," . $column_index[$val["column"]] . " " . $val["dir"];
+            }
+        }
+        $condition_arr["order_by"] = $order_by;
+        $condition_arr["start"] = $post_data["start"];
+        $condition_arr["length"] = $post_data["length"];
+        $base_url = $this->config->item("base_url");
+		$data = $this->SalesModel->getHsnReportViewData($condition_arr,$post_data["search"]);
+
+		$total_balance_amount = 0;
+		foreach ($data as $key => $val) {
+			if ($val['basic_total'] > 0) {
+				$subtotal = $val['basic_total'];
+			} else {
+				$subtotal = round($val['total_rate'] - $val['gst_amount'], 2);
+			}
+			$total_balance_amount += $subtotal;
+			
+			if ($val['part_price'] > 0) {
+				$rate = $val['part_price'];
+			} else {
+				$rate = round($subtotal / $val['qty'], 2);
+			}
+			$row_total =  round($val['total_rate'], 2) + round($val['tcs_amount'], 2);
+			$data[$key]['subtotal'] = $subtotal;
+			$data[$key]['rate'] =  $rate;
+			$data[$key]['sales_discount'] =  ($val['sales_discount'] > 0) ? $val['sales_discount']." %": display_no_character();
+			$data[$key]['row_total'] = number_format($row_total, 2);
+			
+		}
+		$data["data"] = $data;
+		
+        $total_record = $this->SalesModel->getHsnReportViewCount([], $post_data["search"]);
+        // pr($total_record,1);
+        $data["recordsTotal"] = count($total_record);
+        $data["recordsFiltered"] = count($total_record);
+        echo json_encode($data);
+        exit();
+		
+	}
 
 
 
@@ -1349,6 +1526,7 @@ class SalesController extends CommonController
 		// pr($html_content,1);
 		$this->pdf->loadHtml($html_content);
         $this->pdf->render();
+        // pr("ok",1);
 		if($digitalSignature== "Yes" ){
                 $output = $this->pdf->output();
                 $fileName = "dist/uploads/credit_note_print/".$pdfName;
@@ -2993,7 +3171,7 @@ class SalesController extends CommonController
             "className" => "dt-left",
         ];
         $column[] = [
-            "data" => "created_date",
+            "data" => "created_date_val",
             "title" => "Sales Inv Date",
             "width" => "17%",
             "className" => "dt-center",
@@ -3091,7 +3269,14 @@ class SalesController extends CommonController
             "className" => "dt-center",
 			'orderable' => false
         ];
-       
+        $column[] = [
+            "data" => "sales_id_val",
+            "title" => "sales_id_val",
+            "width" => "7%",
+            "className" => "dt-center",
+			'orderable' => false,
+			"visible" => false
+        ];
 		
 		$date_filter = date("Y/m/01") ." - ". date("Y/m/d");
         $date_filter =  explode((" - "),$date_filter);
@@ -3108,7 +3293,7 @@ class SalesController extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
+        $data["sorting_column"] = json_encode([[16,'desc']]);
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
@@ -3139,6 +3324,7 @@ class SalesController extends CommonController
 		
 		$data = $this->SalesModel->getReceivableReportView($condition_arr,$post_data["search"]);
 		// pr($data,1);
+		// pr($this->db->last_query(),1);
 		foreach ($data as $key => $objs) {
 			$created_date_str = $objs['created_date'];
             
@@ -3149,7 +3335,7 @@ class SalesController extends CommonController
 				$payment_receipt_date_formated =  date("d/m/Y", strtotime($objs['payment_receipt_date']));
 			}
 			$data[$key]['subtotal'] = $subtotal;
-			$data[$key]['row_total'] = $row_total;
+			$data[$key]['row_total'] = number_format($row_total,2,".","");
 			$data[$key]['payment_receipt_date_formated'] = $payment_receipt_date_formated;
 			$tds_amount = $data[$key]['tds_amount'] = $objs['tds_amount'] > 0 ? $objs['tds_amount'] : 0;
 
@@ -3240,6 +3426,56 @@ class SalesController extends CommonController
         $data["total_balance_amount_to_pay"] = number_format($total_balance_amount_to_pay,2);
         $data["total_tds_amount"] = number_format($total_tds_amount,2);
         echo json_encode($data);
+	}
+
+	public function outstanding_reporta()
+	{
+		pr("ok",1);
+		checkGroupAccess("receivable_report","list","Yes");
+		$data['customers'] = $this->Crud->read_data("customer");
+		$data['selected_customer_part_id'] = $customer_part_id;
+
+		$column[] = [
+            "data" => "customer_name",
+            "title" => "Party Name <br>(CUSTOMER/Supplier)",
+            "width" => "14%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "sales_number",
+            "title" => "Receivable Amount Due<br>(With Gst)",
+            "width" => "16%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "created_date_val",
+            "title" => "Payable Amount Due<br>(With Gst)",
+            "width" => "17%",
+            "className" => "dt-center",
+        ];
+        
+		
+		$date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
+		$data["data"] = $column;
+        $data["is_searching_enable"] = true;
+        $data["is_paging_enable"] = true;
+        $data["is_serverSide"] = true;
+        $data["is_ordering"] = true;
+        $data["is_heading_color"] = "#a18f72";
+        $data["no_data_message"] =
+            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
+            base_url() .
+            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
+        $data["is_top_searching_enable"] = true;
+        $data["sorting_column"] = json_encode();
+        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["admin_url"] = base_url();
+        $data["base_url"] = base_url();
+		
+		$this->loadView('reports/receivable_report',$data);
 	}
 
 

@@ -48,6 +48,19 @@ $(document).ready(function() {
         }
     });
 
+    $(".expand-icon").on("click",function(){
+        $(this).parents(".menu-form-row").find(".form-right-div").slideToggle();
+        $(this).toggleClass("active");
+    })
+
+    $(".common-check-box").on("change",function(){
+        if(this.checked) {
+            $(this).parents(".menu-form-row").find("[type='checkbox']").prop("checked", true);
+        }else{
+            $(this).parents(".menu-form-row").find("[type='checkbox']").prop("checked", false);
+        }
+        
+    })
     // Custom search filter event
   
    

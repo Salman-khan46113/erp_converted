@@ -135,7 +135,10 @@ class GlobalConfigController extends CommonController
 	        	$value = $this->input->post("old_val");
 	        }
 
-	        if($this->input->post("config_name") == "SignatureImage"){
+	        
+		}
+		if($this->input->post("config_name") == "SignatureImage"){
+
 				if($_FILES['SignatureImage']['name'] != ""){
 		            $profileImageData =
 		                $_FILES["SignatureImage"]["name"] != ""
@@ -164,9 +167,6 @@ class GlobalConfigController extends CommonController
 		        	$value = $this->input->post("old_val");
 		        }
 		    }
-
-	        
-		}
         	
         if($upload_error == 0){
 			if($forArom=='on' || $forArom==1) { $forArom = 1; } else { $forArom = 0;}
@@ -180,6 +180,7 @@ class GlobalConfigController extends CommonController
 				"ARMUserOnly" => $forArom,
 				"canModify" => $canModify
 			);
+			
 
 			$result = $this->Crud->update_data_column("global_configuration", $data, $id, "id");
 			if ($result) {

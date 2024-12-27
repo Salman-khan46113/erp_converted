@@ -90,6 +90,9 @@ const datatable = {
         columnDefs: [{ sortable: false, targets: 0 }],
         pagingType: "full_numbers",
     });
+      $('#serarch-filter-input').on('keyup', function() {
+   table.search(this.value).draw();
+});
     },
     resetFilter:function(){
         table.column(1).search('').draw();

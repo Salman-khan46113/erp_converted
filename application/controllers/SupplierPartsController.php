@@ -512,6 +512,10 @@ class SupplierPartsController extends CommonController
 		$data['client_list'] = $this->Crud->read_data_acc("client");
 		$data['clintUnitId'] = $this->Unit->getSessionClientId();
 		$data['role'] = $this->session->userdata("role");
+		$date_filter = date("01/m/Y") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
 		$this->loadView('store/stock_down', $data);
 	}
 

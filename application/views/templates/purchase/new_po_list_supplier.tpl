@@ -96,6 +96,7 @@
           <thead>
             <tr>
               <!-- <th>Sr. No.</th> -->
+              <th style="display: none;">ID</th>
               <th>Supplier Name</th>
               <th>Supplier Number</th>
               <th>Supplier Location</th>
@@ -108,6 +109,9 @@
                 <%foreach from=$supplier_list item=s %>
                   <tr>
                     <!-- <td width="5%"> <%$i %></td> -->
+                    <td width="0%" style="display: none;">
+                      <%$s->id %>
+                    </td>
                     <td width="30%">
                       <%$s->supplier_name %>
                     </td>

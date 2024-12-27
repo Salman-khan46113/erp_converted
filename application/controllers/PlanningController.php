@@ -230,6 +230,7 @@ class PlanningController extends CommonController
 		$month_id = $this->input->post('month_id');
 		$schedule_qty = $this->input->post('schedule_qty');
 		$financial_year = $this->input->post('financial_year');
+		$planing_id = $this->input->post('planing_id');
 		$data1 = array(
 			"financial_year" => $financial_year,
 			"month" => $month_id,
@@ -263,8 +264,8 @@ class PlanningController extends CommonController
 						"financial_year" => $financial_year,
 						"month" => $month_id,
 					);
-					// pr($data,1);
-					$result = $this->Crud->update_data("planing_data", $data, $planing_data[0]->id);
+					$result = $this->Crud->update_data("planing_data", $data, $planing_id);
+					
 				}
 				if ($result) {
 					$messages = "Plan sucessfully updated.";
@@ -324,6 +325,7 @@ class PlanningController extends CommonController
 				ORDER BY cpm.id DESC');
 
 		$data['child_part_master'] = $role_management_data->result();
+		// pr($this->db->last_query(),1);
 		$child_part_master = $data['child_part_master'];
 		foreach ($child_part_master as $key=>$t) {
 		    $subtotal=0;

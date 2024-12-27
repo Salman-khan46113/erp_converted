@@ -26,7 +26,7 @@
    	<%foreach from=$copies key=key item=value %>
       <tr style="font-size:11px">
          <%$company_logo %>
-         <td colspan="12" style="    padding: 0px;">
+         <td colspan="<%if $company_logo neq ''%>10<%else%>12<%/if%>" style="    padding: 0px;">
             <table cellspacing="0" border="0px" width="100%">
                <tbody>
                   <tr>

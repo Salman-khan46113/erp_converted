@@ -41,11 +41,12 @@
                      </li>
                      <li class="sidebar-item">
                         <div class="input-group">
+                           
                            <select name="supplier_id" class="form-control select2" id="supplier_search">
                               <option value="">Supplier</option>
                               <%foreach from=$supplier_list item=$s%>
                               <option value="
-                                 <%$s->id %>"><%$c->part_number%> / <%$c->part_description %>
+                                 <%$s->id %>"><%$s->supplier_name%>
                               </option>
                               <%/foreach%>
                            </select>

@@ -27,7 +27,7 @@ const page = {
                         var lines = csv.split('\n');
                         var modifiedLines = lines.map(function(line) {
                             var values = line.split(',');
-                            values.splice(8, 1);
+                            values.splice(8, 2);
                             return values.join(',');
                         });
                         return modifiedLines.join('\n');
@@ -51,7 +51,7 @@ const page = {
                         cell.fillColor = theme_color;
                     });
                     doc.content[1].table.body.forEach(function (row, index) {
-                        row.splice(8, 1);
+                        row.splice(8, 2);
                         row.forEach(function (cell) {
                             // Set alignment for each cell
                             cell.alignment = "center"; // Change to 'left' or 'right' as needed
@@ -61,9 +61,10 @@ const page = {
             },
         ],
         searching: true,
-        // scrollX: true,
+        scrollX: true,
         scrollY: true,
         bScrollCollapse: true,
+        order: [[8, 'desc']],
         columnDefs: isMultiClient == true ? [{ sortable: false, targets: 8}] : [{ sortable: false, targets: 7 }],
         pagingType: "full_numbers",
        

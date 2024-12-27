@@ -121,13 +121,13 @@
                                                             <input type="file" name="drawing"  class="form-control required-input" id="exampleInputEmail1" aria-describedby="emailHelp">
                                                         </div>
                                                     </div>
-                                                    <div class="col-lg-6">
+                                                    <div class="col-lg-6 hide">
                                                         <div class="form-group">
                                                             <label for="po_num">Cad File </label>
                                                             <input type="file" name="cad"  class="form-control" id="exampleCadFile" aria-describedby="emailHelp">
                                                         </div>
                                                     </div>
-                                                    <div class="col-lg-6">
+                                                    <div class="col-lg-6 hide">
                                                         <div class="form-group">
                                                             <label for="po_num">3D Model </label>
                                                             <input type="file" name="model"  class="form-control" id="example3DModel" aria-describedby="emailHelp">
@@ -176,8 +176,8 @@
                                             <th>Part Number</th>
                                             <th>Part Description</th>
                                             <th>Drawing</th>
-                                            <th>Cad File</th>
-                                            <th>3D Model</th>
+                                            <!-- <th>Cad File</th> -->
+                                            <!-- <th>3D Model</th> -->
                                         </tr>
                                     </thead>
                                     
@@ -225,13 +225,13 @@
                                                                                             <input type="file" name="drawing"  class="form-control required-input" id="exampleInputEmail1">
                                                                                         </div>
                                                                                      </div>
-                                                                                    <div class="col-lg-6">
+                                                                                    <div class="col-lg-6 hide">
                                                                                         <div class="form-group">
                                                                                             <label for="po_num">Cad File </label>
                                                                                             <input type="file" name="cad"  class="form-control required-input" id="exampleCadFile">
                                                                                         </div>
                                                                                      </div>
-                                                                                    <div class="col-lg-6">
+                                                                                    <div class="col-lg-6 hide" >
                                                                                         <div class="form-group">
                                                                                             <label for="po_num">3D Model </label>
                                                                                             <input type="file" name="model"  class="form-control required-input" id="example3DModel">
@@ -320,7 +320,7 @@
                                 <!-- Ends new upload button -->
                                
                             </td>
-                            <td>
+                            <%* <td>
                                 <%if $customer_part_drawing_data[$poo->customer_master_id][0]->cad != ""%>
                                     <a title="Download" download href="<%$base_url%>documents/<%$customer_part_drawing_data[$poo->customer_master_id][0]->cad%>" class=" remove_hoverr"><i class="ti ti-download"></i></a>
                                     <a title="View" class="" href="<%$base_url%>documents/<%$customer_part_drawing_data[$poo->customer_master_id][0]->cad%>" target="_blank"><i class="ti ti-eye"></i> </a>
@@ -356,8 +356,8 @@
                                                         </div>
                                                     </div>
                                 <!-- Ends new upload button -->
-                            </td>
-                            <td>
+                            </td> *%>
+                           <%* <td>
                                 <%if $customer_part_drawing_data[$poo->customer_master_id][0]->model != ""%>
                                     <a title="Download" download href="<%$base_url%>documents/<%$customer_part_drawing_data[$poo->customer_master_id][0]->model%>" class="remove_hoverr"><i class="ti ti-download"></i></a>
                                     <a title="View" class="" href="<%$base_url%>documents/<%$customer_part_drawing_data[$poo->customer_master_id][0]->model%>" target="_blank"><i class="ti ti-eye"></i> </a>
@@ -396,7 +396,7 @@
                                                         </div>
                                                     </div>
                                 <!-- Ends new upload button -->
-                            </td>
+                            </td> *%>
                             </tr>
                                                 <%assign var="i" value=$i+1%>
                                                 <%/if%>

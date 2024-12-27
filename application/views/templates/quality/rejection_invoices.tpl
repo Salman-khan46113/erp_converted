@@ -55,14 +55,14 @@
                                     
                                     <div class="col-lg-4 mb-3">
                                         <div class="form-group">
-                                            <label for="" class="form-label">Customer Debit Note No</label><span class="text-danger">*</span></label>
+                                            <label for="" class="form-label">Customer Debit Note No</label><span class="text-danger"></span></label>
                                             <input type="text" placeholder="Customer Debit Note No" name="customer_debit_note_no" class="form-control">
                                         </div>
                                     </div>
                                     <div class="col-lg-4 mb-3">
                                         <div class="form-group">
                                             <label  class="form-label" for="on click url">Customer Debit Note Date
-                                                <span class="text-danger">*</span></label>
+                                                <span class="text-danger"></span></label>
                                             <input max="<%date('Y-m-d') %>" type="date"
                                                 value="" name="customer_debit_note_date"
                                                 class="form-control">
