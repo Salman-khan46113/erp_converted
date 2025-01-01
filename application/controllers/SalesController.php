@@ -3521,7 +3521,7 @@ class SalesController extends CommonController
 		// pr($data,1);
 		foreach ($data as $key => $val) {
 			$outstanding_data[] = [
-				"customer_name" => $val['supplier_name'],
+				"customer_name" => $val['customer_name'],
 				"receivable_amount" => 0,
 				"payable_amount" => $val['amount_received']
 			];

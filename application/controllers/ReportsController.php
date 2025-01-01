@@ -342,7 +342,7 @@ class ReportsController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([8, 'desc']);
-        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
         $date_filter = date("Y/m/01") ." - ". date("Y/m/d");

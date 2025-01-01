@@ -168,6 +168,7 @@ const page = {
             //     leftColumns: 2,
             //     // end: 1
             // },
+             columnDefs: [{ sortable: false, targets: 1 },{ sortable: false, targets: 2 }],
             ajax: {
                 data: {'search':data},    
                 url: "SalesController/getOutstandingReportData",

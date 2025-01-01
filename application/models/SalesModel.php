@@ -243,9 +243,7 @@ class SalesModel extends CI_Model {
            rrp.tds_amount as tds_amount,
             rrp.remark as remark_val,
             ROUND(SUM(
-                IF(s.total_rate > 0,s.total_rate,0) + 
-                IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - 
-                IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
+                IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
                 2) AS bal_amnt,
             s.sales_id as sales_id_val');
         
@@ -272,9 +270,9 @@ class SalesModel extends CI_Model {
         }
         if (is_valid_array($search_params) && $search_params["status"] != "") {
                 if($search_params["status"] == "Pending"){
-                    $this->db->having('bal_amnt >', 0);
+                    $this->db->having('bal_amnt >=', 0);
                 }else{
-                    $this->db->having('bal_amnt <=', 0);
+                    $this->db->having('bal_amnt <', 0);
                 }
         }
         if ($search_params["date_range"] != "") {
@@ -310,6 +308,7 @@ class SalesModel extends CI_Model {
         $result_obj = $this->db->get();
         $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
         // pr($this->db->last_query(),1);
+        // pr($ret_data,1);
         return $ret_data;
     }
 
@@ -379,6 +378,7 @@ class SalesModel extends CI_Model {
         $result_obj = $this->db->get();
         $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
         // pr($this->db->last_query(),1);
+        // pr($ret_data,1);
         return $ret_data;
     }
 
@@ -477,7 +477,7 @@ class SalesModel extends CI_Model {
 
     public function getOutstandingPayableReportView($condition_arr = [],$search_params = ""){
         
-        $this->db->select('SUM(pr.amount_received) as amount_received,pr.*,s.supplier_name');
+        $this->db->select('SUM(pr.amount_received) as amount_received,pr.*,s.supplier_name as customer_name');
 
         $this->db->from('payable_report pr');
         $this->db->join('inwarding inward', 'inward.grn_number = pr.grn_number', 'inner');
@@ -527,7 +527,7 @@ class SalesModel extends CI_Model {
     }
     public function getOutstandingPayableReportViewCount($condition_arr = [],$search_params = ""){
         
-        $this->db->select('SUM(pr.amount_received) as amount_received,pr.*,s.supplier_name');
+       $this->db->select('SUM(pr.amount_received) as amount_received,pr.*,s.supplier_name');
 
         $this->db->from('payable_report pr');
         $this->db->join('inwarding inward', 'inward.grn_number = pr.grn_number', 'inner');
@@ -552,7 +552,7 @@ class SalesModel extends CI_Model {
                 $keyword = $search_params["value"];
                 $this->db->group_start();
                 $fields = [
-                    's.supplier_name',
+                    's.supplier_name'
                 ];
                 
                 foreach ($fields as $field) {

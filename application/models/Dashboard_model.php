@@ -91,9 +91,10 @@ class Dashboard_model extends CI_Model
 		$this->db->group_by('ns.id');
 
 	    $result_obj = $this->db->get();
-		//pr($this->db->last_query(), 1);
+		// pr($this->db->last_query(), 1);
 
 	    $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+	    // pr($ret_data,1);
 	    return $ret_data;
 	}
 
@@ -278,6 +279,54 @@ class Dashboard_model extends CI_Model
 	}
 
 	/* account tab */
+
+	public function get_total_receivable_due_gst($year = '',$month_arr = ''){
+		$unit_condition = '';
+		if($this->unit > 0){
+			$unit_condition = "AND n.clientId = $this->unit";
+		}
+        $this->db->select('s.*, 
+            SUM(s.gst_amount) as gst, 
+            SUM(s.total_rate) as ttlrt, 
+            SUM(s.gst_amount) as gstamnt, 
+            SUM(s.tcs_amount) as tcsamnt, 
+            cus.customer_name, 
+            cus.payment_terms, 
+            rrp.payment_receipt_date,
+            rrp.amount_received as amount_received, 
+            rrp.transaction_details, 
+            ns.created_date as created_date_val,
+           rrp.tds_amount as tds_amount,
+            rrp.remark as remark_val,
+            ROUND(SUM(
+                IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
+                2) AS bal_amnt,
+            s.sales_id as sales_id_val');
+        
+        $this->db->from('sales_parts s');
+        
+        $this->db->join('new_sales n', 's.sales_id = n.id AND n.status != "unlocked" '.$unit_condition, 'inner');
+        $this->db->join('new_sales ns', 'ns.id = s.sales_id', 'left');
+        $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
+        $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
+        
+        $this->db->group_by('s.sales_number');
+        
+        
+        if($year != ""){
+	    	if(array_key_exists("year", $month_arr)){
+	    		$this->db->where("s.created_year = ".$month_arr['year']." AND s.created_month = ".$month_arr['month']."");
+	    	}else{
+			    $this->db->where("s.created_year = ".$month_arr['start_year']." AND s.created_month >= ".$month_arr['start_month']."");
+			    $this->db->or_where("s.created_year = ".$month_arr['end_year']." AND s.created_month <= ".$month_arr['end_month']."");
+		   	}
+	   	}
+
+        $result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        // pr($this->db->last_query(),1);
+        return $ret_data;
+    }
 	public function get_total_receivable_paid($year = '',$month_arr = '')
 	{
 		$unit_condition = '';
@@ -286,6 +335,7 @@ class Dashboard_model extends CI_Model
 		}
 	    $this->db->select('rr.amount_received as amount_received,sp.created_date as created_date,c.customer_name as customer');
 	    $this->db->from('sales_parts as sp');
+	    $this->db->join('new_sales n', 'sp.sales_id = n.id AND n.status != "unlocked"', 'inner');
 	    $this->db->join('receivable_report as rr', 'rr.sales_number = sp.sales_number '.$unit_condition);
 	    $this->db->join('customer as c', 'c.id = sp.customer_id', 'left');
 	    if($date != ""){

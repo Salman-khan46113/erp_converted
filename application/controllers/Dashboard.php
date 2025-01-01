@@ -340,10 +340,12 @@ class Dashboard extends CommonController
         return $count_arr;
     }
     public function get_total_receivable_due($year = '',$month_arr = []){
-        $sales_data = $this->dashboard_model->get_sales_sum('','',$year,$month_arr);
+        $sales_data = $this->dashboard_model->get_total_receivable_due_gst($year,$month_arr);
+        // pr($sales_data,1);
         if(count($sales_data) >0){
-            $total_amount = array_sum(array_column($sales_data, "basic_total"));
-            //$total_discount = array_sum(array_column($sales_data, "total_discount"));
+            $total_amount = array_sum(array_column($sales_data, "ttlrt"));
+            $gstamnt = array_sum(array_column($sales_data, "gstamnt"));
+            $total_amount = $total_amount - $gstamnt;
         }else{
             $total_amount = 0;
         }
@@ -351,9 +353,10 @@ class Dashboard extends CommonController
         return $count_arr;
     }
     public function get_total_receivable_due_gst($year = '',$month_arr = []){
-        $sales_data = $this->dashboard_model->get_sales_sum('','',$year,$month_arr);
+        $sales_data = $this->dashboard_model->get_total_receivable_due_gst($year,$month_arr);
+        // pr($sales_data,1);
         if(count($sales_data) >0){
-            $total_amount = array_sum(array_column($sales_data, "total_sales_amount"));
+            $total_amount = array_sum(array_column($sales_data, "bal_amnt"));
         }else{
             $total_amount = 0;
         }
@@ -361,11 +364,14 @@ class Dashboard extends CommonController
         //as of now so added this for that calculation
         $received_data = $this->dashboard_model->get_total_receivable_paid('','',$year,$month_arr);
          if(count($received_data) >0){
-            $total_amount_recvd = array_sum(array_column($received_data, "amount_received"));
+            $total_tds = array_sum(array_column($received_data, "tds_amount"));
+            $total_amount_recvd = array_sum(array_column($received_data, "amount_received")) + $total_tds;
+
         }else{
             $total_amount_recvd = 0;
         }
-        $count_arr['count'] = $total_amount - $total_amount_recvd;
+        // pr($received_data,1);
+        $count_arr['count'] = $total_amount ;
         return $count_arr;
     }
     public function get_total_receivable_paid($year = '',$month_arr = []){
