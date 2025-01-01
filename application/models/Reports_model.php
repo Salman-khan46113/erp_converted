@@ -77,8 +77,8 @@ class Reports_model extends CI_Model {
                 $this->db->where("s.id", $search_params["supplier_part_id"]);
             }
             if ($search_params["status"] != "") {
-            	if($search_params["status"] == "Pending"){
-            		$this->db->having('bal_amnt', 0);
+            	if($search_params["status"] == "Received"){
+            		$this->db->having('bal_amnt <=', 0);
             	}else{
             		$this->db->having('bal_amnt >', 0);
             	}
@@ -188,8 +188,8 @@ class Reports_model extends CI_Model {
                 $this->db->where("s.id", $search_params["supplier_part_id"]);
             }
             if ($search_params["status"] != "") {
-            	if($search_params["status"] == "Pending"){
-            		$this->db->having('bal_amnt', 0);
+            	if($search_params["status"] == "Received"){
+            		$this->db->having('bal_amnt <=', 0);
             	}else{
             		$this->db->having('bal_amnt >', 0);
             	}

@@ -18,14 +18,34 @@
         <!-- Dashboard -->
         <div class="filter-row">
           <li class="nav-small-cap">
+            <span class="hide-menu">Customer</span>
+            <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+          </li>
+          <li class="sidebar-item">
+            <div class="input-group">
+            <select name="customer_id" id="customer_id" class="form-control select2" required>
+            <option value="">Select Customer</option>
+                            <%if $customers%>
+                                <%foreach from=$customers item=c%>
+                                <option value="<%$c->id%>"
+                                    <%if $selected_customer_part_id === $c->id%>selected<%/if%>
+                                ><%$c->customer_name%></option>
+                                <%/foreach%>
+                            <%/if%>
+                        </select>
+            </div>
+          </li>
+        </div>
+        <div class="filter-row">
+          <li class="nav-small-cap">
             <span class="hide-menu">Supplier</span>
             <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
           </li>
           <li class="sidebar-item">
             <div class="input-group">
-            <select name="supplier_part_id" id="supplier_part_id" class="form-control select2" required>
+            <select name="supplier_id" id="supplier_id" class="form-control select2" required>
             <option value="">Select Supplier</option>
-                            <%if $supplier%>
+                            <%if $customers%>
                                 <%foreach from=$supplier item=c%>
                                 <option value="<%$c->id%>"
                                 ><%$c->supplier_name%></option>
@@ -35,24 +55,9 @@
             </div>
           </li>
         </div>
-         <div class="filter-row">
+        <div class="filter-row hide">
           <li class="nav-small-cap">
-            <span class="hide-menu">Payment Status </span>
-            <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
-          </li>
-          <li class="sidebar-item">
-            <div class="input-group">
-            <select name="status_search" id="status_search" class="form-control select2" required>
-                <option value="">Select Payment Status</option>
-                <option value="Pending">Pending</option>
-                <option value="Received">Paid</option>
-                        </select>
-            </div>
-          </li>
-        </div>
-        <div class="filter-row">
-          <li class="nav-small-cap">
-            <span class="hide-menu">GRN Date</span>
+            <span class="hide-menu">Sales Invoice Date</span>
             <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
           </li>
           <li class="sidebar-item">
@@ -61,7 +66,6 @@
             </div>
           </li>
         </div>
-
         
         
 
@@ -79,17 +83,17 @@
           Reports
           <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link" title="Back to Issue Request Listing" >
             <i class="ti ti-chevrons-right" ></i>
-            <em >Payable Reports</em></a>
+            <em >Outstanding Report</em></a>
         </h1>
         <br>
-        <span >Payable Reports</span>
+        <span >Outstanding Report</span>
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-      <%if checkGroupAccess("payable_report","export","No") %>
+     <%if checkGroupAccess("outstanding_report","export","No") %>
       <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
       <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
-      <%/if%>
+     <%/if%>
       <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
       <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
     </div>
@@ -103,29 +107,13 @@
         <div class=" p-0 ms-1">
             <div class="card-header">
                 <div class="row">
-                    <div class="tgdp-rgt-tp-sect ms-2">
-                        <p class="tgdp-rgt-tp-ttl">Total Amount With GST</p>
-                        <p class="tgdp-rgt-tp-txt total_amount_with_gst">
-                            0.00
-                        </p>
+                    <div class="tgdp-rgt-tp-sect">
+                        <p class="tgdp-rgt-tp-ttl">Total Amount Received</p>
+                        <p class="tgdp-rgt-tp-txt total_paid_amount">0.00</p>
                     </div>
                     <div class="tgdp-rgt-tp-sect">
-                        <p class="tgdp-rgt-tp-ttl">Total Amount Paid</p>
-                        <p class="tgdp-rgt-tp-txt total_amount_paid">
-                             0.00
-                        </p>
-                    </div>
-                    <div class="tgdp-rgt-tp-sect">
-                        <p class="tgdp-rgt-tp-ttl">Total Balance Amount to Pay</p>
-                        <p class="tgdp-rgt-tp-txt total_balance_amount_to_pay" title="12">
-                             0.00
-                        </p>
-                    </div>
-                    <div class="tgdp-rgt-tp-sect">
-                        <p class="tgdp-rgt-tp-ttl">Total TDS Amount</p>
-                        <p class="tgdp-rgt-tp-txt total_tds_amount" title="12">
-                             0.00
-                        </p>
+                        <p class="tgdp-rgt-tp-ttl">Total Payable amount</p>
+                        <p class="tgdp-rgt-tp-txt total_pay_amount" title="12">0.00</p>
                     </div>
                 </div>
             </div>
@@ -139,12 +127,12 @@
                         <!-- /.card -->
 
                         <div class="card">
-                            
+                        
 
                             <!-- /.card-header -->
                             <div class="">
                             <div class="table-responsive text-nowrap">
-                                <table id="receivable_report" class="table table-striped">
+                                <table id="receivable_report" class="table table-striped w-100">
                                     <thead>
                                         <%foreach from=$data key=key item=val%>
                                         <th><b>Search <%$val['title']%></b></th>
@@ -159,7 +147,8 @@
                                 </div>
                             <!-- /.card-body -->
                         </div>
-                       
+                        <%* <button type="submit" data-bs-toggle="modal" class="btn btn-sm btn-primary"
+                                                            data-bs-target="#exampleModal2"> <i class="fas fa-edit"></i></button> *%>
 
                         <div class="modal fade" id="update_report_data" role="dialog"
                         aria-labelledby="exampleModalLabel" aria-hidden="true" style="display: none;">
@@ -170,29 +159,34 @@
                                     </h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                                         aria-label="Close">
+                                        <%* <span aria-hidden="true">&times;</span> *%>
                                     </button>
                                 </div>
                                 <div class="modal-body">
 
                                     <form id="updateReceivableForm" method="POST" class="custom-form updateReceivableForm">
-                                        <input type="hidden" name="grn_number" id="grn_number" value="">
+                                        <input type="hidden" name="sales_number" id="sales_number" value="<%$po->sales_number%>">
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 <div class="form-group">
-                                                    <label for="payment_receipt_date">Payment Paid Date</label><span
+                                                    <label for="payment_receipt_date">Payment Receipt Date</label><span
                                                         class="text-danger">*</span>
                                                     <input type="date" name="payment_receipt_date" 
-                                                        class="form-control required-input "
-                                                        placeholder="Payment Paid Date" value="" id="payment_receipt_date">
+                                                        class="form-control required-input"
+                                                        id="payment_date_modal"
+                                                        aria-describedby="emailHelp"
+                                                        placeholder="Payment Receipt Date" value="">
                                                 </div>
 
                                                 <div class="form-group">
-                                                    <label for="amount_received">Amount Paid</label><span
+                                                    <label for="amount_received">Amount Received</label><span
                                                         class="text-danger">*</span>
                                                     <input type="text"
                                                         name="amount_received" 
-                                                        class="form-control required-input onlyNumericInput"
-                                                        placeholder="Amount Paid" value=""id="amount_paid" >
+                                                        class="form-control required-input"
+                                                        id="receivable_amount_modal"
+                                                        aria-describedby="emailHelp"
+                                                        placeholder="Amount Received" value="" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
                                                 </div>
 
                                                 <div class="form-group">
@@ -200,34 +194,36 @@
                                                         class="text-danger"></span>
                                                     <input type="text"
                                                         name="transaction_details"
-                                                        class="form-control "
-                                                        placeholder="Transaction Details" value="" id="transaction_details">
+                                                        class="form-control required-input"
+                                                        id="transection_detail_modal"
+                                                        aria-describedby="emailHelp"
+                                                        placeholder="Transaction Details" value="">
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="transaction_details">TDS</label><span
-                                                        class="text-danger"></span>
-                                                    <input type="text"
-                                                        name="tds"
-                                                        class="form-control "
-                                                        id="tds"
-                                                        placeholder="TDS" value="">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="transaction_details">Remark</label><span
-                                                        class="text-danger"></span>
-                                                    <input type="text"
-                                                        name="remark"
-                                                        class="form-control "
-                                                        id="remark"
-                                                        placeholder="Remark" value="">
-                                                </div>
+                                                                                <label for="amount_received">TDS</label>
+                                                                                <input type="text"
+                                                                                    name="tds" id="tds_val" 
+                                                                                    class="form-control onlyNumericInput"
+                                                                                    aria-describedby="emailHelp"
+                                                                                    placeholder="TDS" value="" >
+                                                                            </div>
+                                                                            <div class="form-group">
+                                                                                <label for="amount_received">Remark</label>
+                                                                                <input type="text"
+                                                                                    name="remark" 
+                                                                                     id="remark_val"
+                                                                                    class="form-control"
+                                                                                    placeholder="Remark"
+                                                                                    >
+                                                                            </div>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Close</button>
                                             <button type="submit"
-                                                class="btn btn-primary">Save</button>
+                                                class="btn btn-primary">Save
+                                                changes</button>
                                         </div>
                                     </form>
 
@@ -249,7 +245,7 @@
     <!-- /.content-wrapper -->
 </div>
 <style type="text/css">
-	tr.danger-row .due_days_block {
+    tr.danger-row .due_days_block {
     color: #000 !important;
     background-color: red !important;
     box-shadow: inset 0 0 0 9999px #e84343 !important;
@@ -305,6 +301,5 @@
     var base_url = <%$base_url|json_encode%>;
     var start_date = <%$start_date|json_encode%>;
     var end_date = <%$end_date|json_encode%>;
-
 </script>
-<script src="<%$base_url%>/public/js/reports/payable_report.js"></script>
+<script src="<%$base_url%>/public/js/reports/outstanding_report.js"></script>

@@ -50,7 +50,7 @@ const datatable = {
     },
     dataTable:function(){
       table =  new DataTable('#example1',{
-        dom: 'Bfrtip',
+        dom: "Bfrtilp",
         scrollX: true, 
         
         buttons: [
@@ -109,7 +109,27 @@ const datatable = {
                     }
                 },
             ],
+            searching: true,
+        // scrollX: true,
+        scrollY: true,
+        lengthMenu: [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]],
+        bScrollCollapse: true,
+        // columnDefs: [{ sortable: false, targets: 7 }],
+        pagingType: "full_numbers",
+       
+        
     });
+       $('#serarch-filter-input').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+        $('.dataTables_length').find('label').contents().filter(function() {
+                return this.nodeType === 3; // Filter out text nodes
+        }).remove();
+        setTimeout(function(){
+            $(".dataTables_length select").select2({
+                minimumResultsForSearch: Infinity
+            });
+        },1000)
     },
     resetFilter:function(){
         table.column(1).search('').draw();

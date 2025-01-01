@@ -586,11 +586,14 @@ class Welcome_model extends CI_Model
             }
         }
 
-        if ($search_params["date_range_filter"] != "") {
-                $date_filter =  explode((" - "),$search_params["date_range_filter"]);
-                $data['start_date'] = $date_filter[0];
-                $data['end_date'] = $date_filter[1];
-               $this->db->where("STR_TO_DATE(p.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        // if ($search_params["date_range_filter"] != "") {
+        //         $date_filter =  explode((" - "),$search_params["date_range_filter"]);
+        //         $data['start_date'] = $date_filter[0];
+        //         $data['end_date'] = $date_filter[1];
+        //        $this->db->where("STR_TO_DATE(p.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        // }
+        if ($search_params["supplier_id"] > 0) {
+            $this->db->where("s.id",$search_params["supplier_id"]);
         }
         if (is_array($search_params) && count($search_params) > 0) {
             if ($search_params["value"] != "") {
@@ -631,11 +634,14 @@ class Welcome_model extends CI_Model
                 $this->db->order_by($condition_arr["order_by"]);
             }
         }
-        if ($search_params["date_range_filter"] != "") {
-                $date_filter =  explode((" - "),$search_params["date_range_filter"]);
-                $data['start_date'] = $date_filter[0];
-                $data['end_date'] = $date_filter[1];
-               $this->db->where("STR_TO_DATE(p.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        // if ($search_params["date_range_filter"] != "") {
+        //         $date_filter =  explode((" - "),$search_params["date_range_filter"]);
+        //         $data['start_date'] = $date_filter[0];
+        //         $data['end_date'] = $date_filter[1];
+        //        $this->db->where("STR_TO_DATE(p.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        // }
+        if ($search_params["supplier_id"] > 0) {
+            $this->db->where("s.id",$search_params["supplier_id"]);
         }
 
         if (is_array($search_params) && count($search_params) > 0) {

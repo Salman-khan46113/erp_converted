@@ -17,6 +17,10 @@ class Dashboard extends CommonController
        $data['selected_unit'] = $this->session->userdata('clientUnit');
        $data['unit_data'] = $this->dashboard_model->get_unit();
        $current_year = date("Y");
+       if(date("m") < 4){
+        $current_year--;
+       }
+      
        $start_year = 2018;
        $year = [];
        for ($i= $current_year; $i >= $start_year; $i--) { 

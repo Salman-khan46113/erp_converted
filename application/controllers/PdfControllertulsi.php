@@ -290,9 +290,9 @@ class PdfControllertulsi extends CommonController
                 $digital_signature_url = $configuration['digital_signature_url'];
                 $digitalSignature = $configuration['digitalSignature'];
                 if($digitalSignature == "Yes"){
-                    $sign_position = "[400:70]";
+                    $sign_position = "[400:50]";
                     if($isEinvoicePresent){
-                        $sign_position = "[440:20]";
+                            $sign_position = "[400:40]";
                     }
                     digitalSignature($fileName,$sign_position,$signer,$certpwd,$certid,$customerPrefix,$digital_signature_url);
                 }
@@ -1149,6 +1149,7 @@ TECHNIQUE </td>
                $digitalSignature = "Yes"; 
             }
 
+
         }
         $new_sales_id = $this->uri->segment('2');
         if (isset($_POST['interests']) && is_array($_POST['interests'])) {
@@ -1230,9 +1231,9 @@ TECHNIQUE </td>
                     $customerPrefix = $configuration['customerPrefix'];
                     $digital_signature_url = $configuration['digital_signature_url'];
                     if($digitalSignature == "Yes"){
-                        $sign_position = "[400:70]";
+                        $sign_position = "[400:50]";
                         if($isEinvoicePresent){
-                            $sign_position = "[440:20]";
+                            $sign_position = "[400:40]";
                         }
                         digitalSignature($fileName,$sign_position,$signer,$certpwd,$certid,$customerPrefix,$digital_signature_url);
                     }
@@ -1403,8 +1404,10 @@ TECHNIQUE </td>
 
         /* per page count */
         // $einvoice_data[0]->Irn = "ds";
+        $font_size ="11.59";
         // $new_sales_data[0]->discountType = "tte";
         if (!empty($einvoice_data[0]->Irn) || $new_sales_data[0]->discountType!='NA') {
+             $font_size ="11.4";
             if(!empty($einvoice_data[0]->Irn) && $new_sales_data[0]->discountType!='NA'){
                 $page_count = "5";
             }else{
@@ -1480,13 +1483,13 @@ TECHNIQUE </td>
             $parts_html .= '
         <tr style="font-size:12px;" class="part-box">
          <td width="4%" style="text-align:center;line-height:40px;">' . $i . '</td>
-         <td width="46%" style="text-align:left;line-height:0px;height:43.3px;"> <div  style="display:block;width:100%;line-height:8px;"> ' .substr($child_part_data[0]->part_description, 0,100) . '</div><div  style="display:block;width:100%;line-height:8px;"><b> Part No - ' . wordwrap($child_part_data[0]->part_number, 12, "\n", true) .' '.$custItemCd.'</div></b></td>
+         <td width="46%" style="text-align:left;line-height:0px;height:43.3px;"> <div  style="display:block;width:100%;line-height:8px;"> '.substr($child_part_data[0]->part_description, 0,100) .'</div><div  style="display:block;width:100%;line-height:8px;"><b> Part No - ' . wordwrap($child_part_data[0]->part_number, 12, "\n", true) .' '.$custItemCd.'</div></b></td>
          <td width="8.66%" style="text-align:center;line-height:40px">' . $hsn_code . '</td>
          <td width="8.66%" style="text-align:center;line-height:40px;"><span >' . $packagingQtyFactors . '</span></td>
          <td width="7.8%" style="text-align:center;line-height:40px;">' . $p->uom_id . '</td>
          <td  width="8.33%" style="text-align:center;line-height:40px;">' . $p->qty . '</td>
          <td width="8.33%" style="text-align:center;line-height:40px;">' . $rate . '</td>
-         <td width="8.33%" colspan="2" style="text-align:center;line-height:40px;">' . number_format($part_total, 2, '.', '') . '</td>
+         <td width="8.23%" colspan="2" style="text-align:center;line-height:40px;">' . number_format($part_total, 2, '.', '') . '</td>
        </tr>
      ';
         // pr(count($po_parts_data).":".$page_row_count);
@@ -1680,7 +1683,7 @@ TECHNIQUE </td>
             // End and clean the buffer
             ob_end_clean();
         }
-        $font_size ="13";
+        
         $company_logo = "";
         $company_logo_enable = "No";
         $row_col_span = '100';
@@ -1722,13 +1725,13 @@ TECHNIQUE </td>
            </th>
         </tr>
         <tr>
-           <th style="text-align:center; font-size:13px;padding:6px;border-bottom: 1px solid black;">
+           <th style="text-align:center; font-size:13px;padding:6px;border-bottom: 0px solid black;">
               <b>TAX INVOICE</b>
            </th>
         </tr>
         <tr>
            <!-- Company Details -->
-           <th style="font-size:9px;text-align:center;padding:5pxwidth:20%;border-top: 0px solid black;border-bottom: 1px solid black;">
+           <th style="font-size:8.4px;text-align:center;padding:5pxwidth:20%;border-top: 0px solid white;border-bottom: 1px solid black;">
               <b style="font-size:20px;margin-top:-100px;">' . $client_data[0]->client_name . '</b><br>
               <b><span>' . $client_data[0]->billing_address . '</span></b>
            </th>
@@ -1750,11 +1753,11 @@ TECHNIQUE </td>
                 <b>PO DATE : </b>' . defaultDateFormat($po_parts_data[0]->po_date) . '<br>
                 <span style="font-size:8px">WHETHER TAX ON REVERSE CHARGE: NO</span>
               </td>
-              <td width="20.8%" style="align-items:center;padding-top:3px;height:110px;" >
-                  <img width="140em" height="105em" src="http://localhost/extra_work/qrcode.png" alt="QR Code">
+              <td width="20.9%" style="align-items:center;padding-top:3px;height:110px;" >
+                  <!--<img width="140em" height="105em" src="http://localhost/extra_work/qrcode.png" alt="QR Code">-->
                   <!-- <img width="200em" height="200em" src="' . $dataUri . '"><br> -->
                  
-                    <!-- <img width="150em" height="110em" src="data:image/png;base64,' . base64_encode($qrCodeImageString) . '" alt="QR Code">-->
+                     <img width="140em" height="105em" src="data:image/png;base64,' . base64_encode($qrCodeImageString) . '" alt="QR Code">
               </td>
             </tr>
             <tr>
@@ -1790,7 +1793,7 @@ TECHNIQUE </td>
             <td width="50%" style="padding-top: 4px;height:140px;">
             <table cellspacing="0" cellpadding="0"   border="0" >
                 <tr>
-                <td style="padding-top: 4px;line-height:1.5;"><b>Details of Receiver (Billed To)</b><br><b>'. $customer_data[0]->customer_name .'</b><br>' . $customer_data[0]->billing_address . '<br><b>STATE :</b> ' . $customer_data[0]->state . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b> &nbsp;STATE CODE :</b> ' . $customer_data[0]->state_no . '<br><b>PAN NO : </b>' . $customer_data[0]->pan_no . '&nbsp;&nbsp;&nbsp;<b>GST NO :</b> ' . $customer_data[0]->gst_number . '
+                <td style="padding-top: 4px;line-height:1.5;"><b>Details of Receiver (Billed To)</b><br><b>'. $customer_data[0]->customer_name .'</b><br>' . $customer_data[0]->billing_address . '<br><b>STATE :</b> ' . $customer_data[0]->state . '&nbsp;&nbsp;<b> &nbsp;STATE CODE :</b> ' . $customer_data[0]->state_no . '<br><b>PAN NO : </b>' . $customer_data[0]->pan_no . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>GST NO :</b> ' . $customer_data[0]->gst_number . '
                 </td>
                 </tr>
             </table>
@@ -1798,13 +1801,13 @@ TECHNIQUE </td>
             <td width="50%" style="padding-top: 4px;height:140px;">
             <table cellspacing="0" cellpadding="0"   border="0" >
                 <tr>
-                <td style="padding-top: 4px;line-height:1.5;"><b>Details of Consignee (Shipped to)</b><br><b>' . $shipping_data['shipping_name'] . '</b><br>' . $shipping_data['ship_address'] . '<br><b>STATE : </b>' . $shipping_data['state'] . ';&nbsp;&nbsp;&nbsp;<b> &nbsp;STATE CODE :</b> ' . $shipping_data['state_no'] . '<br><b>PAN NO : </b>' . $shipping_data['pan_no'] . '&nbsp;&nbsp;&nbsp;<b>GST NO : </b>' . $shipping_data['gst_number'] . '
+                <td style="padding-top: 4px;line-height:1.5;"><b>Details of Consignee (Shipped to)</b><br><b>' . $shipping_data['shipping_name'] . '</b><br>' . $shipping_data['ship_address'] . '<br><b>STATE : </b>' . $shipping_data['state'] . '&nbsp;&nbsp;<b> &nbsp;STATE CODE :</b> ' . $shipping_data['state_no'] . '<br><b>PAN NO : </b>' . $shipping_data['pan_no'] . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>GST NO : </b>' . $shipping_data['gst_number'] . '
                 </td>
                 </tr>
             </table>
             </td>
          </tr>
-         <tr style="font-size:11.5px;text-align:center;" width="100%">
+         <tr style="font-size:'.$font_size.'px;text-align:center;" width="100%">
           <td width="4%" ><b>Sr No</b></td>
           <td width="46%" style="text-align:left;"><b>&nbsp;Part Description</b></td>
           <td width="8.66%"><b>HSN / SAC</b> </td>
@@ -1812,7 +1815,7 @@ TECHNIQUE </td>
           <td width="7.8%"><b>UOM</b></td>
           <td width="8.33%"><b>QTY</b></td>
           <td width="8.33%"><b>Rate</b></td>
-          <td width="8.33%"><b>Amount (Rs)</b></td>
+          <td width="8.23%"><b>Amount (Rs)</b></td>
         </tr>
          </tbody>
         </table>
@@ -1839,7 +1842,7 @@ TECHNIQUE </td>
         <table cellspacing="0" cellpadding="5"   border="1">
         <tbody>
             
-           <tr style="font-size:11.5px">
+           <tr style="font-size:'.$font_size.'px">
                 <td rowspan="'.$defaultColumns.'" colspan="7">
                     <b>&nbsp;Mode Of Transport : </b>' . $md . '&nbsp;&nbsp;&nbsp;&nbsp;<b>&nbsp;Vehicle No : </b>' . $new_sales_data[0]->vehicle_number . '&nbsp;&nbsp;&nbsp;&nbsp;<b>&nbsp;L.R No : </b>' . $new_sales_data[0]->lr_number . '
                     <br><b>&nbsp;&nbsp;&nbsp;Transporter : </b>' . $transporter_data[0]->transporter_id . '
@@ -1914,23 +1917,27 @@ TECHNIQUE </td>
         if($extra_condition == "both"){
             $meddle_content =125.9;
             $footer_content =-109.9;
+            $top_margin = 5.8;
         }else if($extra_condition == "e_invoicing"){
             $meddle_content =125.9;
             $footer_content =-98;
+            $top_margin = 5.8;
         }else if($extra_condition == "discount"){
             $meddle_content =114.9;
             $footer_content =-108.9;
+            $top_margin = 7;
         }else{
             $meddle_content =114.8;
-             $footer_content =-96.7;
+            $footer_content =-96.7;
+            $top_margin = 6.8;
         }
         // pr("ok",1);
         // $header = $this->smarty->fetch('sales/sales_pdf_generate.tpl', $data, TRUE);
             // pr($html_content,1);
             // $pdf = new Pdf1(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-            $pdf = new Pdf1('P', 'mm', 'A4', true, 'UTF-8', false,'',$header,$footer,4, $footer_content);
+            $pdf = new Pdf1('P', 'mm', 'A4', true, 'UTF-8', false,'',$header,$footer,$top_margin, $footer_content);
 
-            $pdf->SetMargins(5, $meddle_content, 5, 5);
+            $pdf->SetMargins(10, $meddle_content, 10, 5);
 
         // set document information
 

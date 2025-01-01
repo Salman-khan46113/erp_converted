@@ -17,7 +17,7 @@
       <div class="simplebar-content" >
          <ul class="menu-inner py-1">
             <!-- Dashboard -->
-            <div class="filter-row">
+            <div class="filter-row hide">
                <li class="nav-small-cap">
                   <span class="hide-menu">Created Date</span>
                   <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
@@ -27,6 +27,23 @@
                      <input type="text" name="datetimes" class="dates form-control" id="date_range_filter" />
                   </div>
                </li>
+            </div>
+            <div class="filter-row">
+                <li class="nav-small-cap">
+                  <span class="hide-menu">Supplier</span>
+                  <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+                </li>
+                <li class="sidebar-item">
+                  <div class="input-group">
+                  <select name="supplier_id_search" id="supplier_id_search" class="form-control select2">
+                  <option value="">Select Supplier </option>
+                  <%foreach from=$supplier_list item=c%>
+                      <option value="<%$c->id%>" ><%$c->supplier_name%></option>
+                  <%/foreach%>
+                  <option value="ALL">ALL</option>
+              </select>
+                  </div>
+                </li>
             </div>
         </ul>
       </div>

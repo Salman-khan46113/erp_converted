@@ -3,7 +3,11 @@ var file_name = "erp_users";
 var pdf_title = "ERP Users";
 var accessGroupsModel = new bootstrap.Modal(document.getElementById('accessGroups'))
 $(document).ready(function() {
+    $(".edit-role").on("click",function(){
+        $(".select2-multiple").select2()
+    })
 
+    
     $("#addTransporterForm").validate({
         rules: {
             user_name: {

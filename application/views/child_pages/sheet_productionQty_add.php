@@ -9,7 +9,7 @@
         
      </button>
  </div>
- <form action="<?php echo base_url('SheetProdController/add_production_qty') ?>" method="POST" enctype="multipart/form-data" id="add_molding_production" class="add_molding_production custom-form">
+ <form action="<?php echo base_url('SheetProdController/add_production_qty') ?>" method="POST" enctype="multipart/form-data" id="add_production_qty" class="add_production_qty custom-form">
         <div class="modal-body">
             <div class="form-group">
                 <label for="on click url">Enter Date <span class="text-danger">*</span></label>

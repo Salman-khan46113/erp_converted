@@ -62,6 +62,7 @@ const page = {
         searching: true,
         // scrollX: true,
         scrollY: true,
+         lengthMenu: [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]],
         bScrollCollapse: true,
         columnDefs: [{ sortable: false, targets: 6 },{ sortable: false, targets: 4 }],
         pagingType: "full_numbers",

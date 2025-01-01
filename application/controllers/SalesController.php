@@ -1168,7 +1168,7 @@ class SalesController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([[2, 'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		$this->loadView('reports/sales_reports', $data);
@@ -1328,7 +1328,7 @@ class SalesController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([[2, 'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		$this->loadView('reports/hsn_reports', $data);
@@ -3294,7 +3294,7 @@ class SalesController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([[16,'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		
@@ -3326,6 +3326,11 @@ class SalesController extends CommonController
 		// pr($data,1);
 		// pr($this->db->last_query(),1);
 		foreach ($data as $key => $objs) {
+
+			$date_convert = DateTime::createFromFormat('d-m-Y', $objs['created_date']);
+			// Format the date to d/m/Y
+			$objs['created_date'] = $date_convert->format('d/m/Y');
+
 			$created_date_str = $objs['created_date'];
             
 			$payment_receipt_date_formated  = '';
@@ -3344,6 +3349,7 @@ class SalesController extends CommonController
 			// Create a DateTime object by specifying the format
 			$dateTime = DateTime::createFromFormat('d/m/Y', $created_date_str);
 			$due_date = display_no_character("");
+			
 			if ($dateTime && is_numeric($objs['payment_terms'])) {
 				// Convert payment_terms to an integer for days
 				$payment_terms_days = (int)$objs['payment_terms'];
@@ -3360,8 +3366,10 @@ class SalesController extends CommonController
 			$today = new DateTime();
         
 			$due_days = display_no_character("");
+
             if($due_date != display_no_character("")){
             	if(!empty($objs['payment_receipt_date']) && $objs['payment_receipt_date'] != "" && $objs['payment_receipt_date'] != NULL ){
+
             		$sales_date = $objs['created_date'];
             		$sales_date = DateTime::createFromFormat("d/m/Y", $sales_date);
 					// Format to the desired output
@@ -3428,12 +3436,12 @@ class SalesController extends CommonController
         echo json_encode($data);
 	}
 
-	public function outstanding_reporta()
+	public function outstanding_report()
 	{
-		pr("ok",1);
-		checkGroupAccess("receivable_report","list","Yes");
+		
+		checkGroupAccess("outstanding_report","list","Yes");
 		$data['customers'] = $this->Crud->read_data("customer");
-		$data['selected_customer_part_id'] = $customer_part_id;
+		$data['supplier'] = $this->Crud->read_data("supplier");
 
 		$column[] = [
             "data" => "customer_name",
@@ -3442,13 +3450,13 @@ class SalesController extends CommonController
             "className" => "dt-left",
         ];
         $column[] = [
-            "data" => "sales_number",
+            "data" => "receivable_amount",
             "title" => "Receivable Amount Due<br>(With Gst)",
             "width" => "16%",
             "className" => "dt-left",
         ];
         $column[] = [
-            "data" => "created_date_val",
+            "data" => "payable_amount",
             "title" => "Payable Amount Due<br>(With Gst)",
             "width" => "17%",
             "className" => "dt-center",
@@ -3470,12 +3478,71 @@ class SalesController extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode();
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["sorting_column"] = json_encode([]);
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		
-		$this->loadView('reports/receivable_report',$data);
+		$this->loadView('reports/outstanding_report',$data);
+	}
+	public function getOutstandingReportData(){
+		$customer_part_id  = $this->input->post("customer_part_id");
+		$post_data = $this->input->post();
+
+        $column_index = array_column($post_data["columns"], "data");
+        $order_by = "";
+        foreach ($post_data["order"] as $key => $val) {
+			if ($key == 0) {
+				$order_by .= $column_index[$val["column"]] . " " . $val["dir"];
+            } else {
+				$order_by .=
+				"," . $column_index[$val["column"]] . " " . $val["dir"];
+            }
+        }
+		
+        $condition_arr["order_by"] = $order_by;
+        $condition_arr["start"] = $post_data["start"];
+        $condition_arr["length"] = $post_data["length"];
+        $base_url = $this->config->item("base_url");
+		
+		$data = $this->SalesModel->getOutstandingReportView($condition_arr,$post_data["search"]);
+		// pr($data,1);
+		$outstanding_data = [];
+		// pr($this->db->last_query(),1);
+		foreach ($data as $key => $val) {
+			$outstanding_data[] = [
+				"customer_name" => $val['customer_name'],
+				"receivable_amount" => $val['receivable_amount'],
+				"payable_amount" => 0
+			];
+		}
+
+		$data = $this->SalesModel->getOutstandingPayableReportView($condition_arr,$post_data["search"]);
+		// pr($data,1);
+		foreach ($data as $key => $val) {
+			$outstanding_data[] = [
+				"customer_name" => $val['supplier_name'],
+				"receivable_amount" => 0,
+				"payable_amount" => $val['amount_received']
+			];
+		}
+		
+		$data["data"] = $outstanding_data;
+        $total_receivable_record = $this->SalesModel->getOutstandingReportViewCount([], $post_data["search"]);
+        $total_paid_amount = 0;
+        foreach ($total_receivable_record as $key => $value) {
+        	$total_paid_amount += $value['receivable_amount'];
+        }
+        $total_payable_record = $this->SalesModel->getOutstandingPayableReportViewCount([], $post_data["search"]);
+        $total_pay_amount = 0;
+        foreach ($total_payable_record as $key => $value) {
+        	$total_pay_amount += $value['amount_received'];
+        }
+        $data["recordsTotal"] = count($total_receivable_record)+count($total_payable_record);
+        $data["recordsFiltered"] = count($total_receivable_record)+count($total_payable_record);
+        $data["total_paid_amount"] = number_format($total_paid_amount,2);
+        $data["total_pay_amount"] = number_format($total_pay_amount,2);
+        echo json_encode($data);
 	}
 
 

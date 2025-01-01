@@ -364,12 +364,7 @@ class SalesModel extends CI_Model {
             // Group OR conditions within a WHERE block
             $this->db->group_start();
             $fields = [
-                's.sales_number',
-                'cus.customer_name',
-                'rrp.transaction_details',
-                'ns.created_date',
-                'rrp.payment_receipt_date',
-                's.created_date'
+                'cus.customer_name'
                 // Add other fields to search as needed
             ];
             
@@ -386,4 +381,193 @@ class SalesModel extends CI_Model {
         // pr($this->db->last_query(),1);
         return $ret_data;
     }
+
+
+    public function getOutstandingReportView($condition_arr = [],$search_params = ""){
+        $this->db->select('SUM(r.amount_received) as receivable_amount,r.*,cus.customer_name as customer_name');
+        $this->db->from('receivable_report r');
+        $this->db->join('new_sales n', 'r.sales_number = n.sales_number AND n.status != "unlocked" AND n.clientId = ' . $this->Unit->getSessionClientId(), 'inner');
+        $this->db->join('customer cus', 'n.customer_id = cus.id', 'left');
+        if(is_valid_array($search_params) && $search_params['customer_id'] > 0){
+            $this->db->where('n.customer_id', $search_params['customer_id']);
+        }
+        if($condition_arr["order_by"] == ''){    
+            $this->db->order_by('r.id', 'DESC');
+        }
+        $this->db->group_by('n.customer_id');
+        
+        if (count($condition_arr) > 0) {
+            $this->db->limit($condition_arr["length"], $condition_arr["start"]);
+            if ($condition_arr["order_by"] != "") {
+                $this->db->order_by($condition_arr["order_by"]);
+            }
+        }
+        // if ($search_params["date_range"] != "") {
+        //         $date_filter =  explode((" - "),$search_params["date_range"]);
+        //         $data['start_date'] = $date_filter[0];
+        //         $data['end_date'] = $date_filter[1];
+        //        $this->db->where("STR_TO_DATE(n.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        // }
+
+        if (is_valid_array($search_params) && isset($search_params["value"]) && $search_params["value"] != "") {
+            $keyword = $search_params["value"];
+            
+            // Group OR conditions within a WHERE block
+            $this->db->group_start();
+            $fields = [
+                'cus.customer_name',
+                // Add other fields to search as needed
+            ];
+            
+            foreach ($fields as $field) {
+                $this->db->or_like($field, $keyword);
+            }
+            $this->db->group_end(); // End the group of OR conditions
+        }
+
+       
+
+        $result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        // pr($this->db->last_query(),1);
+        return $ret_data;
+    }
+
+    public function getOutstandingReportViewCount($condition_arr = [],$search_params = ""){
+        $this->db->select('SUM(r.amount_received) as receivable_amount,r.*,cus.customer_name as customer_name');
+        $this->db->from('receivable_report r');
+        $this->db->join('new_sales n', 'r.sales_number = n.sales_number AND n.status != "unlocked" AND n.clientId = ' . $this->Unit->getSessionClientId(), 'inner');
+        $this->db->join('customer cus', 'n.customer_id = cus.id', 'left');
+        if(is_valid_array($search_params) && $search_params['customer_id'] > 0){
+            $this->db->where('n.customer_id', $search_params['customer_id']);
+        }
+        if($condition_arr["order_by"] == ''){    
+            $this->db->order_by('r.id', 'DESC');
+        }
+        $this->db->group_by('n.customer_id');
+        // if ($search_params["date_range"] != "") {
+        //         $date_filter =  explode((" - "),$search_params["date_range"]);
+        //         $data['start_date'] = $date_filter[0];
+        //         $data['end_date'] = $date_filter[1];
+        //        $this->db->where("STR_TO_DATE(n.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        // }
+
+        if (is_valid_array($search_params) && isset($search_params["value"]) && $search_params["value"] != "") {
+            $keyword = $search_params["value"];
+            
+            // Group OR conditions within a WHERE block
+            $this->db->group_start();
+            $fields = [
+                'cus.customer_name'
+            ];
+            
+            foreach ($fields as $field) {
+                $this->db->or_like($field, $keyword);
+            }
+            $this->db->group_end(); // End the group of OR conditions
+        }
+
+       
+
+        $result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        // pr($this->db->last_query(),1);
+        return $ret_data;
+    }
+
+    public function getOutstandingPayableReportView($condition_arr = [],$search_params = ""){
+        
+        $this->db->select('SUM(pr.amount_received) as amount_received,pr.*,s.supplier_name');
+
+        $this->db->from('payable_report pr');
+        $this->db->join('inwarding inward', 'inward.grn_number = pr.grn_number', 'inner');
+        // $this->db->join('grn_details grn', 'grn.inwarding_id = inward.id', 'inner');
+        $this->db->join('new_po po', 'po.id = inward.po_id', 'inner');
+        $this->db->join('supplier s', 's.id = po.supplier_id', 'inner');
+
+        $this->db->where('po.clientId', $this->Unit->getSessionClientId());
+        $this->db->where('inward.grn_number !=', '');
+        if (count($condition_arr) > 0) {
+            $this->db->limit($condition_arr["length"], $condition_arr["start"]);
+            if ($condition_arr["order_by"] != "") {
+                $this->db->order_by($condition_arr["order_by"]);
+            }
+        }
+        if (is_array($search_params) && count($search_params) > 0) {
+            if ($search_params["supplier_id"] != "") {
+                $this->db->where("s.id", $search_params["supplier_id"]);
+            }
+            // if ($search_params["date_range"] != "") {
+            //     $date_filter =  explode((" - "),$search_params["date_range"]);
+            //     $data['start_date'] = $date_filter[0];
+            //     $data['end_date'] = $date_filter[1];
+            //     $this->db->where("STR_TO_DATE(inward.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+            // }
+            
+            if (isset($search_params["value"]) && $search_params["value"] != "") {
+                $keyword = $search_params["value"];
+                $this->db->group_start();
+                $fields = [
+                    's.supplier_name'
+                ];
+                
+                foreach ($fields as $field) {
+                    $this->db->or_like($field, $keyword);
+                }
+                $this->db->group_end(); // End the group of OR conditions
+            }
+        }
+        
+        $this->db->group_by("s.id");
+
+        $result_obj = $this->db->get();
+                
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        return $ret_data;
+    }
+    public function getOutstandingPayableReportViewCount($condition_arr = [],$search_params = ""){
+        
+        $this->db->select('SUM(pr.amount_received) as amount_received,pr.*,s.supplier_name');
+
+        $this->db->from('payable_report pr');
+        $this->db->join('inwarding inward', 'inward.grn_number = pr.grn_number', 'inner');
+        // $this->db->join('grn_details grn', 'grn.inwarding_id = inward.id', 'inner');
+        $this->db->join('new_po po', 'po.id = inward.po_id', 'inner');
+        $this->db->join('supplier s', 's.id = po.supplier_id', 'inner');
+
+        $this->db->where('po.clientId', $this->Unit->getSessionClientId());
+        $this->db->where('inward.grn_number !=', '');
+        if (is_array($search_params) && count($search_params) > 0) {
+            if ($search_params["supplier_id"] != "") {
+                $this->db->where("s.id", $search_params["supplier_id"]);
+            }
+            // if ($search_params["date_range"] != "") {
+            //     $date_filter =  explode((" - "),$search_params["date_range"]);
+            //     $data['start_date'] = $date_filter[0];
+            //     $data['end_date'] = $date_filter[1];
+            //     $this->db->where("STR_TO_DATE(inward.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+            // }
+            
+            if (isset($search_params["value"]) && $search_params["value"] != "") {
+                $keyword = $search_params["value"];
+                $this->db->group_start();
+                $fields = [
+                    's.supplier_name',
+                ];
+                
+                foreach ($fields as $field) {
+                    $this->db->or_like($field, $keyword);
+                }
+                $this->db->group_end(); // End the group of OR conditions
+            }
+        }
+        
+        $this->db->group_by("s.id");
+
+        $result_obj = $this->db->get();
+                
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        return $ret_data;
+    }
+
 }

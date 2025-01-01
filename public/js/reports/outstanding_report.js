@@ -164,28 +164,21 @@ const page = {
             autoWidth: true,
             lengthChange: true,
             order: sorting_column,
-            fixedColumns: {
-                leftColumns: 2,
-                // end: 1
-            },
+            // fixedColumns: {
+            //     leftColumns: 2,
+            //     // end: 1
+            // },
             ajax: {
                 data: {'search':data},    
-                url: "SalesController/getReceivableReportData",
+                url: "SalesController/getOutstandingReportData",
                 type: "POST",
                 dataSrc: function(json) {
                     // Log the entire response to see what extra data is included
                     console.log('Full Response:', json);
-                    $(".total_amount_with_gst").html(json.total_with_gst_val)
-                    $(".total_tds_amount").html(json.total_tds_amount)
-                    $(".total_amount_paid").html(json.total_paid_amount)
-                    $(".total_balance_amount_to_pay").html(json.total_balance_amount_to_pay)
+                    $(".total_paid_amount").html(json.total_paid_amount)
+                    $(".total_pay_amount").html(json.total_pay_amount)
                     return json.data; // This is what populates the DataTable
                 }
-            },
-            "createdRow": function(row, data, dataIndex) {
-                if (data.due_days_status === "danger") {
-                    $(row).addClass('danger-row'); // Add class for active rows
-                } 
             },
         });
         $('.dataTables_length').find('label').contents().filter(function() {
@@ -227,16 +220,15 @@ const page = {
         })
     },
     serachParams: function(){
-        var customer_part_id = $("#customer_part_id").val();
+        var customer_id = $("#customer_id").val();
         var date_range = $("#date_range_filter").val();
-        var status = $("#status_search").val();
-        var params = {customer_part_id:customer_part_id,date_range:date_range,status:status};
+        var supplier_id = $("#supplier_id").val();
+        var params = {customer_id:customer_id,date_range:date_range,supplier_id:supplier_id};
         return params;
     },
     resetFilter: function(){
-        $("#part_number_search").val('').trigger('change');
-         $("#status_search").val('').trigger('change');
-        $("#part_description_search").val('');
+        $("#customer_id").val('').trigger('change');
+        $("#supplier_id").val('').trigger('change');
         dateRangePicker.setStartDate(start_date);
         dateRangePicker.setEndDate(end_date);
         table.destroy(); 

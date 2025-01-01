@@ -139,7 +139,7 @@
 		                              <td><%$u->type %></td>
                                   <td>
                                     <%if (checkGroupAccess("erp_users","update","No"))%>
-                                    <a data-bs-toggle="modal" data-bs-target="#updatePromo<%$i%>"><i class="ti ti-edit"></i></a>
+                                    <a data-bs-toggle="modal" data-bs-target="#updatePromo<%$i%>" class="edit-role"><i class="ti ti-edit"></i></a>
 
                                     <div class="modal fade" id="updatePromo<%$i%>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                       <div class="modal-dialog  modal-dialog-centered" role="document">

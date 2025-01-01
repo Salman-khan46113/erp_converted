@@ -217,6 +217,8 @@ INSERT INTO `menu_master` (`menu_master_id`, `diaplay_name`, `url`, `status`)
 VALUES (NULL, 'Customer Challan Report', 'customer_challan_report', 'Active');
 INSERT INTO `menu_master` (`menu_master_id`, `diaplay_name`, `url`, `status`) 
 VALUES (NULL, 'HSN Report', 'hsn_report', 'Active');
+INSERT INTO `menu_master` (`menu_master_id`, `diaplay_name`, `url`, `status`) 
+VALUES (NULL, 'Outstanding Report', 'outstanding_report', 'Active');
 --
 -- Indexes for dumped tables
 --

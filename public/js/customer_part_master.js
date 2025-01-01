@@ -34,7 +34,8 @@ const page = {
                   required: true
                },
                part_description: {
-                  required: true
+                  required: true,
+                  maxlength:42
                },
                fg_rate: {
                   required: true,
@@ -43,10 +44,11 @@ const page = {
             },
             messages: {
                part_number: {
-                  required: "Please enter the part number"
+                  required: "Please enter part number"
                },
                part_description: {
-                  required: "Please enter the part description"
+                  required: "Please enter part description",
+                  maxlength:"Enter part description is less than 42 characters.",
                },
                fg_rate: {
                   required: "Please enter a rate",

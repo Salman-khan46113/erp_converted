@@ -262,12 +262,15 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="card p-0 mt-4">
+                        <div class="w-100 mt-4">
+<input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
+</div>
+                        <div class="card p-0 mt-4 w-100">
                             <div class="">
-                                <table class="table table-striped scrollable" >
+                                <table class="table " id="view_customer_tracking_id">
                                     <thead>
                                         <tr>
-                                            <th>Sr No</th>
+                                            <!-- <th>Sr No</th> -->
                                             <th>Part Number</th>
                                             <th>Part Description</th>
                                             <th>Part Price</th>
@@ -297,7 +300,7 @@
                                                 
                                                 <tr>
                                                     
-                                                    <td><%$i%></td>
+                                                    <!-- <td><%$i%></td> -->
                                                     <td><%$child_part_data[$p->part_id][0]->part_number%></td>
                                                     <td><%$child_part_data[$p->part_id][0]->part_description%></td>
                                                     <td><%$child_part_rate[$child_part_data[$p->part_id][0]->id][0]->rate%></td>
@@ -632,4 +635,76 @@ function formValidate(form_class = ''){
             }
         });
     });
+    var data = {};
+        table = $("#view_customer_tracking_id").DataTable({
+        dom: "Bfrtilp",
+        buttons: [
+            {
+                extend: "csv",
+                text: '<i class="ti ti-file-type-csv"></i>',
+                init: function (api, node, config) {
+                    $(node).attr("title", "Download CSV");
+                },
+                customize: function (csv) {
+                        var lines = csv.split('\n');
+                        var modifiedLines = lines.map(function(line) {
+                            var values = line.split(',');
+                            values.splice(7, 1);
+                            return values.join(',');
+                        });
+                        return modifiedLines.join('\n');
+                    },
+                    // filename : file_name
+                },
+          
+            {
+                extend: "pdf",
+                text: '<i class="ti ti-file-type-pdf"></i>',
+                init: function (api, node, config) {
+                    $(node).attr("title", "Download Pdf");
+                },
+                // filename: file_name,
+                customize: function (doc) {
+                    doc.pageMargins = [15, 15, 15, 15];
+                    doc.content[0].text = pdf_title;
+                    doc.content[0].color = theme_color;
+                    // doc.content[1].table.widths = ["19%", "19%", "13%", "13%", "15%", "15%"];
+                    doc.content[1].table.body[0].forEach(function (cell) {
+                        cell.fillColor = theme_color;
+                    });
+                    doc.content[1].table.body.forEach(function (row, index) {
+                        row.splice(7, 1);
+                        row.forEach(function (cell) {
+                            // Set alignment for each cell
+                            cell.alignment = "center"; // Change to 'left' or 'right' as needed
+                        });
+                    });
+                },
+            },
+        ],
+        searching: true,
+        // scrollX: true,
+        scrollY: true,
+        bScrollCollapse: true,
+        // columnDefs: [{ sortable: false, targets: 7 }],
+        pagingType: "full_numbers",
+       
+        
+        });
+        $('#serarch-filter-input').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+        $('.dataTables_length').find('label').contents().filter(function() {
+                return this.nodeType === 3; // Filter out text nodes
+        }).remove();
+        setTimeout(function(){
+            $(".dataTables_length select").select2({
+                minimumResultsForSearch: Infinity
+            });
+        },1000)
+
+        // global searching for datable 
+        $('#serarch-filter-input').on('keyup', function() {
+            table.search(this.value).draw();
+        });
 </script>

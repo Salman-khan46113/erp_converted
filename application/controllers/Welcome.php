@@ -150,7 +150,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([[10, 'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		// $this->load->view('header.php',$data);
@@ -310,7 +310,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		$data['created_year'] = $created_year;
@@ -533,7 +533,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([[10, 'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 
@@ -975,6 +975,7 @@ class Welcome extends CommonController
             "width" => "100px",
             "className" => "dt-center",
         ];
+        $data['supplier_list'] = $this->Crud->read_data("supplier");
         $data["data"] = $column;
         $data["is_searching_enable"] = true;
         $data["is_paging_enable"] = true;
@@ -3241,7 +3242,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Supplier data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([[17, 'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
         // $ajax_json['teacher_data'] = $this->session->userdata();
@@ -3896,7 +3897,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		$this->loadView('reports/child_part_supplier_report',$data);
@@ -4468,7 +4469,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
         $data["current_year"] = date("Y");
@@ -10175,7 +10176,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
         $data['customer_parts_data'] = $this->Crud->customQuery('SELECT id,part_number, part_description FROM `child_part`');

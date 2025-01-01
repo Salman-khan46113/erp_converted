@@ -197,11 +197,13 @@ const page = {
     },
     serachParams: function(){
         var date_range_filter = $("#date_range_filter").val();
-        var params = {date_range_filter:date_range_filter};
+        var supplier_id_search = $("#supplier_id_search").val();
+        var params = {date_range_filter:date_range_filter,supplier_id:supplier_id_search};
         return params;
     },
     resetFilter: function(){
         $('#date_range_filter').data('daterangepicker').setStartDate(moment().format('YYYY-MM-DD'));
+        $("#supplier_id_search").val("").trigger("change");
         table.destroy(); 
         this.dataTable();
     },
