@@ -4,14 +4,13 @@ var pdf_title = "Sales Report";
 // var myModal = new bootstrap.Modal(document.getElementById('child_part_update'))
 const page = {
     init: function(){
-        this.dataTable();
         this.filter();
+        this.dataTable();
         this.formValidation();
         
         $(document).on("click",".edit-part",function(){
             var data = $(this).attr("data-value");
             data = JSON.parse(atob(data)); 
-            console.log(data)
             var option = '';
             if(data.sub_type == 'Regular grn' || data.sub_type == 'RM' ){
                 option = '<option  value="Regular grn">Regular GRN</option><option  value="RM">RM</option>';
@@ -163,16 +162,30 @@ const page = {
         $(".reset-filter").on("click",function(){
             that.resetFilter();
         })
+        $('#date_range_filter').daterangepicker({
+            singleDatePicker: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: 'YYYY/MM/DD' // Change this format as per your requirement
+            }
+        });
+        dateRangePicker = $('#date_range_filter').data('daterangepicker');
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
     },
     serachParams: function(){
         var month_number = $("#month_number").val();
         var year = $("#year").val();
-        var params = {month_number:month_number,year:year};
+        var date_range = $("#date_range_filter").val();
+        var params = {month_number:month_number,year:year,date_range:date_range};
         return params;
     },
     resetFilter: function(){
         $("#part_number_search").val('').trigger('change');
         $("#part_description_search").val('');
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
         table.destroy(); 
         this.dataTable();
     },
@@ -194,10 +207,21 @@ const page = {
                         var success = responseObject.success;
                         if (success == 1) {
                             toastr.success(msg);
-                            setTimeout(function(){
-                                 window.open(responseObject.pdf_utl, "_blank");
-                            },1000);
+                                // Create a hidden <a> element
+                                $(".modal").modal('hide');
+                                var link = document.createElement('a');
+                                link.href = responseObject.pdf_utl;
+                                link.download = responseObject.pdf_url_file; // Set the filename for the downloaded file
 
+                                // Append the link to the body (required for Firefox)
+                                document.body.appendChild(link);
+
+                                // Trigger the download by simulating a click on the link
+                                link.click();
+
+                                // Remove the link after triggering the download
+                                document.body.removeChild(link);
+                           
                         } else {
                             toastr.error(msg);
                         }

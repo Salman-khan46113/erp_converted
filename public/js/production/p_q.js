@@ -9,6 +9,7 @@ var pdf_title = "accept_reject_validation";
 
 const page = {
     init: function() {
+
         this.dataTable();
         this.filter();
         this.formValidation();
@@ -30,6 +31,17 @@ const page = {
               }
           });
       });
+      $('#date_range_filter').daterangepicker({
+            singleDatePicker: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: 'YYYY/MM/DD' // Change this format as per your requirement
+            }
+        });
+        dateRangePicker = $('#date_range_filter').data('daterangepicker');
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
     },
     dataTable: function() {
         var data = {};
@@ -105,35 +117,41 @@ const page = {
     },
     filter: function(){
         let that = this;
-        $(".search-filter").on("click",function(){
-            that.serachParams();
-            $(".close-filter-btn").trigger( "click" )
-        })
-        $(".reset-filter").on("click",function(){
+        // $(".search-filter").on("click",function(){
+        //     that.serachParams();
+        //     $(".close-filter-btn").trigger( "click" )
+        // })
+        $("#reset-filter,#reset-filter-top").on("click",function(){
+
             that.resetFilter();
         })
     },
     serachParams: function(){
-        let inhouse_part_name= $('#search_inhouse_part_name').val();
-         let machine_name= $('#search_machine_name').val();
-        // Ensure that the table and column exist before applying the search
-        if (table && inhouse_part_name) {
-            table.column(0).search(inhouse_part_name).draw();
-        }
-        if (table && machine_name) {
-            table.column(3).search(machine_name).draw();
-        }
+        // let inhouse_part_name= $('#search_inhouse_part_name').val();
+        //  let machine_name= $('#search_machine_name').val();
+        // // Ensure that the table and column exist before applying the search
+        // if (table && inhouse_part_name) {
+        //     table.column(0).search(inhouse_part_name).draw();
+        // }
+        // if (table && machine_name) {
+        //     table.column(3).search(machine_name).draw();
+        // }
     },
     resetFilter: function(){
         $('#search_inhouse_part_name').val('').trigger("change");
         $('#search_machine_name').val('').trigger("change");
-        table.column(0).search("").draw();
-        table.column(3).search("").draw();
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
+        $('#seacrh-filter-block').trigger('submit');
     },
     formValidation: function(){
     	let that = this;
     	$(document).submit(".add_molding_production,.update_p_q,update_p_q_onhold",function(e){
-    		console.log(e.target)
+        var element_dat = $(this);
+        // console.log(e.target.id)
+        if(e.target.id == "seacrh-filter-block"){
+          return;
+        }
         e.preventDefault();
         var href = $(e.target).attr("action");
         var id = $(e.target).attr("id");

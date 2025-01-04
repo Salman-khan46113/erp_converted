@@ -1222,7 +1222,7 @@ TECHNIQUE </td>
                     
 
                     // Output the new PDF
-                    $pdf->Output('f', $fileAbsolutePath);
+                    $pdf->Output('F', $fileAbsolutePath);
 
                     // generate digital signature
                     $signer = $configuration['signer'];
@@ -1418,6 +1418,7 @@ TECHNIQUE </td>
             $page_count = "7";
         }
         $page_row_count = 1;
+
         foreach ($po_parts_data as $p) {
 
             $child_part_data = $this->Crud->get_data_by_id("customer_part", $p->part_id, "id");
@@ -1486,7 +1487,7 @@ TECHNIQUE </td>
          <td width="4%" style="text-align:center;line-height:40px;">' . $i . '</td>
          <td width="46%" style="text-align:left;line-height:0px;height:43.3px;"> <div  style="display:block;width:100%;line-height:8px;"> '.substr($child_part_data[0]->part_description, 0,100) .'</div><div  style="display:block;width:100%;line-height:8px;"><b> Part No - ' . wordwrap($child_part_data[0]->part_number, 12, "\n", true) .' '.$custItemCd.'</div></b></td>
          <td width="8.66%" style="text-align:center;line-height:40px">' . $hsn_code . '</td>
-         <td width="8.66%" style="text-align:center;line-height:40px;"><span >' . $packagingQtyFactors . '</span></td>
+         <td width="8.66%" style="text-align:center;line-height:20px;"><span >250 X 4119 X 1' . $packagingQtyFactors . '</span></td>
          <td width="7.8%" style="text-align:center;line-height:40px;">' . $p->uom_id . '</td>
          <td  width="8.33%" style="text-align:center;line-height:40px;">' . $p->qty . '</td>
          <td width="7.5%" style="text-align:center;line-height:40px;">' . $rate . '</td>

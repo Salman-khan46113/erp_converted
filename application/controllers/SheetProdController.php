@@ -295,7 +295,35 @@ class SheetProdController extends ProductionController
 	public function view_p_q()
 	{
 		checkGroupAccess("view_p_q","list","Yes");
+
+		// pr($_POST,1);	
+		$post_data = $_POST;
 		$clientId = $this->Unit->getSessionClientId();
+		$machin_name = $post_data['search_machine_name'] > 0 ? "AND m.id = ".$post_data['search_machine_name'] : "";
+		$selected_machin_name = $post_data['search_machine_name'];
+
+		if($post_data['datetimes'] != ""){
+			$date_filter = $post_data['datetimes'];
+	        $date_filter =  explode((" - "),$date_filter);
+	        $data['start_date'] = $date_filter[0];
+	        $data['end_date'] = $date_filter[1];
+		}else{
+			$date_filter = date("2024/11/01") ." - ". date("Y/m/d");
+	        $date_filter =  explode((" - "),$date_filter);
+	        $data['start_date'] = $date_filter[0];
+	        $data['end_date'] = $date_filter[1];
+		}
+
+		$part_id_val = explode("|", $post_data['part_id']);
+		$part_condition = "";
+		if($post_data['part_id'] != null){
+			if($part_id_val[1] == "custom_part"){
+				$part_condition = " AND p.output_part_table_name ='customer_part' AND p.output_part_id = ".$part_id_val[0];
+			}else{
+				$part_condition = " AND p.output_part_table_name ='inhouse_parts' AND p.output_part_id = ".$part_id_val[0];
+			}
+		}
+		
 		$data['p_q'] = $this->Crud->customQuery('SELECT 
 					p.*, 
 					o.name AS op_name, 
@@ -312,6 +340,8 @@ class SheetProdController extends ProductionController
 					shifts s ON p.shift_id = s.id
 				WHERE 
 					m.clientId = '.$clientId.'
+					AND STR_TO_DATE(p.created_date, "%d-%m-%Y") BETWEEN "'.$date_filter[0].'" AND "'.$date_filter[1].'"
+					'.$machin_name.' '.$part_condition.'
 				ORDER BY 
 					p.date DESC 
 				');
@@ -327,16 +357,19 @@ class SheetProdController extends ProductionController
             	$output_part_data = $this->Crud->get_data_by_id("customer_part", $u->output_part_id, "id");
             }
             $data['p_q'][$key]->output_part_data = $output_part_data;
+		}
 
+		$inhouse_parts = $this->InhouseParts->readInhousePartsOnly();
+		$customer_part = $this->Crud->read_data("customer_part");
+		foreach ($customer_part as $key => $value) {
+			$value->id = $value->id."|custom_part";
+			$inhouse_parts[] = $value;
 		}
-		$inhouse_parts = [];
-		foreach ($data['p_q'] as $key => $value) {
-			$output_part_data = $value->output_part_data;
-			if(!in_array($output_part_data[0]->part_number."/".$output_part_data[0]->part_description, $inhouse_parts)){
-				$inhouse_parts[] = $output_part_data[0]->part_number."/".$output_part_data[0]->part_description;
-			}
-		}
+		$data['reject_remark'] = $this->Crud->read_data("reject_remark");
 		$data['inhouse_parts'] = $inhouse_parts;
+		$data['inhouse_parts'] = $inhouse_parts;
+		$data['selected_machin_name'] = $selected_machin_name;
+		$data['selected_part_id'] = $post_data['part_id'];
 		$data['machine_data'] = $this->Crud->read_data("machine", true);
 		$this->loadView('store/p_q', $data);
 	}

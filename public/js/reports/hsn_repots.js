@@ -1,11 +1,11 @@
 var table = '';
-var file_name = "hsn_report";
-var pdf_title = "HSN Report";
+var file_name = "hsn_summary_report";
+var pdf_title = "Summary ";
 // var myModal = new bootstrap.Modal(document.getElementById('child_part_update'))
 const page = {
     init: function(){
-        this.dataTable();
         this.filter();
+        this.dataTable();
         this.formValidation();
         
         $(document).on("click",".edit-part",function(){
@@ -163,16 +163,30 @@ const page = {
         $(".reset-filter").on("click",function(){
             that.resetFilter();
         })
+        $('#date_range_filter').daterangepicker({
+            singleDatePicker: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: 'YYYY/MM/DD' // Change this format as per your requirement
+            }
+        });
+        dateRangePicker = $('#date_range_filter').data('daterangepicker');
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
     },
     serachParams: function(){
         var customer_search = $("#customer_search").val();
         var hsn_search = $("#hsn_search").val();
-        var params = {customer:customer_search,hsn_code:hsn_search};
+        var date_range = $("#date_range_filter").val();
+        var params = {customer:customer_search,hsn_code:hsn_search,date_range:date_range};
         return params;
     },
     resetFilter: function(){
         $("#customer_search").val('').trigger('change');
         $("#hsn_search").val('');
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
         table.destroy(); 
         this.dataTable();
     },

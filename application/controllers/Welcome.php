@@ -8758,7 +8758,7 @@ class Welcome extends CommonController
         $emailId = trim($this->input->post('emailId'));
         $discount = trim($this->input->post('discount'));
         $discountType = trim($this->input->post('discountType'));
-		// pr($_POST,1);	
+		
 		$data = array(	
 			"customer_name" => $customerName,
 			"customer_code" => $customerCode,
@@ -8782,6 +8782,7 @@ class Welcome extends CommonController
             "discount" => $discount,
             "discountType" => $discountType
 		);
+        // pr($data,1); 
         if(count(str_split($state_no)) > 2 || count(str_split($pos)) > 2 || count(str_split($paymentTerms)) > 2){
             $message = count(str_split($paymentTerms)) > 2 ? "Payment terms must be 2 digit" : (count(str_split($state_no)) > 2 ? "State no must be 2 digit" : "Pos must be 2 digit");
         }else{

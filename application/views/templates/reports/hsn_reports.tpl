@@ -17,7 +17,7 @@
       <div class="simplebar-content" >
         <ul class="menu-inner py-1">
             <!-- Dashboard -->
-            <div class="filter-row">
+            <div class="filter-row hide">
               <li class="nav-small-cap">
                 <span class="hide-menu">Customer</span>
                 <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
@@ -33,6 +33,7 @@
                 </div>
               </li>
             </div>
+
             <div class="filter-row">
               <li class="nav-small-cap">
                 <span class="hide-menu">HSN Code</span>
@@ -44,7 +45,18 @@
 
               </div>
             </li>
-            </div>  
+            </div> 
+             <div class="filter-row">
+          <li class="nav-small-cap">
+            <span class="hide-menu">Date</span>
+            <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+          </li>
+          <li class="sidebar-item">
+            <div class="input-group">
+            <input type="text" name="datetimes" class="dates form-control" id="date_range_filter" />
+            </div>
+          </li>
+        </div> 
             
 
         </ul>
@@ -62,10 +74,10 @@
           Reports
           <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link" title="Back to Issue Request Listing" >
             <i class="ti ti-chevrons-right" ></i>
-            <em >HSN Reports</em></a>
+            <em >HSN Summary Reports</em></a>
         </h1>
         <br>
-        <span >HSN Reports</span>
+        <span >HSN Summary Reports</span>
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
@@ -179,5 +191,7 @@
     var sorting_column = <%$sorting_column%>;
     var api_name =  <%$api_name|json_encode%>;
     var base_url = <%$base_url|json_encode%>;
+    var start_date = <%$start_date|json_encode%>;
+    var end_date = <%$end_date|json_encode%>;
 </script>
 <script src="<%$base_url%>/public/js/reports/hsn_repots.js"></script>

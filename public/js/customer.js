@@ -19,36 +19,36 @@ const datatable = {
             var data = $(this).attr("data-value");
           
             data = JSON.parse(atob(data)); 
-            // console.log(data)
-            $("#ucustomer_id").val(data['id']);
-            $("#ucustomer_name").val(data.customer_name);
-            $("#ucustomer_code").val(data.customer_code);
-            $("#ucustomer_address").val(data.billing_address);
-            $("#ucustomer_shifting_address").val(data.shifting_address);
-            $("#ucustomer_state").val(data.state);
-            $("#ucustomer_state_no").val(data.state_no);
-            $("#upayment_terms").val(data.payment_terms);
-            $("#uvendor_code").val(data.vendor_code);
-            $("#upan_no").val(data.pan_no);
-            $("#ubank_details").val(data.bank_details);
-            $("#upos").val(data.pos);
-            $("#uaddress1").val(data.address1);
-            $("#ulocation").val(data.location);
-            $("#upin").val(data.pin);
-            $('#customer_id').val(data.id)
-            $('#discount_val').val(data.discount);
-            $("#NA").prop('checked', false);
-            $("#Percentage").prop('checked', false);
+            console.log(data)
+            $("#updateCustomerForm #ucustomer_id").val(data['id']);
+            $("#updateCustomerForm #ucustomer_name").val(data.customer_name);
+            $("#updateCustomerForm #ucustomer_code").val(data.customer_code);
+            $("#updateCustomerForm #ucustomer_address").val(data.billing_address);
+            $("#updateCustomerForm #ucustomer_shifting_address").val(data.shifting_address);
+            $("#updateCustomerForm #ucustomer_state").val(data.state);
+            $("#updateCustomerForm #ucustomer_state_no").val(data.state_no);
+            $("#updateCustomerForm #upayment_terms").val(data.payment_terms);
+            $("#updateCustomerForm #uvendor_code").val(data.vendor_code);
+            $("#updateCustomerForm #upan_no").val(data.pan_no);
+            $("#updateCustomerForm #ubank_details").val(data.bank_details);
+            $("#updateCustomerForm #upos").val(data.pos);
+            $("#updateCustomerForm #uaddress1").val(data.address1);
+            $("#updateCustomerForm #ulocation").val(data.location);
+            $("#updateCustomerForm #pin").val(data.pin);
+            $('#updateCustomerForm #customer_id').val(data.id)
+            $('#updateCustomerForm #discount_val').val(data.discount);
+            $("#updateCustomerForm #NA").prop('checked', false);
+            $("#updateCustomerForm #Percentage").prop('checked', false);
             if(data.discountType == "Percentage"){
-              $("#PercentageOpt").prop('checked', true);
+              $("#updateCustomerForm #PercentageOpt").prop('checked', true);
             }else{
-              $("#NA").prop('checked', true);
+              $("#updateCustomerForm #NA").prop('checked', true);
             }
             for (var i = 1; i <= currentUnit; i++) {
                 var customer_unit = "distncFrmClnt"+i;
-                $('#distncFrmClnt'+i).val(data[customer_unit])
+                $('#updateCustomerForm #distncFrmClnt'+i).val(data[customer_unit])
             }
-            $("#updateEmailId").val(data['emailId']);
+            $("#updateCustomerForm #updateEmailId").val(data['emailId']);
             myModal.show();
         })
     },

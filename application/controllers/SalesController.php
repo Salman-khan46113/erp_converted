@@ -993,11 +993,7 @@ class SalesController extends CommonController
 			//$dom->loadXML($dom->saveXML(), LIBXML_NOXMLDECL);
 			$xmlString = $dom->saveXML();	
 			$xmlStringWithoutDeclaration = preg_replace('/<\?xml version="1.0"\?>/', '', $xmlString);
-			
 
-			// Get the formatted XML as a string
-			//$formattedXml = $dom->saveXML();
-			
 			$filename = $filename = 'dist/uploads/sales_export_tally/tally_sales_'.date(d_m_Y).'.xml';
 
 			file_put_contents($filename, $xmlStringWithoutDeclaration);
@@ -1005,6 +1001,7 @@ class SalesController extends CommonController
 			$return_arr = array(
 			        'pdf_utl' => $this->config->item("base_url").$filename,
 			        'message' => "Export successfully.",
+			        'pdf_url_file' => 'tally_sales_'.date(d_m_Y).'.xml',
 			        'success' => 1
 			);
 
@@ -1155,7 +1152,10 @@ class SalesController extends CommonController
             "className" => "dt-center",
         ];
 		
-		
+		$date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
         $data["data"] = $column;
         $data["is_searching_enable"] = true;
         $data["is_paging_enable"] = true;
@@ -1315,7 +1315,10 @@ class SalesController extends CommonController
             "className" => "dt-center",
         ];
 		
-		
+		$date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
         $data["data"] = $column;
         $data["is_searching_enable"] = true;
         $data["is_paging_enable"] = true;

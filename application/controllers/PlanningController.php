@@ -83,16 +83,34 @@ class PlanningController extends CommonController
 					// pr($planing_data_val[count($planing_data_val)-1]);
 					$data['planing_data'][$key]->planing_data[0] = $planing_data_val[0];
 					$month_number = $this->Common_admin_model->get_month_number($month);
-					$year_number = substr($financial_year, 3, strlen($financial_year));
-					$data['sales_invoice'][$t->customer_part_id] = $this->Crud->customQuery('SELECT sum(p.qty) as dispatched_qty FROM new_sales s, sales_parts p
-							WHERE s.clientId = '.$this->Unit->getSessionClientId().'
-							AND s.created_year = "' . $year_number . '"
-							AND s.created_month = "'.$month_number.'" 
+					$year_number = (int) substr($financial_year, 3, strlen($financial_year));
+					
+					// $data['sales_invoice'][$t->customer_part_id] = $this->Crud->customQuery('SELECT sum(p.qty) as dispatched_qty FROM new_sales s, sales_parts p
+					// 		WHERE s.clientId = '.$this->Unit->getSessionClientId().' 
+					// 		 AND ((s.created_year = "'.$year_number.'" AND s.created_month > "4") 
+     //     					OR (s.created_year = "'.$year_number.'" AND s.created_month < "3"))
+					// 		AND s.status = "lock"
+					// 		AND p.part_id = '.$t->customer_part_id.'
+					// 		AND s.id = p.sales_id
+					// 		GROUP BY s.customer_part_id');
+						$sales_invoice_data = $this->Crud->customQuery('SELECT s.*,p.qty as dispatched_qty FROM new_sales s, sales_parts p
+							WHERE s.clientId = '.$this->Unit->getSessionClientId().' 
+							 AND ((s.created_year = "'.$year_number.'" AND s.created_month > "4") 
+         					OR (s.created_year = "'.($year_number+1).'" AND s.created_month < "3"))
 							AND s.status = "lock"
 							AND p.part_id = '.$t->customer_part_id.'
 							AND s.id = p.sales_id
-							GROUP BY s.customer_part_id');
+							');
+						foreach ($sales_invoice_data as $key => $value) {
+							if($value->created_month == $month_number){
+								$data['sales_invoice'][$t->customer_part_id][] = $value;
+							}
+						}
+
 					}
+
+					
+
 				
 			}
 		}

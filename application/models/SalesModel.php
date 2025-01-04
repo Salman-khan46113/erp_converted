@@ -25,14 +25,16 @@ class SalesModel extends CI_Model {
         $this->db->where('sales.sales_number NOT LIKE', 'TEMP%');
         $this->db->where_not_in('sales.status', ['pending','unlocked']);
         if (is_array($search_params) && count($search_params) > 0) {
-            if ($search_params["month_number"] != "") {
-                $this->db->where("sales.created_month", $search_params["month_number"]);
-            }
-            if ($search_params["year"] != "") {
-                $this->db->where("sales.created_year",$search_params["year"]);
+            if ($search_params["date_range"] != "") {
+                $date_filter =  explode((" - "),$search_params["date_range"]);
+                $data['start_date'] = $date_filter[0];
+                $data['end_date'] = $date_filter[1];
+                $this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
             }
            
         }
+        
+            
         if (isset($search_params["value"]) && $search_params["value"] != "") {
             $keyword = $search_params["value"];
             // Group OR conditions within a WHERE block
@@ -84,11 +86,17 @@ class SalesModel extends CI_Model {
     
         // Apply additional search conditions
         if (is_array($search_params) && count($search_params) > 0) {
-            if ($search_params["month_number"] != "") {
-                $this->db->where("sales.created_month", $search_params["month_number"]);
-            }
-            if ($search_params["year"] != "") {
-                $this->db->where("sales.created_year", $search_params["year"]);
+            // if ($search_params["month_number"] != "") {
+            //     $this->db->where("sales.created_month", $search_params["month_number"]);
+            // }
+            // if ($search_params["year"] != "") {
+            //     $this->db->where("sales.created_year", $search_params["year"]);
+            // }
+            if ($search_params["date_range"] != "") {
+                $date_filter =  explode((" - "),$search_params["date_range"]);
+                $data['start_date'] = $date_filter[0];
+                $data['end_date'] = $date_filter[1];
+                $this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
             }
             
             // Apply LIKE conditions if a keyword is provided
@@ -138,13 +146,18 @@ class SalesModel extends CI_Model {
         
         // Apply additional search conditions
         if (is_array($search_params) && count($search_params) > 0) {
-            if ($search_params["customer"] != "") {
-                $this->db->where("parts.customer_id", $search_params["customer"]);
-            }
+            // if ($search_params["customer"] != "") {
+            //     $this->db->where("parts.customer_id", $search_params["customer"]);
+            // }
             if ($search_params["hsn_code"] != "") {
                 $this->db->where("parts.hsn_code", $search_params["hsn_code"]);
             }
-            
+            if ($search_params["date_range"] != "") {
+                $date_filter =  explode((" - "),$search_params["date_range"]);
+                $data['start_date'] = $date_filter[0];
+                $data['end_date'] = $date_filter[1];
+                $this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+            }
             // Apply LIKE conditions if a keyword is provided
             if (isset($search_params["value"]) && $search_params["value"] != "") {
                 $keyword = $search_params["value"];
@@ -193,11 +206,17 @@ class SalesModel extends CI_Model {
     
         // Apply additional search conditions
         if (is_array($search_params) && count($search_params) > 0) {
-            if ($search_params["customer"] != "") {
-                $this->db->where("parts.customer_id", $search_params["customer"]);
-            }
+            // if ($search_params["customer"] != "") {
+            //     $this->db->where("parts.customer_id", $search_params["customer"]);
+            // }
             if ($search_params["hsn_code"] != "") {
                 $this->db->where("parts.hsn_code", $search_params["hsn_code"]);
+            }
+            if ($search_params["date_range"] != "") {
+                $date_filter =  explode((" - "),$search_params["date_range"]);
+                $data['start_date'] = $date_filter[0];
+                $data['end_date'] = $date_filter[1];
+                $this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
             }
             
             // Apply LIKE conditions if a keyword is provided
