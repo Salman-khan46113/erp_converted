@@ -1222,7 +1222,7 @@ TECHNIQUE </td>
                     
 
                     // Output the new PDF
-                    $pdf->Output('F', $fileAbsolutePath);
+                    $pdf->Output('f', $fileAbsolutePath);
 
                     // generate digital signature
                     $signer = $configuration['signer'];
@@ -1405,6 +1405,7 @@ TECHNIQUE </td>
         /* per page count */
         // $einvoice_data[0]->Irn = "ds";
         $font_size ="11.59";
+        // pr($einvoice_data,1);
         // $new_sales_data[0]->discountType = "tte";
         if (!empty($einvoice_data[0]->Irn) || $new_sales_data[0]->discountType!='NA') {
              $font_size ="11.4";
@@ -1488,8 +1489,8 @@ TECHNIQUE </td>
          <td width="8.66%" style="text-align:center;line-height:40px;"><span >' . $packagingQtyFactors . '</span></td>
          <td width="7.8%" style="text-align:center;line-height:40px;">' . $p->uom_id . '</td>
          <td  width="8.33%" style="text-align:center;line-height:40px;">' . $p->qty . '</td>
-         <td width="8.33%" style="text-align:center;line-height:40px;">' . $rate . '</td>
-         <td width="8.23%" colspan="2" style="text-align:center;line-height:40px;">' . number_format($part_total, 2, '.', '') . '</td>
+         <td width="7.5%" style="text-align:center;line-height:40px;">' . $rate . '</td>
+         <td width="9%" colspan="2" style="text-align:center;line-height:40px;">' . number_format($part_total, 2, '.', '') . '</td>
        </tr>
      ';
         // pr(count($po_parts_data).":".$page_row_count);
@@ -1670,20 +1671,22 @@ TECHNIQUE </td>
         // pr($height,1);
         if ($isEinvoicePresent == true) {
             $file_nm = uniqid() . ".png";
-            $file_qr = './documents/qrcode/sales/' . $file_nm;
-
+            $fileName = "dist/uploads/sales_qr_code/".$file_nm;
+            $fileAbsolutePath = FCPATH.$fileName;
             // Assuming $einvoice_data[0]->SignedQRCode contains your data
             $signedQRCodeData = $einvoice_data[0]->SignedQRCode;
             // Start output buffering
             ob_start();
             // Generate QR Code and output directly to the buffer
-            QRcode::png($signedQRCodeData, null, QR_ECLEVEL_L, 3, 2);
+            QRcode::png($signedQRCodeData, $fileAbsolutePath, QR_ECLEVEL_L, 3, 2);
             // Get the buffered content as a string
             $qrCodeImageString = ob_get_contents();
+            $qrCodeImageString = base_url().$fileName;
             // End and clean the buffer
             ob_end_clean();
         }
-        
+
+        // pr($qrCodeImageString,1);
         $company_logo = "";
         $company_logo_enable = "No";
         $row_col_span = '100';
@@ -1736,6 +1739,7 @@ TECHNIQUE </td>
               <b><span>' . $client_data[0]->billing_address . '</span></b>
            </th>
         </tr>';
+        
         if ($isEinvoicePresent == true) {
             $html_invoice_details = '
             <tr style="font-size:'.$font_size.'px" style="border-right-style:none;">
@@ -1753,11 +1757,11 @@ TECHNIQUE </td>
                 <b>PO DATE : </b>' . defaultDateFormat($po_parts_data[0]->po_date) . '<br>
                 <span style="font-size:8px">WHETHER TAX ON REVERSE CHARGE: NO</span>
               </td>
-              <td width="20.9%" style="align-items:center;padding-top:3px;height:110px;" >
-                  <!--<img width="140em" height="105em" src="http://localhost/extra_work/qrcode.png" alt="QR Code">-->
+              <td width="20.9%" style="align-items:center;padding-top:5px;height:110px;" >
+                  <img width="100em" height="80em" src="'.$qrCodeImageString.'" alt="QR Code">
                   <!-- <img width="200em" height="200em" src="' . $dataUri . '"><br> -->
                  
-                     <img width="140em" height="105em" src="data:image/png;base64,' . base64_encode($qrCodeImageString) . '" alt="QR Code">
+                     <!--<img width="140em" height="100px" src="data:image/png;base64,' . base64_encode($qrCodeImageString) . '" alt="QR Code" alt="QR Code" width="140" height="100"> -->
               </td>
             </tr>
             <tr>
@@ -1814,8 +1818,8 @@ TECHNIQUE </td>
           <td width="8.66%;font-size:10.5px"><b>Packaging</b></td>
           <td width="7.8%"><b>UOM</b></td>
           <td width="8.33%"><b>QTY</b></td>
-          <td width="8.33%"><b>Rate</b></td>
-          <td width="8.23%"><b>Amount (Rs)</b></td>
+          <td width="7.5%"><b>Rate</b></td>
+          <td width="9%"><b>Amount (Rs)</b></td>
         </tr>
          </tbody>
         </table>

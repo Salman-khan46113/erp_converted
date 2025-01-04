@@ -233,7 +233,7 @@ $route['planing_data/(:any)/(:any)/(:any)'] = 'PlanningController/planing_data';
 $route['get_customer_parts_for_planning'] = 'PlanningController/get_customer_parts_for_planning';
 $route['add_planning_data'] = 'PlanningController/add_planning_data';
 $route['add_planning_fg_stock'] = 'PlanningController/add_planning_fg_stock';
-$route['view_planing_data/(:any)/(:any)'] = 'PlanningController/view_planing_data';
+$route['view_planing_data/(:any)'] = 'PlanningController/view_planing_data';
 $route['update_planning_data'] = 'PlanningController/update_planning_data';
 $route['view_all_child_parts_schedule/(:any)/(:any)'] = 'PlanningController/view_all_child_parts_schedule';
 $route['update_schedule_qty'] = 'PlanningController/update_schedule_qty'; //NOT used due to schedule_qty2 not in use...
@@ -830,3 +830,5 @@ $route['payment_days_dump_script'] = 'MagrationScript_Controller/payment_days_du
 
 #======================== Mail Notification =======================================
 $route['yesterdays_sales_for_mail'] = 'MagrationScript_Controller/yesterdays_sales_for_mail';
+
+$route['send_email'] = 'MagrationScript_Controller/email_sender_test';

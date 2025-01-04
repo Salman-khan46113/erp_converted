@@ -4500,7 +4500,7 @@ class Welcome extends CommonController
 
 		$data = $this->welcome_model->getPlanningReportView($condition_arr,$post_data["search"]);
 
-		// pr($data,1);
+		pr($data,1);
 
 		foreach ($data as $key => $value) {
 			$edit_data = base64_encode(json_encode($value));
