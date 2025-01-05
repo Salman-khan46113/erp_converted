@@ -308,12 +308,12 @@ class SheetProdController extends ProductionController
 	        $data['start_date'] = $date_filter[0];
 	        $data['end_date'] = $date_filter[1];
 		}else{
-			$date_filter = date("2024/11/01") ." - ". date("Y/m/d");
+			$date_filter = date("Y/m/d", strtotime("-8 days")) ." - ". date("Y/m/d");
 	        $date_filter =  explode((" - "),$date_filter);
 	        $data['start_date'] = $date_filter[0];
 	        $data['end_date'] = $date_filter[1];
 		}
-
+		
 		$part_id_val = explode("|", $post_data['part_id']);
 		$part_condition = "";
 		if($post_data['part_id'] != null){

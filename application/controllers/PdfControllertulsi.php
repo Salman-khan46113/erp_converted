@@ -1418,7 +1418,13 @@ TECHNIQUE </td>
             $page_count = "7";
         }
         $page_row_count = 1;
-
+        // $po_parts_data[] = $po_parts_data[0];
+        // $po_parts_data[] = $po_parts_data[0];
+        // $po_parts_data[] = $po_parts_data[0];
+        // $po_parts_data[] = $po_parts_data[0];
+        // $po_parts_data[] = $po_parts_data[0];
+        // $po_parts_data[] = $po_parts_data[0];
+        // $po_parts_data[] = $po_parts_data[0];
         foreach ($po_parts_data as $p) {
 
             $child_part_data = $this->Crud->get_data_by_id("customer_part", $p->part_id, "id");
@@ -1467,13 +1473,21 @@ TECHNIQUE </td>
             $sgst_amount = $sgst_amount + $p->sgst_amount;
             $igst_amount = $igst_amount + $p->igst_amount;
             $tcs_amount = $tcs_amount + $p->tcs_amount;
-
+            
+            // pr($packSize,1);
             $packagingQtyFactors = '';
             if ($packaging_qty > 0) {
-                foreach ($packSize as $factor) {
+                foreach ($packSize as $key=>$factor) {
                     $packagingQtyFactorsTemp = $factor['factor'] . ' X ' . $factor['count'] . '';
+                    if($key == 0 && count($packSize) > 1){
+                        $packagingQtyFactorsTemp .= "<br>";
+                    }
                     $packagingQtyFactors = $packagingQtyFactors . $packagingQtyFactorsTemp;
                 }
+            }
+            $packing_lenght = "20px";
+            if(strlen($packagingQtyFactors) <= 11){
+                $packing_lenght = "40px";
             }
 
             $custItemCd = $child_part_data[0]->itemCode;
@@ -1483,12 +1497,12 @@ TECHNIQUE </td>
             }
 
             $parts_html .= '
-        <tr style="font-size:12px;" class="part-box">
+        <tr style="font-size:12px;" class="part-box">   
          <td width="4%" style="text-align:center;line-height:40px;">' . $i . '</td>
          <td width="46%" style="text-align:left;line-height:0px;height:43.3px;"> <div  style="display:block;width:100%;line-height:8px;"> '.substr($child_part_data[0]->part_description, 0,100) .'</div><div  style="display:block;width:100%;line-height:8px;"><b> Part No - ' . wordwrap($child_part_data[0]->part_number, 12, "\n", true) .' '.$custItemCd.'</div></b></td>
-         <td width="8.66%" style="text-align:center;line-height:40px">' . $hsn_code . '</td>
-         <td width="8.66%" style="text-align:center;line-height:20px;"><span >250 X 4119 X 1' . $packagingQtyFactors . '</span></td>
-         <td width="7.8%" style="text-align:center;line-height:40px;">' . $p->uom_id . '</td>
+         <td width="8.66%" style="text-align:center;line-height:40px;font-size:11px;">' . $hsn_code . '</td>
+         <td width="9.6%" style="text-align:center;line-height:'.$packing_lenght.';font-size:11px;"><span >' . $packagingQtyFactors . '</span></td>
+         <td width="7%" style="text-align:center;line-height:40px;font-size:11px;">' . $p->uom_id . '</td>
          <td  width="8.33%" style="text-align:center;line-height:40px;">' . $p->qty . '</td>
          <td width="7.5%" style="text-align:center;line-height:40px;">' . $rate . '</td>
          <td width="9%" colspan="2" style="text-align:center;line-height:40px;">' . number_format($part_total, 2, '.', '') . '</td>
@@ -1752,7 +1766,7 @@ TECHNIQUE </td>
                 <b> VENDOR CODE : </b>' . $customer_data[0]->vendor_code . '<br>
               </td>
               <td width="29%" style="height:110px;">
-                <span style="font-size:'.$font_size.'px;"><b>INVOICE NO :&nbsp;' . $new_sales_data[0]->sales_number . '</b></span><br>
+                <span style="font-size:'.$font_size.'px;"><b>INVOICE NO :&nbsp;&nbsp;' . $new_sales_data[0]->sales_number . '</b></span><br>
                 <b>INVOICE DATE :</b> ' . $new_sales_data[0]->created_date . '<br>
                 <b>PO NUMBER : </b>' . $po_parts_data[0]->po_number . '<br>
                 <b>PO DATE : </b>' . defaultDateFormat($po_parts_data[0]->po_date) . '<br>
@@ -1783,7 +1797,7 @@ TECHNIQUE </td>
           <b>VENDOR CODE : </b>' . $customer_data[0]->vendor_code . '<br>
         </td>
         <td width="50%" style="height:110px;">
-          <span style="font-size:'.$font_size.'px;"><b>INVOICE NO :' . $new_sales_data[0]->sales_number . '</b></span><br>
+          <span style="font-size:13px;"><b>INVOICE NO :&nbsp;&nbsp;' . $new_sales_data[0]->sales_number . '</b></span><br>
           <b>INVOICE DATE :</b> ' . $new_sales_data[0]->created_date . '<br>
           <b>PO NUMBER : </b>' . $po_parts_data[0]->po_number . '<br>
           <b>PO DATE : </b>' . defaultDateFormat($po_parts_data[0]->po_date) . '<br>
@@ -1816,8 +1830,8 @@ TECHNIQUE </td>
           <td width="4%" ><b>Sr No</b></td>
           <td width="46%" style="text-align:left;"><b>&nbsp;Part Description</b></td>
           <td width="8.66%"><b>HSN / SAC</b> </td>
-          <td width="8.66%;font-size:10.5px"><b>Packaging</b></td>
-          <td width="7.8%"><b>UOM</b></td>
+          <td width="9.6%;font-size:10.5px"><b>Packing</b></td>
+          <td width="7%"><b>UOM</b></td>
           <td width="8.33%"><b>QTY</b></td>
           <td width="7.5%"><b>Rate</b></td>
           <td width="9%"><b>Amount (Rs)</b></td>
@@ -1847,10 +1861,10 @@ TECHNIQUE </td>
         <table cellspacing="0" cellpadding="5"   border="1">
         <tbody>
             
-           <tr style="font-size:'.$font_size.'px">
-                <td rowspan="'.$defaultColumns.'" colspan="7">
-                    <b>&nbsp;Mode Of Transport : </b>' . $md . '&nbsp;&nbsp;&nbsp;&nbsp;<b>&nbsp;Vehicle No : </b>' . $new_sales_data[0]->vehicle_number . '&nbsp;&nbsp;&nbsp;&nbsp;<b>&nbsp;L.R No : </b>' . $new_sales_data[0]->lr_number . '
-                    <br><b>&nbsp;&nbsp;&nbsp;Transporter : </b>' . $transporter_data[0]->transporter_id . '
+           <tr style="font-size:'.$font_size.'px;">
+                <td rowspan="'.$defaultColumns.'" colspan="7" width="58.65%;" style="line-height:19px;">
+                    <b>&nbsp;Mode Of Transport : </b>' . $md . '&nbsp;&nbsp;&nbsp;&nbsp;<b>&nbsp;Vehicle No : </b>' . $new_sales_data[0]->vehicle_number . '&nbsp;&nbsp;&nbsp;&nbsp;<b><br><b>&nbsp;&nbsp;&nbsp;Transporter : </b>' . $transporter_data[0]->transporter_id . '&nbsp;&nbsp;&nbsp;L.R No : </b>' . $new_sales_data[0]->lr_number . '
+                    
                 </td>';
         
             if($isDiscount==true) {
@@ -1859,8 +1873,8 @@ TECHNIQUE </td>
             }
            
             $footer_content .='
-                    <td colspan="3" style="text-align:left;margin-left:10px;">&nbsp;&nbsp;&nbsp;TAXABLE VALUE</td>
-                    <td colspan="2" style="text-align:center">' . $final_basic_total . '</td>
+                    <td colspan="3" style="text-align:left;margin-left:10px;" width="24.95%;">&nbsp;&nbsp;&nbsp;TAXABLE VALUE</td>
+                    <td colspan="2" style="text-align:center" width="16.4%">' . $final_basic_total . '</td>
            </tr>
            <tr style="font-size:11.5px">
                 <td colspan="3" style="text-align:left">&nbsp;&nbsp;&nbsp;IGST ' . $igst . '%</td>
@@ -1942,7 +1956,7 @@ TECHNIQUE </td>
             // $pdf = new Pdf1(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
             $pdf = new Pdf1('P', 'mm', 'A4', true, 'UTF-8', false,'',$header,$footer,$top_margin, $footer_content);
 
-            $pdf->SetMargins(10, $meddle_content, 10, 5);
+            $pdf->SetMargins(10, $meddle_content, 8, 5);
 
         // set document information
 
@@ -3219,7 +3233,7 @@ TECHNIQUE </td>
         $footerDetails =
 
         '
-        <tr style="font-size:10px">
+        <tr style="font-size:9.5px">
             <td colspan="5">
             <table cellpadding="0">
                 <tr>
@@ -3229,7 +3243,7 @@ TECHNIQUE </td>
                 been effected by me/us and it shall be accounted for in the turnover of sales while filling
                 of return and the due tax. If any, payable on the sale has been paid or shall be paid
                 <br>Certified that the particulars given above are true.Interest @24% P.A. will be charged on all overdue invoices.<br>Subject To Pune Jurisdiction
-                <b>This is computer generated document. No signature required.</b>
+                <b><br>This is computer generated document. No signature required.</b>
                 </td>
                 </tr>
                 </table>

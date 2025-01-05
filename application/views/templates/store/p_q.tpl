@@ -42,7 +42,7 @@
               <li class="sidebar-item">
                 <div class="input-group">
                   <select name="search_machine_name" class="form-control select2" id="search_machine_name">
-                          <option value="">Select Select Machine</option>
+                          <option value="">Select Machine</option>
                         <%foreach from=$machine_data item=i %>
                               <option 
                                  value="<%$i->id %>"  <%if $i->id eq $selected_machin_name%>selected<%/if%>><%$i->name %></option>
