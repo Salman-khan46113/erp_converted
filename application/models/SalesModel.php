@@ -23,7 +23,7 @@ class SalesModel extends CI_Model {
         $this->db->join('customer_part AS cp', 'parts.part_id = cp.id', 'inner');
         $this->db->where('sales.clientId', $clientId);
         $this->db->where('sales.sales_number NOT LIKE', 'TEMP%');
-        $this->db->where_not_in('sales.status', ['pending','unlocked']);
+        $this->db->where_not_in('sales.status', ['pending','unlocked','Cancelled']);
         if (is_array($search_params) && count($search_params) > 0) {
             if ($search_params["date_range"] != "") {
                 $date_filter =  explode((" - "),$search_params["date_range"]);
@@ -74,7 +74,7 @@ class SalesModel extends CI_Model {
         $this->db->join('customer_part AS cp', 'parts.part_id = cp.id', 'inner');
         $this->db->where('sales.clientId', $clientId);
         $this->db->where('sales.sales_number NOT LIKE', 'TEMP%');
-        $this->db->where_not_in('sales.status', ['pending','unlocked']);
+        $this->db->where_not_in('sales.status', ['pending','unlocked','Cancelled']);
         
         // Apply conditions based on $condition_arr
         if (count($condition_arr) > 0) {
@@ -141,7 +141,7 @@ class SalesModel extends CI_Model {
         $this->db->join('customer_part AS cp', 'parts.part_id = cp.id', 'inner');
         $this->db->where('sales.clientId', $clientId);
         $this->db->where('sales.sales_number NOT LIKE', 'TEMP%');
-        $this->db->where_not_in('sales.status', ['pending','unlocked']);
+        $this->db->where_not_in('sales.status', ['pending','unlocked','Cancelled']);
         
         
         // Apply additional search conditions
@@ -194,7 +194,7 @@ class SalesModel extends CI_Model {
         $this->db->join('customer_part AS cp', 'parts.part_id = cp.id', 'inner');
         $this->db->where('sales.clientId', $clientId);
         $this->db->where('sales.sales_number NOT LIKE', 'TEMP%');
-        $this->db->where_not_in('sales.status', ['pending','unlocked']);
+        $this->db->where_not_in('sales.status', ['pending','unlocked','Cancelled']);
         
         // Apply conditions based on $condition_arr
         if (count($condition_arr) > 0) {
@@ -426,8 +426,8 @@ class SalesModel extends CI_Model {
         $this->db->join('new_sales n', 's.sales_id = n.id AND n.status != "unlocked" AND n.clientId = ' . $this->Unit->getSessionClientId(), 'inner');  
         $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
         $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
-        if(is_valid_array($search_params) && $search_params['customer_part_id'] > 0){
-            $this->db->where('s.customer_id', $search_params['customer_part_id']);
+        if(is_valid_array($search_params) && $search_params['customer_id'] > 0){
+            $this->db->where('s.customer_id', $search_params['customer_id']);
         }
         $this->db->group_by('s.sales_number');
         // pr($condition_arr,1);
@@ -441,6 +441,20 @@ class SalesModel extends CI_Model {
                 $this->db->order_by($condition_arr["order_by"]);
             }
         }
+
+
+        $current_year = (int) date("Y");
+        if(!((int) date("m") > 3)){
+            $current_year--;
+        }
+
+        $date_filter =  explode((" - "),$search_params["date_range"]);
+        $start_date = date("$current_year/04/01");
+        $end_date = date(($current_year+1)."/03/31");
+        $data['end_date'] = $date_filter[1];
+        $this->db->where("STR_TO_DATE(n.created_date, '%d/%m/%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
+
+
        if (is_valid_array($search_params) && isset($search_params["value"]) && $search_params["value"] != "") {
             $keyword = $search_params["value"];
             
@@ -517,6 +531,18 @@ class SalesModel extends CI_Model {
         if($condition_arr["order_by"] == ''){    
             $this->db->order_by('s.id', 'DESC');
         }
+
+
+        $current_year = (int) date("Y");
+        if(!((int) date("m") > 3)){
+            $current_year--;
+        }
+
+        $date_filter =  explode((" - "),$search_params["date_range"]);
+        $start_date = date("$current_year/04/01");
+        $end_date = date(($current_year+1)."/03/31");
+        $data['end_date'] = $date_filter[1];
+        $this->db->where("STR_TO_DATE(n.created_date, '%d/%m/%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
         
        if (is_valid_array($search_params) && isset($search_params["value"]) && $search_params["value"] != "") {
             $keyword = $search_params["value"];
@@ -645,6 +671,17 @@ class SalesModel extends CI_Model {
                 $this->db->group_end(); // End the group of OR conditions
             }
         }
+
+        $current_year = (int) date("Y");
+        if(!((int) date("m") > 3)){
+            $current_year--;
+        }
+
+        $date_filter =  explode((" - "),$search_params["date_range"]);
+        $start_date = date("$current_year/04/01");
+        $end_date = date(($current_year+1)."/03/31");
+        $data['end_date'] = $date_filter[1];
+        $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
         
         $this->db->group_by("inward.grn_number");
 
@@ -736,6 +773,18 @@ class SalesModel extends CI_Model {
                 $this->db->group_end(); // End the group of OR conditions
             }
         }
+
+
+        $current_year = (int) date("Y");
+        if(!((int) date("m") > 3)){
+            $current_year--;
+        }
+
+        $date_filter =  explode((" - "),$search_params["date_range"]);
+        $start_date = date("$current_year/04/01");
+        $end_date = date(($current_year+1)."/03/31");
+        $data['end_date'] = $date_filter[1];
+        $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
         
         $this->db->group_by("inward.grn_number");
 
@@ -797,7 +846,7 @@ class SalesModel extends CI_Model {
                 IF(pr.tds_amount > 0,pr.tds_amount,0), 
                 2)) AS bal_paybele_amnt',
             'inward.grn_number as invoice_number',
-            'grn.remark as remarks','s.location as billing_address',
+            'grn.remark as remarks','s.location as billing_address,','s.payment_days as payment_days',
         ]);
 
         $this->db->from('grn_details grn');

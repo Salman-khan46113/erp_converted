@@ -141,11 +141,11 @@
             <div class="card-header">
                 <div class="row">
                     <div class="tgdp-rgt-tp-sect">
-                        <p class="tgdp-rgt-tp-ttl">Total Receivable Amount</p>
+                        <p class="tgdp-rgt-tp-ttl">Total Amount Receivable</p>
                         <p class="tgdp-rgt-tp-txt total_paid_amount">0.00</p>
                     </div>
                     <div class="tgdp-rgt-tp-sect">
-                        <p class="tgdp-rgt-tp-ttl">Total Payable amount</p>
+                        <p class="tgdp-rgt-tp-ttl">Total Amount Payable</p>
                         <p class="tgdp-rgt-tp-txt total_pay_amount" title="12">0.00</p>
                     </div>
                 </div>

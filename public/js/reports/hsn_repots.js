@@ -166,30 +166,30 @@ const page = {
                         });
                         // Add a new row to the table (For example: Add an empty row or custom values)
                         var newRow = [
-                            { text: 'Total', style: 'tableCell',fillColor:"#f0f0f0" },
-                            { text: '', style: 'tableCell' ,fillColor:"#f0f0f0"},
-                            { text: total_qty.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
-                            { text: total_balance_amount.toFixed(2), style:'tableCell',fillColor:"#f0f0f0" },
-                            { text: total_sgst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
-                            { text: total_cgst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
-                            { text: total_igst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
-                            { text: total_tcs.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
-                            { text: total_gst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
-                            { text: total_rate.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" }
+                            { text: 'Total', style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                            { text: '', style: 'tableCell' ,fillColor:"#f0f0f0", bold: true},
+                            { text: total_qty.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                            { text: total_balance_amount.toFixed(2), style:'tableCell',fillColor:"#f0f0f0" , bold: true},
+                            { text: total_sgst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                            { text: total_cgst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                            { text: total_igst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                            { text: total_tcs.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                            { text: total_gst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                            { text: total_rate.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true}
                         ];
                         var customer_column_show = $("[name='inlineRadioOptions']:checked").val();
                             if(table != undefined && table != ""){
                                 if(customer_column_show != "Yes"){
                                     var newRow = [
-                                            { text: 'Total', style: 'tableCell',fillColor:"#f0f0f0" },
-                                            { text: total_qty.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
-                                            { text: total_balance_amount.toFixed(2), style:'tableCell',fillColor:"#f0f0f0" },
-                                            { text: total_sgst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
-                                            { text: total_cgst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
-                                            { text: total_igst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
-                                            { text: total_tcs.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
-                                            { text: total_gst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
-                                            { text: total_rate.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" }
+                                            { text: 'Total', style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                                            { text: total_qty.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                                            { text: total_balance_amount.toFixed(2), style:'tableCell',fillColor:"#f0f0f0" , bold: true},
+                                            { text: total_sgst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                                            { text: total_cgst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0", bold: true },
+                                            { text: total_igst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0", bold: true },
+                                            { text: total_tcs.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                                            { text: total_gst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                                            { text: total_rate.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true}
                                         ];
                                 }
                             }

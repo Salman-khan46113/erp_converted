@@ -1317,7 +1317,7 @@ class SalesController extends CommonController
             "className" => "dt-center",
         ];
 		// pr(date('Y-m-d', strtotime('last month')),1);
-		$date_filter = date('Y/m/01', strtotime('last month'))." - ". date('Y/m/d', strtotime('last month'));
+		$date_filter = date('Y/m/01', strtotime('first day of last month')) . " - " . date('Y/m/t', strtotime('last day of last month'));
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -3367,10 +3367,9 @@ class SalesController extends CommonController
         $base_url = $this->config->item("base_url");
 		
 		$data = $this->SalesModel->getReceivableReportView($condition_arr,$post_data["search"]);
-		// pr($data,1);
+		
 		// pr($this->db->last_query(),1);
 		foreach ($data as $key => $objs) {
-
 			$date_convert = DateTime::createFromFormat('d-m-Y', $objs['created_date']);
 			// Format the date to d/m/Y
 			$objs['created_date'] = $date_convert->format('d/m/Y');
@@ -3409,7 +3408,7 @@ class SalesController extends CommonController
 
 			$today = new DateTime();
         
-			$due_days = display_no_character("");
+			$due_days_status = display_no_character("");
 
             if($due_date != display_no_character("")){
             	if(!empty($objs['payment_receipt_date']) && $objs['payment_receipt_date'] != "" && $objs['payment_receipt_date'] != NULL ){
@@ -3449,7 +3448,7 @@ class SalesController extends CommonController
 			$data[$key]['due_days'] = $due_days;
 			$data[$key]['due_days_status'] = $due_days_status;
 		}
-		
+		// pr($data,1);
 		foreach ($data as $key => $value) {
 			$edit_data = base64_encode(json_encode($value)); 
 			$data[$key]['action'] = display_no_character("");
@@ -3549,85 +3548,96 @@ class SalesController extends CommonController
         $condition_arr["length"] = $post_data["length"];
         $base_url = $this->config->item("base_url");
 		
-		$data = $this->SalesModel->getOutstandingReportView($condition_arr,$post_data["search"]);
 		$outstanding_data = [];
-		foreach ($data as $key => $val) {
+		$recevivable_data = [];
+		if(!($post_data["search"]['supplier_id'] > 0) || ($post_data["search"]['customer_id'] > 0)){
+		$data = $this->SalesModel->getOutstandingReportView($condition_arr,$post_data["search"]);
 
-			if(array_key_exists($val['customer_id'], $outstanding_data)){
-				$outstanding_data[$val['customer_id']]['receivable_amount'] += number_format($val['bal_amnt'],2,".","");
-			}else{
-				$outstanding_data[$val['customer_id']] = [
-					"customer_name" => $val['customer_name'],
-					"receivable_amount" => number_format($val['bal_amnt'],2,".",""),
-					"payable_amount" => 0
-				];
+			foreach ($data as $key => $val) {
+
+				if(array_key_exists($val['customer_id'], $outstanding_data)){
+					$outstanding_data[$val['customer_id']]['receivable_amount'] += number_format($val['bal_amnt'],2,".","");
+				}else{
+					$outstanding_data[$val['customer_id']] = [
+						"customer_name" => $val['customer_name'],
+						"receivable_amount" => number_format($val['bal_amnt'],2,".",""),
+						"payable_amount" => 0
+					];
+				}
+				
 			}
-			
+			$recevivable_data =  array_values($outstanding_data);
 		}
-		$recevivable_data =  array_values($outstanding_data);
-		
-		$data = $this->SalesModel->getOutstandingPayableReportView($condition_arr,$post_data["search"]);
-		// pr($this->db->last_query(),1);
+
 		$payable_data = [];
-		foreach ($data as $key => $val) {
-			$gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);  
-            $total_with_gst = $gst_amount + $val['base_amount'];  
-            $bal_amnt = $total_with_gst - $val['amount_received'] - $val['tds_amount'];
-			if(array_key_exists($val['supplier_id'], $payable_data)){
-				$payable_data[$val['supplier_id']]['payable_amount'] += number_format($bal_amnt > 0 ? $bal_amnt : 0,2,".","");
-			}else{
-				$payable_data[$val['supplier_id']] = [
-					"customer_name" => $val['customer_name'],
-					"payable_amount" => number_format($bal_amnt > 0 ? $bal_amnt : 0,2,".",""),
-					"receivable_amount" => 0
-				];
+		if(!($post_data["search"]['customer_id'] > 0)|| ($post_data["search"]['supplier_id'] > 0)){
+			$data = $this->SalesModel->getOutstandingPayableReportView($condition_arr,$post_data["search"]);
+			// pr($this->db->last_query(),1);
+			foreach ($data as $key => $val) {
+				$gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);
+            	$total_with_gst = $gst_amount + $val['base_amount'];  
+            	$bal_amnt = $total_with_gst - $val['amount_received'] - $val['tds_amount'];
+				if(array_key_exists($val['supplier_id'], $payable_data)){
+					$payable_data[$val['supplier_id']]['payable_amount'] += number_format($bal_amnt,2,".","");
+				}else{
+					$payable_data[$val['supplier_id']] = [
+						"customer_name" => $val['customer_name'],
+						"payable_amount" => number_format($bal_amnt,2,".",""),
+						"receivable_amount" => 0
+					];
+				}
+				
 			}
-			
+			$payable_data =  array_values($payable_data);
 		}
-		$payable_data =  array_values($payable_data);
-
 		$data = array_merge($recevivable_data,$payable_data);
 
 		$data["data"] = $data;
-        $total_receivable_record = $this->SalesModel->getOutstandingReportViewCount([], $post_data["search"]);
-        $total_paid_amount = 0;
-        $outstanding_data = [];
-        foreach ($total_receivable_record as $key => $val) {
-			if(array_key_exists($val['customer_id'], $outstanding_data)){
-				$outstanding_data[$val['customer_id']]['receivable_amount'] += number_format($val['bal_amnt'],2,".","");
-			}else{
-				$outstanding_data[$val['customer_id']] = [
-					"customer_name" => $val['customer_name'],
-					"receivable_amount" => number_format($val['bal_amnt'],2,".",""),
-					"payable_amount" => 0
-				];
+		$total_paid_amount = 0;
+	    $outstanding_data = [];
+	    $receivable_count_data = [];
+		if(!($post_data["search"]['supplier_id'] > 0) || ($post_data["search"]['customer_id'] > 0)){
+	        $total_receivable_record = $this->SalesModel->getOutstandingReportViewCount([], $post_data["search"]);
+	        foreach ($total_receivable_record as $key => $val) {
+				if(array_key_exists($val['customer_id'], $outstanding_data)){
+					$outstanding_data[$val['customer_id']]['receivable_amount'] += number_format($val['bal_amnt'],2,".","");
+				}else{
+					$outstanding_data[$val['customer_id']] = [
+						"customer_name" => $val['customer_name'],
+						"receivable_amount" => number_format($val['bal_amnt'],2,".",""),
+						"payable_amount" => 0
+					];
+				}
+				$total_paid_amount += $val['bal_amnt'];
+				
 			}
-			$total_paid_amount += $val['bal_amnt'];
-			
+			$receivable_count_data =  array_values($outstanding_data);
 		}
-		$receivable_count_data =  array_values($outstanding_data);
-        $total_payable_record = $this->SalesModel->getOutstandingPayableReportViewCount([], $post_data["search"]);
 
-        $total_pay_amount = 0;
-        $payable_data = [];
-		foreach ($total_payable_record as $key => $val) {
-			$gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);  
-            $total_with_gst = $gst_amount + $val['base_amount'];  
-            $bal_amnt = $total_with_gst - $val['amount_received'] - $val['tds_amount'];
-			if(array_key_exists($val['supplier_id'], $payable_data)){
-				$payable_data[$val['supplier_id']]['payable_amount'] += number_format($bal_amnt > 0 ? $bal_amnt : 0,2,".","");
-			}else{
-				$payable_data[$val['supplier_id']] = [
-					"customer_name" => $val['customer_name'],
-					"payable_amount" => number_format($bal_amnt > 0 ? $bal_amnt : 0,2,".",""),
-					"receivable_amount" => 0
-				];
+		$total_pay_amount = 0;
+	    $payable_data = [];
+	    $payable_count_data = [];
+		if(!($post_data["search"]['customer_id'] > 0)|| ($post_data["search"]['supplier_id'] > 0)){
+	        $total_payable_record = $this->SalesModel->getOutstandingPayableReportViewCount([], $post_data["search"]);
+			foreach ($total_payable_record as $key => $val) {
+				$gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);
+	            $total_with_gst = $gst_amount + $val['base_amount'];  
+	            $bal_amnt = $total_with_gst - $val['amount_received'] - $val['tds_amount'];
+				if(array_key_exists($val['supplier_id'], $payable_data)){
+					$payable_data[$val['supplier_id']]['payable_amount'] += $bal_amnt;
+				}else{
+					$payable_data[$val['supplier_id']] = [
+						"customer_name" => $val['customer_name'],
+						"payable_amount" => $bal_amnt,
+						"receivable_amount" => 0
+					];
+				}
+				$total_pay_amount += $bal_amnt > 0 ? $bal_amnt : 0;
 			}
-			$total_pay_amount += $bal_amnt;
+			$payable_count_data =  array_values($payable_data);
 		}
-		// pr($total_paid_amount1);
+		
 		// pr($total_paid_amount,1);
-		$payable_count_data =  array_values($payable_data);
         $data["recordsTotal"] = count($receivable_count_data)+count($payable_count_data);
         $data["recordsFiltered"] = count($receivable_count_data)+count($payable_count_data);
         $data["total_paid_amount"] = number_format($total_paid_amount,2);
@@ -3642,22 +3652,129 @@ class SalesController extends CommonController
 		$formatted_date = $date->format('d/m/Y');
 		// pr($formatted_date,1);
 		$pending_to_recived_data = $this->SalesModel->getOutstandingReportData($formatted_date);
-
+		
 		$customer_wise_data = [];
-		foreach ($pending_to_recived_data as $key => $value) {
-			$value['type'] = "recive";
-			$customer_wise_data[$value['customer_id']][] = $value;
+		foreach ($pending_to_recived_data as $key => $objs) {
+			$objs['type'] = "recive";
+			$date = DateTime::createFromFormat('d-m-Y', $objs['created_date']);
+			$objs['created_date'] = $date->format('d/m/Y');
+			$created_date_str = $objs['created_date'];
+			$dateTime = DateTime::createFromFormat('d/m/Y', $objs['created_date']);
+			
+			$due_date = display_no_character("");
+			if ($dateTime && is_numeric($objs['payment_terms'])) {
+				// Convert payment_terms to an integer for days
+				$payment_terms_days = (int)$objs['payment_terms'];
+		
+				// Add payment_terms (in days) to the created date
+				$dateTime->add(new DateInterval('P' . $payment_terms_days . 'D'));
+		
+				// Get the formatted due date
+				$due_date = $dateTime->format('d/m/Y');
+		
+				
+			}
+			$due_days_status = display_no_character("");
+			$today = new DateTime();
+			$due_days = display_no_character("");
+            if($due_date != display_no_character("")){
+            	if(!empty($objs['payment_receipt_date']) && $objs['payment_receipt_date'] != "" && $objs['payment_receipt_date'] != NULL ){
+
+            		$sales_date = $objs['created_date'];
+            		$sales_date = DateTime::createFromFormat("d/m/Y", $sales_date);
+					// Format to the desired output
+					$sales_date = $sales_date->format("Y-m-d");
+            		$payment_receipt_date = $objs['payment_receipt_date'];
+            		$sales_date = new DateTime($sales_date);
+					$payment_receipt_date = new DateTime($payment_receipt_date);
+					// Calculate the difference
+					$interval = $sales_date->diff($payment_receipt_date);
+
+					// Get the difference in days
+					$due_days = $interval->days;
+
+                }else{
+                    $dueDateObject = DateTime::createFromFormat('d/m/Y', $due_date);
+
+                    // Calculate the interval between the due date and today's date
+					$interval = $today->diff($dueDateObject);
+					
+					// Get the difference in days
+					$due_days = $interval->format('%r%a');
+                }
+            	
+
+				$due_days_status = "normal";
+                if($due_days <= 0 && empty($objs['payment_receipt_date']))
+                {
+                    $due_days_status = "danger";
+                }
+
+			}
+			$objs['due_days'] = $due_days;
+			$objs['due_date'] = $due_date;
+			$customer_wise_data[$objs['customer_id']][] = $objs;
 		}
 		$customer_wise_data = array_values($customer_wise_data);
 		$formatted_date = $date->format('d-m-Y');
 		$pending_to_payable_data = $this->SalesModel->getOutstandingPayableReportData($formatted_date);
 
 		$supplier_wise_data = [];
-		foreach ($pending_to_payable_data as $key => $value) {
-			$value['type'] = "pay";
-			$supplier_wise_data[$value['id']][] = $value;
-		}
+		foreach ($pending_to_payable_data as $key => $objs) {
+			$objs['type'] = "pay";
+			$dateTime = DateTime::createFromFormat('d-m-Y', $objs['created_date_val']);
 
+            $due_date = display_no_character("");
+            if ($dateTime && is_numeric($objs['payment_days'])) {
+                // Convert payment_terms to an integer for days
+                $payment_terms_days = (int)$objs['payment_days'];
+                // Add payment_terms (in days) to the created date
+                $dateTime->add(new DateInterval('P' . $payment_terms_days . 'D'));
+                // Get the formatted due date
+                $due_date = $dateTime->format('d/m/Y');
+                $due_date = defaultDateFormat($due_date);
+            }
+            
+           
+            $today = new DateTime();
+            // Convert due date string to a DateTime object
+            $due_days = display_no_character("");
+            if($due_date != display_no_character("")){
+                if(!empty($objs['payment_receipt_date'])){
+                    $sales_date = $objs['created_date_val'];
+
+                    $sales_date = DateTime::createFromFormat("d-m-Y", $sales_date);
+                    // Format to the desired output
+                    $sales_date = $sales_date->format("Y-m-d");
+                    $payment_receipt_date = $objs['payment_receipt_date'];
+                    $sales_date = new DateTime($sales_date);
+                    $payment_receipt_date = new DateTime($payment_receipt_date);
+                    // Calculate the difference
+                    $interval = $sales_date->diff($payment_receipt_date);
+
+                    // Get the difference in days
+                    $due_days = $interval->days;
+                }else{
+                    $dueDateObject = DateTime::createFromFormat('d/m/Y', $due_date);
+                     // Calculate the interval between the due date and today's date
+                    $interval = $today->diff($dueDateObject);
+                    // Get the difference in days
+                    $due_days = $interval->format('%r%a'); // This will give the difference in days with respect to today's date
+                }
+                
+               
+                $due_days_status = "normal";
+                if($due_days <= 0 && empty($objs['payment_receipt_date']))
+                {
+                    $due_days_status = "danger";
+                }
+            }
+            
+            $objs['due_days'] = $due_days;
+            $objs['due_date'] = $due_date;
+			$supplier_wise_data[$objs['id']][] = $objs;
+		}
+		
 		$supplier_wise_data = array_values($supplier_wise_data);
 		$data['date'] = $get_data['date'];
 		$data['merge_arr'] = array_merge($customer_wise_data,$supplier_wise_data);

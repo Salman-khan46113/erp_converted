@@ -172,9 +172,9 @@ const page = {
                             row.splice(14, 1);
                         });
                         var newRow = [
-                            { text: 'Total', style: 'tableCell',fillColor:"#f0f0f0" },
-                            { text: total_receive.toFixed(2), style: 'tableCell' ,fillColor:"#f0f0f0"},
-                            { text: total_payable.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" }
+                            { text: 'Total', style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
+                            { text: total_receive.toFixed(2), style: 'tableCell' ,fillColor:"#f0f0f0", bold: true},
+                            { text: total_payable.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true}
                         ];
 
                         // Add the row to the table body
