@@ -166,6 +166,7 @@ class ReportsController extends CommonController
 	public function reports_grn()
 	{
         checkGroupAccess("reports_grn","list","Yes");
+
 		$created_month  = $this->input->post("created_month");
 		$created_year  = $this->input->post("created_y	ear");
 
@@ -349,8 +350,15 @@ class ReportsController extends CommonController
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
-		
 		$data['showDocRequestDetails'] = $this->showMaterialRequestDetails();
+
+        $error_message = "";
+        if($this->session->userdata("error_message") != ""){
+            $error_message = $this->session->userdata("error_message");
+             $this->session->set_userdata(['error_message' => '']);
+        }   
+        $data['error_message'] = $error_message;
+
 		$this->getPage('reports/reports_grn', $data);	
 	}
 

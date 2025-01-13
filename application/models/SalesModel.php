@@ -403,17 +403,37 @@ class SalesModel extends CI_Model {
 
 
     public function getOutstandingReportView($condition_arr = [],$search_params = ""){
-        $this->db->select('SUM(r.amount_received) as receivable_amount,r.*,cus.customer_name as customer_name');
-        $this->db->from('receivable_report r');
-        $this->db->join('new_sales n', 'r.sales_number = n.sales_number AND n.status != "unlocked" AND n.clientId = ' . $this->Unit->getSessionClientId(), 'inner');
-        $this->db->join('customer cus', 'n.customer_id = cus.id', 'left');
-        if(is_valid_array($search_params) && $search_params['customer_id'] > 0){
-            $this->db->where('n.customer_id', $search_params['customer_id']);
+        $this->db->select('s.*, 
+            SUM(s.gst_amount) as gst, 
+            SUM(s.total_rate) as ttlrt, 
+            SUM(s.gst_amount) as gstamnt, 
+            SUM(s.tcs_amount) as tcsamnt, 
+            cus.customer_name, 
+            cus.payment_terms, 
+            rrp.payment_receipt_date,
+            rrp.amount_received as amount_received, 
+            rrp.transaction_details, 
+            n.created_date as created_date_val,
+           rrp.tds_amount as tds_amount,
+            rrp.remark as remark_val,
+            ROUND(SUM(
+                IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
+                2) AS bal_amnt,
+            s.sales_id as sales_id_val');
+        
+        $this->db->from('sales_parts s');
+        
+        $this->db->join('new_sales n', 's.sales_id = n.id AND n.status != "unlocked" AND n.clientId = ' . $this->Unit->getSessionClientId(), 'inner');  
+        $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
+        $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
+        if(is_valid_array($search_params) && $search_params['customer_part_id'] > 0){
+            $this->db->where('s.customer_id', $search_params['customer_part_id']);
         }
+        $this->db->group_by('s.sales_number');
+        // pr($condition_arr,1);
         if($condition_arr["order_by"] == ''){    
-            $this->db->order_by('r.id', 'DESC');
+            $this->db->order_by('s.id', 'DESC');
         }
-        $this->db->group_by('n.customer_id');
         
         if (count($condition_arr) > 0) {
             $this->db->limit($condition_arr["length"], $condition_arr["start"]);
@@ -421,14 +441,7 @@ class SalesModel extends CI_Model {
                 $this->db->order_by($condition_arr["order_by"]);
             }
         }
-        // if ($search_params["date_range"] != "") {
-        //         $date_filter =  explode((" - "),$search_params["date_range"]);
-        //         $data['start_date'] = $date_filter[0];
-        //         $data['end_date'] = $date_filter[1];
-        //        $this->db->where("STR_TO_DATE(n.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
-        // }
-
-        if (is_valid_array($search_params) && isset($search_params["value"]) && $search_params["value"] != "") {
+       if (is_valid_array($search_params) && isset($search_params["value"]) && $search_params["value"] != "") {
             $keyword = $search_params["value"];
             
             // Group OR conditions within a WHERE block
@@ -443,34 +456,6 @@ class SalesModel extends CI_Model {
             }
             $this->db->group_end(); // End the group of OR conditions
         }
-
-       
-
-        $result_obj = $this->db->get();
-        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
-        // pr($this->db->last_query(),1);
-        return $ret_data;
-    }
-
-    public function getOutstandingReportViewCount($condition_arr = [],$search_params = ""){
-        $this->db->select('SUM(r.amount_received) as receivable_amount,r.*,cus.customer_name as customer_name');
-        $this->db->from('receivable_report r');
-        $this->db->join('new_sales n', 'r.sales_number = n.sales_number AND n.status != "unlocked" AND n.clientId = ' . $this->Unit->getSessionClientId(), 'inner');
-        $this->db->join('customer cus', 'n.customer_id = cus.id', 'left');
-        if(is_valid_array($search_params) && $search_params['customer_id'] > 0){
-            $this->db->where('n.customer_id', $search_params['customer_id']);
-        }
-        if($condition_arr["order_by"] == ''){    
-            $this->db->order_by('r.id', 'DESC');
-        }
-        $this->db->group_by('n.customer_id');
-        // if ($search_params["date_range"] != "") {
-        //         $date_filter =  explode((" - "),$search_params["date_range"]);
-        //         $data['start_date'] = $date_filter[0];
-        //         $data['end_date'] = $date_filter[1];
-        //        $this->db->where("STR_TO_DATE(n.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
-        // }
-
         if (is_valid_array($search_params) && isset($search_params["value"]) && $search_params["value"] != "") {
             $keyword = $search_params["value"];
             
@@ -478,6 +463,7 @@ class SalesModel extends CI_Model {
             $this->db->group_start();
             $fields = [
                 'cus.customer_name'
+                // Add other fields to search as needed
             ];
             
             foreach ($fields as $field) {
@@ -491,18 +477,147 @@ class SalesModel extends CI_Model {
         $result_obj = $this->db->get();
         $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
         // pr($this->db->last_query(),1);
+        // pr($ret_data,1);
+        return $ret_data;
+
+
+
+    }
+
+    public function getOutstandingReportViewCount($condition_arr = [],$search_params = ""){
+        $this->db->select('s.*, 
+            SUM(s.gst_amount) as gst, 
+            SUM(s.total_rate) as ttlrt, 
+            SUM(s.gst_amount) as gstamnt, 
+            SUM(s.tcs_amount) as tcsamnt, 
+            cus.customer_name, 
+            cus.payment_terms, 
+            rrp.payment_receipt_date,
+            rrp.amount_received as amount_received, 
+            rrp.transaction_details, 
+            ns.created_date as created_date_val,
+           rrp.tds_amount as tds_amount,
+            rrp.remark as remark_val,
+            ROUND(SUM(
+                IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
+                2) AS bal_amnt,
+            s.sales_id as sales_id_val');
+        
+        $this->db->from('sales_parts s');
+        
+        $this->db->join('new_sales n', 's.sales_id = n.id AND n.status != "unlocked" AND n.clientId = ' . $this->Unit->getSessionClientId(), 'inner');
+        $this->db->join('new_sales ns', 'ns.id = s.sales_id', 'left');
+        $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
+        $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
+        if(is_valid_array($search_params) && $search_params['customer_id'] > 0){
+            $this->db->where('s.customer_id', $search_params['customer_id']);
+        }
+        $this->db->group_by('s.sales_number');
+        // pr($condition_arr,1);
+        if($condition_arr["order_by"] == ''){    
+            $this->db->order_by('s.id', 'DESC');
+        }
+        
+       if (is_valid_array($search_params) && isset($search_params["value"]) && $search_params["value"] != "") {
+            $keyword = $search_params["value"];
+            
+            // Group OR conditions within a WHERE block
+            $this->db->group_start();
+            $fields = [
+                'cus.customer_name',
+                // Add other fields to search as needed
+            ];
+            
+            foreach ($fields as $field) {
+                $this->db->or_like($field, $keyword);
+            }
+            $this->db->group_end(); // End the group of OR conditions
+        }
+        if (is_valid_array($search_params) && isset($search_params["value"]) && $search_params["value"] != "") {
+            $keyword = $search_params["value"];
+            
+            // Group OR conditions within a WHERE block
+            $this->db->group_start();
+            $fields = [
+                'cus.customer_name'
+                // Add other fields to search as needed
+            ];
+            
+            foreach ($fields as $field) {
+                $this->db->or_like($field, $keyword);
+            }
+            $this->db->group_end(); // End the group of OR conditions
+        }
+
+       
+
+        $result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        // pr($this->db->last_query(),1);
+        // pr($ret_data,1);
         return $ret_data;
     }
 
+    
     public function getOutstandingPayableReportView($condition_arr = [],$search_params = ""){
-        
-        $this->db->select('SUM(pr.amount_received) as amount_received,pr.*,s.supplier_name as customer_name');
+        $this->db->select([
+            'grn.inwarding_id',
+            'grn.po_part_id',
+            'grn.po_number',
+            'grn.created_date AS grn_created_date',
+            'grn.invoice_number',
+            'inward.invoice_date',
+            'po.supplier_id',
+            'SUM(grn.qty) AS po_qty',
+            'po.po_number AS poNumber',
+            's.supplier_name as customer_name',
+            'po.po_date',
+            'part.part_number',
+            'part.part_description',
+            'part.hsn_code',
+            'u.uom_name',
+            'po_parts.tax_id',
+            'po_parts.part_id',
+            'po_parts.rate',
+            'tax.igst',
+            'tax.sgst',
+            'tax.cgst',
+            'tax.tcs',
+            'tax.tcs_on_tax',
+            's.*',
+            'SUM(ROUND(grn.accept_qty, 2)) AS total_accept_qty',
+            'SUM(ROUND(grn.accept_qty * po_parts.rate, 2)) AS base_amount',
+            'SUM(ROUND((grn.accept_qty * po_parts.rate * tax.cgst) / 100, 2)) AS cgst_amount',
+            'SUM(ROUND((grn.accept_qty * po_parts.rate * tax.sgst) / 100, 2)) AS sgst_amount',
+            'SUM(ROUND((grn.accept_qty * po_parts.rate * tax.tcs) / 100, 2)) AS tcs_amount',
+            'SUM(ROUND((grn.accept_qty * po_parts.rate * tax.igst) / 100, 2)) AS igst_amount',
+            'SUM(ROUND(
+                IF(((grn.accept_qty * po_parts.rate * tax.cgst) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.cgst) / 100,0) + 
+                IF(((grn.accept_qty * po_parts.rate * tax.sgst) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.sgst) / 100,0) + 
+                IF(((grn.accept_qty * po_parts.rate * tax.tcs) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.tcs) / 100,0) + 
+                IF(((grn.accept_qty * po_parts.rate * tax.igst) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.igst) / 100,0) + 
+                ROUND(IF((grn.accept_qty * po_parts.rate) > 0,(grn.accept_qty * po_parts.rate),0), 2) - 
+                IF(pr.amount_received > 0,pr.amount_received,0) - 
+                IF(pr.tds_amount > 0,pr.tds_amount,0), 
+                2)) AS bal_amnt',
+            'po.loading_unloading',
+            'po.loading_unloading_gst',
+            'po.freight_amount',
+            'po.freight_amount_gst',
+            'pr.*',
+            'inward.grn_number',
+            'grn.remark as remarks'
+        ]);
 
-        $this->db->from('payable_report pr');
-        $this->db->join('inwarding inward', 'inward.grn_number = pr.grn_number', 'inner');
-        // $this->db->join('grn_details grn', 'grn.inwarding_id = inward.id', 'inner');
-        $this->db->join('new_po po', 'po.id = inward.po_id', 'inner');
+        $this->db->from('grn_details grn');
+        $this->db->join('inwarding inward', 'inward.id = grn.inwarding_id', 'inner');
+        $this->db->join('po_parts po_parts', 'po_parts.id = grn.po_part_id', 'inner');
+        $this->db->join('new_po po', 'po.id = grn.po_number', 'inner');
+        $this->db->join('child_part part', 'part.id = po_parts.part_id', 'inner');
+        $this->db->join('uom u', 'u.id = po_parts.uom_id', 'inner');
+        $this->db->join('gst_structure tax', 'tax.id = po_parts.tax_id', 'inner');
         $this->db->join('supplier s', 's.id = po.supplier_id', 'inner');
+        $this->db->join('payable_report pr', 'inward.grn_number = pr.grn_number', 'left');
 
         $this->db->where('po.clientId', $this->Unit->getSessionClientId());
         $this->db->where('inward.grn_number !=', '');
@@ -516,13 +631,7 @@ class SalesModel extends CI_Model {
             if ($search_params["supplier_id"] != "") {
                 $this->db->where("s.id", $search_params["supplier_id"]);
             }
-            // if ($search_params["date_range"] != "") {
-            //     $date_filter =  explode((" - "),$search_params["date_range"]);
-            //     $data['start_date'] = $date_filter[0];
-            //     $data['end_date'] = $date_filter[1];
-            //     $this->db->where("STR_TO_DATE(inward.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
-            // }
-            
+
             if (isset($search_params["value"]) && $search_params["value"] != "") {
                 $keyword = $search_params["value"];
                 $this->db->group_start();
@@ -537,41 +646,88 @@ class SalesModel extends CI_Model {
             }
         }
         
-        $this->db->group_by("s.id");
+        $this->db->group_by("inward.grn_number");
 
         $result_obj = $this->db->get();
                 
         $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
         return $ret_data;
+
     }
     public function getOutstandingPayableReportViewCount($condition_arr = [],$search_params = ""){
         
-       $this->db->select('SUM(pr.amount_received) as amount_received,pr.*,s.supplier_name');
+       $this->db->select([
+            'grn.inwarding_id',
+            'grn.po_part_id',
+            'grn.po_number',
+            'grn.created_date AS grn_created_date',
+            'grn.invoice_number',
+            'inward.invoice_date',
+            'po.supplier_id',
+            'SUM(grn.qty) AS po_qty',
+            'po.po_number AS poNumber',
+            's.supplier_name',
+            'po.po_date',
+            'part.part_number',
+            'part.part_description',
+            'part.hsn_code',
+            'u.uom_name',
+            'po_parts.tax_id',
+            'po_parts.part_id',
+            'po_parts.rate',
+            'tax.igst',
+            'tax.sgst',
+            'tax.cgst',
+            'tax.tcs',
+            'tax.tcs_on_tax',
+            's.*',
+            'SUM(ROUND(grn.accept_qty, 2)) AS total_accept_qty',
+            'SUM(ROUND(grn.accept_qty * po_parts.rate, 2)) AS base_amount',
+            'SUM(ROUND((grn.accept_qty * po_parts.rate * tax.cgst) / 100, 2)) AS cgst_amount',
+            'SUM(ROUND((grn.accept_qty * po_parts.rate * tax.sgst) / 100, 2)) AS sgst_amount',
+            'SUM(ROUND((grn.accept_qty * po_parts.rate * tax.tcs) / 100, 2)) AS tcs_amount',
+            'SUM(ROUND((grn.accept_qty * po_parts.rate * tax.igst) / 100, 2)) AS igst_amount',
+            'SUM(ROUND(
+                IF(((grn.accept_qty * po_parts.rate * tax.cgst) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.cgst) / 100,0) + 
+                IF(((grn.accept_qty * po_parts.rate * tax.sgst) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.sgst) / 100,0) + 
+                IF(((grn.accept_qty * po_parts.rate * tax.tcs) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.tcs) / 100,0) + 
+                IF(((grn.accept_qty * po_parts.rate * tax.igst) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.igst) / 100,0) + 
+                ROUND(IF((grn.accept_qty * po_parts.rate) > 0,(grn.accept_qty * po_parts.rate),0), 2) - 
+                IF(pr.amount_received > 0,pr.amount_received,0) - 
+                IF(pr.tds_amount > 0,pr.tds_amount,0), 
+                2)) AS bal_amnt',
+            'po.loading_unloading',
+            'po.loading_unloading_gst',
+            'po.freight_amount',
+            'po.freight_amount_gst',
+            'pr.*',
+            'inward.grn_number',
+            'grn.remark as remarks'
+        ]);
 
-        $this->db->from('payable_report pr');
-        $this->db->join('inwarding inward', 'inward.grn_number = pr.grn_number', 'inner');
-        // $this->db->join('grn_details grn', 'grn.inwarding_id = inward.id', 'inner');
-        $this->db->join('new_po po', 'po.id = inward.po_id', 'inner');
+        $this->db->from('grn_details grn');
+        $this->db->join('inwarding inward', 'inward.id = grn.inwarding_id', 'inner');
+        $this->db->join('po_parts po_parts', 'po_parts.id = grn.po_part_id', 'inner');
+        $this->db->join('new_po po', 'po.id = grn.po_number', 'inner');
+        $this->db->join('child_part part', 'part.id = po_parts.part_id', 'inner');
+        $this->db->join('uom u', 'u.id = po_parts.uom_id', 'inner');
+        $this->db->join('gst_structure tax', 'tax.id = po_parts.tax_id', 'inner');
         $this->db->join('supplier s', 's.id = po.supplier_id', 'inner');
+        $this->db->join('payable_report pr', 'inward.grn_number = pr.grn_number', 'left');
 
         $this->db->where('po.clientId', $this->Unit->getSessionClientId());
         $this->db->where('inward.grn_number !=', '');
+        
         if (is_array($search_params) && count($search_params) > 0) {
             if ($search_params["supplier_id"] != "") {
                 $this->db->where("s.id", $search_params["supplier_id"]);
             }
-            // if ($search_params["date_range"] != "") {
-            //     $date_filter =  explode((" - "),$search_params["date_range"]);
-            //     $data['start_date'] = $date_filter[0];
-            //     $data['end_date'] = $date_filter[1];
-            //     $this->db->where("STR_TO_DATE(inward.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
-            // }
-            
             if (isset($search_params["value"]) && $search_params["value"] != "") {
                 $keyword = $search_params["value"];
                 $this->db->group_start();
                 $fields = [
                     's.supplier_name'
+                    // Add other fields to search as needed
                 ];
                 
                 foreach ($fields as $field) {
@@ -581,7 +737,84 @@ class SalesModel extends CI_Model {
             }
         }
         
-        $this->db->group_by("s.id");
+        $this->db->group_by("inward.grn_number");
+
+        $result_obj = $this->db->get();
+                
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        return $ret_data;
+
+    }
+
+    public function getOutstandingReportData($date = ''){
+        $this->db->select('s.*,s.sales_number as invoice_number, 
+            SUM(s.gst_amount) as gst, 
+            SUM(s.total_rate) as ttlrt, 
+            SUM(s.gst_amount) as gstamnt, 
+            SUM(s.tcs_amount) as tcsamnt, 
+            cus.customer_name as party_name, 
+            cus.payment_terms, 
+            rrp.payment_receipt_date,
+            rrp.amount_received as amount_received, 
+            rrp.transaction_details, 
+            ns.created_date as created_date_val,
+           rrp.tds_amount as tds_amount,
+            rrp.remark as remark_val,
+            cus.billing_address as billing_address,
+            ROUND(SUM(
+                IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
+                2) AS bal_amnt,
+            s.sales_id as sales_id_val');
+        
+        $this->db->from('sales_parts s');
+        
+        $this->db->join('new_sales n', 's.sales_id = n.id AND n.status != "unlocked" AND n.clientId = ' . $this->Unit->getSessionClientId(), 'inner');
+        $this->db->join('new_sales ns', 'ns.id = s.sales_id', 'left');
+        $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
+        $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
+        $this->db->where('n.created_date', $date);
+    
+        $this->db->group_by('s.sales_number');
+        $result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        // pr($this->db->last_query(),1);
+        // pr($ret_data,1);
+        return $ret_data;
+    }
+    public function getOutstandingPayableReportData($date = ""){
+        $this->db->select([
+            's.supplier_name as party_name',
+            's.id',
+            's.mobile_no as mobile_no',
+            'inward.created_date as created_date_val',
+            'SUM(ROUND(
+                IF(((grn.accept_qty * po_parts.rate * tax.cgst) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.cgst) / 100,0) + 
+                IF(((grn.accept_qty * po_parts.rate * tax.sgst) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.sgst) / 100,0) + 
+                IF(((grn.accept_qty * po_parts.rate * tax.tcs) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.tcs) / 100,0) + 
+                IF(((grn.accept_qty * po_parts.rate * tax.igst) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.igst) / 100,0) + 
+                ROUND(IF((grn.accept_qty * po_parts.rate) > 0,(grn.accept_qty * po_parts.rate),0), 2) - 
+                IF(pr.amount_received > 0,pr.amount_received,0) - 
+                IF(pr.tds_amount > 0,pr.tds_amount,0), 
+                2)) AS bal_paybele_amnt',
+            'inward.grn_number as invoice_number',
+            'grn.remark as remarks','s.location as billing_address',
+        ]);
+
+        $this->db->from('grn_details grn');
+        $this->db->join('inwarding inward', 'inward.id = grn.inwarding_id',
+        'inner');
+        $this->db->join('po_parts po_parts', 'po_parts.id = grn.po_part_id', 'inner');
+        $this->db->join('new_po po', 'po.id = grn.po_number', 'inner');
+        $this->db->join('child_part part', 'part.id = po_parts.part_id', 'inner');
+        $this->db->join('uom u', 'u.id = po_parts.uom_id', 'inner');
+        $this->db->join('gst_structure tax', 'tax.id = po_parts.tax_id', 'inner');
+        $this->db->join('supplier s', 's.id = po.supplier_id', 'inner');
+        $this->db->join('payable_report pr', 'inward.grn_number = pr.grn_number', 'left');
+
+        $this->db->where('po.clientId', $this->Unit->getSessionClientId());
+        $this->db->where('inward.grn_number !=', '');
+        $this->db->where('inward.created_date',$date);
+        $this->db->group_by("inward.grn_number");
 
         $result_obj = $this->db->get();
                 
@@ -589,4 +822,4 @@ class SalesModel extends CI_Model {
         return $ret_data;
     }
 
-}
+} 

@@ -3621,4 +3621,5 @@ TECHNIQUE </td>
 
         return $html_content;
     }
+    
 }

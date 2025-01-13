@@ -33,6 +33,22 @@
                 </div>
               </li>
             </div>
+            <div class="filter-row ">
+              <li class="nav-small-cap">
+                <span class="hide-menu">Customer Column</span>
+                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+              </li>
+              <li class="sidebar-item">
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="Yes">
+                  <label class="form-check-label" for="inlineRadio1">Yes</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="No" checked>
+                  <label class="form-check-label" for="inlineRadio2">No</label>
+                </div>
+              </li>
+            </div>
 
             <div class="filter-row">
               <li class="nav-small-cap">
@@ -94,9 +110,22 @@
     <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
   </div>
     <div class="content-wrapper ">
-     
+        <div class=" p-0 ms-1">
+            <div class="card-header">
+                <div class="row">
+                    <div class="tgdp-rgt-tp-sect ms-2">
+                        <p class="tgdp-rgt-tp-ttl">Total Quantity</p>
+                        <p class="tgdp-rgt-tp-txt total_qty_block">0.00</p>
+                    </div>
+                    <div class="tgdp-rgt-tp-sect">
+                        <p class="tgdp-rgt-tp-ttl">Total Amount</p>
+                        <p class="tgdp-rgt-tp-txt total_rate_block">0.00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Main content -->
-        <section class="content">
+        <section class="content mt-4">
             <div class="">
                 <div class="row">
                     <div class="col-12">
@@ -179,6 +208,49 @@
     </div>
     <!-- /.content-wrapper -->
 </div>
+<style type="text/css">
+    tr.danger-row .due_days_block {
+    color: #000 !important;
+    background-color: red !important;
+    box-shadow: inset 0 0 0 9999px #e84343 !important;
+}
+.tgdp-rgt-tp-sect {
+    float: left;
+    width: 25%;
+    width: calc(25% - 19px);
+    border-radius: 10px;
+    background: #fff;
+    height: 105px;
+    margin-right: 17px;
+    padding: 20px;
+    display: inline-block;
+}
+.tgdp-rgt-tp-sect .tgdp-rgt-tp-ttl {
+
+    font-size: 16px !important;
+    margin-bottom: 0px;
+    color: #000;
+    font-size: 18px;
+    font-family: "gilroymedium" !important;
+    margin: 0;
+}
+.tgdp-rgt-tp-sect .tgdp-rgt-tp-txt {
+    font-weight: 500;
+    
+    color: #000 !important;
+    max-width: 95%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #000;
+    font-size: 26px !important;
+    font-family: 'gilroymedium';
+    margin: 0;
+    display: inline-block;
+    line-height: 48px;
+    cursor: pointer;
+}
+</style>
 <script>
     var column_details =  <%$data|json_encode%>;
     var page_length_arr = <%$page_length_arr|json_encode%>;

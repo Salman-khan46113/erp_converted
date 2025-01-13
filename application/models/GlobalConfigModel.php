@@ -15,9 +15,10 @@ class GlobalConfigModel extends CI_Model {
         return $ret_data;
     }
     public function getGroupRightsData($group_id = 0){
-        $this->db->select('g.*,m.diaplay_name');
+        $this->db->select('g.*,m.diaplay_name,m.menu_category_id,mc.category_name');
         $this->db->from('group_rights as g');
         $this->db->join("menu_master as m","m.menu_master_id = g.menu_master_id");
+        $this->db->join("menu_category as mc","mc.menu_category_id = m.menu_category_id");
         $this->db->where("g.group_master_id",$group_id);
         $result_obj = $this->db->get();
         $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
@@ -61,8 +62,9 @@ class GlobalConfigModel extends CI_Model {
         return $affected_rows;
     }
     public function getAllMenuData(){
-        $this->db->select('m.*');
+        $this->db->select('m.*,mc.category_name');
         $this->db->from('menu_master as m');
+        $this->db->join("menu_category as mc","mc.menu_category_id = m.menu_category_id");
         $result_obj = $this->db->get();
         $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
         return $ret_data;

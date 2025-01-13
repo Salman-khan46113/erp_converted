@@ -19,7 +19,7 @@
                <div class="col-12">
                   <div class="card">
                      <div class="card-header">
-                        <%if (count($grn_part_arr) == 0 && $status_value != "Expired") %>
+                        <%if (count($grn_part_arr) == 0 && $status_value != "Expired" && $status_value != "Released") %>
                         <form action="<%base_url('update_po')%>" method="post" id="update_po" class="update_po custom-form">
                            <div class="row">
                               <div class="col-lg-4">

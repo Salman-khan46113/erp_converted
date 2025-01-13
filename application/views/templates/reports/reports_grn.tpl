@@ -283,5 +283,6 @@
     var base_url = <%$base_url|json_encode%>;
      var start_date = <%$start_date|json_encode%>;
     var end_date = <%$end_date|json_encode%>;
+    var error_message = <%$error_message|json_encode%>;
 </script>
 <script src="<%$base_url%>/public/js/reports/gn_report.js"></script>

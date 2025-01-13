@@ -1,6 +1,6 @@
 var table = '';
-var file_name = "receivable_reports";
-var pdf_title = "Receivable Reports";
+var file_name = "outstanding_report";
+var pdf_title = "Outstanding Report";
 var myModal = new bootstrap.Modal(document.getElementById('update_report_data'));
 var dateRangePicker;
 const page = {
@@ -57,6 +57,22 @@ const page = {
             });
         });
 
+        $('#report_date').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: 'YYYY/MM/DD' // Change this format as per your requirement
+            }
+        });
+        dateRangePicker = $('#date_range_filter').data('daterangepicker');
+
+        $('#export_oustanding_report').on('submit', function(e){
+            var report_date = $("#report_date").val();
+            window.location.href = base_url+'generate_outsanding_pdf?date='+report_date;
+            
+        });
+
     },
     formValidate: function(form_class){
         let flag = false;
@@ -97,11 +113,20 @@ const page = {
                       },
                       customize: function (csv) {
                             var lines = csv.split('\n');
+                            var total_receive = 0;
+                            var total_payable = 0;
+                            var i = 0
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
                                 values.splice(13, 1);
+                                if( i > 0){
+                                    total_receive += parseFloat((values[1].replaceAll('"',"")).replaceAll(',',""));
+                                    total_payable += parseFloat((values[2].replaceAll('"',"")).replaceAll(',',""));
+                                }
+                                i++;
                                 return values.join(',');
                             });
+                            modifiedLines.push(`Total,${total_receive.toFixed(2)},${total_payable.toFixed(2)}`);
                             return modifiedLines.join('\n');
                         },
                         filename : file_name
@@ -122,7 +147,14 @@ const page = {
                         doc.content[1].table.body[0].forEach(function(cell) {
                             cell.fillColor = theme_color;
                         });
+                        var total_receive = 0;
+                        var total_payable = 0;
                         doc.content[1].table.body.forEach(function(row, rowIndex) {
+                            if(rowIndex > 0){
+
+                                total_receive +=  parseFloat((row[1]['text'].replaceAll('"',"")).replaceAll(',',""));
+                                total_payable += parseFloat((row[2]['text'].replaceAll('"',"")).replaceAll(',',""));
+                            }
                             row.forEach(function(cell, cellIndex) {
                                 var alignmentClass = $('#child_part_view tbody tr:eq(' + rowIndex + ') td:eq(' + cellIndex + ')').attr('class');
                                 var alignment = '';
@@ -139,6 +171,14 @@ const page = {
                             });
                             row.splice(14, 1);
                         });
+                        var newRow = [
+                            { text: 'Total', style: 'tableCell',fillColor:"#f0f0f0" },
+                            { text: total_receive.toFixed(2), style: 'tableCell' ,fillColor:"#f0f0f0"},
+                            { text: total_payable.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" }
+                        ];
+
+                        // Add the row to the table body
+                        doc.content[1].table.body.push(newRow);
                     }
                 },
             ],

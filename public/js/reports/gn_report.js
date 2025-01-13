@@ -15,6 +15,10 @@ const page = {
             // myModal.show();
         })
 
+        if(error_message != ""){
+            toastr.error(error_message)
+        }
+
     },
     dataTable: function(){
         var data = this.serachParams();

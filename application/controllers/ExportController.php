@@ -43,9 +43,8 @@ class ExportController extends CommonController
         $grn_detail_list = $this->get_grn_details();
 
         if (empty($grn_detail_list)) {
-            $this->addWarningMessage('No records found for this export criteria.');
-            $this->redirectMessage();
-            exit();
+            $this->session->set_userdata(['error_message' => 'No records found for this export criteria.']);
+            $this->redirectMessage();   
         }
 
         //Inventory type data
@@ -75,6 +74,7 @@ class ExportController extends CommonController
        
         
         if ($grn_detail_list) {
+
             $excel_row = 2;
             $rowNo = 1;
             foreach ($grn_detail_list as $grn_details) {
@@ -236,7 +236,8 @@ class ExportController extends CommonController
             ob_start();
             $objWriter->save('php://output');
         } else {
-            // echo "<script>alert('No Customer Parts Found');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+
+            echo "<script>alert('ok');</script>";
         }
 
     }
@@ -247,7 +248,7 @@ class ExportController extends CommonController
         $searchYear = $this->input->post('search_year');
         $searchMonth = $this->input->post('search_month');
         $grn_ids = $this->input->post('grn_numbers');
-
+        $searchYear++;
         if(!empty($searchMonth)) {
             $updaateSearchYear = 1;
             $monthOperator_1 = ">=";
@@ -264,11 +265,10 @@ class ExportController extends CommonController
 							OR
 							(inward.created_year = " . ($searchYear + $updaateSearchYear) . " AND inward.created_month ".$monthOperator_2." 3)) ";
         }
-
+        // pr($where_condition,1);
         if (empty($grn_ids) && !empty($searchMonth)) {
             $where_condition = $where_condition . " AND inward.created_month = " . $searchMonth . " ";
         }
-
         if (!empty($grn_ids)) {
             if (strpos($grn_ids, '-') !== false) { //range selection
                 $serial_range = explode("-", $grn_ids);
@@ -277,7 +277,7 @@ class ExportController extends CommonController
                 $serial_list = explode("-", $grn_ids);
                 $grnNo_condition = " GRN_SERIAL_NO in ( " . $grn_ids . " )";
             } else if (strpos($grn_ids, '-') !== false && strpos($grn_ids, ',') !== false) {
-                echo "<script>alert('Incorrect GRN number criteria. Can't have both list and range.');</script>";
+                $this->session->set_userdata(['error_message' => "Incorrect GRN number criteria. Can't have both list and range."]);
                 exit();
             } else { //individual sales no
                 $grnNo_condition = " GRN_SERIAL_NO = " . $grn_ids;

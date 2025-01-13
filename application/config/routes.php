@@ -598,6 +598,7 @@ $route['sales_report'] = 'SalesController/sales_report';
 $route['hsn_report'] = 'SalesController/hsn_report';
 $route['receivable_report'] = 'SalesController/receivable_report';
 $route['outstanding_report'] = 'SalesController/outstanding_report';
+$route['generate_outsanding_pdf'] = 'SalesController/generateOutsandingPdf';
 $route['update_receivable_report'] = 'SalesController/update_receivable_report';
 $route['view_original_sales_invoice/(:any)'] = 'PdfControllertulsi/view_original_sales_invoice';
 $route['print_packing_sticker'] = 'SalesController/print_packing_sticker';

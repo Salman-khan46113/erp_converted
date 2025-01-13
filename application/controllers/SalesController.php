@@ -12,6 +12,7 @@ class SalesController extends CommonController
 		parent::__construct();
 		$this->load->model('CustomerPart');
 		$this->load->model('SalesModel');
+		require_once APPPATH . 'libraries/Pdf1.php';
 	}
 
 	private function getViewPath()
@@ -1260,6 +1261,7 @@ class SalesController extends CommonController
             "title" => "CUSTOMER NAME",
             "width" => "14%",
             "className" => "dt-left",
+            "visible" => false
         ];
         $column[] = [
             "data" => "qty",
@@ -1314,8 +1316,8 @@ class SalesController extends CommonController
             "width" => "7%",
             "className" => "dt-center",
         ];
-		
-		$date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+		// pr(date('Y-m-d', strtotime('last month')),1);
+		$date_filter = date('Y/m/01', strtotime('last month'))." - ". date('Y/m/d', strtotime('last month'));
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -1357,9 +1359,10 @@ class SalesController extends CommonController
         $condition_arr["length"] = $post_data["length"];
         $base_url = $this->config->item("base_url");
 		$data = $this->SalesModel->getHsnReportViewData($condition_arr,$post_data["search"]);
-
+		$unique_data = [];
 		$total_balance_amount = 0;
 		foreach ($data as $key => $val) {
+
 			if ($val['basic_total'] > 0) {
 				$subtotal = $val['basic_total'];
 			} else {
@@ -1376,15 +1379,53 @@ class SalesController extends CommonController
 			$data[$key]['subtotal'] = $subtotal;
 			$data[$key]['rate'] =  $rate;
 			$data[$key]['sales_discount'] =  ($val['sales_discount'] > 0) ? $val['sales_discount']." %": display_no_character();
-			$data[$key]['row_total'] = number_format($row_total, 2);
+			$data[$key]['row_total'] = $row_total;
+			$hsn_code = trim($val['hsn_code']);
+			if(!array_key_exists($hsn_code, $unique_data)){
+				$unique_data[$hsn_code] = [
+					"hsn_code" => $val['hsn_code'],
+					"customer_name" => $val['customer_name'],
+					"qty" => $val['qty'],
+					"subtotal" => $subtotal,
+					"sgst_amount" => $val['sgst_amount'],
+					"cgst_amount" => $val['cgst_amount'],
+					"igst_amount" => $val['igst_amount'],
+					"tcs_amount" => $val['tcs_amount'],
+					"gst_amount" => $val['gst_amount'],
+					"row_total" => number_format($row_total,2,".","")
+				];
+			}else{
+				$unique_data[$hsn_code]['qty'] += $val['qty'];
+				$unique_data[$hsn_code]['subtotal'] += $subtotal;
+				$unique_data[$hsn_code]['customer_name'] .= ",".$val['customer_name'];
+				$unique_data[$hsn_code]['sgst_amount'] += $val['sgst_amount'];
+				$unique_data[$hsn_code]['cgst_amount'] += $val['cgst_amount'];
+				$unique_data[$hsn_code]['igst_amount'] += $val['igst_amount'];
+				$unique_data[$hsn_code]['tcs_amount'] += $val['tcs_amount'];
+				$unique_data[$hsn_code]['gst_amount'] += $val['gst_amount'];
+				$unique_data[$hsn_code]['row_total'] += number_format($row_total,2,".","");
+			}
+			
+
 			
 		}
-		$data["data"] = $data;
+		$data["data"] = array_values($unique_data);
 		
         $total_record = $this->SalesModel->getHsnReportViewCount([], $post_data["search"]);
-        // pr($total_record,1);
-        $data["recordsTotal"] = count($total_record);
-        $data["recordsFiltered"] = count($total_record);
+        $unique_data = [];
+        foreach ($total_record as $key => $val) {
+			$hsn_code = trim($val['hsn_code']);
+			if(!array_key_exists($hsn_code, $unique_data)){
+				$unique_data[$hsn_code] = [
+					"hsn_code" => $val['hsn_code']
+				];
+			}			
+		}
+        $data["total_qty"] = number_format(array_sum(array_column($total_record, "qty")),2,".",",");
+        $data["total_rate"] = number_format(array_sum(array_column($total_record, "total_rate"))+array_sum(array_column($total_record, "tcs_amount")),2,".",",");
+        $data["recordsTotal"] = count($unique_data);
+        $data["recordsTotal"] = count($unique_data);
+        $data["recordsFiltered"] = count($unique_data);
         echo json_encode($data);
         exit();
 		
@@ -3482,7 +3523,7 @@ class SalesController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500,50000], [10,50,100,200,500,1000,2500,50000]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		
@@ -3509,44 +3550,152 @@ class SalesController extends CommonController
         $base_url = $this->config->item("base_url");
 		
 		$data = $this->SalesModel->getOutstandingReportView($condition_arr,$post_data["search"]);
-		// pr($data,1);
 		$outstanding_data = [];
-		// pr($this->db->last_query(),1);
 		foreach ($data as $key => $val) {
-			$outstanding_data[] = [
-				"customer_name" => $val['customer_name'],
-				"receivable_amount" => $val['receivable_amount'],
-				"payable_amount" => 0
-			];
-		}
 
-		$data = $this->SalesModel->getOutstandingPayableReportView($condition_arr,$post_data["search"]);
-		// pr($data,1);
-		foreach ($data as $key => $val) {
-			$outstanding_data[] = [
-				"customer_name" => $val['customer_name'],
-				"receivable_amount" => 0,
-				"payable_amount" => $val['amount_received']
-			];
+			if(array_key_exists($val['customer_id'], $outstanding_data)){
+				$outstanding_data[$val['customer_id']]['receivable_amount'] += number_format($val['bal_amnt'],2,".","");
+			}else{
+				$outstanding_data[$val['customer_id']] = [
+					"customer_name" => $val['customer_name'],
+					"receivable_amount" => number_format($val['bal_amnt'],2,".",""),
+					"payable_amount" => 0
+				];
+			}
+			
 		}
+		$recevivable_data =  array_values($outstanding_data);
 		
-		$data["data"] = $outstanding_data;
+		$data = $this->SalesModel->getOutstandingPayableReportView($condition_arr,$post_data["search"]);
+		// pr($this->db->last_query(),1);
+		$payable_data = [];
+		foreach ($data as $key => $val) {
+			$gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);  
+            $total_with_gst = $gst_amount + $val['base_amount'];  
+            $bal_amnt = $total_with_gst - $val['amount_received'] - $val['tds_amount'];
+			if(array_key_exists($val['supplier_id'], $payable_data)){
+				$payable_data[$val['supplier_id']]['payable_amount'] += number_format($bal_amnt > 0 ? $bal_amnt : 0,2,".","");
+			}else{
+				$payable_data[$val['supplier_id']] = [
+					"customer_name" => $val['customer_name'],
+					"payable_amount" => number_format($bal_amnt > 0 ? $bal_amnt : 0,2,".",""),
+					"receivable_amount" => 0
+				];
+			}
+			
+		}
+		$payable_data =  array_values($payable_data);
+
+		$data = array_merge($recevivable_data,$payable_data);
+
+		$data["data"] = $data;
         $total_receivable_record = $this->SalesModel->getOutstandingReportViewCount([], $post_data["search"]);
         $total_paid_amount = 0;
-        foreach ($total_receivable_record as $key => $value) {
-        	$total_paid_amount += $value['receivable_amount'];
-        }
+        $outstanding_data = [];
+        foreach ($total_receivable_record as $key => $val) {
+			if(array_key_exists($val['customer_id'], $outstanding_data)){
+				$outstanding_data[$val['customer_id']]['receivable_amount'] += number_format($val['bal_amnt'],2,".","");
+			}else{
+				$outstanding_data[$val['customer_id']] = [
+					"customer_name" => $val['customer_name'],
+					"receivable_amount" => number_format($val['bal_amnt'],2,".",""),
+					"payable_amount" => 0
+				];
+			}
+			$total_paid_amount += $val['bal_amnt'];
+			
+		}
+		$receivable_count_data =  array_values($outstanding_data);
         $total_payable_record = $this->SalesModel->getOutstandingPayableReportViewCount([], $post_data["search"]);
+
         $total_pay_amount = 0;
-        foreach ($total_payable_record as $key => $value) {
-        	$total_pay_amount += $value['amount_received'];
-        }
-        $data["recordsTotal"] = count($total_receivable_record)+count($total_payable_record);
-        $data["recordsFiltered"] = count($total_receivable_record)+count($total_payable_record);
+        $payable_data = [];
+		foreach ($total_payable_record as $key => $val) {
+			$gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);  
+            $total_with_gst = $gst_amount + $val['base_amount'];  
+            $bal_amnt = $total_with_gst - $val['amount_received'] - $val['tds_amount'];
+			if(array_key_exists($val['supplier_id'], $payable_data)){
+				$payable_data[$val['supplier_id']]['payable_amount'] += number_format($bal_amnt > 0 ? $bal_amnt : 0,2,".","");
+			}else{
+				$payable_data[$val['supplier_id']] = [
+					"customer_name" => $val['customer_name'],
+					"payable_amount" => number_format($bal_amnt > 0 ? $bal_amnt : 0,2,".",""),
+					"receivable_amount" => 0
+				];
+			}
+			$total_pay_amount += $bal_amnt;
+		}
+		// pr($total_paid_amount1);
+		// pr($total_paid_amount,1);
+		$payable_count_data =  array_values($payable_data);
+        $data["recordsTotal"] = count($receivable_count_data)+count($payable_count_data);
+        $data["recordsFiltered"] = count($receivable_count_data)+count($payable_count_data);
         $data["total_paid_amount"] = number_format($total_paid_amount,2);
         $data["total_pay_amount"] = number_format($total_pay_amount,2);
         echo json_encode($data);
 	}
+
+	public function generateOutsandingPdf($html_content = "",$header="",$footer="",$type="",$pdf_download_type="",$extra_condition ="normal"){
+		$get_data = $this->input->get();
+
+		$date = DateTime::createFromFormat('Y/m/d', $get_data['date']);
+		$formatted_date = $date->format('d/m/Y');
+		// pr($formatted_date,1);
+		$pending_to_recived_data = $this->SalesModel->getOutstandingReportData($formatted_date);
+
+		$customer_wise_data = [];
+		foreach ($pending_to_recived_data as $key => $value) {
+			$value['type'] = "recive";
+			$customer_wise_data[$value['customer_id']][] = $value;
+		}
+		$customer_wise_data = array_values($customer_wise_data);
+		$formatted_date = $date->format('d-m-Y');
+		$pending_to_payable_data = $this->SalesModel->getOutstandingPayableReportData($formatted_date);
+
+		$supplier_wise_data = [];
+		foreach ($pending_to_payable_data as $key => $value) {
+			$value['type'] = "pay";
+			$supplier_wise_data[$value['id']][] = $value;
+		}
+
+		$supplier_wise_data = array_values($supplier_wise_data);
+		$data['date'] = $get_data['date'];
+		$data['merge_arr'] = array_merge($customer_wise_data,$supplier_wise_data);
+		// pr($data,1);
+        $html_content = $this->smarty->fetch('sales/outstanding_report.tpl', $data, TRUE);
+        $pdf = new Pdf1('P', 'mm', 'A4', true, 'UTF-8', false);
+
+        // Set margins (adjust as needed)
+        $pdf->SetMargins(7, 7, 7, 7);
+
+        // Set document information
+        $pdf->SetCreator(PDF_CREATOR);
+
+        // Disable header and footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // Set default monospaced font
+        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+        // Enable auto page breaks (optional)
+        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+        // Set image scale factor
+        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+        // Add a page
+        $pdf->AddPage();
+
+        // set some text to print
+        // $html = file_get_contents('path_to_html_file.html'); // Load your HTML content
+
+        // output the HTML content
+        $pdf->writeHTML($html_content, true, false, true, false, '');
+
+        $pdf->Output("outstanding_report.pdf", 'D');
+             ob_end_flush();
+    } 
 
 
 

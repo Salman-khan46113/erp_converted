@@ -1,10 +1,10 @@
 var table = '';
 var file_name = "hsn_summary_report";
-var pdf_title = "Summary ";
+var pdf_title = "HSN Summary ";
 // var myModal = new bootstrap.Modal(document.getElementById('child_part_update'))
 const page = {
     init: function(){
-        this.filter();
+        this.filter("first_time");
         this.dataTable();
         this.formValidation();
         
@@ -60,11 +60,43 @@ const page = {
                       },
                       customize: function (csv) {
                             var lines = csv.split('\n');
+                            var total_qty = 0;
+                            var total_rate = 0;
+                            var total_balance_amount = 0;
+                            var total_sgst = 0;
+                            var total_cgst = 0;
+                            var total_igst = 0;
+                            var total_tcs = 0;
+                            var total_gst = 0;
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
-                                // values.splice(13, 1);
+                                total_qty += parseFloat((values[2].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((values[2].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_rate += parseFloat((values[9].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((values[9].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_balance_amount += parseFloat((values[3].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((values[3].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_sgst += parseFloat((values[4].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((values[4].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_cgst += parseFloat((values[5].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((values[5].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_igst += parseFloat((values[6].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((values[6].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_tcs += parseFloat((values[7].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((values[7].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_gst += parseFloat((values[8].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((values[8].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                var customer_column_show = $("[name='inlineRadioOptions']:checked").val();
+                                if(table != undefined && table != ""){
+                                    if(customer_column_show != "Yes"){
+                                        values.splice(1, 1);
+                                    }
+                                }
                                 return values.join(',');
                             });
+                            
+                            var customer_column_show = $("[name='inlineRadioOptions']:checked").val();
+                                if(table != undefined && table != ""){
+                                    if(customer_column_show != "Yes"){
+                                        modifiedLines.push(`Total,${total_qty.toFixed(2)},${total_balance_amount.toFixed(2)},${total_sgst.toFixed(2)},${total_cgst.toFixed(2)},${total_igst.toFixed(2)},${total_tcs.toFixed(2)},${total_gst.toFixed(2)},${total_rate.toFixed(2)}`);
+                                    }else{
+                                        modifiedLines.push(`Total,,${total_qty.toFixed(2)},${total_balance_amount.toFixed(2)},${total_sgst.toFixed(2)},${total_cgst.toFixed(2)},${total_igst.toFixed(2)},${total_tcs.toFixed(2)},${total_gst.toFixed(2)},${total_rate.toFixed(2)}`);
+                                    }
+                                }
+
+                            
                             return modifiedLines.join('\n');
                         },
                         filename : file_name
@@ -78,30 +110,94 @@ const page = {
                     },
                     filename: file_name,
                     customize: function (doc) {
+                      var current_date = $("#date_range_filter").val()
+                      var dateParts = current_date.split(' - ');
+                      var start_date = dateParts[0];
+                      start_date = start_date.split('/');
+                      start_date = start_date[2] + '/' + start_date[1] + '/' + start_date[0];
+                      var end_date = dateParts[1];
+                      end_date = end_date.split('/');
+                      end_date = end_date[2] + '/' + end_date[1] + '/' + end_date[0];
                       doc.pageMargins = [15, 15, 15, 15];
-                      doc.content[0].text = pdf_title;
+                      doc.content[0].text = pdf_title+" ("+start_date+" -" +end_date+")";
                       doc.content[0].color = theme_color;
-                        // doc.content[1].table.widths = ['15%', '19%', '13%', '13%','15%', '15%', '10%'];
+                      doc.content[1].table.widths = ['10%', '10%', '10%','10%', '10%', '10%','10%', '10%','10%', '10%'];
+                      var customer_column_show = $("[name='inlineRadioOptions']:checked").val();
+                        if(table != undefined && table != ""){
+                            if(customer_column_show != "Yes"){
+                                doc.content[1].table.widths = ['11.11%', '11.11%', '11.11%','11.11%', '11.11%', '11.11%','11.11%', '11.11%','11.11%', '11.11%'];
+                            }
+                        }
+                      
                         doc.content[1].table.body[0].forEach(function(cell) {
                             cell.fillColor = theme_color;
                         });
+                        var total_qty = 0;
+                        var total_rate = 0;
+                        var total_balance_amount = 0;
+                        var total_sgst = 0;
+                        var total_cgst = 0;
+                        var total_igst = 0;
+                        var total_tcs = 0;
+                        var total_gst = 0;
                         doc.content[1].table.body.forEach(function(row, rowIndex) {
+                            if(rowIndex > 0){
+                                total_qty += parseFloat((row[2]['text'].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((row[2]['text'].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_rate += parseFloat((row[9]['text'].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((row[9]['text'].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_balance_amount += parseFloat((row[3]['text'].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((row[3]['text'].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_sgst += parseFloat((row[4]['text'].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((row[4]['text'].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_cgst += parseFloat((row[5]['text'].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((row[5]['text'].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_igst += parseFloat((row[6]['text'].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((row[6]['text'].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_tcs += parseFloat((row[7]['text'].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((row[7]['text'].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                                total_gst += parseFloat((row[8]['text'].replaceAll('"',"")).replaceAll(',',"")) > 0 ? parseFloat((row[8]['text'].replaceAll('"',"")).replaceAll(',',"")) : 0;
+                            }
                             row.forEach(function(cell, cellIndex) {
                                 var alignmentClass = $('#example1 tbody tr:eq(' + rowIndex + ') td:eq(' + cellIndex + ')').attr('class');
-                                var alignment = '';
-                                if (alignmentClass && alignmentClass.includes('dt-left')) {
-                                    alignment = 'left';
-                                } else if (alignmentClass && alignmentClass.includes('dt-center')) {
-                                    alignment = 'center';
-                                } else if (alignmentClass && alignmentClass.includes('dt-right')) {
-                                    alignment = 'right';
-                                } else {
-                                    alignment = 'left';
-                                }
-                                cell.alignment = alignment;
+
                             });
+                            var customer_column_show = $("[name='inlineRadioOptions']:checked").val();
+                            if(table != undefined && table != ""){
+                                if(customer_column_show != "Yes"){
+                                    row.splice(1, 1);
+                                }
+                            }
+
                             // row.splice(14, 1);
                         });
+                        // Add a new row to the table (For example: Add an empty row or custom values)
+                        var newRow = [
+                            { text: 'Total', style: 'tableCell',fillColor:"#f0f0f0" },
+                            { text: '', style: 'tableCell' ,fillColor:"#f0f0f0"},
+                            { text: total_qty.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
+                            { text: total_balance_amount.toFixed(2), style:'tableCell',fillColor:"#f0f0f0" },
+                            { text: total_sgst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
+                            { text: total_cgst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
+                            { text: total_igst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
+                            { text: total_tcs.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
+                            { text: total_gst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
+                            { text: total_rate.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" }
+                        ];
+                        var customer_column_show = $("[name='inlineRadioOptions']:checked").val();
+                            if(table != undefined && table != ""){
+                                if(customer_column_show != "Yes"){
+                                    var newRow = [
+                                            { text: 'Total', style: 'tableCell',fillColor:"#f0f0f0" },
+                                            { text: total_qty.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
+                                            { text: total_balance_amount.toFixed(2), style:'tableCell',fillColor:"#f0f0f0" },
+                                            { text: total_sgst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
+                                            { text: total_cgst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
+                                            { text: total_igst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
+                                            { text: total_tcs.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
+                                            { text: total_gst.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" },
+                                            { text: total_rate.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" }
+                                        ];
+                                }
+                            }
+                        
+
+                        // Add the row to the table body
+                        doc.content[1].table.body.push(newRow);  // Add it to the end, or you can insert at any position
+
                     }
                 },
             ],
@@ -135,6 +231,14 @@ const page = {
                 data: {'search':that.serachParams()},    
                 url: "SalesController/hsnReportsAjax",
                 type: "POST",
+                dataSrc: function(json) {
+                    // Log the entire response to see what extra data is included
+                    $(".total_qty_block").html(json.total_qty)
+                    $(".total_rate_block").html(json.total_rate)
+                    $(".total_amount_paid").html(json.total_paid_amount)
+                    $(".total_balance_amount_to_pay").html(json.total_balance_amount_to_pay)
+                    return json.data; // This is what populates the DataTable
+                }
             },
         });
         $('.dataTables_length').find('label').contents().filter(function() {
@@ -148,6 +252,14 @@ const page = {
         $('#serarch-filter-input').on('keyup', function() {
             table.search(this.value).draw();
         });
+        var customer_column_show = $("[name='inlineRadioOptions']:checked").val();
+        if(table != undefined && table != ""){
+            if(customer_column_show == "Yes"){
+                table.column(1).visible(true);
+            }else{
+                table.column(1).visible(false);
+            }
+        }
     },
     formValidation: function(){
         let that = this;

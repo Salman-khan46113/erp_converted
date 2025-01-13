@@ -222,11 +222,12 @@ class GlobalConfigController extends CommonController
 		}
 		$menu_data = $this->GlobalConfigModel->getAllMenuData();
 		$data['groups_menu'] = [];
+
 		foreach ($menu_data as $key => $value) {
 			if(array_key_exists($value['menu_master_id'], $exist_menu_access_arr)){
-				$groups_menu[] = $exist_menu_access_arr[$value['menu_master_id']];
+				$groups_menu[$value['menu_category_id']][] = $exist_menu_access_arr[$value['menu_master_id']];
 			}else{
-				$groups_menu[] = [
+				$groups_menu[$value['menu_category_id']][] = [
 					"group_rights_id" => 0,
 					"group_master_id" => $group_id,
 					"menu_master_id" => $value['menu_master_id'],
@@ -236,15 +237,19 @@ class GlobalConfigController extends CommonController
 					"delete" => "No",
 					"export" => "No",
 					"import" => "No",
-					"diaplay_name" => $value['diaplay_name']
+					"diaplay_name" => $value['diaplay_name'],
+					"category_name" => $value['category_name'],
+					"menu_category_id" => $value['menu_category_id']
 				];
 			}
 		}
+		// pr($groups_menu,1);
 		$data['groups_menu'] = $groups_menu;
 		$this->loadView('admin/group_master_menu', $data);
 	}
 	public function updateGroupMenuRight(){
 		$post_data = $this->input->post();
+		// pr($post_data,1);
 		$menu_data = $post_data['menu'];
 		$group_id = $post_data['group_id'];
 		$access_data = ["list","add","update","export","delete",'import'];
