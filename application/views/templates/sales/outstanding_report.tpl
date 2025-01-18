@@ -2,9 +2,9 @@
 <table cellpadding="5" cellspacing="0" style="width:100%; " border="0">
         <thead>
             <tr>
-                <th style="text-align:left;border-bottom:2px solid black;" width="70%"><h2>Outstanding Report<br></h2></th>
-                <th style="text-align:right;border-bottom:2px solid black;line-height: 40px;" width="16%"><h4>Date : </h4></th>
-                <th style="text-align:left;border-bottom:2px solid black;line-height: 40px;"  width="14%"><%defaultDateFormat($date)%></th>
+                <th style="text-align:left;border-bottom:2px solid black;" width="50%"><h2>Outstanding Report <br><span style="font-size: 14px;font-weight: normal;line-height: 15px;">(<%$date_filter%>)</span></h2></th>
+                <th style="text-align:right;border-bottom:2px solid black;line-height: 40px;" width="36%"><h4>Generated Date : </h4></th>
+                <th style="text-align:left;border-bottom:2px solid black;line-height: 40px;"  width="14%"><%defaultDateFormat(date("Y/m/d"))%></th>
             </tr>
         </thead>
 

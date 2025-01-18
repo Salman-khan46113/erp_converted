@@ -186,7 +186,7 @@
                         </div>
                      </div>
                      <div class="row stat-cards">
-                        <div class="col-md-6 col-xl-3">
+                        <div class="col-md-6 col-xl-3 hide ">
                            <article class="stat-cards-item widget-box" id="TOTAL_RECEIVABLES_PAID_BA_BLOCK" data-widget="TOTAL_RECEIVABLES_PAID_BA">
                               <div class="refresh-btn-block ">
                                  <i class="las la-sync cursor" title="Refresh"></i>
@@ -218,7 +218,7 @@
                                     <i class="las la-money-bill"></i>
                                  </div>
                                  <div class="stat-cards-info">
-                                    <p class="stat-cards-info__title">Total Receivables Due With GST</p>
+                                    <p class="stat-cards-info__title">Total Receivables Due (INR)</p>
                                     <p class="stat-cards-info__num timer count-title count-number" data-to="" data-speed="1500"></p>
                                  </div>
                               </a>
@@ -255,7 +255,7 @@
                                  <i class="las la-boxes"></i>
                               </div>
                               <div class="stat-cards-info">
-                                 <p class="stat-cards-info__title" >Payable Due (INR)</p>
+                                 <p class="stat-cards-info__title" >Total Payable Due (INR)</p>
                                  <p class="stat-cards-info__num timer count-title count-number" data-to="" data-speed="1500"></p>
                               </div>
                            </article>

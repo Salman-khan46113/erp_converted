@@ -170,7 +170,12 @@
 
                                     <form id="updateReceivableForm" method="POST" class="custom-form updateReceivableForm">
                                         <input type="hidden" name="sales_number" id="sales_number" value="<%$po->sales_number%>">
+                                        <input type="hidden" name="total_amount" id="total_amount_value" value="">
                                         <div class="row">
+                                            <div class="col-lg-12" style="text-align: -webkit-center;">
+                                                <span style="text-align: center;background: red;width: 100%;margin-bottom: 12px;    border-radius: 4px;display:block;padding: 4px;color: white;font-weight: 900;" id="error-message-block">
+                                                </span>
+                                            </div>
                                             <div class="col-lg-12">
                                                 <div class="form-group">
                                                     <label for="payment_receipt_date">Payment Receipt Date</label><span

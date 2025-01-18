@@ -629,7 +629,7 @@ class ReportsController extends CommonController
             if(!empty($objs['tcs_amount'])){
                 $tcs_amount = $objs['tcs_amount'];
             }   
-            $data[$key]['tcs_amount'] = $tcs_amount;                         
+            $data[$key]['tcs_amount'] = number_format($tcs_amount,2,".","");                          
             // Create a DateTime object by specifying the format
             $dateTime = DateTime::createFromFormat('d-m-Y', $created_date_str);
             $due_date = display_no_character("");
@@ -690,7 +690,11 @@ class ReportsController extends CommonController
 
             $data[$key]['grn_created_date'] = defaultDateFormat($objs['grn_created_date']);
             $data[$key]['invoice_date'] = defaultDateFormat($objs['invoice_date']);
-            $data[$key]['payment_receipt_date'] = defaultDateFormat($objs['payment_receipt_date']);                                    
+            $data[$key]['payment_receipt_date'] = defaultDateFormat($objs['payment_receipt_date']);  
+
+            $data[$key]['cgst_amount'] = number_format($objs['cgst_amount'],2,".","");
+            $data[$key]['sgst_amount'] = number_format($objs['sgst_amount'],2,".","");
+            $data[$key]['igst_amount'] = number_format($objs['igst_amount'],2,".","");                                
                                                                                 
         }  
 
@@ -709,8 +713,8 @@ class ReportsController extends CommonController
             $total_with_gst_val += $total_with_gst > 0 ? $total_with_gst : 0;
             $total_paid_amount += $objs['amount_received'] > 0 ? $objs['amount_received'] : 0;
             $bal_amnt = $total_with_gst - $objs['amount_received'] - $objs['tds_amount'];
-            $data[$key]['bal_amnt'] = $bal_amnt;
-            $total_balance_amount_to_pay += $bal_amnt > 0 ? $bal_amnt : 0;
+            $data[$key]['bal_amnt'] = number_format($bal_amnt, 2, '.', '');
+            $total_balance_amount_to_pay += $bal_amnt;
             $total_tds_amount += $objs['tds_amount'] > 0 ? $objs['tds_amount'] : 0;
         }
         $data["recordsTotal"] = count($total_record);

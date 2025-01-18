@@ -1712,12 +1712,13 @@ TECHNIQUE </td>
 
                 $company_logo = '<th  rowspan="3" style="width:20%;text-align:right;font-size:9px;padding:0px;text-align: center;">
                 <br><br>
-              <img src="'.base_url('').'/dist/img/company_logo/'.$company_logo.'"  style="width: 60px;padding: 0px;">
+              <img src="'.base_url('').'/dist/img/company_logo/'.$company_logo.'"  style="width: 60px;padding: 0px;height:55px;">
            </th>';
                 $row_col_span = '80';
             }
         }
 
+        // pr($company_logo,1);
         $html_content =
         '
         <style>

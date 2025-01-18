@@ -13,6 +13,9 @@ class SalesController extends CommonController
 		$this->load->model('CustomerPart');
 		$this->load->model('SalesModel');
 		require_once APPPATH . 'libraries/Pdf1.php';
+		ini_set('max_execution_time', 0); // Set unlimited execution time
+		set_time_limit(0);
+		ini_set('memory_limit', '-1');
 	}
 
 	private function getViewPath()
@@ -1209,6 +1212,9 @@ class SalesController extends CommonController
 				$rate = $val['part_price'];
 			} else {
 				$rate = round($subtotal / $val['qty'], 2);
+			}
+			if($val['status'] == "Cancelled"){
+				$data[$key]['qty'] = 0;
 			}
 			$row_total =  round($val['total_rate'], 2) + round($val['tcs_amount'], 2);
 			$data[$key]['subtotal'] = $subtotal;
@@ -3505,8 +3511,12 @@ class SalesController extends CommonController
             "className" => "dt-center",
         ];
         
-		
-		$date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        
+        $current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+        	$current_year--;
+        }
+		$date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -3522,7 +3532,7 @@ class SalesController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500,50000], [10,50,100,200,500,1000,2500,50000]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500,5000], [10,50,100,200,500,1000,2500,5000]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		
@@ -3556,11 +3566,11 @@ class SalesController extends CommonController
 			foreach ($data as $key => $val) {
 
 				if(array_key_exists($val['customer_id'], $outstanding_data)){
-					$outstanding_data[$val['customer_id']]['receivable_amount'] += number_format($val['bal_amnt'],2,".","");
+					$outstanding_data[$val['customer_id']]['receivable_amount'] +=round($val['bal_amnt'],2);
 				}else{
 					$outstanding_data[$val['customer_id']] = [
 						"customer_name" => $val['customer_name'],
-						"receivable_amount" => number_format($val['bal_amnt'],2,".",""),
+						"receivable_amount" => round($val['bal_amnt']),
 						"payable_amount" => 0
 					];
 				}
@@ -3572,17 +3582,17 @@ class SalesController extends CommonController
 		$payable_data = [];
 		if(!($post_data["search"]['customer_id'] > 0)|| ($post_data["search"]['supplier_id'] > 0)){
 			$data = $this->SalesModel->getOutstandingPayableReportView($condition_arr,$post_data["search"]);
-			// pr($this->db->last_query(),1);
+			
 			foreach ($data as $key => $val) {
 				$gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);
             	$total_with_gst = $gst_amount + $val['base_amount'];  
             	$bal_amnt = $total_with_gst - $val['amount_received'] - $val['tds_amount'];
 				if(array_key_exists($val['supplier_id'], $payable_data)){
-					$payable_data[$val['supplier_id']]['payable_amount'] += number_format($bal_amnt,2,".","");
+					$payable_data[$val['supplier_id']]['payable_amount'] += round($bal_amnt,2);
 				}else{
 					$payable_data[$val['supplier_id']] = [
 						"customer_name" => $val['customer_name'],
-						"payable_amount" => number_format($bal_amnt,2,".",""),
+						"payable_amount" => round($bal_amnt,2),
 						"receivable_amount" => 0
 					];
 				}
@@ -3591,7 +3601,10 @@ class SalesController extends CommonController
 			$payable_data =  array_values($payable_data);
 		}
 		$data = array_merge($recevivable_data,$payable_data);
-
+		$data = array_merge($recevivable_data,$payable_data);
+		$chunk_number = $post_data["start"]/$post_data["length"];
+		$array_chunk = array_chunk($data,$post_data["length"]);
+		$data = $array_chunk[($chunk_number)];
 		$data["data"] = $data;
 		$total_paid_amount = 0;
 	    $outstanding_data = [];
@@ -3619,6 +3632,7 @@ class SalesController extends CommonController
 	    $payable_count_data = [];
 		if(!($post_data["search"]['customer_id'] > 0)|| ($post_data["search"]['supplier_id'] > 0)){
 	        $total_payable_record = $this->SalesModel->getOutstandingPayableReportViewCount([], $post_data["search"]);
+	        // pr($total_payable_record,1);
 			foreach ($total_payable_record as $key => $val) {
 				$gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);
 	            $total_with_gst = $gst_amount + $val['base_amount'];  
@@ -3632,7 +3646,7 @@ class SalesController extends CommonController
 						"receivable_amount" => 0
 					];
 				}
-				$total_pay_amount += $bal_amnt > 0 ? $bal_amnt : 0;
+				$total_pay_amount += $bal_amnt;
 			}
 			$payable_count_data =  array_values($payable_data);
 		}
@@ -3648,11 +3662,9 @@ class SalesController extends CommonController
 	public function generateOutsandingPdf($html_content = "",$header="",$footer="",$type="",$pdf_download_type="",$extra_condition ="normal"){
 		$get_data = $this->input->get();
 
-		$date = DateTime::createFromFormat('Y/m/d', $get_data['date']);
-		$formatted_date = $date->format('d/m/Y');
-		// pr($formatted_date,1);
-		$pending_to_recived_data = $this->SalesModel->getOutstandingReportData($formatted_date);
+		$date_filter =  $get_data['date'];
 		
+		$pending_to_recived_data = $this->SalesModel->getOutstandingReportData($date_filter);
 		$customer_wise_data = [];
 		foreach ($pending_to_recived_data as $key => $objs) {
 			$objs['type'] = "recive";
@@ -3713,12 +3725,14 @@ class SalesController extends CommonController
 			}
 			$objs['due_days'] = $due_days;
 			$objs['due_date'] = $due_date;
-			$customer_wise_data[$objs['customer_id']][] = $objs;
+			if($objs['bal_amnt'] > 0){
+				$customer_wise_data[$objs['customer_id']][] = $objs;
+			}
 		}
 		$customer_wise_data = array_values($customer_wise_data);
 		$formatted_date = $date->format('d-m-Y');
-		$pending_to_payable_data = $this->SalesModel->getOutstandingPayableReportData($formatted_date);
-
+		$pending_to_payable_data = $this->SalesModel->getOutstandingPayableReportData($date_filter);
+		
 		$supplier_wise_data = [];
 		foreach ($pending_to_payable_data as $key => $objs) {
 			$objs['type'] = "pay";
@@ -3772,13 +3786,19 @@ class SalesController extends CommonController
             
             $objs['due_days'] = $due_days;
             $objs['due_date'] = $due_date;
+            $gst_amount = (float)($objs['sgst_amount'] + $objs['cgst_amount'] + $objs['igst_amount'] + $objs['tcs_amount']);
+ 			$total_with_gst = $gst_amount + $objs['base_amount']; 
+ 			$bal_amnt = $total_with_gst - $objs['amount_received'] - $objs['tds_amount'];
+ 			$objs['bal_paybele_amnt'] = number_format($bal_amnt, 2, '.', ''); 
 			$supplier_wise_data[$objs['id']][] = $objs;
 		}
 		
 		$supplier_wise_data = array_values($supplier_wise_data);
+		// pr($supplier_wise_data,1);
+		$data['date_filter'] = $date_filter;
 		$data['date'] = $get_data['date'];
 		$data['merge_arr'] = array_merge($customer_wise_data,$supplier_wise_data);
-		// pr($data,1);
+		// pr($supplier_wise_data,1);
         $html_content = $this->smarty->fetch('sales/outstanding_report.tpl', $data, TRUE);
         $pdf = new Pdf1('P', 'mm', 'A4', true, 'UTF-8', false);
 

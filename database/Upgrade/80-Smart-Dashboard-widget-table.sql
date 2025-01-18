@@ -105,6 +105,7 @@ INSERT INTO `widget` (`widget_id`, `tab_name`, `widget_name`, `widget_type`, `wi
 -- Indexes for dumped tables
 --
 
+UPDATE `widget` SET `widget_funtion` = 'get_payable_due_data' WHERE `widget`.`widget_name` = "TOTAL_PAYABLE_DUE"
 --
 -- Indexes for table `widget`
 --

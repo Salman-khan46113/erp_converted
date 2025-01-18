@@ -55,7 +55,7 @@
             </div>
           </li>
         </div>
-        <div class="filter-row hide">
+        <!-- <div class="filter-row hide">
           <li class="nav-small-cap">
             <span class="hide-menu">Sales Invoice Date</span>
             <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
@@ -65,7 +65,7 @@
             <input type="text" name="datetimes" class="dates form-control" id="date_range_filter" />
             </div>
           </li>
-        </div>
+        </div> -->
         
         
 
@@ -141,11 +141,11 @@
             <div class="card-header">
                 <div class="row">
                     <div class="tgdp-rgt-tp-sect">
-                        <p class="tgdp-rgt-tp-ttl">Total Amount Receivable</p>
+                        <p class="tgdp-rgt-tp-ttl">Total Amount Receivable Due</p>
                         <p class="tgdp-rgt-tp-txt total_paid_amount">0.00</p>
                     </div>
                     <div class="tgdp-rgt-tp-sect">
-                        <p class="tgdp-rgt-tp-ttl">Total Amount Payable</p>
+                        <p class="tgdp-rgt-tp-ttl">Total Amount Payable Due</p>
                         <p class="tgdp-rgt-tp-txt total_pay_amount" title="12">0.00</p>
                     </div>
                 </div>

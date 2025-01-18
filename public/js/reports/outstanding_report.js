@@ -58,14 +58,16 @@ const page = {
         });
 
         $('#report_date').daterangepicker({
-            singleDatePicker: true,
+            singleDatePicker: false,
             showDropdowns: true,
             autoApply: true,
             locale: {
                 format: 'YYYY/MM/DD' // Change this format as per your requirement
             }
         });
-        dateRangePicker = $('#date_range_filter').data('daterangepicker');
+        var dateRangePicker1 = $('#report_date').data('daterangepicker');
+        dateRangePicker1.setStartDate(start_date);
+        dateRangePicker1.setEndDate(end_date);
 
         $('#export_oustanding_report').on('submit', function(e){
             var report_date = $("#report_date").val();
@@ -215,7 +217,13 @@ const page = {
                 type: "POST",
                 dataSrc: function(json) {
                     // Log the entire response to see what extra data is included
-                    console.log('Full Response:', json);
+                    
+                    for (var i = 0; i < json.data.length; i++) {
+                        var value_t = parseFloat(json.data[i]['receivable_amount']);
+                        json.data[i]['receivable_amount'] = (value_t).toFixed(2);
+                        var value_p = parseFloat(json.data[i]['payable_amount']);
+                        json.data[i]['payable_amount'] = (value_p).toFixed(2)
+                    }
                     $(".total_paid_amount").html(json.total_paid_amount)
                     $(".total_pay_amount").html(json.total_pay_amount)
                     return json.data; // This is what populates the DataTable
@@ -240,17 +248,17 @@ const page = {
     filter: function(){
         let that = this;
         $('#part_number_search,#status_search').select2();
-        $('#date_range_filter').daterangepicker({
-            singleDatePicker: false,
-            showDropdowns: true,
-            autoApply: true,
-            locale: {
-                format: 'YYYY/MM/DD' // Change this format as per your requirement
-            }
-        });
-        dateRangePicker = $('#date_range_filter').data('daterangepicker');
-        dateRangePicker.setStartDate(start_date);
-        dateRangePicker.setEndDate(end_date);
+        // $('#date_range_filter').daterangepicker({
+        //     singleDatePicker: false,
+        //     showDropdowns: true,
+        //     autoApply: true,
+        //     locale: {
+        //         format: 'YYYY/MM/DD' // Change this format as per your requirement
+        //     }
+        // });
+        // dateRangePicker = $('#date_range_filter').data('daterangepicker');
+        // dateRangePicker.setStartDate(start_date);
+        // dateRangePicker.setEndDate(end_date);
         $(".search-filter").on("click",function(){
             table.destroy(); 
             that.dataTable();

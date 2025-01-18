@@ -852,6 +852,113 @@ class Dashboard_model extends CI_Model
 	    $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
 	    return $ret_data;
 	}
+	public function get_payable_report($year = '',$month_arr = []){
+	   // pr($year,1);
+       $start_date = date("$year/04/01");
+       $end_date = date(($year+1)."/03/31");
+       $data['end_date'] = $date_filter[1];
+       $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
+       $this->db->select([
+            'grn.inwarding_id',
+            'grn.po_part_id',
+            'grn.po_number',
+            'grn.created_date AS grn_created_date',
+            'grn.invoice_number',
+            'inward.invoice_date',
+            'po.supplier_id',
+            'SUM(grn.qty) AS po_qty',
+            'po.po_number AS poNumber',
+            's.supplier_name',
+            'po.po_date',
+            'part.part_number',
+            'part.part_description',
+            'part.hsn_code',
+            'u.uom_name',
+            'po_parts.tax_id',
+            'po_parts.part_id',
+            'po_parts.rate',
+            'tax.igst',
+            'tax.sgst',
+            'tax.cgst',
+            'tax.tcs',
+            'tax.tcs_on_tax',
+            's.*',
+            'SUM(ROUND(grn.accept_qty, 2)) AS total_accept_qty',
+            'SUM(ROUND(grn.accept_qty * po_parts.rate, 2)) AS base_amount',
+            'SUM(ROUND((grn.accept_qty * po_parts.rate * tax.cgst) / 100, 2)) AS cgst_amount',
+            'SUM(ROUND((grn.accept_qty * po_parts.rate * tax.sgst) / 100, 2)) AS sgst_amount',
+            'SUM(ROUND((grn.accept_qty * po_parts.rate * tax.tcs) / 100, 2)) AS tcs_amount',
+            'SUM(ROUND((grn.accept_qty * po_parts.rate * tax.igst) / 100, 2)) AS igst_amount',
+            'SUM(ROUND(
+                IF(((grn.accept_qty * po_parts.rate * tax.cgst) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.cgst) / 100,0) + 
+                IF(((grn.accept_qty * po_parts.rate * tax.sgst) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.sgst) / 100,0) + 
+                IF(((grn.accept_qty * po_parts.rate * tax.tcs) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.tcs) / 100,0) + 
+                IF(((grn.accept_qty * po_parts.rate * tax.igst) / 100) > 0,(grn.accept_qty * po_parts.rate * tax.igst) / 100,0) + 
+                ROUND(IF((grn.accept_qty * po_parts.rate) > 0,(grn.accept_qty * po_parts.rate),0), 2) - 
+                IF(pr.amount_received > 0,pr.amount_received,0) - 
+                IF(pr.tds_amount > 0,pr.tds_amount,0), 
+                2)) AS bal_amnt',
+            'po.loading_unloading',
+            'po.loading_unloading_gst',
+            'po.freight_amount',
+            'po.freight_amount_gst',
+            'pr.*',
+            'inward.grn_number',
+            'grn.remark as remarks'
+        ]);
+
+        $this->db->from('grn_details grn');
+        $this->db->join('inwarding inward', 'inward.id = grn.inwarding_id', 'inner');
+        $this->db->join('po_parts po_parts', 'po_parts.id = grn.po_part_id', 'inner');
+        $this->db->join('new_po po', 'po.id = grn.po_number', 'inner');
+        $this->db->join('child_part part', 'part.id = po_parts.part_id', 'inner');
+        $this->db->join('uom u', 'u.id = po_parts.uom_id', 'inner');
+        $this->db->join('gst_structure tax', 'tax.id = po_parts.tax_id', 'inner');
+        $this->db->join('supplier s', 's.id = po.supplier_id', 'inner');
+        $this->db->join('payable_report pr', 'inward.grn_number = pr.grn_number', 'left');
+
+        $this->db->where('po.clientId', $this->Unit->getSessionClientId());
+        $this->db->where('inward.grn_number !=', '');
+        
+        if (is_array($search_params) && count($search_params) > 0) {
+            if ($search_params["supplier_id"] != "") {
+                $this->db->where("s.id", $search_params["supplier_id"]);
+            }
+            if (isset($search_params["value"]) && $search_params["value"] != "") {
+                $keyword = $search_params["value"];
+                $this->db->group_start();
+                $fields = [
+                    's.supplier_name'
+                    // Add other fields to search as needed
+                ];
+                
+                foreach ($fields as $field) {
+                    $this->db->or_like($field, $keyword);
+                }
+                $this->db->group_end(); // End the group of OR conditions
+            }
+        }
+
+
+        $current_year = (int) date("Y");
+        if(!((int) date("m") > 3)){
+            $current_year--;
+        }
+
+        $date_filter =  explode((" - "),$search_params["date_range"]);
+        $start_date = date("$current_year/04/01");
+        $end_date = date(($current_year+1)."/03/31");
+        $data['end_date'] = $date_filter[1];
+        $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
+        
+        $this->db->group_by("inward.grn_number");
+
+        $result_obj = $this->db->get();
+                
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        return $ret_data;
+
+    }
 }
 
 ?>

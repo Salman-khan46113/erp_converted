@@ -997,8 +997,25 @@ class Dashboard extends CommonController
         return $count_arr;
     }
 
-    public function get_payable_due_data(){
-        $count_arr['count'] = 0;
+    public function get_payable_due_data($year = '',$month_arr = [],$unit = ''){
+        $total_payable_record = $this->dashboard_model->get_payable_report($year,$month_arr,$unit);
+        $total_pay_amount = 0;
+        foreach ($total_payable_record as $key => $val) {
+                $gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);
+                $total_with_gst = $gst_amount + $val['base_amount'];  
+                $bal_amnt = $total_with_gst - $val['amount_received'] - $val['tds_amount'];
+                if(array_key_exists($val['supplier_id'], $payable_data)){
+                    $payable_data[$val['supplier_id']]['payable_amount'] += $bal_amnt;
+                }else{
+                    $payable_data[$val['supplier_id']] = [
+                        "customer_name" => $val['customer_name'],
+                        "payable_amount" => $bal_amnt,
+                        "receivable_amount" => 0
+                    ];
+                }
+                $total_pay_amount += $bal_amnt;
+            }
+        $count_arr['count'] = $total_pay_amount;
         return $count_arr;
     }
 

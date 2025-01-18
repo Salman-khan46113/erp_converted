@@ -76,7 +76,7 @@
 				                                                <span aria-hidden="true">&times;</span>
 				                                                </button>
 				                                             </div>
-															 <form action="<%base_url('updatechildpart_supplier_admin') %>" method="POST" enctype='multipart/form-data' class="approve-price">
+															 <form action="<%base_url('updatechildpart_supplier_admin') %>" method="POST" enctype='multipart/form-data' class="approve-price approve-price<%$i%> custom-form" id="approve-price<%$i%>">
 				                                             <div class="modal-body">
 															
 				                                                   <div class="row">
@@ -87,11 +87,11 @@
 				                                                         </div>
 				                                                         <div class="form-group">
 				                                                            <label for="po_num">Part Number </label><span class="text-danger">*</span>
-				                                                            <input type="text" value="<%$po[0]->part_number  %>" name="upart_number" readonly class="form-control" placeholder="Enter Part Number.">
+				                                                            <input type="text" value="<%$po[0]->part_number  %>" name="upart_number" readonly class="form-control required-input" placeholder="Enter Part Number.">
 				                                                         </div>
 				                                                         <div class="form-group">
 				                                                            <label for="po_num">Part Price </label><span class="text-danger">*</span>
-				                                                            <input type="text" value="<%$po[0]->part_rate  %>" name="upart_desc"   class="form-control onlyNumericInput" id="exampleInputEmail1">
+				                                                            <input type="text" value="<%$po[0]->part_rate  %>" name="upart_desc"   class="form-control onlyNumericInput required-input" id="exampleInputEmail1" data-min="1">
 				                                                            
 				                                                         </div>
 				                                                      </div>

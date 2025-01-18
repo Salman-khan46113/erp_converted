@@ -10,16 +10,35 @@ const page = {
         this.formValidation();
         let that = this;
         $(document).on("click",".edit-part",function(){
+            $("#error-message-block").hide();
             var data = $(this).attr("data-value");
             data = JSON.parse(atob(data)); 
+            console.log(data);
             $('#sales_number').val(data.sales_number);
             $("#payment_date_modal").val(data.payment_receipt_date);
             $("#receivable_amount_modal").val(data.amount_received);
             $("#transection_detail_modal").val(data.transaction_details);
             $("#tds_val").val(data.tds_amount);
             $("#remark").val(data.remark_val);
+            $("#total_amount_value").val(data.row_total);
             myModal.show();
         })
+        $('#receivable_amount_modal').on('keyup', function(e){
+            var total_amount_value = parseFloat($("#total_amount_value").val());
+            var receivable_amount_modal = parseFloat($("#receivable_amount_modal").val());
+            $("#error-message-block").hide();
+            if(total_amount_value > receivable_amount_modal){
+                $("#error-message-block").show();
+                $("#error-message-block").html("Amount received less than total amount to receive.");
+            }else if(total_amount_value < receivable_amount_modal){
+                $("#error-message-block").show();
+                $("#error-message-block").html("Amount received greater than total amount to receive.");
+            }else{
+                $("#error-message-block").hide();
+            }
+            console.log(total_amount_value,receivable_amount_modal);
+            return;
+        });
         $('#updateReceivableForm').on('submit', function(e){
             e.preventDefault(); // Prevent the default form submission
             var form = $(this);
@@ -29,6 +48,7 @@ const page = {
                 event.preventDefault();
                     return;
             }
+            
             $.ajax({
                 url: base_url+'update_receivable_report',
                 type: 'POST',
