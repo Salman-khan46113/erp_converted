@@ -1,90 +1,44 @@
 
 <div class="content-wrapper">
   <!-- Content -->
-
-  <div class="container-xxl flex-grow-1 container-p-y">
-    <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme filter-popup-block" style="width: 0px;">
-      <div class="app-brand demo justify-content-between">
-        <a href="javascript:void(0)" class="app-brand-link">
-          <span class="app-brand-text demo menu-text fw-bolder ms-2">Filter</span>
-        </a>
-        <div class="close-filter-btn d-block filter-popup cursor-pointer">
-          <i class="ti ti-x fs-8"></i>
-        </div>
+  <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme filter-popup-block" style="width: 0px;">
+   <div class="app-brand demo justify-content-between">
+      <a href="javascript:void(0)" class="app-brand-link">
+      <span class="app-brand-text demo menu-text fw-bolder ms-2">Filter</span>
+      </a>
+      <div class="close-filter-btn d-block filter-popup cursor-pointer">
+         <i class="ti ti-x fs-8"></i>
       </div>
-      <nav class="sidebar-nav scroll-sidebar filter-block" data-simplebar="init">
-        <div class="simplebar-content" >
-          <ul class="menu-inner py-1">
+   </div>
+   <nav class="sidebar-nav scroll-sidebar filter-block" data-simplebar="init">
+      <div class="simplebar-content" >
+         <ul class="menu-inner py-1">
             <!-- Dashboard -->
             <div class="filter-row">
-              <li class="nav-small-cap">
-                <span class="hide-menu">Part Number</span>
-                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
-              </li>
-              <li class="sidebar-item">
-                <div class="input-group">
-                  <select name="child_part_id" class="form-control select2" id="part_number_search">
-                    <option value="">Select Part Number</option>
-                    <%foreach from=$supplier_part_list item=parts%>
-                    <option value="<%$parts->id%>"><%$parts->part_number %></option>
-                    <%/foreach%>
-                  </select>
-                </div>
-              </li>
+                <li class="nav-small-cap">
+                  <span class="hide-menu">Status</span>
+                  <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+                </li>
+                <li class="sidebar-item">
+                  <div class="input-group">
+                  <select name="status_search" id="status_search" class="form-control select2">
+                  <option value="">Select Status </option>
+                  <option value="pending" selected>pending</option>
+                  <option value="completed">Completed</option>
+              </select>
+                  </div>
+                </li>
             </div>
-            <div class="filter-row">
-              <li class="nav-small-cap">
-                <span class="hide-menu">Part Description</span>
-                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
-              </li>
-              <li class="sidebar-item">
-                <div class="input-group">
-                  <input type="text" id="part_description_search" class="form-control" placeholder="Name">
-                </div>
-              </li>
-            </div>
-            <div class="filter-row">
-              <li class="nav-small-cap">
-                <span class="hide-menu">Name</span>
-                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
-              </li>
-              <li class="sidebar-item">
-                <div class="input-group">
-                  <input type="text" id="employee_name_search" class="form-control" placeholder="Name">
-                </div>
-              </li>
-            </div>
-            <div class="filter-row">
-              <li class="nav-small-cap">
-                <span class="hide-menu">Name</span>
-                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
-              </li>
-              <li class="sidebar-item">
-                <div class="input-group">
-                  <input type="text" id="employee_name_search" class="form-control" placeholder="Name">
-                </div>
-              </li>
-            </div>
-            <div class="filter-row">
-              <li class="nav-small-cap">
-                <span class="hide-menu">Name</span>
-                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
-              </li>
-              <li class="sidebar-item">
-                <div class="input-group">
-                  <input type="text" id="employee_name_search" class="form-control" placeholder="Name">
-                </div>
-              </li>
-            </div>
-
-          </ul>
-        </div>
-      </nav>
-      <div class="filter-popup-btn">
-        <button class="btn btn-outline-danger reset-filter">Reset</button>
-        <button class="btn btn-primary search-filter">Search</button>
+        </ul>
       </div>
-    </aside>
+   </nav>
+   <div class="filter-popup-btn">
+      <button class="btn btn-outline-danger reset-filter">Reset</button>
+      <button class="btn btn-primary search-filter">Search</button>
+   </div>
+</aside>
+  <div class="container-xxl flex-grow-1 container-p-y">
+   
 
     <nav aria-label="breadcrumb">
       <div class="sub-header-left pull-left breadcrumb">
@@ -110,6 +64,8 @@
         <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
         <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
         <%/if%>
+        <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
+      <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
 
       </div>
 
@@ -132,7 +88,7 @@
           <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="final_inspection_qa">
             <thead>
                <tr>
-                  <!-- <th>Sr No</th> -->
+                  <th style="display: none;">Sr No</th>
                   <th>Output Part Number / Descriptions </th>
                   <th>Date</th>
                   <th>Shift</th>
@@ -154,11 +110,11 @@
                      <%foreach from=$p_q item=u %>
                         <%assign var='output_part_data' value=$u->output_part_data %>
                            <tr>
-                              <!--<td><%$i %></td>-->
+                              <td style="display: none;"><%$u->id %></td>
                               <td><%$output_part_data[0]->part_number %> /
                                  <%$output_part_data[0]->part_description %>
                               </td>
-                              <td><%$u->date %></td>
+                              <td><%defaultDateFormat($u->date) %></td>
                               <td><%$u->shift_type %>/<%$u->shift_name %></td>
                               <td><%$u->machine_name %></td>
                               <td><%$u->op_name %></td>

@@ -901,4 +901,98 @@ class SalesModel extends CI_Model {
         return $ret_data;
     }
 
+
+    /* global export */
+    public function getSalesReportExportData($search_params = []) {
+        $clientId = $this->Unit->getSessionClientId();
+        $this->db->select('cp.part_number, cp.part_description, c.customer_name, sales.status, sales.sales_number as salesNumber, sales.created_date AS sales_date, parts.*,sales.discount as sales_discount');
+        $this->db->from('new_sales AS sales');
+        $this->db->join('sales_parts AS parts', 'sales.id = parts.sales_id', 'inner');
+        $this->db->join('customer AS c', 'parts.customer_id = c.id', 'inner');
+        $this->db->join('customer_part AS cp', 'parts.part_id = cp.id', 'inner');
+        $this->db->where('sales.clientId', $clientId);
+        $this->db->where('sales.sales_number NOT LIKE', 'TEMP%');
+        $this->db->where_not_in('sales.status', ['pending','unlocked']);
+        
+        // $this->db->limit(20,0);
+        $this->db->order_by("salesNumber","DESC");
+        if ($search_params["date"] != "") {
+                $date_filter =  explode((" - "),$search_params["date"]);
+                $data['start_date'] = $date_filter[0];
+                $data['end_date'] = $date_filter[1];
+                $this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        }
+    
+        $result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        
+        // Debugging: print the last executed query
+        // pr($this->db->last_query(),1);
+        
+        return $ret_data;
+    }
+     public function getGNRepotExportData($search_params = []){
+        $clientId = $this->Unit->getSessionClientId();
+        $this->db->select('
+            grn.inwarding_id, 
+            inward.grn_number, 
+            grn.po_part_id, 
+            grn.po_number, 
+            grn.created_date as grn_created_date,
+            grn.invoice_number, 
+            inward.invoice_date, 
+            po.supplier_id, 
+            grn.qty as po_qty, 
+            po.po_number as poNumber, 
+            s.supplier_name, 
+            po.po_date, 
+            part.part_number, 
+            part.part_description, 
+            part.hsn_code, 
+            u.uom_name,
+            po_parts.tax_id, 
+            po_parts.part_id, 
+            po_parts.rate, 
+            po_parts.discount,
+            grn.accept_qty as total_accept_qty,
+            tax.igst, 
+            tax.sgst, 
+            tax.cgst, 
+            tax.tcs, 
+            tax.tcs_on_tax,
+            ROUND((grn.accept_qty * po_parts.rate), 2) as base_amount, 
+            ROUND(((grn.accept_qty * po_parts.rate) * tax.cgst) / 100, 2) as cgst_amount, 
+            ROUND(((grn.accept_qty * po_parts.rate) * tax.sgst) / 100, 2) as sgst_amount,
+            ROUND(((grn.accept_qty * po_parts.rate) * tax.tcs) / 100, 2) as tcs_amount,
+            ROUND(((grn.accept_qty * po_parts.rate) * tax.igst) / 100, 2) as igst_amount,
+            po.loading_unloading, 
+            po.loading_unloading_gst, 
+            po.freight_amount, 
+            po.freight_amount_gst
+        ');
+        $this->db->from('grn_details grn');
+        $this->db->join('inwarding inward', 'inward.id = grn.inwarding_id', 'inner');
+        $this->db->join('po_parts po_parts', 'po_parts.id = grn.po_part_id', 'inner');
+        $this->db->join('new_po po', 'po.id = grn.po_number', 'inner');
+        $this->db->join('child_part part', 'part.id = po_parts.part_id', 'inner');
+        $this->db->join('uom u', 'u.id = po_parts.uom_id', 'inner');
+        $this->db->join('gst_structure tax', 'tax.id = po_parts.tax_id', 'inner');
+        $this->db->join('supplier s', 's.id = po.supplier_id', 'inner');
+        // $this->db->order_by('grn.id', 'DESC');
+        $this->db->where('po.clientId', $clientId);
+        if ($search_params["date"] != "") {
+                $date_filter =  explode((" - "),$search_params["date"]);
+                $data['start_date'] = $date_filter[0];
+                $data['end_date'] = $date_filter[1];
+               $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        }
+
+        // $this->db->limit(20,0);
+        $this->db->order_by("grn_number","DESC");
+        $query = $this->db->get();
+        $result = is_object($query) ? $query->result_array() : [];
+        // pr($this->db->last_query(),1);
+        return $result;
+    }
+
 } 

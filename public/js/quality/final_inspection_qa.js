@@ -9,6 +9,7 @@ var pdf_title = "Final Inspection Production Qty";
 const page = {
     init: function() {
         this.dataTable();
+        this.filter();
         this.initiateForm();
     },
     dataTable: function() {
@@ -64,6 +65,7 @@ const page = {
         bScrollCollapse: true,
         columnDefs: [{ sortable: false, targets:11 },{ sortable: false, targets: 12 }],
         pagingType: "full_numbers",
+        order: [[0, 'desc']],
        
         
         });
@@ -80,6 +82,28 @@ const page = {
         $('#serarch-filter-input').on('keyup', function() {
             table.search(this.value).draw();
         });
+    },
+    filter: function(){
+
+        let that = this;
+        that.serachParams();
+        $(".search-filter").on("click",function(){
+            that.serachParams();
+            $('.close-filter-btn').trigger('click');
+        })
+        $(".reset-filter").on("click",function(){
+            that.resetFilter();
+        })
+    },
+    serachParams: function(){
+        var status_search = $("#status_search").val();
+        console.log(status_search)
+        table.column(11).search(status_search).draw();
+    },
+    resetFilter: function(){
+        $("#status_search").val("").trigger("change");;
+        table.column(11).search(status_search).draw();
+
     },
     initiateForm: function(){
     	let that = this;

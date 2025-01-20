@@ -358,6 +358,14 @@ class ReportsController extends CommonController
              $this->session->set_userdata(['error_message' => '']);
         }   
         $data['error_message'] = $error_message;
+        $current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+            $current_year--;
+        }
+        $date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['export_start_date'] = $date_filter[0];
+        $data['export_end_date'] = $date_filter[1];
 
 		$this->getPage('reports/reports_grn', $data);	
 	}
@@ -815,6 +823,13 @@ class ReportsController extends CommonController
             
         ];
         $column[] = [
+            "data" => "vehicle_number",
+            "title" => "Vehicle Number",
+            "width" => "25%",
+            "className" => "dt-center",
+            
+        ];
+        $column[] = [
             "data" => "qty",
             "title" => "Total Qty",
             "width" => "25%",
@@ -906,7 +921,7 @@ class ReportsController extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([[14, 'desc']]);
+        $data["sorting_column"] = json_encode([[15, 'desc']]);
         $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();

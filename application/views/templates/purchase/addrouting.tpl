@@ -84,6 +84,7 @@
                                             <th>Input Part Number</th>
                                             <th>Input Part Description</th>
                                             <th>Input Part Qty</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -97,7 +98,42 @@
 	                                                    <td><%$poo->in_partNumber %></td>
 	                                                    <td><%$poo->in_partDesc  %></td>
 	                                                    <td><%$poo->qty %></td>
+                                                      <td class="text-center">
+                                                        
+                                                         <a type="button" class="float-left" data-bs-toggle="modal" data-bs-target="#editModal<%$i %>"><i class="ti ti-edit"></i></a>
+                                                         <div class="modal fade" id="editModal<%$i %>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="exampleModalLabel">Edit </h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                                                            <span aria-hidden="true">&times;</span>
+                                                                        </button>
+                                                                    </div>
+                                                                    <form action="<%base_url('editRoutingParts') %>" id="editRoutingParts<%$i %>" class="editRoutingParts<%$i %> editRoutingParts custom-form" method="POST" enctype='multipart/form-data' >
+                                                                    <div class="modal-body">
+                                                                        
+                                                                            <div class="row">
+                                                                                <div class="col-lg-12">
+                                                                                    <div class="form-group">
+                                                                                        <label for="po_num">Qty</label><span class="text-danger">*</span>
+                                                                                        <input type="text" step="any" value="<%$poo->qty %>" name="qty"  class="form-control onlyNumericInput required-input"  placeholder="Enter Qty">
+                                                                                        <input type="hidden" value="<%$poo->id_val %>" name="id" required class="form-control" id="exampleInputEmail1" placeholder="Enter Part Price">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="modal-footer">
+                                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                                                <button type="submit" class="btn btn-primary">Save changes</button>
+                                                                            </div>
+                                                                    </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                      </td>
 	                                                </tr>
+                                                  <%assign var='i' value=$i+1%>
 	                                        <%/foreach%>
                                         <%/if%>
                                     </tbody>
@@ -123,6 +159,43 @@ const page = {
         // inwarding_grn
         this.dataTable();
         this.formValidation();
+        let that = this;
+        $(".editRoutingParts").submit(function(e){
+          e.preventDefault();
+          let id = $(this).attr("id");
+          let flag = that.formValidate(id);
+          let href = $(this).attr("action");
+          if(flag){
+            return;
+          }
+          var formData = new FormData($('#'+id)[0]);
+          $.ajax({
+            type: "POST",
+            url: href,
+            // url: "add_invoice_number",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+              var responseObject = JSON.parse(response);
+              var msg = responseObject.messages;
+              var success = responseObject.success;
+              if (success == 1) {
+                toastr.success(msg);
+                $(this).parents(".modal").modal("hide")
+                setTimeout(function(){
+                  window.location.reload();
+                },1000);
+
+              } else {
+                toastr.error(msg);
+              }
+            },
+            error: function (error) {
+              console.error("Error:", error);
+            },
+          });
+        });
     },
     dataTable: function(){
         var data ={};

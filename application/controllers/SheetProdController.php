@@ -144,7 +144,6 @@ class SheetProdController extends ProductionController
 		ORDER BY 
 			bom.id DESC");
 
-		
 		$this->load->view('child_pages/sheet_productionQty_add', $data);	//this page is same as that of final inspection qty except machine data filter
 	}
 
@@ -323,6 +322,16 @@ class SheetProdController extends ProductionController
 				$part_condition = " AND p.output_part_table_name ='inhouse_parts' AND p.output_part_id = ".$part_id_val[0];
 			}
 		}
+
+		$status = "pending";
+		if(isset($post_data['status'])){
+			$status = $post_data['status'];
+		}
+		
+		$status_con = $status != "" ? "AND status = '$status'" : "";
+		
+
+	
 		
 		$data['p_q'] = $this->Crud->customQuery('SELECT 
 					p.*, 
@@ -341,11 +350,12 @@ class SheetProdController extends ProductionController
 				WHERE 
 					m.clientId = '.$clientId.'
 					AND STR_TO_DATE(p.created_date, "%d-%m-%Y") BETWEEN "'.$date_filter[0].'" AND "'.$date_filter[1].'"
-					'.$machin_name.' '.$part_condition.'
+					'.$machin_name.' '.$part_condition.' '.$status_con.'
 				ORDER BY 
 					p.date DESC 
 				');
 		
+
 		$data['reject_remark'] = $this->Crud->read_data("reject_remark");
 		$CI =& get_instance();
 	   	// Load the model
@@ -358,6 +368,7 @@ class SheetProdController extends ProductionController
             }
             $data['p_q'][$key]->output_part_data = $output_part_data;
 		}
+		// pr($data['p_q'],1);
 
 		$inhouse_parts = $this->InhouseParts->readInhousePartsOnly();
 		$customer_part = $this->Crud->read_data("customer_part");
@@ -365,6 +376,8 @@ class SheetProdController extends ProductionController
 			$value->id = $value->id."|custom_part";
 			$inhouse_parts[] = $value;
 		}
+		// pr($inhouse_parts,1);
+		$data['status'] = $status;
 		$data['reject_remark'] = $this->Crud->read_data("reject_remark");
 		$data['inhouse_parts'] = $inhouse_parts;
 		$data['inhouse_parts'] = $inhouse_parts;
@@ -539,8 +552,11 @@ class SheetProdController extends ProductionController
 				JOIN 
 					shifts s ON pq.shift_id = s.id 
 				WHERE EXISTS ( SELECT 1 FROM machine m WHERE clientId = ".$clientId." AND m.id = pq.machine_id )
+				ORDER BY pq.date desc
+
 		
 		");
+		
 		$data['shifts'] = $this->Crud->read_data("shifts",true);
 		$data['operator'] = $this->Crud->read_data("operator",true);
 		$data['machine'] = $this->Crud->read_data("machine",true);
@@ -798,10 +814,14 @@ class SheetProdController extends ProductionController
 			"status" => "completed"
 		);
 
+		$unit_id = $this->Unit->getSessionClientId();
+		$get_previous_qty = $this->Crud->customQuery("SELECT *FROM child_part_stock WHERE childPartId = ".$child_part_id." AND clientId = $unit_id");
+		$get_previous_qty = isset($get_previous_qty[0]->sharing_qty) && $get_previous_qty[0]->sharing_qty > 0 ? $get_previous_qty[0]->sharing_qty : 0;
+		
 		$update = $this->Crud->update_data("sharing_issue_request", $data23333, $id);
 		if ($update) {
 			$new_stock = $actual_stock - $accepted_qty;
-			$new_sharing_qty = $sharing_qty + $accepted_qty;
+			$new_sharing_qty = $get_previous_qty + $accepted_qty;
 			$stockColName = $this->Unit->getStockColNmForClientUnit();
 			$sharingQtyColName = $this->Unit->getSharingQtyColNmForClientUnit();
 
@@ -809,6 +829,7 @@ class SheetProdController extends ProductionController
 				$stockColName => $new_stock,
 				$sharingQtyColName => $new_sharing_qty,
 			);
+
 			$result2 = $this->SupplierParts->updateStockById($data2, $child_part_id);
 			// echo "<script>alert('Updated Successfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
 			$messages = "Updated Successfully";

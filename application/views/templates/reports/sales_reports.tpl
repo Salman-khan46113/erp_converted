@@ -84,6 +84,8 @@
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
         <%if checkGroupAccess("sales_report","export","No") %>
+        <button class="btn btn-seconday" type="button" id="downloadOustandingReport"  data-bs-toggle="modal"
+           data-bs-target="#addPromo" title="Download Sales Report"><i class="ti ti-download"></i></button>
         <button type="button" class="btn btn-seconday" data-toggle="modal"
                                             data-bs-target="#exportForTally" data-bs-toggle="modal">
                                             Sales Export For Tally
@@ -99,7 +101,58 @@
     <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
   </div>
     <div class="content-wrapper ">
-     
+        <div class="modal fade global-export" id="addPromo" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel" aria-hidden="true">
+         <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Download Sales Report</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+
+                  </button>
+               </div>
+               <div class="modal-body">
+                  <div class="form-group ps-2">
+                     <form action="javascript:void(0)" method="POST"
+                        enctype="multipart/form-data" id="export_oustanding_report">
+                            
+                            <div class="form-group mb-4 hide">
+                              <label for="on click url " class="float-start mt-2 me-2">Export To :</label>
+                               <div class="row w-50 " style="    overflow-y: unset;">
+                                    <div class="form-check " style="width:36%">
+                                      <div class="ms-2 mt-2">
+                                          <input class="form-check-input me-2" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="csv" checked>
+                                      </div>
+                                      <label class="form-check-label " for="inlineRadio1">
+                                        <i class="ti ti-file-type-csv"></i>
+                                      </label>
+                                    </div>
+                                    <div class="form-check "style="width:36%">
+                                      <div class="ms-2 mt-2">
+                                            <input class="form-check-input me-2" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="pdf" >
+                                         </div>
+                                        <label class="form-check-label " for="inlineRadio2">
+                                            <i class="ti ti-file-type-pdf"></i>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                          <div class="form-group mt-2" >
+                          <label for="on click url" class="float-start" style="width: 17%;">Date <span class="text-danger">*</span>:</label>
+                          <input  type="text" name="report_date" placeholder="Enter Name"
+                             class="form-control w-50" id="report_date">
+                          </div>
+                       </div>
+                       <div class="modal-footer">
+                       <button type="button" class="btn btn-secondary"
+                          data-bs-dismiss="modal">Close</button>
+                       <button type="submit" class="btn btn-primary">Save changes</button>
+                    </form>
+               </div>
+            </div>
+         </div>
+         </div>
+      </div>
         <!-- Main content -->
         <section class="content">
             <div class="">
@@ -306,6 +359,9 @@
     </div>
     <!-- /.content-wrapper -->
 </div>
+<style type="text/css">
+  
+</style>
 <script>
     var column_details =  <%$data|json_encode%>;
     var page_length_arr = <%$page_length_arr|json_encode%>;
@@ -320,5 +376,7 @@
     var base_url = <%$base_url|json_encode%>;
     var start_date = <%$start_date|json_encode%>;
     var end_date = <%$end_date|json_encode%>;
+    var export_start_date = <%$export_start_date|json_encode%>;
+    var export_end_date = <%$export_end_date|json_encode%>;
 </script>
 <script src="<%$base_url%>/public/js/reports/sales_repots.js"></script>

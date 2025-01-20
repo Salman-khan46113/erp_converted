@@ -291,6 +291,7 @@ $route['addrouting/(:any)'] = 'welcome/addrouting';
 $route['addrouting_customer_subcon/(:any)'] = 'welcome/addrouting_customer_subcon';
 $route['insert_challan_history'] = 'welcome/insert_challan_history';
 $route['addRoutingParts'] = 'welcome/addRoutingParts';
+$route['editRoutingParts'] = 'welcome/editRoutingParts';
 $route['addRoutingParts_subcon'] = 'welcome/addRoutingParts_subcon';
 
 $route['add_challan_parts_subcon'] = 'welcome/add_challan_parts_subcon';
@@ -595,6 +596,7 @@ $route['reuse_invoice'] = 'SalesController/reuse_invoice';
 $route['cancel_sale_invoice'] = 'SalesController/cancel_sale_invoice';
 $route['delete_sale_invoice'] = 'SalesController/delete_sale_invoice';
 $route['sales_report'] = 'SalesController/sales_report';
+$route['sales_report_export'] = 'SalesController/generateSalesReportPdf';
 $route['hsn_report'] = 'SalesController/hsn_report';
 $route['receivable_report'] = 'SalesController/receivable_report';
 $route['outstanding_report'] = 'SalesController/outstanding_report';

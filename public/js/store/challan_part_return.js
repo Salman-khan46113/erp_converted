@@ -55,9 +55,9 @@ const page = {
 	      // scrollX: true,
 	      scrollY: '200px',
 	      bScrollCollapse: true,
-	      columnDefs: [{ sortable: false, targets: 5 }],
+	      columnDefs: [{ sortable: false, targets: 6 }],
 	      pagingType: "full_numbers",
-	     
+	      order: [[0, 'desc']],
 	      
 	  });
       $('.dataTables_length').find('label').contents().filter(function() {

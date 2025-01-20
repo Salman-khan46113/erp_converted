@@ -18,6 +18,25 @@ const page = {
         if(error_message != ""){
             toastr.error(error_message)
         }
+         $('#report_date').daterangepicker({
+            singleDatePicker: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: 'YYYY/MM/DD' // Change this format as per your requirement
+            }
+        });
+        var dateRangePicker1 = $('#report_date').data('daterangepicker');
+        dateRangePicker1.setStartDate(export_start_date);
+        dateRangePicker1.setEndDate(export_end_date);
+
+        $('#export_oustanding_report').on('submit', function(e){
+            var report_date = $("#report_date").val();
+            var type = $("[name='inlineRadioOptions']:checked").val();
+            console.log(type)
+            window.location.href = base_url+'sales_report_export?date='+report_date+"&type="+type+"&report_type=grn";
+            
+        });
 
     },
     dataTable: function(){

@@ -3531,13 +3531,14 @@ class Welcome extends CommonController
 		$data['part_id'] = $this->uri->segment('2');
 		$data['child_part_master'] = $this->Crud->customQuery('SELECT DISTINCT part_number, id FROM `child_part` WHERE sub_type !="Subcon grn"');
 		$data['routing'] = $this->Crud->customQuery("
-			SELECT r.id, r.qty, o.part_number as out_partNumber, o.part_description as out_partDesc, i.part_number as in_partNumber, i.part_description as in_partDesc
+			SELECT  r.qty, o.part_number as out_partNumber, o.part_description as out_partDesc, i.part_number as in_partNumber, i.part_description as in_partDesc,r.id as id_val
 			FROM `routing` r
 			INNER JOIN child_part o ON o.id = r.part_id
 			INNER JOIN child_part i ON i.id = r.routing_part_id
 			WHERE r.part_id = ".$data['part_id']);
 
 		// $this->load->view('header');
+        // pr($data,1);
 		$this->loadView('purchase/addrouting', $data);
 		// $this->load->view('footer');
 	}
@@ -4837,7 +4838,7 @@ class Welcome extends CommonController
 					AND m.name = "FINAL INSPECTION"
 				ORDER BY
 					p.id DESC
-				LIMIT 10');
+				');
 		foreach ($data['p_q'] as $key => $u) {
 
 			if ($u->output_part_table_name == "inhouse_parts1") {
@@ -5240,6 +5241,31 @@ class Welcome extends CommonController
         echo json_encode($return_arr);
         exit;
 	}
+    public function editRoutingParts()
+    {
+        $post_data = $this->input->post();
+        $success = 0;
+        $message = "Something went wrong!";
+        $update_data = array(
+            'qty' => $post_data['qty']
+        );
+        $update = $this->Crud->update_data("routing", $update_data, $post_data['id']);
+        if ($update) {
+            $message = "Updated successfully";
+            $success = 1;
+                    // echo "<script>alert('successfully added');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+        } else {
+            $message = "Error,try again";
+            // echo "<script>alert('Error IN User  Adding ,try again');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+        }
+        $return_arr = [
+            "success" => $success,
+            "messages" => $message
+        ];
+
+        echo json_encode($return_arr);
+        exit;
+    }
 	public function addRoutingParts_subcon()
 	{
 		$data = array(
@@ -5372,6 +5398,7 @@ class Welcome extends CommonController
 	public function update_p_q()
 	{
 
+        // pr("ok",1);
 		$id = $this->input->post('id');
 		$p_q_main_data = $this->Crud->get_data_by_id("p_q", $id, "id");
 

@@ -328,7 +328,7 @@ class StockController extends CommonController
 			$data[$key][$sheet_prod_column_name] = $production_stocks;
 			$data[$key]['stock_html'] = $stock_temp_html;
 			$data[$key]['transfer_fg'] = $transfer_fg;
-			$data[$key]['stock_value'] = $stock_val;
+			$data[$key]['stock_value'] = number_format($stock_val,2,".","");
 			$data[$key][$plastic_prod_column_name] = $plastic_prod_details;
 			$data[$key]['plastic_prod_details'] = $value['production_rejection'];
 			

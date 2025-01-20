@@ -53,6 +53,21 @@
             </div>
             <div class="filter-row">
               <li class="nav-small-cap">
+                <span class="hide-menu">Status</span>
+                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+              </li>
+              <li class="sidebar-item">
+                <div class="input-group">
+                  <select name="status" class="form-control select2" id="search_status">
+                        <option value="">Select Status</option>
+                        <option value="pending" <%if $status eq 'pending'%>selected<%/if%>>pending</option>
+                        <option value="completed" <%if $status eq 'completed'%>selected<%/if%>>completed</option>
+                       </select>
+                </div>
+              </li>
+            </div>
+            <div class="filter-row">
+              <li class="nav-small-cap">
                 <span class="hide-menu"> Date</span>
                 <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
               </li>
@@ -108,7 +123,7 @@
                      <table id="molding_production" class="table table-striped">
                         <thead>
                            <tr>
-                              <!-- <th>Sr No</th> -->
+                              <th style="display: none">Sr No</th>
                               <th>Output Part Number / Descriptions </th>
                               <th>Date</th>
                               <th>Shift</th>
@@ -129,7 +144,7 @@
                            <%assign var='i' value=1%>
                            <%foreach from=$p_q item=u %>
                            <tr>
-                              <!-- <td><%$i %></td> -->
+                              <td style="display: none"><%$u->id %></td>
                               <td><%$u->output_part_data[0]->part_number %>/<%$u->output_part_data[0]->part_description %>
                               </td>
                               <td><%$u->date %></td>
@@ -260,7 +275,7 @@
                                  </div>
                               </td>
                               <td><%$u->status %></td>
-                              <td>
+                              <td style="text-align: center;">
                                  <%if ($u->status == "pending") %>
                                    <%if checkGroupAccess("view_p_q","update","No")%>
                                         <button type="button" class="btn btn-danger float-left "
@@ -270,7 +285,7 @@
                                       <%display_no_character("")%>
                                     <%/if%>
                                  <%else %>
-                                 Completed
+                                 --
                                  <%/if%>
                                  <div class="modal fade" id="acceptReject<%$i %>" tabindex="-1"
                                     role="dialog" aria-labelledby="exampleModalLabel"
@@ -292,7 +307,7 @@
                                                          <label for="">Qty</label>
                                                          <input type="text"
                                                             value="<%$u->qty %>"
-                                                            readonly class="form-control">
+                                                            readonly class="form-control qty_required">
                                                       </div>
                                                    </div>
                                                    <div class="col-lg-12">
@@ -302,7 +317,7 @@
                                                          </label>
                                                          <input type="text" step="any" value=""
                                                             data-max="<%$u->qty %>" dat-min="0"
-                                                            class="form-control required-input"
+                                                            class="form-control required-input accepted_qty onlyNumericInput"
                                                             name="accepted_qty"
                                                             placeholder="Enter Accepted Quantity"
                                                             >
@@ -315,7 +330,7 @@
                                                          </label>
                                                          <input type="text" step="any" value=""
                                                             data-max="<%$u->qty %>" data-min="0"
-                                                            class="form-control required-input onlyNumericInput"
+                                                            class="form-control required-input onlyNumericInput onhold_qty"
                                                             name="onhold_qty"
                                                             placeholder="Enter onhold" >
                                                       </div>

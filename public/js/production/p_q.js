@@ -40,9 +40,20 @@ const page = {
                 format: 'YYYY/MM/DD' // Change this format as per your requirement
             }
         });
+
         dateRangePicker = $('#date_range_filter').data('daterangepicker');
         dateRangePicker.setStartDate(start_date);
         dateRangePicker.setEndDate(end_date);
+
+
+        $(".accepted_qty").on("keyup",function(){
+          var parent_el = $(this).parents(".update_p_q");
+          var required_qty = parseFloat($(parent_el).find(".qty_required").val());
+          var accepted_qty = parseFloat($(this).val());
+          var onhold_qty = required_qty - accepted_qty;
+          $(parent_el).find(".onhold_qty").attr("data-max",onhold_qty);
+          console.log(required_qty,accepted_qty);
+        })
     },
     dataTable: function() {
         var data = {};
@@ -93,12 +104,12 @@ const page = {
             },
         ],
         searching: true,
-        // scrollX: true,
+        scrollX: true,
         scrollY: true,
         bScrollCollapse: true,
         columnDefs: [{ sortable: false, targets: 8 }],
         pagingType: "full_numbers",
-       	order: [[1, 'desc']]
+       	order: [[0, 'desc']]
         
         });
         $('.dataTables_length').find('label').contents().filter(function() {
@@ -141,6 +152,7 @@ const page = {
     resetFilter: function(){
         $('#search_inhouse_part_name').val('').trigger("change");
         $('#search_machine_name').val('').trigger("change");
+        $('#search_status').val('').trigger("change");
         dateRangePicker.setStartDate(start_date);
         dateRangePicker.setEndDate(end_date);
         $('#seacrh-filter-block').trigger('submit');

@@ -4,7 +4,7 @@
 
   <div class="container-xxl flex-grow-1 container-p-y">
    
-      <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme filter-popup-block" style="width: 0px;">
+ <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme filter-popup-block" style="width: 0px;">
    <div class="app-brand demo justify-content-between">
       <a href="javascript:void(0)" class="app-brand-link">
       <span class="app-brand-text demo menu-text fw-bolder ms-2">Filter</span>

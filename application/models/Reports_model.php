@@ -256,7 +256,8 @@ class Reports_model extends CI_Model {
 			parts.tax_id as taxid,
 			parts.po_number,
 			parts.hsn_code,
-			sales.id as sales_id
+			sales.id as sales_id,
+			sales.vehicle_number
 			");
 
 		$this->db->from('new_sales AS sales');
@@ -300,6 +301,7 @@ class Reports_model extends CI_Model {
 	                'sales.status',
 	                'parts.qty',
 	                'sales.discount_amount',
+	                'sales.vehicle_number'
 	                // Add other fields to search as needed
 	            ];
 	            
@@ -382,6 +384,7 @@ class Reports_model extends CI_Model {
 	                'sales.status',
 	                'parts.qty',
 	                'sales.discount_amount',
+	                'sales.vehicle_number'
 	                // Add other fields to search as needed
 	            ];
 	            

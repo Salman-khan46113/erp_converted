@@ -717,9 +717,9 @@ class ChallanController extends CommonController {
 		$data['customer'] = $this->Crud->read_data("customer");
 		// $data['rejection_sales_invoice'] = $this->Crud->read_data("rejection_sales_invoice");
 		$sql = "
-			SELECT ch.*,c.customer_name as customer_name
+			SELECT ch.*,c.customer_name as customer_name,DATE(ch.created_date) as created_date
 			FROM customer_challan_part_return as ch
-			LEFT JOIN customer as c On c.id = ch.customer_id ORDER BY ch.created_date DESC ";
+			LEFT JOIN customer as c On c.id = ch.customer_id ORDER BY ch.customer_challan_part_return_id DESC ";
 		$data['customer_challan_part_return'] = $this->Crud->customQuery($sql);
 		// pr($data['customer_challan_return'],1);
 		$data['transporter'] = $this->Crud->read_data("transporter");
@@ -832,23 +832,25 @@ class ChallanController extends CommonController {
 					}
 					$total_rate = $total_amount + $gst_amount;	
 
-					$return_part_data[] = array(
-						"customer_id" => $customer_id,
-						"customer_challan_part_return_id" => $insert_id,
-						"part_id" => $part_id,
-						"qty" => $qty,
-						"created_by" => $this->user_id,
-						"created_date" => date("Y-m-d H:i:s"),
-						'part_price' => $value['rate'],
-						"basic_total" => $basic_total,
-						'total_rate' =>$total_rate,
-						'cgst_amount' =>$cgst_amount,
-						'sgst_amount' =>$sgst_amount ,
-						'igst_amount' => $igst_amount,
-						'tcs_amount' =>$tcs_amount,
-						'gst_amount'=>$gst_amount
-				
-					);
+					if($qty > 0){
+						$return_part_data[] = array(
+							"customer_id" => $customer_id,
+							"customer_challan_part_return_id" => $insert_id,
+							"part_id" => $part_id,
+							"qty" => $qty,
+							"created_by" => $this->user_id,
+							"created_date" => date("Y-m-d H:i:s"),
+							'part_price' => $value['rate'],
+							"basic_total" => $basic_total,
+							'total_rate' =>$total_rate,
+							'cgst_amount' =>$cgst_amount,
+							'sgst_amount' =>$sgst_amount ,
+							'igst_amount' => $igst_amount,
+							'tcs_amount' =>$tcs_amount,
+							'gst_amount'=>$gst_amount
+					
+						);
+					}
 				}
 
 				$part_insert_id = $this->SupplierParts->saveCustomerChallanPartReturnPart($return_part_data);
@@ -1132,18 +1134,21 @@ class ChallanController extends CommonController {
                $signatureImageUrl = base_url("dist/img/signature_image/").$configuration['SignatureImage'];
             }
         }
+
+        /* added because its not aplicable */
+        $digitalSignature = "No";
+
         $data['signatureImageEnable'] =$signatureImageEnable;
         $data['signatureImageUrl'] =$signatureImageUrl;
         $data['digitalSignature'] =$digitalSignature;
         $data['copies'] = $copies;
         
 		$html_content = $this->smarty->fetch('store/return_challan_miltiple_pdf.tpl', $data, TRUE);
-		// pr($html_content,1);
+		
 		$this->pdf->loadHtml($html_content);
         $this->pdf->render();
         $pdfName = $customer_challan_part_return_id.'-Delivery-Challan-'. $type . '.pdf';
-        if($digitalSignature== "Yes" ){
-        	   
+        if($digitalSignature== "Yes"){
                 $output = $this->pdf->output();
                 $fileName = "dist/uploads/challan_return_part_print/".$pdfName;
                 $fileAbsolutePath = FCPATH.$fileName;

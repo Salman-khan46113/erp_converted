@@ -811,3 +811,15 @@ a.nav-active-link {
     margin: 11px !important;
     width: 16% !important;
 }
+
+
+ .global-export i.ti {
+        font-size: 24px;
+    /* border: 1px solid; */
+    padding: 8px;
+    border-radius: 3px;
+    /* margin-bottom: 15px !important; */
+    color: var(--bs-theme-color);
+    /* background: var(--bs-theme-light4-color); */
+    background: var(--bs-theme-light4-color) !important;
+    }

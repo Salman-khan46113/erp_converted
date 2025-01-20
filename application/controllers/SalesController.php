@@ -1175,6 +1175,16 @@ class SalesController extends CommonController
         $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
+
+        $current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+        	$current_year--;
+        }
+		$date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['export_start_date'] = $date_filter[0];
+        $data['export_end_date'] = $date_filter[1];
+
 		$this->loadView('reports/sales_reports', $data);
 		}
 	}
@@ -1229,8 +1239,409 @@ class SalesController extends CommonController
         $data["recordsTotal"] = $total_record['total_record'];
         $data["recordsFiltered"] = $total_record['total_record'];
         echo json_encode($data);
-        exit();
-		
+        exit();	
+	}
+
+	public function generateSalesReportPdf(){
+		// pr("ok",1);
+		$post_data = $this->input->get();
+		// pr($post_data,1);
+		$export_data = $this->export_column($post_data);
+		$sales_data = $export_data['result_data'];
+		$column = $export_data['column'];
+		$file_name = $export_data['file_name'];
+		$title = $data['title'] = $export_data['title'];
+		$data['sales_data'] = $sales_data;
+        if($post_data['type'] == 'pdf'){
+	        $data['column'] = $column;
+	        $data['date'] = $post_data['date'];
+	        // pr($data['column'],1);
+	        $html_content = $this->smarty->fetch('sales/sales_report_export.tpl', $data, TRUE);
+	         // pr($html_content,1);
+	        $pdf = new Pdf1('P', 'mm', 'A4', true, 'UTF-8', false);
+
+	        // Set margins (adjust as needed)
+	        $pdf->SetMargins(7, 7, 7, 7);
+
+	        // Set document information
+	        $pdf->SetCreator(PDF_CREATOR);
+
+	        // Disable header and footer
+	        $pdf->setPrintHeader(false);
+	        $pdf->setPrintFooter(false);
+
+	        // Set default monospaced font
+	        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+	        // Enable auto page breaks (optional)
+	        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+	        // Set image scale factor
+	        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+	        // Add a page
+	        $pdf->AddPage();
+
+	        // set some text to print
+	        // $html = file_get_contents('path_to_html_file.html'); // Load your HTML content
+
+	        // output the HTML content
+	        $pdf->writeHTML($html_content, true, false, true, false, '');
+
+	        $pdf->Output("$file_name.pdf", 'D');
+	        ob_end_flush();
+	    }else{
+	        $csv_column = [];
+	        foreach ($column as $key => $value) {
+	        	array_push($csv_column, $value['title']);
+	        }
+	        $csv_output = [];
+	        foreach ($sales_data as $key => $value) {
+	        	$row_data = [];
+	        	foreach ($column as $key_val => $val) {
+	        		array_push($row_data, $value[$val['data']]);
+	        	}
+	        	array_push($csv_output, $row_data);
+	        }
+	        
+	      	
+	        // Set headers to force download
+	        header('Content-Type: text/csv');
+	        header('Content-Disposition: attachment; filename="'.$file_name.'.csv"');
+	        header('Pragma: no-cache');
+	        header('Expires: 0');
+
+	        // Open PHP output stream for the CSV file
+	        $output = fopen('php://output', 'w');
+	        
+	        $extra_row = ['Date : '.$post_data['date']];  // Customize as needed
+			fputcsv($output, $extra_row);
+	        // Optional: Add column headers to the CSV file
+	        fputcsv($output, $csv_column);
+
+	        // Loop through the data and write to the CSV file
+	        foreach ($csv_output as $row) {
+	            fputcsv($output, $row);  // Each $row should be an array
+	        }
+
+	        // Close the output stream
+	        fclose($output);
+        }
+	}
+
+	public function export_column($post_data = []){
+		$return_arr = [];
+		$type = $post_data['report_type'];
+		if($type == "sales"){
+			$return_arr['column'] = [
+				[
+		            "data" => "customer_name",
+		            "title" => "CUSTOMER NAME",
+		            "width" => "14%",
+		            "className" => "dt-left",
+		        ],
+		        [
+		            "data" => "po_number",
+		            "title" => "Customer PO No",
+		            "width" => "16%",
+		            "className" => "dt-left",
+		        ],
+		        [
+		            "data" => "salesNumber",
+		            "title" => "SALES INV NO",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "sales_date",
+		            "title" => "SALES INV DATE",
+		            "width" => "10%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "status",
+		            "title" => "SALES STATUS",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "part_number",
+		            "title" => "PART NO",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "part_description",
+		            "title" => "PART NAME",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "hsn_code",
+		            "title" => "HSN",
+		            "width" => "7%",
+		            "className" => "dt-center status-row",
+		        ],
+		        [
+		            "data" => "qty",
+		            "title" => "QTY",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "uom_id",
+		            "title" => "UOM",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "rate",
+		            "title" => "Part Price",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "sales_discount",
+		            "title" => "Discount",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "subtotal",
+		            "title" => "Taxable Amount",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		            'orderable' => false
+		        ],
+		        [
+		            "data" => "sgst_amount",
+		            "title" => "SGST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "cgst_amount",
+		            "title" => "CGST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "igst_amount",
+		            "title" => "IGST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "tcs_amount",
+		            "title" => "TCS",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "gst_amount",
+		            "title" => "TOTAL GST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "row_total",
+		            "title" => "TOTAL WITH GS",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ]
+	        ];
+	        $sales_data = $this->SalesModel->getSalesReportExportData($post_data);
+	        foreach ($sales_data as $key => $val) {
+				if ($val['basic_total'] > 0) {
+					$subtotal = $val['basic_total'];
+				} else {
+					$subtotal = round($val['total_rate'] - $val['gst_amount'], 2);
+				}
+				$total_balance_amount += $subtotal;
+				
+				if ($val['part_price'] > 0) {
+					$rate = $val['part_price'];
+				} else {
+					$rate = round($subtotal / $val['qty'], 2);
+				}
+				if($val['status'] == "Cancelled"){
+					$sales_data[$key]['qty'] = 0;
+				}
+				$row_total =  round($val['total_rate'], 2) + round($val['tcs_amount'], 2);
+				$sales_data[$key]['subtotal'] = $subtotal;
+				$sales_data[$key]['rate'] =  $rate;
+				$sales_data[$key]['sales_discount'] =  ($val['sales_discount'] > 0) ? $val['sales_discount']." %": display_no_character();
+				$sales_data[$key]['row_total'] = $row_total;	
+			}
+			$return_arr['result_data'] = $sales_data;
+			$return_arr['file_name'] = "sales_report";
+			$return_arr['title'] = "Sales Report";
+
+	    }else if($type == "grn"){
+	    	$return_arr['column'] = [
+				[
+		            "data" => "supplier_name",
+		            "title" => "Supplier name",
+		            "width" => "14%",
+		            "className" => "dt-left",
+		        ],
+		        [
+		            "data" => "part_number",
+		            "title" => "Part No",
+		            "width" => "16%",
+		            "className" => "dt-left",
+		        ],
+		        [
+		            "data" => "part_description",
+		            "title" => "Part Description",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "rate",
+		            "title" => "Part Rate",
+		            "width" => "10%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "hsn_code",
+		            "title" => "HSN",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "uom_name",
+		            "title" => "UOM",
+		            "width" => "17%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "poNumber",
+		            "title" => "PO No",
+		            "width" => "7%",
+		            "className" => "dt-center text-nowrap",
+		        ],
+		        [
+		            "data" => "po_date",
+		            "title" => "PO Date",
+		            "width" => "7%",
+		            "className" => "dt-center text-nowrap",
+		        ],
+		        [
+		            "data" => "grn_number",
+		            "title" => "GRN No",
+		            "width" => "17%",
+		            "className" => "dt-center text-nowrap",
+					
+		        ],
+		        [
+		            "data" => "grn_created_date",
+		            "title" => "GRN Date",
+		            "width" => "7%",
+		            "className" => "dt-center text-nowrap",
+		        ],
+		        [
+		            "data" => "invoice_number",
+		            "title" => "Invoice Number",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "invoice_date",
+		            "title" => "Invoice Date",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "po_qty",
+		            "title" => "PO Qty",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "total_accept_qty",
+		            "title" => "Accepted QTY",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "base_amount",
+		            "title" => "Basic Amount",
+		            "width" => "7%",
+		            "className" => "dt-center status-row",
+		        ],
+		        [
+		            "data" => "sgst_amount",
+		            "title" => "SGST",
+		            "width" => "17%",
+		            "className" => "dt-center",
+					
+		        ],
+		        [
+		            "data" => "cgst_amount",
+		            "title" => "CGST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "igst_amount",
+		            "title" => "IGST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "tcs_amount",
+		            "title" => "TCS",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "gst_amount",
+		            "title" => "GST Total",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "total_with_gst",
+		            "title" => "Total Amount With GST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ]
+		    ];
+		    $data = $this->SalesModel->getGNRepotExportData($post_data);
+			foreach($data as $k=>$v){
+				$data[$k]['po_date']= defaultDateFormat($v['po_date']);
+				$data[$k]['invoice_date'] = defaultDateFormat($v['invoice_date']);
+				$data[$k]['grn_created_date'] = defaultDateFormat($v['grn_created_date']);
+				$gst_amount = $v['sgst_amount'] + $v['cgst_amount'] + $v['igst_amount'] + $v['tcs_amount'];
+				// Calculate total_with_gst
+				$total_with_gst = $gst_amount + $v['base_amount'];
+				// Initialize tcs_amount
+				$tcs_amount = 0;
+				// Check if tcs_amount is not empty and assign its value
+				if (!empty($v['tcs_amount'])) {
+					$tcs_amount = $g->tcs_amount;
+				}
+				$data[$k]['gst_amount'] = $gst_amount;
+				$data[$k]['total_with_gst'] = number_format($total_with_gst,2,".","");
+				$data[$k]['tcs_amount'] = $tcs_amount;
+			}
+			$return_arr['result_data'] = $data;
+			$return_arr['file_name'] = "grn_report";
+			$return_arr['title'] = "GRN Report";
+
+	    }
+	    return $return_arr;
 	}
 	public function hsn_report()
 	{

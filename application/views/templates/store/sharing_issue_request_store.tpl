@@ -64,7 +64,7 @@
                      <table id="sharing_issue_request_store" class="table  table-striped">
                         <thead>
                            <tr>
-                              <!-- <th>Sr No</th> -->
+                              <th style="display: none;">Sr No</th>
                               <th>Part Number / Description / Thickness / Weight</th>
                               <th>Status</th>
                               <th>Date & Time</th>
@@ -77,10 +77,10 @@
                         </thead>
                         <tbody>
                            <%if ($sharing_issue_request) %>
-                                  <%assign var='i' value=1 %>
+                                  <%assign var='i' value=1 %>                       
                                   <%foreach from=$sharing_issue_request item=u %>
 				                           <tr>
-				                              <!--<td><%$i %></td>-->
+				                              <td style="display: none;"><%$u->id %></td>
 				                              <td><%$u->part_number %> /
 				                                 <%$u->part_description %>/
 				                                 <%$u->thickness %>/
