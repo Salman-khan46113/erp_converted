@@ -621,11 +621,10 @@ class ReportsController extends CommonController
         $condition_arr["length"] = $post_data["length"];
         $base_url = $this->config->item("base_url");
         $data = $this->Reports_model->getPayableReportView($condition_arr,$post_data["search"]);
-        // pr($data,1); 
         
         foreach ($data as $key => $objs) {
             $gst_amount = (float)($objs['sgst_amount'] + $objs['cgst_amount'] + $objs['igst_amount'] + $objs['tcs_amount']);
-            $data[$key]['gst_amount'] = $gst_amount;
+            $data[$key]['gst_amount'] = number_format($gst_amount,2,".","");
             $created_date_str = $objs['grn_created_date'];  
             $total_with_gst = $gst_amount + $objs['base_amount'];  
             $data[$key]['total_with_gst'] = $total_with_gst;
@@ -699,13 +698,13 @@ class ReportsController extends CommonController
             $data[$key]['grn_created_date'] = defaultDateFormat($objs['grn_created_date']);
             $data[$key]['invoice_date'] = defaultDateFormat($objs['invoice_date']);
             $data[$key]['payment_receipt_date'] = defaultDateFormat($objs['payment_receipt_date']);  
-
+             $data[$key]['base_amount'] = number_format($objs['base_amount'],2,".","");
             $data[$key]['cgst_amount'] = number_format($objs['cgst_amount'],2,".","");
             $data[$key]['sgst_amount'] = number_format($objs['sgst_amount'],2,".","");
             $data[$key]['igst_amount'] = number_format($objs['igst_amount'],2,".","");                                
                                                                                 
         }  
-
+        // pr($data,1);
         $data["data"] = $data;
         $total_record = $this->Reports_model->getReceivableReportCount([], $post_data["search"]);
         $total_with_gst_val = 0;
@@ -722,7 +721,9 @@ class ReportsController extends CommonController
             $total_paid_amount += $objs['amount_received'] > 0 ? $objs['amount_received'] : 0;
             $bal_amnt = $total_with_gst - $objs['amount_received'] - $objs['tds_amount'];
             $data[$key]['bal_amnt'] = number_format($bal_amnt, 2, '.', '');
-            $total_balance_amount_to_pay += $bal_amnt;
+            if($objs['bal_amnt'] > 0){
+                $total_balance_amount_to_pay += $bal_amnt;
+            }
             $total_tds_amount += $objs['tds_amount'] > 0 ? $objs['tds_amount'] : 0;
         }
         $data["recordsTotal"] = count($total_record);

@@ -3885,7 +3885,9 @@ class SalesController extends CommonController
 			$total_with_gst_val += $row_total;
 			$total_paid_amount += $value['amount_received'];
 			$total_tds_amount += $value['tds_amount'];
-			$total_balance_amount_to_pay += $value['bal_amnt'];
+			if($value['bal_amnt'] > 0){
+				$total_balance_amount_to_pay += $value['bal_amnt'];
+			}
 		}
         $data["recordsTotal"] = count($total_record);
         $data["recordsFiltered"] = count($total_record);
@@ -3975,7 +3977,6 @@ class SalesController extends CommonController
 		$data = $this->SalesModel->getOutstandingReportView($condition_arr,$post_data["search"]);
 
 			foreach ($data as $key => $val) {
-
 				if(array_key_exists($val['customer_id'], $outstanding_data)){
 					$outstanding_data[$val['customer_id']]['receivable_amount'] +=round($val['bal_amnt'],2);
 				}else{
@@ -3993,19 +3994,21 @@ class SalesController extends CommonController
 		$payable_data = [];
 		if(!($post_data["search"]['customer_id'] > 0)|| ($post_data["search"]['supplier_id'] > 0)){
 			$data = $this->SalesModel->getOutstandingPayableReportView($condition_arr,$post_data["search"]);
-			
+			// pr($data);
 			foreach ($data as $key => $val) {
 				$gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);
             	$total_with_gst = $gst_amount + $val['base_amount'];  
             	$bal_amnt = $total_with_gst - $val['amount_received'] - $val['tds_amount'];
-				if(array_key_exists($val['supplier_id'], $payable_data)){
-					$payable_data[$val['supplier_id']]['payable_amount'] += round($bal_amnt,2);
-				}else{
-					$payable_data[$val['supplier_id']] = [
-						"customer_name" => $val['customer_name'],
-						"payable_amount" => round($bal_amnt,2),
-						"receivable_amount" => 0
-					];
+            	if($val['bal_amnt'] > 0){
+					if(array_key_exists($val['supplier_id'], $payable_data)){
+						$payable_data[$val['supplier_id']]['payable_amount'] += round($bal_amnt,2);
+					}else{
+						$payable_data[$val['supplier_id']] = [
+							"customer_name" => $val['customer_name'],
+							"payable_amount" => round($bal_amnt,2),
+							"receivable_amount" => 0
+						];
+					}
 				}
 				
 			}
@@ -4048,16 +4051,21 @@ class SalesController extends CommonController
 				$gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);
 	            $total_with_gst = $gst_amount + $val['base_amount'];  
 	            $bal_amnt = $total_with_gst - $val['amount_received'] - $val['tds_amount'];
-				if(array_key_exists($val['supplier_id'], $payable_data)){
-					$payable_data[$val['supplier_id']]['payable_amount'] += $bal_amnt;
-				}else{
-					$payable_data[$val['supplier_id']] = [
-						"customer_name" => $val['customer_name'],
-						"payable_amount" => $bal_amnt,
-						"receivable_amount" => 0
-					];
+	            if($val['bal_amnt'] > 0){
+		            if($bal_amnt > 0){
+						if(array_key_exists($val['supplier_id'], $payable_data)){
+							$payable_data[$val['supplier_id']]['payable_amount'] += $bal_amnt;
+						}else{
+							$payable_data[$val['supplier_id']] = [
+								"customer_name" => $val['customer_name'],
+								"payable_amount" => $bal_amnt,
+								"receivable_amount" => 0
+							];
+						}
+					}
+					$total_pay_amount += $bal_amnt;
 				}
-				$total_pay_amount += $bal_amnt;
+				
 			}
 			$payable_count_data =  array_values($payable_data);
 		}

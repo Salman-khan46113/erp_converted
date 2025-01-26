@@ -78,7 +78,7 @@ class Reports_model extends CI_Model {
             }
             if ($search_params["status"] != "") {
             	if($search_params["status"] == "Received"){
-            		$this->db->having('bal_amnt <=', 0);
+            		$this->db->having('bal_amnt', 0);
             	}else{
             		$this->db->having('bal_amnt >', 0);
             	}
@@ -189,7 +189,7 @@ class Reports_model extends CI_Model {
             }
             if ($search_params["status"] != "") {
             	if($search_params["status"] == "Received"){
-            		$this->db->having('bal_amnt <=', 0);
+            		$this->db->having('bal_amnt ', 0);
             	}else{
             		$this->db->having('bal_amnt >', 0);
             	}

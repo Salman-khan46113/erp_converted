@@ -569,7 +569,8 @@
                      </form>
                 <%/if%>
                  <div class="row pdf-btn-block">
-                <%if ((empty($new_sales[0]->Status) && empty($new_sales[0]->EwbStatus))) %>
+                 
+                <%if ((empty($new_sales[0]->Status) && empty($einvoice_res_data[0]->EwbStatus))) %>
                         <%if ( $new_sales[0]->status == "lock")  %>
                                     <div class="col-lg-1 extra-copy">
                                           <button type="button" class="btn btn-danger " data-bs-toggle="modal" data-bs-target="#unlock">Unlock</button>

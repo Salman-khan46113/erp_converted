@@ -321,7 +321,7 @@ class Dashboard_model extends CI_Model
 			    $this->db->or_where("s.created_year = ".$month_arr['end_year']." AND s.created_month <= ".$month_arr['end_month']."");
 		   	}
 	   	}
-
+	   	$this->db->having('bal_amnt >', 0);
         $result_obj = $this->db->get();
         $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
         // pr($this->db->last_query(),1);
@@ -944,6 +944,7 @@ class Dashboard_model extends CI_Model
         if(!((int) date("m") > 3)){
             $current_year--;
         }
+        $this->db->having('bal_amnt >', 0);
 
         $date_filter =  explode((" - "),$search_params["date_range"]);
         $start_date = date("$current_year/04/01");
