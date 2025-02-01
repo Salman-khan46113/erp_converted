@@ -356,8 +356,10 @@ class SalesController extends CommonController
 		//$data['uom'] = $this->Crud->read_data("uom");
 		$data['customer_tracking'] = $this->Crud->customQuery('SELECT po.* FROM customer_po_tracking as po, 
 		parts_customer_trackings as po_parts 
-		WHERE po.status = "pending" AND po.customer_id =' . $data['new_sales'][0]->customer_id . '
+		WHERE po.po_end_date > CURDATE() AND po.status = "pending" AND po.customer_id =' . $data['new_sales'][0]->customer_id . '
 		 AND po.id = po_parts.customer_po_tracking_id AND po_parts.part_id = ' . $data['new_sales'][0]->customer_part_id);
+
+
 		// pr($data['customer_tracking'],1);
 		//old -> $data['customer_tracking'] = $this->Crud->get_data_by_id("customer_po_tracking", $data['new_sales'][0]->customer_id, 'customer_id');
 
@@ -442,7 +444,7 @@ class SalesController extends CommonController
 			$total_available_qty = $po_part_details[0]->qty - $used_qty;
 			$falg = 0;
 			if ($qty > $total_available_qty) {
-				$msg = "Insufficient PO Part balance qty. PO Part balance qty is " . $total_available_qty;
+				$msg = "Insufficient Sales Order balance qty. Sales Order balance qty is " . $total_available_qty;
 				// $this->addErrorMessage("Insufficient PO Part balance qty. PO Part balance qty is " . $po_part_details[0]->qty);
 				// $this->redirectMessage();
 				// exit();
@@ -949,11 +951,13 @@ class SalesController extends CommonController
 			$data2->addChild('SVCURRENTCOMPANY', "TESTING");	//$this->getCustomerNameDetails()
 			$request = $data->addChild('REQUESTDATA');
 
-			$sales_details = $this->Crud->customQuery('SELECT parts.sales_id, parts.sales_number, sales.created_date, customer_name,
+            $sales_details = $this->Crud->customQuery('SELECT parts.sales_id, parts.sales_number, sales.created_date, customer_name, payment_terms,
 			ROUND(sum(total_rate),2) as Total, ROUND(sum(cgst_amount),2) as CGST_AMT, ROUND(sum(sgst_amount),2) as SGST_AMT,
 			ROUND(sum(igst_amount),2) as IGST_AMT ,ROUND(sum(tcs_amount),2) as TCS_AMT, ROUND(sum(gst_amount),2) as GST_AMT,
-			tax.cgst, tax.sgst, tax.igst, tax.tcs, tax.tcs_on_tax, sales.status,sales.discount_amount,sales.discount
-            FROM  sales_parts as parts, new_sales as sales, gst_structure tax, customer
+			tax.cgst, tax.sgst, tax.igst, tax.tcs, tax.tcs_on_tax, sales.status,sales.discount_amount,sales.discount, 
+            sc.category_name as tally_category
+            FROM  sales_parts as parts, gst_structure tax, customer, new_sales as sales
+            LEFT JOIN sales_category as sc ON sc.sales_category_id = sales.tally_category
             WHERE sales.status in ("lock")
 			AND parts.sales_id =  sales.id
 			AND parts.tax_id = tax.id
@@ -2579,7 +2583,6 @@ class SalesController extends CommonController
 	}
 
 	// Function to add sales data request
-	// Function to add sales data request
     public function requestSalesXML($data, $sales_details)
     {
 
@@ -2641,6 +2644,8 @@ class SalesController extends CommonController
                                 WHEN sales.shipping_addressType = 'consignee' THEN cons.gst_number
                             END AS consignee_gst_number,
                             cust.billing_address as billing_address,
+                            cust.state as billing_state,
+                            cust.pan_no as cust_pan_no,
                             cust.gst_number as billing_GSTIN
                         FROM 
                             new_sales sales
@@ -2657,18 +2662,23 @@ class SalesController extends CommonController
                $shippingAddress = $addressDetails[0]->shippingAddress;
                $billingAddress = $addressDetails[0]->billing_address;
                $billing_GSTIN = $addressDetails[0]->billing_GSTIN;
+               $billing_state = $addressDetails[0]->billing_state;
+               $customer_pan_no = $addressDetails[0]->cust_pan_no;
                $consigneeName = $addressDetails[0]->consigneeName;
                $consignee_state = $addressDetails[0]->consignee_state;
                $consignee_gst_number = $addressDetails[0]->consignee_gst_number;
             }
 
+            //client data 
+            $client = $this->Unit->getClientUnitDetails();
+            
             $addr_type = $voucher_child->addChild('ADDRESS.LIST'); //bill to address
             $addr_type->addAttribute('TYPE', 'String'); //Hard-Coded
             $addr_type->addChild('ADDRESS',$billingAddress);
 
             $basicbuyaddr_type = $voucher_child->addChild('BASICBUYERADDRESS.LIST');//ship to address
             $basicbuyaddr_type->addAttribute('TYPE', 'String'); //Hard-Coded
-            $basicbuyaddr_type->addChild('ADDRESS', $shippingAddress);
+            $basicbuyaddr_type->addChild('BASICBUYERADDRESS', $shippingAddress);
 
             /** <BASICORDERTERMS.LIST TYPE="String">
              *  <BASICORDERTERMS>By Road</BASICORDERTERMS>
@@ -2680,17 +2690,18 @@ class SalesController extends CommonController
 
             $voucher_child->addChild('GSTREGISTRATIONTYPE', 'Regular'); //Hard-Coded ?
             $voucher_child->addChild('VATDEALERTYPE', 'Regular'); //Hard-Coded ?
-            $voucher_child->addChild('STATENAME', 'Maharashtra'); //TO-DO		- Customer state ?
+            $voucher_child->addChild('STATENAME', $billing_state); //TO-DO		- Customer state ?
             $voucher_child->addChild('ENTEREDBY', 'admin'); //TO-DO
 			$voucher_child->addChild('COUNTRYOFRESIDENCE', 'India'); //TO-DO	
             $voucher_child->addChild('PARTYGSTIN', $billing_GSTIN);
-			$voucher_child->addChild('PLACEOFSUPPLY', 'Maharashtra'); //TO-DO		- Customer state ?
+			$voucher_child->addChild('PLACEOFSUPPLY', $billing_state); //TO-DO		- Customer state ?
 			$voucher_child->addChild('PARTYNAME', $customer_name);
             
-			$gst_registration = $voucher_child->addChild('GSTREGISTRATION','Maharashtra Registration'); //TO-DO
+			$gst_registration = $voucher_child->addChild('GSTREGISTRATION',$client[0]->state); //TO-DO
 			$gst_registration->addAttribute('TAXTYPE', 'GST');
-			$gst_registration->addAttribute('TAXREGISTRATION', '');
-			
+			$gst_registration->addAttribute('TAXREGISTRATION', $client[0]->gst_number);
+            $voucher_child->addChild('CMPGSTIN', $client[0]->gst_number);
+
 			$voucher_child->addChild('VOUCHERTYPENAME', 'Sales'); //Hard coded
 			$voucher_child->addChild('PARTYLEDGERNAME', $customer_name);
 
@@ -2704,7 +2715,7 @@ class SalesController extends CommonController
             $voucher_child->addChild('CMPGSTSTATE', 'Maharashtra'); //TO-DO
             $voucher_child->addChild('CONSIGNEECOUNTRYNAME', 'India'); //TO-DO
             $voucher_child->addChild('BASICBASEPARTYNAME', $consigneeName);
-            $voucher_child->addChild('NUMBERINGSTYLE', 'Auto Retain'); //Hard Coded
+            $voucher_child->addChild('NUMBERINGSTYLE', 'Auto Retain1'); //Hard Coded
             $voucher_child->addChild('CSTFORMISSUETYPE', 'Not Applicable'); //Hard Coded
             $voucher_child->addChild('CSTFORMRECVTYPE', 'Not Applicable'); //Hard Coded
 
@@ -2712,10 +2723,10 @@ class SalesController extends CommonController
             $voucher_child->addChild('PERSISTEDVIEW', 'Invoice Voucher View'); //Hard Coded
             $voucher_child->addChild('VCHSTATUSTAXADJUSTMENT', 'Default'); //Hard Coded
             $voucher_child->addChild('VCHSTATUSVOUCHERTYPE', 'Sales'); //Hard Coded
-            $voucher_child->addChild('VCHSTATUSTAXUNIT', 'Maharashtra Registration'); //TO-DO Maharashtra Registration
+            $voucher_child->addChild('VCHSTATUSTAXUNIT', $billing_state); //TO-DO Maharashtra Registration
             $voucher_child->addChild('VCHGSTCLASS', 'Not Applicable'); //Hard Coded
-            $voucher_child->addChild('VCHENTRYMODE', 'Item Invoice'); //Hard Coded
-			
+            $voucher_child->addChild('CONSIGNEEPINNUMBER', $customer_pan_no); //TO-DO CUSTOMER PAN NO 
+            $voucher_child->addChild('VCHENTRYMODE', 'Item Invoice'); //Hard Coded	
             $voucher_child->addChild('EFFECTIVEDATE', $sales_date); 
             $voucher_child->addChild('DIFFACTUALQTY', 'No'); // Hard Coded
             $voucher_child->addChild('ISMSTFROMSYNC', 'No'); // Hard Coded
@@ -2768,10 +2779,9 @@ class SalesController extends CommonController
 
 				$this->inoviceExportForCreate($voucher_child, $sales_details,$customer_name, $guid,$isWithInventory);
 
-				if ($inventory_details) {
+				/*if ($inventory_details) {
 					foreach ($inventory_details as $inventory_part) {
 						$inventory = $voucher_child->addChild('INVENTORYENTRIES.LIST');
-
 						$inventory->addChild('STOCKITEMNAME', $inventory_part->part_number); 
 						$inventory->addChild('ISDEEMEDPOSITIVE', 'No'); //Hard Coded
 						$inventory->addChild('RATE', $inventory_part->part_price);
@@ -2781,7 +2791,7 @@ class SalesController extends CommonController
 						$inventory->addChild('BILLEDQTY', $inventory_part->qty);
 						$inventory->addChild('UOM', $inventory_part->uom_id);
 					}
-				}
+				}*/
 			}else{
 				//vocher with inventory details
                 if ($inventory_details) {
@@ -2823,9 +2833,10 @@ class SalesController extends CommonController
 						$batchAllocations = $inventory->addChild('BATCHALLOCATIONS.LIST');
 						$batchAllocations->addChild('GODOWNNAME', 'Main Location'); //Hard Coded
 						$batchAllocations->addChild('BATCHNAME', 'Primary Batch'); //Hard Coded
+                        $batchAllocations->addChild('DESTINATIONGODOWNNAME', 'Main Location'); //Hard Coded
 						$batchAllocations->addChild('INDENTNO', 'Not Applicable'); //Hard Coded
 						$batchAllocations->addChild('ORDERNO', 'Not Applicable'); //Hard Coded
-						$batchAllocations->addChild('TRACKINGNUMBER', 'Not Applicable'); //Hard Coded
+						//$batchAllocations->addChild('TRACKINGNUMBER', 'Not Applicable'); //Hard Coded
 						$batchAllocations->addChild('DYNAMICCSTISCLEARED', 'No'); //Hard Coded
 						$batchAllocations->addChild('AMOUNT', $inventory_part->part_amount); //Hard Coded
 						$batchAllocations->addChild('DISCOUNT', $sales_details->discount); 
@@ -2836,8 +2847,8 @@ class SalesController extends CommonController
 
 
 						$acctingAllocations = $inventory->addChild('ACCOUNTINGALLOCATIONS.LIST');
-						$acctingAllocations->addChild('LEDGERNAME', 'Sales'); //Hard Coded
-						$acctingAllocations->addChild('GSTCLASS', 'Not Applicable'); //Hard Coded
+                        $acctingAllocations->addChild('LEDGERNAME', $sales_details->tally_category); //tally category
+                        $acctingAllocations->addChild('GSTCLASS', 'Not Applicable'); //Hard Coded
 						$acctingAllocations->addChild('ISDEEMEDPOSITIVE', 'No'); //Hard Coded
 						$acctingAllocations->addChild('LEDGERFROMITEM', 'No'); //Hard Coded
 						$acctingAllocations->addChild('REMOVEZEROENTRIES', 'No'); //Hard Coded
@@ -2852,10 +2863,47 @@ class SalesController extends CommonController
 						$acctingAllocations->addChild('ISCAPVATTAXALTERED', 'No'); //Hard Coded
 						$acctingAllocations->addChild('ISCAPVATNOTCLAIMED', 'No'); //Hard Coded
 						$acctingAllocations->addChild('AMOUNT', $inventory_part->part_amount);
-						
+
+                        $acctingAllocations->addChild('SERVICETAXDETAILS.LIST');
+                        $acctingAllocations->addChild('BANKALLOCATIONS.LIST');
+                        $acctingAllocations->addChild('BILLALLOCATIONS.LIST');
+                        $acctingAllocations->addChild('INTERESTCOLLECTION.LIST');
+                        $acctingAllocations->addChild('OLDAUDITENTRIES.LIST');
+                        $acctingAllocations->addChild('ACCOUNTAUDITENTRIES.LIST');
+                        $acctingAllocations->addChild('AUDITENTRIES.LIST');
+                        $acctingAllocations->addChild('INPUTCRALLOCS.LIST');
+                        $acctingAllocations->addChild('DUTYHEADDETAILS.LIST');
+                        $acctingAllocations->addChild('EXCISEDUTYHEADDETAILS.LIST');
+                        $acctingAllocations->addChild('RATEDETAILS.LIST');
+                        $acctingAllocations->addChild('SUMMARYALLOCS.LIST');
+                        $acctingAllocations->addChild('CENVATDUTYALLOCATIONS.LIST');
+                        $acctingAllocations->addChild('STPYMTDETAILS.LIST');
+                        $acctingAllocations->addChild('EXCISEPAYMENTALLOCATIONS.LIST');
+                        $acctingAllocations->addChild('TAXBILLALLOCATIONS.LIST');
+                        $acctingAllocations->addChild('TAXOBJECTALLOCATIONS.LIST');
+
+                        $acctingAllocations->addChild('TDSEXPENSEALLOCATIONS.LIST');
+
+
+                        $acctingAllocations->addChild('VATSTATUTORYDETAILS.LIST');
+                        $acctingAllocations->addChild('COSTTRACKALLOCATIONS.LIST');
+                        $acctingAllocations->addChild('REFVOUCHERDETAILS.LIST');
+                        $acctingAllocations->addChild('INVOICEWISEDETAILS.LIST');
+                        $acctingAllocations->addChild('VATITCDETAILS.LIST');
+                        $acctingAllocations->addChild('ADVANCETAXDETAILS.LIST');
+                        $acctingAllocations->addChild('TAXTYPEALLOCATIONS.LIST');
+
+
+                        $inventory->addChild('DUTYHEADDETAILS.LIST');//Hard Coded
+
 						//RATEDETAILS
 						$this->inventoriesExportForCreate($inventory, $inventory_part, $customer_name, $guid,$isWithInventory);
-		
+                       
+                        $inventory->addChild('SUPPLEMENTARYDUTYHEADDETAILS.LIST');//Hard Coded
+                        $inventory->addChild('TAXOBJECTALLOCATIONS.LIST');//Hard Coded
+                        $inventory->addChild('REFVOUCHERDETAILS.LIST');//Hard Coded
+                        $inventory->addChild('EXCISEALLOCATIONS.LIST');//Hard Coded
+                        $inventory->addChild('EXPENSEALLOCATIONS.LIST');//Hard Coded
 				    }
                 }
 
@@ -2863,7 +2911,7 @@ class SalesController extends CommonController
 				$this->vocher_withInventories_after_inventories_defaults($voucher_child);
 
 				//ledger with Inventories
-				$this->ledgerWithInventories($voucher_child,$sales_details,$leger_arr,$customer_name);
+				$this->ledgerWithInventories($voucher_child,$sales_details,$leger_arr,$customer_name,$inventory_part->part_amount);
 
 				$gst_list = $voucher_child->addChild('GST.LIST');
 				$gst_list->addChild('PURPOSETYPE', 'GST'); //Hard Coded
@@ -2894,6 +2942,7 @@ class SalesController extends CommonController
 		$voucher_child->addChild('INVOICEEXPORTLIST.LIST', ''); //Hard Coded
 
 	}
+	
     /**
      * Cancel invoice specific fields
      */
@@ -2920,7 +2969,7 @@ class SalesController extends CommonController
         $gst_on_amount = ($sales_details->Total - $gst_all);
 
 		$leger_arr = array(
-				"Total" => $sales_details->Total, // Entire amount
+				"Total" => $sales_details->Total + $sales_details->TCS_AMT, // Entire amount
 				"SALES GST @ " . $gst_percntg . "%" => $gst_on_amount, //<LEDGERNAME>SALES GST @ 28%</LEDGERNAME>
 				"OUTPUT CGST @ " . $sales_details->cgst . "%" => $sales_details->CGST_AMT, //<LEDGERNAME>OUTPUT CGST @ 14%</LEDGERNAME>
 				"OUTPUT SGST @ " . $sales_details->sgst . "%" => $sales_details->SGST_AMT, //<LEDGERNAME>OUTPUT SGST @ 14%</LEDGERNAME>
@@ -2956,7 +3005,10 @@ class SalesController extends CommonController
                 $bill_allocations = $ledger_entries->addChild('BILLALLOCATIONS.LIST');
                 $bill_allocations->addChild('NAME', $sales_details->sales_number);
                 $bill_allocations->addChild('BILLTYPE', $key);
-                $bill_allocations->addChild('BILLCREDITPERIOD', '0'); //<!-- NO IDEA Hard Code ? -->
+                if (!empty($sales_details->payment_terms)) {
+                    $bill_creditperiod = $bill_allocations->addChild('BILLCREDITPERIOD', $sales_details->payment_terms . " Days");
+                    $bill_creditperiod->addAttribute('P', $sales_details->payment_terms . " Days");
+                }
                 $bill_allocations->addChild('AMOUNT', "-" . $value);
             } else {
                 $ledger_entries->addChild('ISDEEMEDPOSITIVE', 'No');
@@ -2967,13 +3019,13 @@ class SalesController extends CommonController
         }
 	}
 	
-
+	
 	private function inventoriesExportForCreate($inventory, $inventory_part, $customer_name, $guid)
     {
 		$leger_arr = array(
 				"CGST" => $inventory_part->cgst, 
 				"SGST/UTGST" => $inventory_part->sgst,
-				"TCS" => $inventory_part->tcs, 
+				//"TCS" => $inventory_part->tcs, 
 				"IGST" => $inventory_part->igst
 			);
 	    
@@ -2995,32 +3047,45 @@ class SalesController extends CommonController
 			$rateDetails->addChild('GSTRATEVALUATIONTYPE', 'Based on Value'); 
 			$rateDetails->addChild('GSTRATE', $value);
 	     }
-	}
+         
+        $rateDetails = $inventory->addChild('RATEDETAILS.LIST');
+		$rateDetails->addChild('GSTRATEDUTYHEAD', 'Cess'); 
+		$rateDetails->addChild('GSTRATEVALUATIONTYPE', 'Not Applicable'); 
+
+        $rateDetails = $inventory->addChild('RATEDETAILS.LIST');
+        $rateDetails->addChild('GSTRATEDUTYHEAD', 'State Cess');
+        $rateDetails->addChild('GSTRATEVALUATIONTYPE', 'Based on Value');
+    }
 
 	/**
 	 * Vocher with inventories ledger
 	 */
-	private function ledgerWithInventories($voucher_child,$sales_details,$leger_arr,$customer_name) {
+	private function ledgerWithInventories($voucher_child,$sales_details,$leger_arr,$customer_name,$inventory_amount) {
 		$gst_percntg = $sales_details->cgst + $sales_details->sgst + $sales_details->igst + $sales_details->tcs;
         $gst_all = $sales_details->CGST_AMT + $sales_details->SGST_AMT + $sales_details->IGST_AMT + $sales_details->TCS_AMT;
         $gst_on_amount = ($sales_details->Total - $gst_all);
 
 		$leger_arr = array(
-				"Total" => $sales_details->Total,
+				"Total" => $sales_details->Total + $sales_details->TCS_AMT,
 				"CGST"  => $sales_details->CGST_AMT,
 				"SGST"  => $sales_details->SGST_AMT,
 				"TCS"   => $sales_details->TCS_AMT, 
 				"IGST"  => $sales_details->IGST_AMT,
 		);
 
-		//remove those items which are with 0 values.
+    
+       //remove those items which are with 0 values.
         foreach ($leger_arr as $key => $value) {
             if ($value < 0.01) {
                 unset($leger_arr[$key]);
             }
         }
 
-	   foreach ($leger_arr as $key => $value) {
+        if($sales_details->TCS_AMT > 0.01){
+            $tcsAmountPresent = true;
+        }
+
+       foreach ($leger_arr as $key => $value) {
             $ledger_entries = $voucher_child->addChild('LEDGERENTRIES.LIST');
             if ($key == "Total") {
                 $ledger_entries->addChild('LEDGERNAME', $customer_name); 
@@ -3032,34 +3097,205 @@ class SalesController extends CommonController
               
                 $bill_allocations = $ledger_entries->addChild('BILLALLOCATIONS.LIST');
                 $bill_allocations->addChild('NAME', $sales_details->sales_number);
+                if(!empty($sales_details->payment_terms)){
+                    $bill_creditperiod = $bill_allocations->addChild('BILLCREDITPERIOD',$sales_details->payment_terms . " Days");
+                    $bill_creditperiod->addAttribute('P', $sales_details->payment_terms . " Days");
+                }
                 $bill_allocations->addChild('BILLTYPE', 'New Ref');	//New Ref
-				$bill_allocations->addChild('TDSDEDUCTEEISSPECIALRATE', 'No');
-				$bill_allocations->addChild('AMOUNT', "-" . $value);
+                $bill_allocations->addChild('TDSDEDUCTEEISSPECIALRATE', 'No');
+                $bill_allocations->addChild('AMOUNT', "-" . $value);
                 $bill_allocations->addChild('INTERESTCOLLECTION.LIST', ''); //Hard Coded
-				$bill_allocations->addChild('STBILLCATEGORIES.LIST', ''); //Hard Coded
+                $bill_allocations->addChild('STBILLCATEGORIES.LIST', ''); //Hard Coded
+                    
+                if($tcsAmountPresent == true){
+                    $ledger_entries->addChild('OLDAUDITENTRIES.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('ACCOUNTAUDITENTRIES.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('AUDITENTRIES.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('INPUTCRALLOCS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('DUTYHEADDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('EXCISEDUTYHEADDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('RATEDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('SUMMARYALLOCS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('CENVATDUTYALLOCATIONS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('STPYMTDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('EXCISEPAYMENTALLOCATIONS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('TAXBILLALLOCATIONS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('TAXOBJECTALLOCATIONS.LIST', ''); //Hard Coded
 
+
+                    $tax_obj_allocations = $ledger_entries->addChild('TAXOBJECTALLOCATIONS.LIST');
+                    $tax_obj_allocations->addChild('CATEGORY','Sale of Goods');
+                    $tax_obj_allocations->addChild('TAXTYPE','TCS');
+                    $tax_obj_allocations->addChild('PARTYLEDGER',$customer_name);
+                    //$tax_obj_allocations->addChild('EXPENSES','Central GST (CGST)');    //TODO  - WHAT IF THE IGST IS THERE ?
+                    $tax_obj_allocations->addChild('REFTYPE','New Ref');
+                    $tax_obj_allocations->addChild('ISOPTIONAL','No');
+                    $tax_obj_allocations->addChild('ISBASEDONREALIZATION','No');
+                    $tax_obj_allocations->addChild('ISPANVALID','No');
+                    $tax_obj_allocations->addChild('ZERORATED', 'No');
+                    $tax_obj_allocations->addChild('EXEMPTED','No');
+                    $tax_obj_allocations->addChild('ISSPECIALRATE','No');
+                    $tax_obj_allocations->addChild('ISDEDUCTNOW','No');
+                    $tax_obj_allocations->addChild('ISPANNOTAVAILABLE','No');
+                    $tax_obj_allocations->addChild('ISSUPPLEMENTARY','No');
+                    $tax_obj_allocations->addChild('ISPUREAGENT','No');
+                    $tax_obj_allocations->addChild('HASINPUTCREDIT','No');
+                    $tax_obj_allocations->addChild('ISTDSDEDUCTED', 'No');
+
+                    $sub_cate_allocations = $tax_obj_allocations->addChild('SUBCATEGORYALLOCATION.LIST');
+                    $sub_cate_allocations->addChild('SUBCATEGORY', 'Income Tax');
+                    $sub_cate_allocations->addChild('SUBCATZERORATED', 'No');
+                    $sub_cate_allocations->addChild('SUBCATEXEMPTED', 'No');
+                    $sub_cate_allocations->addChild('SUBCATISSPECIALRATE', 'No');
+
+                    $tax_value_for_this = $leger_arr['CGST'] + $leger_arr['SGST']  + $leger_arr['IGST'];
+                    $sub_cate_allocations->addChild('ASSESSABLEAMOUNT', $tax_value_for_this);
+                    
+                    $sub_cate_allocations = $tax_obj_allocations->addChild('SUBCATEGORYALLOCATION.LIST');
+                    $sub_cate_allocations->addChild('SUBCATEGORY', 'Surcharge');
+                    $sub_cate_allocations->addChild('SUBCATZERORATED', 'No');
+                    $sub_cate_allocations->addChild('SUBCATEXEMPTED', 'No');
+                    $sub_cate_allocations->addChild('SUBCATISSPECIALRATE', 'No');
+
+                    $sub_cate_allocations = $tax_obj_allocations->addChild('SUBCATEGORYALLOCATION.LIST');
+                    $sub_cate_allocations->addChild('SUBCATEGORY', 'Education Cess');
+                    $sub_cate_allocations->addChild('SUBCATZERORATED', 'No');
+                    $sub_cate_allocations->addChild('SUBCATEXEMPTED', 'No');
+                    $sub_cate_allocations->addChild('SUBCATISSPECIALRATE', 'No');
+
+                    $sub_cate_allocations = $tax_obj_allocations->addChild('SUBCATEGORYALLOCATION.LIST');
+                    $sub_cate_allocations->addChild('SUBCATEGORY', 'Secondary Education Cess');
+                    $sub_cate_allocations->addChild('SUBCATZERORATED', 'No');
+                    $sub_cate_allocations->addChild('SUBCATEXEMPTED', 'No');
+                    $sub_cate_allocations->addChild('SUBCATISSPECIALRATE', 'No');
+
+                    $ledger_entries->addChild('TDSEXPENSEALLOCATIONS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('VATSTATUTORYDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('COSTTRACKALLOCATIONS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('REFVOUCHERDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('INVOICEWISEDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('VATITCDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('ADVANCETAXDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('TAXTYPEALLOCATIONS.LIST', ''); //Hard Coded
+                }
 				//$this->legder_entries_defaults2($ledger_entries);
 				                
             } else {
                 $ledger_entries->addChild('APPROPRIATEFOR', 'Not Applicable');
-                $ledger_entries->addChild('LEDGERNAME', $key); // Replace with the customer's ledger name
-				$ledger_entries->addChild('AMOUNT', $value);
-				$ledger_entries->addChild('VATEXPAMOUNT', $value);
 
-				$ledger_entries->addChild('GSTCLASS', 'Not Applicable');
-				$ledger_entries->addChild('ISDEEMEDPOSITIVE', 'No');
-				$ledger_entries->addChild('LEDGERFROMITEM', 'No');
-				$ledger_entries->addChild('REMOVEZEROENTRIES', 'No');
-				$ledger_entries->addChild('ISPARTYLEDGER', 'No');
-				$ledger_entries->addChild('GSTOVERRIDDEN', 'No');
-				$ledger_entries->addChild('ISGSTASSESSABLEVALUEOVERRIDDEN', 'No');
-				$ledger_entries->addChild('STRDISGSTAPPLICABLE', 'No');
-				$ledger_entries->addChild('STRDGSTISPARTYLEDGER', 'No');
-				$ledger_entries->addChild('STRDGSTISDUTYLEDGER', 'No');
-				$ledger_entries->addChild('CONTENTNEGISPOS', 'No');
-				$ledger_entries->addChild('ISLASTDEEMEDPOSITIVE', 'No');
-				$ledger_entries->addChild('ISCAPVATTAXALTERED', 'No');
-				$ledger_entries->addChild('ISCAPVATNOTCLAIMED', 'No');
+                if ($key === "TCS") {
+                    $ledger_entries->addChild('ROUNDTYPE', 'Normal Rounding');
+                    $ledger_entries->addChild('LEDGERNAME', 'TCS TAX');
+                    $ledger_entries->addChild('METHODTYPE', 'TCS');
+                    $ledger_entries->addChild('GSTCLASS', 'Not Applicable');
+                }else{
+                    $ledger_entries->addChild('ROUNDTYPE', 'Not Applicable');
+                    $ledger_entries->addChild('LEDGERNAME', $key); // Replace with the customer's ledger name
+                    $ledger_entries->addChild('METHODTYPE', 'GST');
+                    $ledger_entries->addChild('GSTCLASS', 'Not Applicable');
+                }
+                    $ledger_entries->addChild('ISDEEMEDPOSITIVE', 'No');
+                    $ledger_entries->addChild('LEDGERFROMITEM', 'No');
+                    $ledger_entries->addChild('REMOVEZEROENTRIES', 'Yes');
+                    $ledger_entries->addChild('ISPARTYLEDGER', 'No');
+                    $ledger_entries->addChild('GSTOVERRIDDEN', 'No');
+                    $ledger_entries->addChild('ISGSTASSESSABLEVALUEOVERRIDDEN', 'No');
+                    $ledger_entries->addChild('STRDISGSTAPPLICABLE', 'No');
+                    $ledger_entries->addChild('STRDGSTISPARTYLEDGER', 'No');
+                    $ledger_entries->addChild('STRDGSTISDUTYLEDGER', 'No');
+                    $ledger_entries->addChild('CONTENTNEGISPOS', 'No');
+                    $ledger_entries->addChild('ISLASTDEEMEDPOSITIVE', 'No');
+                    $ledger_entries->addChild('ISCAPVATTAXALTERED', 'No');
+                    $ledger_entries->addChild('ISCAPVATNOTCLAIMED', 'No');
+                    $ledger_entries->addChild('AMOUNT', $value);
+                    $ledger_entries->addChild('VATEXPAMOUNT', $value);
+
+                    $ledger_entries->addChild('SERVICETAXDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('BANKALLOCATIONS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('BILLALLOCATIONS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('INTERESTCOLLECTION.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('OLDAUDITENTRIES.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('ACCOUNTAUDITENTRIES.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('AUDITENTRIES.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('INPUTCRALLOCS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('DUTYHEADDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('EXCISEDUTYHEADDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('RATEDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('SUMMARYALLOCS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('CENVATDUTYALLOCATIONS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('STPYMTDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('EXCISEPAYMENTALLOCATIONS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('TAXBILLALLOCATIONS.LIST', ''); //Hard Coded
+
+                    $tax_obj_allocations_tcs = $ledger_entries->addChild('TAXOBJECTALLOCATIONS.LIST');
+
+                    if ($key === "TCS") {
+                        //tally import category - budhale uses this and other can also use it
+                        $tax_obj_allocations_tcs->addChild('CATEGORY', $sales_details->tally_category);
+                        $tax_obj_allocations_tcs->addChild('TAXTYPE','TCS');
+                        $tax_obj_allocations_tcs->addChild('PARTYLEDGER', $customer_name);
+                        $tax_obj_allocations_tcs->addChild('EXPENSES', $sales_details->tally_category);
+                        $tax_obj_allocations_tcs->addChild('REFTYPE', 'New Ref');//Hard coded
+                        $tax_obj_allocations_tcs->addChild('ISOPTIONAL', 'No');
+                        $tax_obj_allocations_tcs->addChild('ISBASEDONREALIZATION', 'No');
+                        $tax_obj_allocations_tcs->addChild('ISPANVALID', 'No');
+                        $tax_obj_allocations_tcs->addChild('ZERORATED', 'No');
+                        $tax_obj_allocations_tcs->addChild('EXEMPTED', 'No');
+                        $tax_obj_allocations_tcs->addChild('ISSPECIALRATE','No');
+                        $tax_obj_allocations_tcs->addChild('ISDEDUCTNOW', 'No');
+                        $tax_obj_allocations_tcs->addChild('ISPANNOTAVAILABLE', 'No');
+                        $tax_obj_allocations_tcs->addChild('ISSUPPLEMENTARY', 'No');
+                        $tax_obj_allocations_tcs->addChild('ISPUREAGENT', 'No');
+                        $tax_obj_allocations_tcs->addChild('HASINPUTCREDIT', 'No');
+                        $tax_obj_allocations_tcs->addChild('ISTDSDEDUCTED', 'No');
+                        $tax_obj_allocations_tcs->addChild('OLDAUDITENTRIES.LIST');
+                        $tax_obj_allocations_tcs->addChild('ACCOUNTAUDITENTRIES.LIST');
+                        $tax_obj_allocations_tcs->addChild('AUDITENTRIES.LIST');
+
+                        $sub_cate_allocations = $tax_obj_allocations_tcs->addChild('SUBCATEGORYALLOCATION.LIST');
+                        $sub_cate_allocations->addChild('SUBCATEGORY', 'Income Tax');
+                        $sub_cate_allocations->addChild('DUTYLEDGER', 'TCS TAX');
+                        $sub_cate_allocations->addChild('SUBCATZERORATED', 'No');
+                        $sub_cate_allocations->addChild('SUBCATEXEMPTED', 'No');
+                        $sub_cate_allocations->addChild('SUBCATISSPECIALRATE', 'No');
+                    
+                        $sub_cate_allocations->addChild('TAXRATE', $sales_details->tcs);//TO-DO : TCS: tax rate should be added
+                        $sub_cate_allocations->addChild('ASSESSABLEAMOUNT', $inventory_amount);//TO-DO TOTAL TAXABLE VALUE 
+                        $sub_cate_allocations->addChild('TAX', $value); //TCS VALUE
+
+                        $sub_cate_allocations = $tax_obj_allocations_tcs->addChild('SUBCATEGORYALLOCATION.LIST');
+                        $sub_cate_allocations->addChild('SUBCATEGORY', 'Surcharge');
+                        $sub_cate_allocations->addChild('DUTYLEDGER', 'TCS TAX');
+                        $sub_cate_allocations->addChild('SUBCATZERORATED', 'No');
+                        $sub_cate_allocations->addChild('SUBCATEXEMPTED', 'No');
+                        $sub_cate_allocations->addChild('SUBCATISSPECIALRATE', 'No');
+                        $sub_cate_allocations->addChild('ASSESSABLEAMOUNT', $value); //TO-DO: TCS: TOTAL TAXABLE VALUE
+
+                        $sub_cate_allocations = $tax_obj_allocations_tcs->addChild('SUBCATEGORYALLOCATION.LIST');
+                        $sub_cate_allocations->addChild('SUBCATEGORY', 'Education Cess');
+                        $sub_cate_allocations->addChild('DUTYLEDGER', 'TCS TAX');
+                        $sub_cate_allocations->addChild('SUBCATZERORATED', 'No');
+                        $sub_cate_allocations->addChild('SUBCATEXEMPTED', 'No');
+                        $sub_cate_allocations->addChild('SUBCATISSPECIALRATE', 'No');
+                        $sub_cate_allocations->addChild('ASSESSABLEAMOUNT', $value); //TO-DO: TCS: TOTAL TAXABLE VALUE
+
+                        $sub_cate_allocations = $tax_obj_allocations_tcs->addChild('SUBCATEGORYALLOCATION.LIST');
+                        $sub_cate_allocations->addChild('SUBCATEGORY', 'Secondary Education Cess');
+                        $sub_cate_allocations->addChild('DUTYLEDGER', 'TCS TAX');
+                        $sub_cate_allocations->addChild('SUBCATZERORATED', 'No');
+                        $sub_cate_allocations->addChild('SUBCATEXEMPTED', 'No');
+                        $sub_cate_allocations->addChild('SUBCATISSPECIALRATE', 'No');
+                        $sub_cate_allocations->addChild('ASSESSABLEAMOUNT', $value); //TO-DO: TCS: TOTAL TAXABLE VALUE
+                    }
+
+                    $ledger_entries->addChild('TDSEXPENSEALLOCATIONS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('VATSTATUTORYDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('COSTTRACKALLOCATIONS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('REFVOUCHERDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('INVOICEWISEDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('VATITCDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('ADVANCETAXDETAILS.LIST', ''); //Hard Coded
+                    $ledger_entries->addChild('TAXTYPEALLOCATIONS.LIST', ''); //Hard Coded
                 
             }
         }
@@ -3187,8 +3423,8 @@ class SalesController extends CommonController
         $voucher_child->addChild('OVRDNEWAYBILLAPPLICABILITY', 'No'); //Hard Coded
         $voucher_child->addChild('ISVATPRINCIPALACCOUNT', 'No'); //Hard Coded
         $voucher_child->addChild('VCHSTATUSISVCHNUMUSED', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISINCLUDED', 'No'); //Hard Coded
-		$voucher_child->addChild('VCHGSTSTATUSISUNCERTAIN', 'Yes'); //TO-DO
+        $voucher_child->addChild('VCHGSTSTATUSISINCLUDED', 'Yes'); //TO-DO
+		$voucher_child->addChild('VCHGSTSTATUSISUNCERTAIN', 'No'); //Hard Coded
         $voucher_child->addChild('VCHGSTSTATUSISEXCLUDED', 'No'); //Hard Coded
         $voucher_child->addChild('VCHGSTSTATUSISAPPLICABLE', 'Yes'); //TO-DO
         $voucher_child->addChild('VCHGSTSTATUSISGSTR2BRECONCILED', 'No'); //Hard Coded
@@ -3245,7 +3481,14 @@ class SalesController extends CommonController
 		//$voucher_child->addChild('VOUCHERRETAINKEY', '1'); //TO-DO
 		$voucher_child->addChild('VOUCHERNUMBERSERIES', 'Default'); //TO-DO
 
-    }
+        $voucher_child->addChild('EWAYBILLDETAILS.LIST'); //Hard Coded
+        $voucher_child->addChild('EXCLUDEDTAXATIONS.LIST'); //Hard Coded
+        $voucher_child->addChild('OLDAUDITENTRIES.LIST'); //Hard Coded
+        $voucher_child->addChild('ACCOUNTAUDITENTRIES.LIST'); //Hard Coded
+        $voucher_child->addChild('AUDITENTRIES.LIST'); //Hard Coded
+        $voucher_child->addChild('DUTYHEADDETAILS.LIST'); //Hard Coded
+        $voucher_child->addChild('GSTADVADJDETAILS.LIST'); //Hard Coded
+   }
 
     
 	

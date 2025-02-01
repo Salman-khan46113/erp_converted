@@ -152,11 +152,13 @@ const page = {
     },
     serachParams: function(){
         var customer_id = $("#customer_name").val();
-        var params = {customer_id:customer_id};
+        var status = $("#status_val").val();
+        var params = {customer_id:customer_id,status};
         return params;
     },
     resetFilter: function(){
         $("#customer_name").val('');
+        $("#status_val").val('').trigger("change");
         table.destroy(); 
         this.dataTable();
     }

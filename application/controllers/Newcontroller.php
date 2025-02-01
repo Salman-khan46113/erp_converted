@@ -645,12 +645,19 @@ public function get_po_sales_parts()
 	
 	$customer_tracking_parts = $this->Crud->get_data_by_id("parts_customer_trackings", $po_id, 'customer_po_tracking_id');
 	//$customer_part = $this->Crud->get_data_by_id("customer_part", $customer_tracking_parts[0]->part_id,'id');
-
+	// pr($customer_tracking_parts,1);
 	echo '';
 	if ($customer_tracking_parts) {
 		foreach ($customer_tracking_parts  as $val) {
+			$customer_po_tracking = $this->Crud->get_data_by_id("customer_po_tracking", $val->customer_po_tracking_id, "id");
 			$query = "SELECT * FROM customer_part WHERE id = " . $val->part_id . "";
-
+			$role_management_data = $this->db->query('SELECT SUM(parts.qty) AS MAINSUM from `sales_parts`as parts , 
+				new_sales as sales WHERE  parts.part_id = ' . $val->part_id. ' 
+				AND parts.po_number = \''.$customer_po_tracking[0]->po_number.'\' 
+				AND parts.sales_id = sales.id AND sales.status =\'lock\'');
+			$sales_qty_data = $role_management_data->result();
+			$MAINSUM = isset($sales_qty_data[0]->MAINSUM) && $sales_qty_data[0]->MAINSUM > 0 ? $sales_qty_data[0]->MAINSUM : 0;
+			$qty_val = $val->qty - $MAINSUM;
 				$result = $this->db->query($query);
 				if (count($result->result_array()) > 0) {
 					//$data=$result->result_array();		
@@ -669,9 +676,9 @@ public function get_po_sales_parts()
 				} else {
 				$balance_qty = (int) $val->qty;
 			}*/
-			if(!empty($customer_part_rate[0]->rate))
+			if(!empty($customer_part_rate[0]->rate) && $qty_val > 0)
 			{
-				echo '<option value="' . $value['id'] . '">' . $value['part_number'] . '//' . $value['part_description'] . '//' . $customer_parts_master_data[0]->fg_stock. '//' . $customer_part_rate[0]->rate .'//'. $customer_part[0]->packaging_qty .'</option>';
+				echo '<option value="' . $value['id'] . '">' . $value['part_number'] . '//' . $value['part_description'] . '//' .$qty_val.'//' . $customer_parts_master_data[0]->fg_stock. '//' . $customer_part_rate[0]->rate .'//'. $customer_part[0]->packaging_qty .'</option>';
 
 			}
 		}

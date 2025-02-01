@@ -164,14 +164,16 @@ class CustomerPart extends CI_Model {
      * Create Customer Part Master entry including stock
      */
    public function createCustomerPart($data) {
-    $data = array(
+    $insert_data = array(
 				"part_number" => $data["part_number"],
 				"part_description" => $data["part_description"],
+                "part_type" => isset($data['part_type']) ? $data['part_type'] : "non_scrap",
+                "scrap_category_id" => isset($data['scrap_category_id']) ? $data['scrap_category_id'] : 0,
 			    "created_id" => $this->user_id,
 				"date" => $this->current_date,
 				"time" => $this->current_time,
 			);
-			$newRecordId = $this->Crud->insert_data("customer_parts_master", $data);
+			$newRecordId = $this->Crud->insert_data("customer_parts_master", $insert_data);
            
             if($newRecordId > 0) {
                 return $this->createStockRecord($newRecordId, $data);
@@ -185,6 +187,7 @@ class CustomerPart extends CI_Model {
      * Insert new stock record
      */
     public function createStockRecord($partId, $data){
+
              $stockData = array(
                     "customer_parts_master_id" => $partId,
                     "clientId"  =>  $this->Unit->getSessionClientId(),
@@ -536,6 +539,18 @@ class CustomerPart extends CI_Model {
        
         if(is_valid_array($search_params) && $search_params['customer_id'] > 0){
             $this->db->where('cpt.customer_id', $search_params['customer_id']);
+        }
+        if(is_valid_array($search_params) && $search_params['status'] != ""){
+            if($search_params['status'] == "expired"){
+                $this->db->where('cpt.po_end_date < CURDATE()');
+                $this->db->where('cpt.status != "closed"');
+            }else if($search_params['status'] == "pending"){
+                $this->db->where('cpt.po_end_date > CURDATE()');
+                $this->db->where('cpt.status', $search_params['status']);
+            }else{
+                $this->db->where('cpt.status', $search_params['status']);
+            }
+            
         }
         // pr($condition_arr,1);
         if($condition_arr["order_by"] == ''){    

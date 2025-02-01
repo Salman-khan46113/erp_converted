@@ -378,19 +378,20 @@
                             <a class="btn btn-success" href="<%$base_url%>generate_sales_invoice/<%$uri_segment_2%>/EXTRA_COPY">Extra Invoice</a>
                         </div>
                     </div>
-                    <%if empty($einvoice_res_data[0]->Status)%>
-                        <%if empty($einvoice_res_data[0]->Irn)%>
+                    <%if empty($einvoice_res_data[0]->Status) || true%>
+
+                        <%if empty($einvoice_res_data[0]->Irn) && empty($einvoice_res_data[0]->Status)%>
                           <div class="col-lg-1 extra-copy" >
                               <div class="form-group">
                                    <a class="btn btn-info "  href="<%base_url('generate_E_invoice/')%><%$uri_segment_2%>/EINVOICE" target="_blank">E-Invoice </a>
                               </div>
                           </div>
                         <%else%>
-                          <div class="col-lg-1 extra-copy" >
+                          <!-- <div class="col-lg-1 extra-copy" >
                               <div class="form-group">
-                                   <a class="btn btn-info"  href="<%base_url('get_E_invoice/')%><%$uri_segment_2%>">Get E-Invoice Details</a>
+                                   <a class="btn btn-info"  href="<%base_url('view_E_invoice/')%><%$uri_segment_2%>">Get E-Invoice Details</a>
                               </div>
-                          </div>
+                          </div> -->
                         <%/if%>
                          <%if empty($einvoice_res_data[0]->EwbStatus) || $einvoice_res_data[0]->EwbStatus=="CANCELLED" %>
                               <div class="col-lg-1 extra-copy">
@@ -398,6 +399,7 @@
                                     <button type="button" style="width: 90%;" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#createEBill<%$uri_segment_2%>" target="_blank">Eway Bill</button>
                                  </div>
                               </div>
+
                               <!-- Modal for create way bill -->
                                  <div class="modal fade" id="createEBill<%$uri_segment_2%>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -449,6 +451,12 @@
                                        </div>
                                     </div>
                                  </div>
+                                 <%else%>
+                        <div class="col-lg-1 packaging-sticker" >
+                              <div class="form-group">
+                                   <a class="btn btn-info" target="_blank"  href="<%base_url('view_EwayBill/')%><%$uri_segment_2%>"> Eway Bill Details</a>
+                              </div>
+                          </div>
                         <%/if%>
                     <%/if%>
 
@@ -540,7 +548,7 @@
                            </div>
                            <div class="col-lg-4">
                               <div class="form-group">
-                                 <label for="">Select Part NO // Description // FG Stock // Rate // Packing QTY <span class="text-danger">*</span> </label>
+                                 <label for="">Select Part NO // Description // SO QTY // FG Stock // Rate // Packing QTY <span class="text-danger">*</span> </label>
                                  <input type="hidden" readonly id="customer_tracking_id" name="customer_tracking_id" class="form-control">
                                  <select name="part_id" id="part_id"  class="form-control select2">
                                     <option value=''>Please select</option>

@@ -121,8 +121,25 @@
                                             <input required type="text" name="part_description" placeholder="Enter Part Description" class="form-control" value="">
                                         </div>
                                         <div class="form-group">
+                                            <label for="on click url">Part Type<span class="text-danger">*</span></label> <br>
+                                           <select name="part_type" class="form-control select2" >
+                                              <option value="non_scrap" >Non Scrap</option>
+                                              <option value="scrap" >Scrap</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
                                             <label for="on click url">Rate<span class="text-danger">*</span></label> <br>
                                             <input required type="text" step="any" name="fg_rate" placeholder="Enter Rate" class="form-control onlyNumericInput" value="0" required>
+                                        </div>
+                                         <div class="form-group">
+                                            <label for="on click url">Scrap Category<span class="text-danger"></span></label> <br>
+                                           <select name="scrap_category" class="form-control select2" >
+                                              <option value="" >Please select scrap category</option>
+                                              <%foreach $scrap_category as $key => $val%>
+                                              <option 
+                                                  value="<%$val->scrap_category_master_id%>"><%$val->scrap_category%></option>
+                                             <%/foreach%>
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -216,6 +233,16 @@
                                                         <label>Rate<span class="text-danger">*</span></label> <br>
                                                         <input  type="text" step="any" name="fg_rate" placeholder="Enter Rate" class="form-control onlyNumericInput" value="<%$u->fg_rate%>" id="part-rate" required>
                                                     </div>
+                                                    <div class="form-group">
+                                                    <label for="on click url">Scrap Category<span class="text-danger"></span></label>
+                                                   <select name="scrap_category" class="form-control select2" id="scrap_category_id">
+                                                      <option value="" >Please select scrap category</option>
+                                                      <%foreach $scrap_category as $key => $val%>
+                                                      <option 
+                                                          value="<%$val->scrap_category_master_id%>"><%$val->scrap_category%></option>
+                                                     <%/foreach%>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

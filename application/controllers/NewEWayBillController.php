@@ -390,6 +390,7 @@ class NewEWayBillController extends CommonController {
 		$previousHSNCode;
 
 		$i = 1;
+		$part_arr = [];
 		foreach ($po_parts_data as $ps) {
 					  $actualIemsArr = array();
 					 
@@ -518,31 +519,50 @@ class NewEWayBillController extends CommonController {
 							<td colspan="2" style="text-align:center;">' . number_format((float)$subtotal,2, '.', '') . '</td>
 						</tr>
 						';
+
 						
 						if($isInterState==true) {
-							$eway_parts_html .= '
-							<tr style="font-size:14px;text-align:center;">
-							<td>' .  $hsn_codes . '</td>
-							<td>' .  $child_part_datas[0]->part_number.'</td>
-							<td colspan="6" style="text-align:left;" >'.$child_part_datas[0]->part_description.'</td>
-							<td>' . $ps->qty . ' '.$ps->uom_id.'</td>
-							<td>' . number_format((float)$subtotal, 2) . '</td>
-							<td colspan="2"> IGST: '.$igsts.'%</td>
-						</tr>';
+							$part_arr[] = [
+								"hsn_codes" => $hsn_codes ,
+								"part_number" => $child_part_datas[0]->part_number,
+								"part_description" => $child_part_datas[0]->part_description,
+								"qty" => $ps->qty . ' '.$ps->uom_id,
+								"subtotal" => number_format((float)$subtotal, 2),
+								"gst" => 'IGST: '
+							];
+							// $eway_parts_html .= '
+							// <tr style="font-size:14px;text-align:center;">
+							// <td>' .  $hsn_codes . '</td>
+							// <td>' .  $child_part_datas[0]->part_number.'</td>
+							// <td colspan="6" style="text-align:left;" >'.$child_part_datas[0]->part_description.'</td>
+							// <td>' . $ps->qty . ' '.$ps->uom_id.'</td>
+							// <td>' . number_format((float)$subtotal, 2) . '</td>
+							// <td colspan="2"> IGST: '.$igsts.'%</td>
+						// </tr>';
 						}else{
-							$eway_parts_html .= '
-							<tr style="font-size:14px;text-align:center;">
-							<td>' .  $hsn_codes . '</td>
-							<td>' .  $child_part_datas[0]->part_number.'</td>
-							<td colspan="6" style="text-align:left;">'.$child_part_datas[0]->part_description.'</td>
-							<td>' . $ps->qty . ' '.$ps->uom_id.'</td>
-							td>' . number_format((float)$subtotal, 2) . '</td>
-							<td colspan="2"> SGST: '.$sgsts .'%<br> CGST: ' .$cgsts .'</td>
-						</tr>';
+							$part_arr[] = [
+								"hsn_codes" => $hsn_codes ,
+								"part_number" => $child_part_datas[0]->part_number,
+								"part_description" => $child_part_datas[0]->part_description,
+								"qty" => $ps->qty . ' '.$ps->uom_id,
+								"subtotal" => number_format((float)$subtotal, 2),
+								"gst" => 'SGST: '.$sgsts .'%<br> CGST: ' .$cgsts
+							];
+						// 	$eway_parts_html .= '
+						// 	<tr style="font-size:14px;text-align:center;">
+						// 	<td>' .  $hsn_codes . '</td>
+						// 	<td>' .  $child_part_datas[0]->part_number.'</td>
+						// 	<td colspan="6" style="text-align:left;">'.$child_part_datas[0]->part_description.'</td>
+						// 	<td>' . $ps->qty . ' '.$ps->uom_id.'</td>
+						// 	<td>' . number_format((float)$subtotal, 2) . '</td>
+						// 	<td colspan="2"> SGST: '.$sgsts .'%<br> CGST: ' .$cgsts .'</td>
+						// </tr>';
 						}
 						
 			 $i++;
 		}
+		$template_data['part_arr'] = $part_arr;
+		// pr($part_arr,1);
 	
 	//discount related things
         $isDiscount = false;
@@ -585,8 +605,33 @@ class NewEWayBillController extends CommonController {
 	$hsn_code_table_html = $this-> NewEwayBill -> getHSNTableData($unsortedHSNCodes);
 	$transportMode = $this-> NewEwayBill -> getModeOfTransport ($new_sales_data[0]->mode);
 
+	$template_data['new_sales_data'] = $new_sales_data;
+	$template_data['EwbDt'] = $EwbDt;
+	$template_data['EwbValidTill'] = $EwbValidTill;
+	$template_data['IRNNo'] = $IRNNo;
+	$template_data['EwbNo'] = $EwbNo;
+	$template_data['client_data'] = $client_data;
+	$template_data['shipping_data'] = $shipping_data;
+	$template_data['final_basic_total'] = number_format($final_basic_total,2);
+	$template_data['final_basic_total'] = number_format($final_basic_total,2);
+	$template_data['sales_cgst'] = number_format($sales_total['sales_cgst'],2);
+	$template_data['sales_sgst'] = number_format($sales_total['sales_sgst'],2);
+	$template_data['sales_igst'] =number_format($sales_total['sales_igst'],2);
+	$template_data['final_po_amount'] = number_format($final_po_amount,2);
+	$template_data['transporter_data'] = $transporter_data;
+	include "application/libraries/phpqrcode/qrlib.php";
+	// header('Content-Type: image/png');
+	$folderPath = 'documents/ewayBill/'; // specify the path where you want to create the folder
+
+	// Check if the folder exists, if not, create it
+	if (!file_exists($folderPath)) {
+	    mkdir($folderPath, 0777, true);
+	}
+	$path = $folderPath.$EwbNo.".png";
+	$template_data['qr_code'] = base_url().$path;
+	QRcode::png($EwbNo, $path, QR_ECLEVEL_L, 10, 2);
+
 	$html_content = '
-    
 	<!DOCTYPE html>
 	<head>
 			<style> html { margin: 1px}
@@ -637,13 +682,6 @@ class NewEWayBillController extends CommonController {
 	</head>	
 	<body>
 	<script>
-		function printSection() {
-			var printContent = document.getElementById("print-section").innerHTML;
-			var originalContent = document.body.innerHTML;
-			document.body.innerHTML = printContent;
-			window.print();
-			document.body.innerHTML = originalContent;
-		}
 		</script>
 		<div>
 		<button style="color: white;background-color: red;"onclick="printSection()">Print</button>
@@ -792,15 +830,65 @@ class NewEWayBillController extends CommonController {
 	</body>
   </html>
  ';
+ // pr($html_content,1);
+$html_content = $this->smarty->fetch('sales/eWayBillPdf.tpl', $template_data, TRUE);	
 
-		if($downloadPDF == true){
-			$this->pdf->loadHtml($html_content);
-			$this->pdf->render();
-			$this->pdf->stream("View-E-Invoice-Details.pdf", array("Attachment" => 1));
-		}else{
-			echo $html_content;
-			die;
-		}
+		// if($downloadPDF == true){
+			// $this->pdf->loadHtml($html_content);
+			// $this->pdf->render();
+			// $this->pdf->stream("View-E-Invoice-Details.pdf", array("Attachment" => 1));
+  ob_start();
+ 			require_once (APPPATH . 'libraries/tcpdf/tcpdf.php');
+			$pdf = new TCPDF('P', 'mm','A4' , true, 'UTF-8', false);
+
+            $pdf->SetMargins(5, 8, 5, 5);
+
+	        // set document information
+
+	        $pdf->SetCreator(PDF_CREATOR);
+
+	        // set default header data
+	        // $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 006', PDF_HEADER_STRING);
+
+	        // set header and footer fonts
+	        // $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+	        // $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+
+	        // set default monospaced font
+	        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+	        // set margins
+	        // $pdf->SetMargins(PDF_MARGIN_LEFT, 15, PDF_MARGIN_RIGHT,0);
+	        // $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+	        // $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+	        $pdf->setPrintHeader(false);
+			$pdf->setPrintFooter(false);
+	        $pdf->SetHeaderMargin(0);      // Set header margin to 0
+			$pdf->SetFooterMargin(0);
+			$pdf->SetAutoPageBreak(false); 
+
+	        // set auto page breaks
+	        // $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+	        // set image scale factor
+	        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+	        // add a page
+	        $pdf->AddPage();
+
+	        // set some text to print
+	        // $html = file_get_contents('path_to_html_file.html'); // Load your HTML content
+
+	        // output the HTML content
+	        $pdf->writeHTML($html_content, true, false, true, false, '');
+
+	        //Close and output PDF document
+	        $pdf->Output('eway_bill.pdf', 'I');
+	        ob_end_flush();
+		// }else{
+		// 	echo $html_content;
+		// 	die;
+		// }
   }
 	
   /**

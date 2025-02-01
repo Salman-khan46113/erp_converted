@@ -4965,7 +4965,7 @@ class Welcome extends CommonController
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		$data['part_drop_data'] = $this->welcome_model->getCustomerPartNumber();
-		
+		$data['scrap_category'] =  $this->Crud->customQuery("SELECT s.* FROM scrap_category_master s");
 		$this->getPage('customer/customer_parts_master', $data);
 	}
 
@@ -5648,6 +5648,7 @@ class Welcome extends CommonController
 	}
 	public function add_customer_parts_master()
 	{
+        // pr($this->input->post(),1);
 		$part_number = trim($this->input->post('part_number'));
 		$part_description = trim($this->input->post('part_description'));
 		$fg_rate = $this->input->post('fg_rate');
@@ -5670,12 +5671,14 @@ class Welcome extends CommonController
 			$data = array(
 				'part_number' => trim($part_number),
 				'part_description' => trim($part_description),
-				'fg_rate' => $fg_rate
+				'fg_rate' => $fg_rate,
+                "part_type" => $this->input->post("part_type"),
+                "scrap_category_id" => $this->input->post("scrap_category") > 0 ? $this->input->post("scrap_category"): 0,
 			);
-
+            
 			$inser_query = $this->CustomerPart->createCustomerPart($data);
-
 			if ($inser_query) {
+               
 				// $data = array(
 				// 	'success' => 'Data Added Successfully  !!',
 				// );
@@ -11106,7 +11109,8 @@ class Welcome extends CommonController
 		$fg_rate = $this->input->post('fg_rate');
 		
 		$data = array(
-			"part_description" => trim($part_description)
+			"part_description" => trim($part_description),
+            "scrap_category_id" => $this->input->post('scrap_category') > 0 ?  $this->input->post('scrap_category') : 0
 		);
 
 		$dataStock = array(
@@ -11255,4 +11259,59 @@ class Welcome extends CommonController
         echo json_encode($return);
         exit();
     }
+
+    /* scrap category master */
+    public function scrap_category(){
+        checkGroupAccess("scrap_category","list","Yes");
+        $data['scrap_category'] = $this->Crud->customQuery("SELECT s.* FROM scrap_category_master s" );
+        $this->loadView('admin/scrap_category',$data);
+        // pr($data,1);
+    }
+    public function add_update_scrap_category()
+    {
+        $post_data = $this->input->post();
+        $scrap_category = trim($post_data['scrap_category']);
+        if(isset($post_data['scrap_category_id'])){
+            $scrap_category_id = $post_data['scrap_category_id'];
+            $success = 0;
+            $messages = "Something went wrong.";
+            $customer_part_stock = $this->Crud->customQuery("SELECT sc.* FROM scrap_category_master sc WHERE sc.scrap_category = '$scrap_category' AND sc.scrap_category_master_id != $scrap_category_id" );
+            if(!$customer_part_stock){
+                $update_arr = [
+                    "scrap_category" => $scrap_category,
+                    "updated_by" => $this->session->userdata('user_id'),
+                    "updated_date" => date("Y-m-d H:i:s")
+                ];
+                $updated_row = $this->Common_admin_model->update("scrap_category_master", $update_arr, "scrap_category_master_id", $scrap_category_id);
+                if($updated_row > 0){
+                    $messages = "Scrap category updated sucessfully";
+                    $success = 1;
+                }
+            }else{
+                $messages = "Scrap category already exist";
+            }
+        }else{
+            $customer_part_stock = $this->Crud->customQuery("SELECT sc.* FROM scrap_category_master sc WHERE sc.scrap_category = '$scrap_category'" );
+            if(!$customer_part_stock){
+                $insert_data = [
+                    "scrap_category" => $scrap_category,
+                    "added_by" => $this->session->userdata('user_id'),
+                    "added_date" => date("Y-m-d H:i:s")
+                ];
+                $insert_id = $this->Common_admin_model->insert('scrap_category_master', $insert_data);
+                if($insert_id > 0){
+                    $messages = "Scrap category added sucessfully";
+                    $success = 1;
+                }
+            }else{
+                $messages = "Scrap category already exist";
+            }
+        }
+        $result = [];
+        $result['messages'] = $messages;
+        $result['success'] = $success;
+        echo json_encode($result);
+        exit();
+    }
+
 }

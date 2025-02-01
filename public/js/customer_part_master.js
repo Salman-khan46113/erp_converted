@@ -10,10 +10,12 @@ const page = {
         $(document).on("click",".edit-part",function(){
             var data = $(this).attr("data-value");
             data = JSON.parse(atob(data)); 
-            
+            console.log(data);
            $('#edit-part-des').val(data['part_description']);
            $('#part-rate').val(data['stock_rate']);
            $('#part_id').val(data['id']);
+           var scrap_category_id = data['scrap_category_id'] > 0 ? data['scrap_category_id'] : "";
+           $("#scrap_category_id").val(scrap_category_id).trigger("change");
             // myModal.show();
         })
         // $(document).on('click','[type="submit"]',function(){

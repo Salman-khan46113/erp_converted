@@ -212,6 +212,20 @@ class POTrackingController extends CommonController {
         $base_url = $this->config->item("base_url");
 		$data = $this->CustomerPart->getPoTrakingView($condition_arr,$post_data["search"]);
 		foreach ($data as $key => $val) {
+			$dateToCheck = $val['po_end_date'];
+			$currentDate = date('Y-m-d'); // Gets the current date in Y-m-d format
+
+			// Convert both dates to timestamps
+			$dateToCheckTimestamp = strtotime($dateToCheck);
+			$currentDateTimestamp = strtotime($currentDate);
+
+			if($val['status'] == "pending"){
+				$data[$key]['status'] = "Open";
+			}
+			// Compare the timestamps
+			if ($dateToCheckTimestamp < $currentDateTimestamp && $val['status'] != "closed") {
+			    $data[$key]['status'] = "Expired";
+			}
 			$view_details = $po_doc = $action = '';
 			$encode_data = base64_encode(json_encode($val));
 			$view_details = '<a href="' . base_url('view_customer_tracking_id/' . $val['id']) . '" class="" title="PO Details"><i class="ti ti-eye"></i></a>';

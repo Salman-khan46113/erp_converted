@@ -19,7 +19,7 @@
             <!-- Dashboard -->
             <div class="filter-row">
               <li class="nav-small-cap">
-                <span class="hide-menu">Select Customer</span>
+                <span class="hide-menu">Customer</span>
                 <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
               </li>
               <li class="sidebar-item">
@@ -29,6 +29,21 @@
                   <option 
                       value="<%$key%>"><%$val%></option>
                    <%/foreach%>
+                  </select>
+                </div>
+              </li>
+            </div>
+            <div class="filter-row">
+              <li class="nav-small-cap">
+                <span class="hide-menu">Status</span>
+                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+              </li>
+              <li class="sidebar-item">
+                <div class="input-group">
+                  <select name="status" class="form-control select2" id="status_val">
+                  <option value="pending">Open</option>
+                  <option value="expired">Expired</option>
+                  <option value="closed">Close</option>
                   </select>
                 </div>
               </li>

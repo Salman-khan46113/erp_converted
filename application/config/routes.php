@@ -835,3 +835,11 @@ $route['payment_days_dump_script'] = 'MagrationScript_Controller/payment_days_du
 $route['yesterdays_sales_for_mail'] = 'MagrationScript_Controller/yesterdays_sales_for_mail';
 
 $route['send_email'] = 'MagrationScript_Controller/email_sender_test';
+
+
+#=================================== phase 2 new route =======================
+$route['scrap_report'] = 'ReportsController/scrap_report';
+$route['production_scrap_report'] = 'ReportsController/production_scrap_report';
+$route['transfer_scrap_stock'] = 'ReportsController/transfer_scrap_stock';
+$route['scrap_category'] = 'welcome/scrap_category';
+$route['add_update_scrap_category'] = 'welcome/add_update_scrap_category';

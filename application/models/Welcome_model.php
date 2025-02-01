@@ -496,7 +496,7 @@ class Welcome_model extends CI_Model
     }
 
     public function getDataForCustomerParts($condition_arr = [],$search_params = []){
-        $this->db->select('c.id ,c.part_number as part_number,c.part_description as part_description,c.old_fg_stock as fg_stock,c.fg_rate as fg_rate ,stock.fg_rate as stock_rate');
+        $this->db->select('c.id ,c.part_number as part_number,c.part_description as part_description,c.old_fg_stock as fg_stock,c.fg_rate as fg_rate ,stock.fg_rate as stock_rate,c.scrap_category_id');
         $this->db->from('customer_parts_master as c');
         $this->db->join('customer_parts_master_stock stock', 'c.id = stock.customer_parts_master_id AND stock.clientId = ' . $this->db->escape($this->Unit->getSessionClientId()), 'left');
         if(is_valid_array($search_params) && $search_params['part'] > 0){
