@@ -172,7 +172,7 @@ const page = {
             },
           });
         });
-        $(".update_p_q_molding_production").submit(function(e){
+        $(document).on('submit', '.update_p_q_molding_production', function(e) {
             e.preventDefault();
             var data_id = $(this).attr("data-id");
             let flag = that.formValidate("update_p_q_molding_production_"+data_id);
@@ -213,6 +213,7 @@ const page = {
     formValidate: function(form_class = ''){
         let flag = false;
         $(".custom-form."+form_class+" .required-input").each(function( index ) {
+          console.log($(this))
           var value = $(this).val();
           var dataMax = $(this).attr('data-max');
           var dataMin = $(this).attr('data-min');

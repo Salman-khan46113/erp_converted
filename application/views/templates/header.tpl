@@ -721,7 +721,10 @@
                      <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdownMenuLinkReport" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                      Reports
                      </a>
-                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkReportSubmenu">
+                     <ul class="dropdown-menu report-menu" aria-labelledby="navbarDropdownMenuLinkReportSubmenu" style="
+    width: 885px;
+    left: -258px;
+">
                         <%if checkGroupAccess("sales_report","list","No") %>
                         <li><a href="<%base_url('sales_report')%>" class="dropdown-item">Sales Report </a></li>
                         <%/if%>
@@ -1005,3 +1008,9 @@ Production Scrap Report</a></li>
       <!-- Content wrapper -->
       <div class="content-wrapper">
       <!-- Content -->
+<style type="text/css">
+   .report-menu li {
+    float: left;
+    width: 33%;
+}
+</style>
