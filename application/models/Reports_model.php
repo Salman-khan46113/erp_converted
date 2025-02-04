@@ -755,6 +755,51 @@ WHERE pq.output_part_table_name = "inhouse_parts"','inner');
         return $ret_data;
     }
 
+    public function getProductionScrapTransferDataView($condition_arr = [],$search_params = ""){
+    	$this->db->select('st.*,cp.part_number,cp.part_description,sm.scrap_category');
+		$this->db->from('scrap_transfer_stock AS st');
+		$this->db->join('customer_parts_master AS cp', 'cp.id = st.customer_part_id', 'inner');
+		$this->db->join('scrap_category_master AS sm', 'sm.scrap_category_master_id = st.scrap_category_id', 'inner');
+		if (count($condition_arr) > 0) {
+            $this->db->limit($condition_arr["length"], $condition_arr["start"]);
+            if ($condition_arr["order_by"] != "") {
+                $this->db->order_by($condition_arr["order_by"]);
+            }
+        }
+        if (is_array($search_params) && count($search_params) > 0) {
+            if ($search_params["scrap_product"] != "") {
+                $this->db->where("st.customer_part_id", $search_params["scrap_product"]);
+            }
+   
+            if ($search_params["date_range"] != "") {
+	            $date_filter =  explode((" - "),$search_params["date_range"]);
+				$data['start_date'] = $date_filter[0];
+				$data['end_date'] = $date_filter[1];
+				$this->db->where("STR_TO_DATE(st.added_date, '%Y-%m-%d') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+			}
+            
+            if (isset($search_params["value"]) && $search_params["value"] != "") {
+	            $keyword = $search_params["value"];
+	            $this->db->group_start();
+	            $fields = [
+	                'cp.part_number',
+	                'cp.part_description',
+	                // Add other fields to search as needed
+	            ];
+	            
+	            foreach ($fields as $field) {
+	                $this->db->or_like($field, $keyword);
+	            }
+	            $this->db->group_end(); // End the group of OR conditions
+	        }
+        }
+
+		$result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        // pr($this->db->last_query(),1);
+        return $ret_data;
+    }
+
 
 
 

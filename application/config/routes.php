@@ -840,6 +840,8 @@ $route['send_email'] = 'MagrationScript_Controller/email_sender_test';
 #=================================== phase 2 new route =======================
 $route['scrap_report'] = 'ReportsController/scrap_report';
 $route['production_scrap_report'] = 'ReportsController/production_scrap_report';
+$route['production_scrap_transfer_report'] = 'ReportsController/getProductionScrapTransfer';
 $route['transfer_scrap_stock'] = 'ReportsController/transfer_scrap_stock';
 $route['scrap_category'] = 'welcome/scrap_category';
 $route['add_update_scrap_category'] = 'welcome/add_update_scrap_category';
+

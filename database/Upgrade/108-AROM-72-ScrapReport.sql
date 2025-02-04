@@ -32,7 +32,7 @@ CREATE TABLE `scrap_category_master` (
   `added_date` datetime NOT NULL,
   `updated_by` int DEFAULT NULL,
   `updated_date` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 
 
 --
@@ -46,7 +46,7 @@ CREATE TABLE `scrap_transfer_stock` (
   `stock` double(10,2) NOT NULL,
   `added_by` int NOT NULL,
   `added_date` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 
 --
 -- Indexes for dumped tables
@@ -105,3 +105,9 @@ INSERT INTO `DB_Upgrade`
 ;
 
 COMMIT;
+
+/*added remark in transfer scrap stock */
+ALTER TABLE `scrap_transfer_stock` ADD `remark` VARCHAR(255) NULL AFTER `stock`;
+
+/*added menu for new report transfer scrap stock */;
+INSERT INTO `menu_master` (`diaplay_name`, `url`,`menu_category_id`, `status`) VALUES ('Production Scrap Transfer Report', 'production_scrap_transfer_report',7,'Active')

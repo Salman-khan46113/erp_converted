@@ -366,7 +366,11 @@ class ReportsController extends CommonController
         $date_filter =  explode((" - "),$date_filter);
         $data['export_start_date'] = $date_filter[0];
         $data['export_end_date'] = $date_filter[1];
-
+        $data['client_data'] = $this->Crud->read_data("client");
+        $config_data = $this->Crud->read_data("global_configuration");
+        $config_data = array_column($config_data,"config_value","config_name");
+        $data['selected_unit'] = $config_data['allUnitExport'] == "Yes" ? "" : $this->Unit->getSessionClientId();
+        $data['all_unit_export'] = $config_data['allUnitExport'];
 		$this->getPage('reports/reports_grn', $data);	
 	}
 
@@ -596,7 +600,19 @@ class ReportsController extends CommonController
         $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
-        
+        $current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+            $current_year--;
+        }
+        $date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['export_start_date'] = $date_filter[0];
+        $data['export_end_date'] = $date_filter[1];
+        $data['client_data'] = $this->Crud->read_data("client");
+        $config_data = $this->Crud->read_data("global_configuration");
+        $config_data = array_column($config_data,"config_value","config_name");
+        $data['selected_unit'] = $config_data['allUnitExport'] == "Yes" ? "" : $this->Unit->getSessionClientId();
+        $data['all_unit_export'] = $config_data['allUnitExport'];
         $this->loadView('reports/payable_report',$data);
     }
 
@@ -926,7 +942,20 @@ class ReportsController extends CommonController
         $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
-        
+
+        $current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+            $current_year--;
+        }
+        $date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['export_start_date'] = $date_filter[0];
+        $data['export_end_date'] = $date_filter[1];
+        $data['client_data'] = $this->Crud->read_data("client");
+        $config_data = $this->Crud->read_data("global_configuration");
+        $config_data = array_column($config_data,"config_value","config_name");
+        $data['selected_unit'] = $config_data['allUnitExport'] == "Yes" ? "" : $this->Unit->getSessionClientId();
+        $data['all_unit_export'] = $config_data['allUnitExport'];
         $this->loadView('reports/sales_summary_report',$data);
     }
 
@@ -1137,7 +1166,20 @@ class ReportsController extends CommonController
         $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
-        
+
+        $current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+            $current_year--;
+        }
+        $date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['export_start_date'] = $date_filter[0];
+        $data['export_end_date'] = $date_filter[1];
+        $data['client_data'] = $this->Crud->read_data("client");
+        $config_data = $this->Crud->read_data("global_configuration");
+        $config_data = array_column($config_data,"config_value","config_name");
+        $data['selected_unit'] = $config_data['allUnitExport'] == "Yes" ? "" : $this->Unit->getSessionClientId();
+        $data['all_unit_export'] = $config_data['allUnitExport'];
         $this->loadView('reports/grn_summary_report',$data);
     }
 
@@ -1271,7 +1313,6 @@ class ReportsController extends CommonController
     }
     public function transfer_scrap_stock()
     {
-        // pr($this->input->post(),1);
         $customer_part_id = $this->input->post('customer_part_id');
         $scrap_category_id = $this->input->post('scrap_category_id');
         $scrap_stock = $this->input->post('scrap_stock');
@@ -1282,7 +1323,8 @@ class ReportsController extends CommonController
             "customer_part_id" => $customer_part_id,
             "stock" => $scrap_stock,
             "added_by" => $this->session->userdata('user_id'),
-            "added_date" => date("Y-m-d H:i:s")
+            "added_date" => date("Y-m-d H:i:s"),
+            "remark" => $this->input->post("remark"),
         ];
         $insert_id = $this->Common_admin_model->insert('scrap_transfer_stock', $insert_data);
         if($insert_id > 0){
@@ -1312,7 +1354,6 @@ class ReportsController extends CommonController
     public function production_scrap_report()
     {
 
-        
         checkGroupAccess("production_scrap_report","list","Yes");
         $data['customers'] = $this->Crud->read_data("customer");
         $column[] = [
@@ -1440,6 +1481,109 @@ class ReportsController extends CommonController
         $data["total_balance_amount"] = number_format($total_balance_amount,2);
         $data["total_gst_amount"] = number_format($total_gst_amount,2);
         $data["total_amount_with_gst_amount"] = number_format($total_amount_with_gst_amount,2);
+        echo json_encode($data);
+    }
+    public function getProductionScrapTransfer(){
+
+        checkGroupAccess("production_scrap_report","list","Yes");
+        $data['customers'] = $this->Crud->read_data("customer");
+         $column[] = [
+            "data" => "scrap_category",
+            "title" => "Scrap Category",
+            "width" => "8%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "customer_part",
+            "title" => "Scrap Part",
+            "width" => "8%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "stock",
+            "title" => "Transferred Scrap Qty",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        $column[] = [
+            "data" => "added_date",
+            "title" => "Date",
+            "width" => "10%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "remark",
+            "title" => "Remark",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        // $column[] = [
+        //     "data" => "operation_part_no",
+        //     "title" => "Operation Part No",
+        //     "width" => "20%",
+        //     "className" => "dt-left",
+
+        // ];
+        
+        
+        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
+        
+        $data["data"] = $column;
+        $data["is_searching_enable"] = true;
+        $data["is_paging_enable"] = true;
+        $data["is_serverSide"] = true;
+        $data["is_ordering"] = true;
+        $data["is_heading_color"] = "#a18f72";
+        $data["no_data_message"] =
+            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
+            base_url() .
+            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
+        $data["is_top_searching_enable"] = true;
+        $data["sorting_column"] = json_encode([3, 'desc']); //[15, 'desc']
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
+        $data["admin_url"] = base_url();
+        $data["base_url"] = base_url();
+        $data['scrap_category'] =  $this->Crud->customQuery("SELECT s.* FROM scrap_category_master s");
+        $data['scrap_product'] = $this->Crud->customQuery("SELECT c.* FROM customer_parts_master c WHERE c.part_type = 'scrap'" );
+        // pr($data['scrap_product'],1);
+        $this->loadView('reports/production_scrap_transfer',$data);
+    }
+
+
+    public function getProductionScrapTransferData  (){
+        $post_data = $this->input->post();
+
+        $column_index = array_column($post_data["columns"], "data");
+        $order_by = "";
+        foreach ($post_data["order"] as $key => $val) {
+            if ($key == 0) {
+                $order_by .= $column_index[$val["column"]] . " " . $val["dir"];
+            } else {
+                $order_by .=
+                "," . $column_index[$val["column"]] . " " . $val["dir"];
+            }
+        }
+        
+        $condition_arr["order_by"] = $order_by;
+        $condition_arr["start"] = $post_data["start"];
+        $condition_arr["length"] = $post_data["length"];
+        $base_url = $this->config->item("base_url");
+        $data = $this->Reports_model->getProductionScrapTransferDataView($condition_arr,$post_data["search"]);
+        foreach ($data as $key => $val) {            
+            $data[$key]['customer_part'] = $val['part_number']."/".$val['part_description'];
+            $data[$key]['added_date'] = defaultDateFormat(formateFormDate($val['added_date']));
+            $data[$key]['remark'] = display_no_character($val['remark']);
+        } 
+
+        $data["data"] = $data;
+        $total_record = $this->Reports_model->getProductionScrapTransferDataView([], $post_data["search"]);
+        $total_balance_amount = 0;
+        $data["recordsTotal"] = count($total_record);
+        $data["recordsFiltered"] = count($total_record);
+        $data["total_balance_amount"] = number_format($total_balance_amount,2);
         echo json_encode($data);
     }
 }

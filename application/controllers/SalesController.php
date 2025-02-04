@@ -1188,7 +1188,11 @@ class SalesController extends CommonController
         $date_filter =  explode((" - "),$date_filter);
         $data['export_start_date'] = $date_filter[0];
         $data['export_end_date'] = $date_filter[1];
-
+        $data['client_data'] = $this->Crud->read_data("client");
+        $config_data = $this->Crud->read_data("global_configuration");
+        $config_data = array_column($config_data,"config_value","config_name");
+        $data['selected_unit'] = $config_data['allUnitExport'] == "Yes" ? "" : $this->Unit->getSessionClientId();
+        $data['all_unit_export'] = $config_data['allUnitExport'];
 		$this->loadView('reports/sales_reports', $data);
 		}
 	}
@@ -1339,6 +1343,12 @@ class SalesController extends CommonController
 		if($type == "sales"){
 			$return_arr['column'] = [
 				[
+		            "data" => "client_name",
+		            "title" => "Unit",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+				[
 		            "data" => "customer_name",
 		            "title" => "CUSTOMER NAME",
 		            "width" => "14%",
@@ -1483,6 +1493,12 @@ class SalesController extends CommonController
 
 	    }else if($type == "grn"){
 	    	$return_arr['column'] = [
+	    		[
+		            "data" => "client_name",
+		            "title" => "Unit",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
 				[
 		            "data" => "supplier_name",
 		            "title" => "Supplier name",
@@ -1644,7 +1660,693 @@ class SalesController extends CommonController
 			$return_arr['file_name'] = "grn_report";
 			$return_arr['title'] = "GRN Report";
 
+	    }else if($type == "sales_summary"){
+	    	$return_arr['column'] = [
+	    		[
+		            "data" => "client_name",
+		            "title" => "Unit",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+			    [
+			        "data" => "customer_name",
+			        "title" => "Customer Name",
+			        "width" => "25%",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "po_number",
+			        "title" => "Customer PO NO",
+			        "width" => "25%",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "salesNumber",
+			        "title" => "Sales Inv No",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "sales_date",
+			        "title" => "Sales Invoice Date",
+			        "width" => "25%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "status",
+			        "title" => "Sales Status",
+			        "width" => "25%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "vehicle_number",
+			        "title" => "Vehicle Number",
+			        "width" => "25%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "qty",
+			        "title" => "Total Qty",
+			        "width" => "25%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "subtotal",
+			        "title" => "Taxable Value",
+			        "width" => "7%",
+			        "className" => "dt-center status-row",
+			    ],
+			    [
+			        "data" => "total_discount_amount",
+			        "title" => "Discount(₹)",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "sgst_amount",
+			        "title" => "SGST",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "cgst_amount",
+			        "title" => "CGST",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "igst_amount",
+			        "title" => "IGST",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "tcs_amount",
+			        "title" => "TCS",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "total_gst_amount",
+			        "title" => "TOTAL GST",
+			        "width" => "17%",
+			        "className" => "dt-center due_days_block",
+			    ],
+			    [
+			        "data" => "row_total",
+			        "title" => "Total With GST",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			    ]
+			];
+
+		    $data = $this->SalesModel->getSalesSummaryRepotExportData($post_data);
+			foreach ($data as $key => $po) {
+	            if($po['basic_total'] > 0 ) {
+	                $subtotal = $po['basic_total'];
+	            }else{
+	                $subtotal =  $po['total_rate'] - $po['gst_amount'];
+	            }
+	            
+	            $data[$key]['subtotal'] = $subtotal;
+	            if ($po['part_price'] > 0) {
+	                $rate = $po['part_price'];
+	            }else{
+	                $rate = round((float) $subtotal / (float) $po['qty'], 2);
+	            }
+	            $data[$key]['rate'] = $rate;
+	            $row_total = $po['total_sales_amount'];
+	            $data[$key]['row_total'] = $row_total;
+
+	            $gst_structure = $this->Crud->get_data_by_id("gst_structure", $po['taxid'], "id");
+	            $sales_total = $this->Crud->tax_calcuation($gst_structure[0], $subtotal, $po['total_discount_amount']);
+	            $data[$key]['sgst_amount']  = $sales_total["sales_sgst"];
+	            $data[$key]['cgst_amount'] = $sales_total["sales_cgst"];
+	            $data[$key]['igst_amount']  = $sales_total["sales_igst"];
+	            $data[$key]['tcs_amount'] = $sales_total["sales_tcs"];
+	        } 
+
+			$return_arr['result_data'] = $data;
+			$return_arr['file_name'] = "sales_summary_report";
+			$return_arr['title'] = "GRN Report";
+
+	    }else if($type == "grn_summary"){
+	    	$return_arr['column'] = [
+	    		[
+		            "data" => "client_name",
+		            "title" => "Unit",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+			    [
+			        "data" => "supplier_name",
+			        "title" => "Supplier Name",
+			        "width" => "150px",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "poNumber",
+			        "title" => "PO No",
+			        "width" => "25%",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "po_date",
+			        "title" => "PO Date",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "grn_number",
+			        "title" => "GRN No",
+			        "width" => "80px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "grn_created_date",
+			        "title" => "GRN Date",
+			        "width" => "100px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "invoice_number",
+			        "title" => "Invoice Number",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "invoice_date",
+			        "title" => "Invoice Date",
+			        "width" => "120px",
+			        "className" => "dt-center status-row",
+			    ],
+			    [
+			        "data" => "po_qty",
+			        "title" => "PO Qty",
+			        "width" => "80px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "accept_qty",
+			        "title" => "Total QTY",
+			        "width" => "100px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "base_amount",
+			        "title" => "Basic Amount",
+			        "width" => "120px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "sgst_amount",
+			        "title" => "SGST",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "cgst_amount",
+			        "title" => "CGST",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "igst_amount",
+			        "title" => "IGST",
+			        "width" => "17%",
+			        "className" => "dt-center due_days_block",
+			    ],
+			    [
+			        "data" => "tcs_amount",
+			        "title" => "TCS",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "gst_amount",
+			        "title" => "GST Total",
+			        "width" => "90px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "total_with_gst",
+			        "title" => "Total Amount With GST",
+			        "width" => "160px",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ]
+			];
+
+
+		    $data = $this->SalesModel->getGrnSummaryReportExportData($post_data);
+			foreach ($data as $key => $g) {
+	            $gst_amount = (float)($g['sgst_amount'] + $g['cgst_amount'] + $g['igst_amount'] + $g['tcs_amount']);
+	            $total_with_gst = $gst_amount + $g['base_amount'];
+	            // $data[$key]['gst_amount'] = $gst_amount;
+	            $data[$key]['total_with_gst']  = $total_with_gst;
+	            $data[$key]['po_date']  = defaultDateFormat($g['po_date']);
+	            $data[$key]['grn_created_date']  = defaultDateFormat($g['grn_created_date']);
+	            $data[$key]['invoice_date']  = defaultDateFormat($g['invoice_date']);            
+	        }  
+
+			$return_arr['result_data'] = $data;
+			$return_arr['file_name'] = "grn_summary_report";
+			$return_arr['title'] = "GRN Report";
+
+	    }else if($type == "payable"){
+	    	$return_arr['column'] = [
+	    		[
+		            "data" => "client_name",
+		            "title" => "Unit",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+			    [
+			        "data" => "supplier_name",
+			        "title" => "Supplier name",
+			        "width" => "150px",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "grn_number",
+			        "title" => "GRN No",
+			        "width" => "100px",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "grn_created_date",
+			        "title" => "GRN Date",
+			        "width" => "100px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "invoice_number",
+			        "title" => "Invoice Number",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "invoice_date",
+			        "title" => "Invoice Date",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "base_amount",
+			        "title" => "Basic Amount",
+			        "width" => "120px",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "sgst_amount",
+			        "title" => "SGST",
+			        "width" => "3%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "cgst_amount",
+			        "title" => "CGST",
+			        "width" => "3%",
+			        "className" => "dt-center status-row",
+			    ],
+			    [
+			        "data" => "igst_amount",
+			        "title" => "IGST",
+			        "width" => "3%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "tcs_amount",
+			        "title" => "TCS",
+			        "width" => "3%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "gst_amount",
+			        "title" => "GST Total",
+			        "width" => "120px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "total_with_gst",
+			        "title" => "Total Amount With GST",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "payment_days",
+			        "title" => "Payment Terms in Days",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "due_date",
+			        "title" => "Due Date",
+			        "width" => "10%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "due_days",
+			        "title" => "Due Days",
+			        "width" => "10%",
+			        "className" => "dt-center due_days_block",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "amount_received",
+			        "title" => "Amount Paid",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "tds_amount",
+			        "title" => "TDS",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "bal_amnt",
+			        "title" => "Balance Amount to Pay",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "payment_receipt_date",
+			        "title" => "Payment Paid Date",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "transaction_details",
+			        "title" => "Transaction Details",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "remarks",
+			        "title" => "Remark",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ]
+			];
+
+
+
+		    $data = $this->SalesModel->getPayableReportExportData($post_data);
+			foreach ($data as $key => $objs) {
+	            $gst_amount = (float)($objs['sgst_amount'] + $objs['cgst_amount'] + $objs['igst_amount'] + $objs['tcs_amount']);
+	            $data[$key]['gst_amount'] = number_format($gst_amount,2,".","");
+	            $created_date_str = $objs['grn_created_date'];  
+	            $total_with_gst = $gst_amount + $objs['base_amount'];  
+	            $data[$key]['total_with_gst'] = $total_with_gst;
+	            $total_with_gst_val += $total_with_gst > 0 ? $total_with_gst : 0;
+	            $total_paid_amount += $value['amount_received'] > 0 ? $value['amount_received'] : 0;
+	            $total_balance_amount_to_pay += $value['bal_amnt'] > 0 ? $value['bal_amnt'] : 0;
+	            $total_tds_amount += $value['tds_amount'] > 0 ? $value['tds_amount'] : 0;
+	            $tcs_amount = 0;
+	            if(!empty($objs['tcs_amount'])){
+	                $tcs_amount = $objs['tcs_amount'];
+	            }   
+	            $data[$key]['tcs_amount'] = number_format($tcs_amount,2,".","");                          
+	            // Create a DateTime object by specifying the format
+	            $dateTime = DateTime::createFromFormat('d-m-Y', $created_date_str);
+	            $due_date = display_no_character("");
+	            if ($dateTime && is_numeric($objs['payment_days'])) {
+	                // Convert payment_terms to an integer for days
+	                $payment_terms_days = (int)$objs['payment_days'];
+	                // Add payment_terms (in days) to the created date
+	                $dateTime->add(new DateInterval('P' . $payment_terms_days . 'D'));
+	                // Get the formatted due date
+	                $due_date = $dateTime->format('d/m/Y');
+	                $due_date = defaultDateFormat($due_date);
+	            }
+	            $data[$key]['due_date'] = $due_date;
+
+	            $today = new DateTime();
+	            // Convert due date string to a DateTime object
+	            $due_days = display_no_character("");
+	            if($due_date != display_no_character("")){
+	                if(!empty($objs['payment_receipt_date'])){
+	                    $sales_date = $objs['grn_created_date'];
+
+	                    $sales_date = DateTime::createFromFormat("d-m-Y", $sales_date);
+	                    // Format to the desired output
+	                    $sales_date = $sales_date->format("Y-m-d");
+	                    $payment_receipt_date = $objs['payment_receipt_date'];
+	                    $sales_date = new DateTime($sales_date);
+	                    $payment_receipt_date = new DateTime($payment_receipt_date);
+	                    // Calculate the difference
+	                    $interval = $sales_date->diff($payment_receipt_date);
+
+	                    // Get the difference in days
+	                    $due_days = $interval->days;
+	                }else{
+	                    $dueDateObject = DateTime::createFromFormat('d/m/Y', $due_date);
+	                     // Calculate the interval between the due date and today's date
+	                    $interval = $today->diff($dueDateObject);
+	                    // Get the difference in days
+	                    $due_days = $interval->format('%r%a'); // This will give the difference in days with respect to today's date
+	                }
+	                
+	               
+	                $due_days_status = "normal";
+	                if($due_days <= 0 && empty($objs['payment_receipt_date']))
+	                {
+	                    $due_days_status = "danger";
+	                }
+	            }
+	            
+	            $data[$key]['due_days'] = $due_days;
+	            $data[$key]['due_days_status'] = $due_days_status;
+
+	            $bal_amnt = $total_with_gst - $objs['amount_received'] - $objs['tds_amount'];
+	            $data[$key]['bal_amnt'] = number_format($bal_amnt, 2, '.', '');    
+	            $data[$key]['action']= display_no_character("");
+	            if($objs['total_accept_qty'] > 0 && checkGroupAccess("payable_report","update","No")){
+	                $data[$key]['action'] = "<a href='javascript:void(0)' class='add-payable-report' data-grn-number='".$objs['grn_number']."' data-amount-paid='".$objs['amount_received']."' data-bal-amnt='".$bal_amnt."' data-transaction-details='".$objs['transaction_details']."' data-payment-receipt-date='".$objs['payment_receipt_date']."' data-tds='".$objs['tds_amount']."'><i class='ti ti-edit'></i></a>";
+	            }
+
+	            $data[$key]['grn_created_date'] = defaultDateFormat($objs['grn_created_date']);
+	            $data[$key]['invoice_date'] = defaultDateFormat($objs['invoice_date']);
+	            $data[$key]['payment_receipt_date'] = defaultDateFormat($objs['payment_receipt_date']);  
+	             $data[$key]['base_amount'] = number_format($objs['base_amount'],2,".","");
+	            $data[$key]['cgst_amount'] = number_format($objs['cgst_amount'],2,".","");
+	            $data[$key]['sgst_amount'] = number_format($objs['sgst_amount'],2,".","");
+	            $data[$key]['igst_amount'] = number_format($objs['igst_amount'],2,".","");                                
+	                                                                                
+	        }   
+	        // pr(count($data),1);
+			$return_arr['result_data'] = $data;
+			$return_arr['file_name'] = "payable_report";
+			$return_arr['title'] = "Payable Report";
+
+	    }else if($type == "receivable"){
+	    	$return_arr['column'] = [
+	    		[
+		            "data" => "client_name",
+		            "title" => "Unit",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+			    [
+			        "data" => "customer_name",
+			        "title" => "CUSTOMER NAME",
+			        "width" => "14%",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "sales_number",
+			        "title" => "Sales Inv No",
+			        "width" => "16%",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "created_date_val",
+			        "title" => "Sales Inv Date",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "subtotal",
+			        "title" => "Basic Amount Total",
+			        "width" => "10%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "gst",
+			        "title" => "GST Total Amount",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "row_total",
+			        "title" => "Total Amount With GST",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "payment_terms",
+			        "title" => "Payment Terms in Days",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "due_date",
+			        "title" => "Due Date",
+			        "width" => "7%",
+			        "className" => "dt-center status-row",
+			    ],
+			    [
+			        "data" => "due_days",
+			        "title" => "Due Days",
+			        "width" => "17%",
+			        "className" => "dt-center due_days_block",
+			    ],
+			    [
+			        "data" => "amount_received",
+			        "title" => "Amount Received",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "tds_amount",
+			        "title" => "TDS",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "bal_amnt",
+			        "title" => "Balance Amount to Receive",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "payment_receipt_date_formated",
+			        "title" => "Payment Receipt Date",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "transaction_details",
+			        "title" => "Transaction Details",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "remark_val",
+			        "title" => "Remark",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "action",
+			        "title" => "Action",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ]
+			];
+
+
+
+
+		    $data = $this->SalesModel->getReceivableReportExportData($post_data);
+			foreach ($data as $key => $objs) {
+				$date_convert = DateTime::createFromFormat('d-m-Y', $objs['created_date']);
+				// Format the date to d/m/Y
+				$objs['created_date'] = $date_convert->format('d/m/Y');
+
+				$created_date_str = $objs['created_date'];
+	            
+				$payment_receipt_date_formated  = '';
+				$subtotal = round($objs['ttlrt'] - $objs['gstamnt'], 2);
+				$row_total = round($objs['ttlrt'], 2) + round($objs['tcsamnt'], 2);
+				if (($objs['payment_receipt_date'] != '')) {
+					$payment_receipt_date_formated =  date("d/m/Y", strtotime($objs['payment_receipt_date']));
+				}
+				$data[$key]['subtotal'] = $subtotal;
+				$data[$key]['row_total'] = number_format($row_total,2,".","");
+				$data[$key]['payment_receipt_date_formated'] = $payment_receipt_date_formated;
+				$tds_amount = $data[$key]['tds_amount'] = $objs['tds_amount'] > 0 ? $objs['tds_amount'] : 0;
+
+				// $data[$key]['bal_amnt'] = $row_total - $val['amount_received'] - $tds_amount;
+
+				// Create a DateTime object by specifying the format
+				$dateTime = DateTime::createFromFormat('d/m/Y', $created_date_str);
+				$due_date = display_no_character("");
+				
+				if ($dateTime && is_numeric($objs['payment_terms'])) {
+					// Convert payment_terms to an integer for days
+					$payment_terms_days = (int)$objs['payment_terms'];
+			
+					// Add payment_terms (in days) to the created date
+					$dateTime->add(new DateInterval('P' . $payment_terms_days . 'D'));
+			
+					// Get the formatted due date
+					$due_date = $dateTime->format('d/m/Y');
+			
+					
+				}
+
+				$today = new DateTime();
+	        
+				$due_days_status = display_no_character("");
+
+	            if($due_date != display_no_character("")){
+	            	if(!empty($objs['payment_receipt_date']) && $objs['payment_receipt_date'] != "" && $objs['payment_receipt_date'] != NULL ){
+
+	            		$sales_date = $objs['created_date'];
+	            		$sales_date = DateTime::createFromFormat("d/m/Y", $sales_date);
+						// Format to the desired output
+						$sales_date = $sales_date->format("Y-m-d");
+	            		$payment_receipt_date = $objs['payment_receipt_date'];
+	            		$sales_date = new DateTime($sales_date);
+						$payment_receipt_date = new DateTime($payment_receipt_date);
+						// Calculate the difference
+						$interval = $sales_date->diff($payment_receipt_date);
+
+						// Get the difference in days
+						$due_days = $interval->days;
+
+	                }else{
+	                    $dueDateObject = DateTime::createFromFormat('d/m/Y', $due_date);
+	                    // Calculate the interval between the due date and today's date
+						$interval = $today->diff($dueDateObject);
+						
+						// Get the difference in days
+						$due_days = $interval->format('%r%a');
+	                }
+	            	
+
+					$due_days_status = "normal";
+	                if($due_days <= 0 && empty($objs['payment_receipt_date']))
+	                {
+	                    $due_days_status = "danger";
+	                }
+
+				}
+
+				$data[$key]['due_date'] = $due_date;
+				$data[$key]['due_days'] = $due_days;
+				$data[$key]['due_days_status'] = $due_days_status;
+			}   
+	        // pr(count($data),1);
+			$return_arr['result_data'] = $data;
+			$return_arr['file_name'] = "receivalbe_report";
+			$return_arr['title'] = "Receivable Report";
+
 	    }
+	    // pr($return_arr,1);
 	    return $return_arr;
 	}
 	public function hsn_report()
@@ -4001,7 +4703,19 @@ class SalesController extends CommonController
         $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
-		
+		$current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+            $current_year--;
+        }
+        $date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['export_start_date'] = $date_filter[0];
+        $data['export_end_date'] = $date_filter[1];
+        $data['client_data'] = $this->Crud->read_data("client");
+        $config_data = $this->Crud->read_data("global_configuration");
+        $config_data = array_column($config_data,"config_value","config_name");
+        $data['selected_unit'] = $config_data['allUnitExport'] == "Yes" ? "" : $this->Unit->getSessionClientId();
+        $data['all_unit_export'] = $config_data['allUnitExport'];
 		$this->loadView('reports/receivable_report',$data);
 	}
 

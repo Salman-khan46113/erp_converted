@@ -68,7 +68,7 @@
                                        <div class="modal-body">
                                           <input value="<%$t['scrap_category_master_id'] %>" name="scrap_category_id" type="hidden" required class="form-control" aria-describedby="emailHelp" placeholder="">
                                             <div class="form-group">
-												<label>Transfer to Part<span class="text-danger">*</span></label> <br>
+												<label>Transfer To Scrap Part<span class="text-danger">*</span></label> <br>
                                                	<select name="customer_part_id" class="form-control select2 required-input" >
                                                       <option value="" >Please select Part</option>
                                                       <%foreach $scrap_product as $key => $val%>
@@ -80,6 +80,10 @@
                                             <div class="form-group">
 												<label>Transfer Qty<span class="text-danger">*</span></label> <br>
                                                 <input  type="text" step="any" name="scrap_stock" placeholder="Enter transfer qtys" class="form-control onlyNumericInput required-input" value="" id="part-rate" data-max="<%roundUpNumber($t['scrap_stock']) %>" data-min="1">
+                                            </div>
+                                            <div class="form-group">
+                        <label>Remark<span class="text-danger">*</span></label> <br>
+                                                <input  type="text" step="any" name="remark" placeholder="Enter remark" class="form-control  required-input" value="" >
                                             </div>
                                        </div>
                                        <div class="modal-footer">

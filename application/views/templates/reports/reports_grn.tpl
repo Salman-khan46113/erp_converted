@@ -111,7 +111,7 @@
                <div class="modal-body">
                   <div class="form-group ps-2">
                      <form action="javascript:void(0)" method="POST"
-                        enctype="multipart/form-data" id="export_oustanding_report">
+                        enctype="multipart/form-data" id="export_oustanding_report" class="global-export">
                             
                             <div class="form-group mb-4 hide">
                               <label for="on click url " class="float-start mt-2 me-2">Export To :</label>
@@ -134,10 +134,25 @@
                                     </div>
                                 </div>
                             </div>
+                            <%if $all_unit_export eq 'Yes'%>
+                               <div class="form-group mt-2" >
+                                <label for="on click url" class="float-start me-3" style="width: 17%;">Client Unit <span class="text-danger">*</span>:</label>
+                                <select name="client" class="form-control select2 w-50" id="client_name">
+                                  <option value="">All</option>
+                                 <%foreach $client_data as $key => $val%>
+                                    <option <%if $selected_unit eq $val->id%>selected<%/if%>
+                                        value="<%$val->id%>"><%$val->client_unit%></option>
+                                <%/foreach%>
+                                  </select>
+                                </div>
+                            <%else%>
+                               <input  type="hidden" name="client" placeholder="Enter Name"
+                             class="form-control w-75" value="<%$selected_unit%>" id="client_name">
+                            <%/if%>
                           <div class="form-group mt-2" >
-                          <label for="on click url" class="float-start" style="width: 17%;">Date <span class="text-danger">*</span>:</label>
+                          <label for="on click url" class="float-start me-3" style="width: 17%;">Date <span class="text-danger">*</span>:</label>
                           <input  type="text" name="report_date" placeholder="Enter Name"
-                             class="form-control w-50" id="report_date">
+                             class="form-control w-75" id="report_date">
                           </div>
                        </div>
                        <div class="modal-footer">

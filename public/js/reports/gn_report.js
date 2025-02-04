@@ -33,8 +33,8 @@ const page = {
         $('#export_oustanding_report').on('submit', function(e){
             var report_date = $("#report_date").val();
             var type = $("[name='inlineRadioOptions']:checked").val();
-            console.log(type)
-            window.location.href = base_url+'sales_report_export?date='+report_date+"&type="+type+"&report_type=grn";
+            var client = $("#client_name").val();
+            window.location.href = base_url+'sales_report_export?date='+report_date+"&type="+type+"&report_type=grn"+"&client="+client;
             
         });
 

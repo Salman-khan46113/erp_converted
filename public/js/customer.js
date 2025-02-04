@@ -19,7 +19,7 @@ const datatable = {
             var data = $(this).attr("data-value");
           
             data = JSON.parse(atob(data)); 
-            console.log(data)
+            console.log(data.gst_number)
             $("#updateCustomerForm #ucustomer_id").val(data['id']);
             $("#updateCustomerForm #ucustomer_name").val(data.customer_name);
             $("#updateCustomerForm #ucustomer_code").val(data.customer_code);
@@ -37,6 +37,7 @@ const datatable = {
             $("#updateCustomerForm #pin").val(data.pin);
             $('#updateCustomerForm #customer_id').val(data.id)
             $('#updateCustomerForm #discount_val').val(data.discount);
+            $('#updateCustomerForm #ucustomer_gst_number').val(data.gst_number);
             $("#updateCustomerForm #NA").prop('checked', false);
             $("#updateCustomerForm #Percentage").prop('checked', false);
             if(data.discountType == "Percentage"){
