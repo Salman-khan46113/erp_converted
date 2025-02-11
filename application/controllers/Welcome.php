@@ -2191,6 +2191,7 @@ class Welcome extends CommonController
 		$data = array(
 			'name' => $this->input->post('namess'),
 			'transporter_id' => $this->input->post('transporter_id'),
+            'vehicle_number' => $this->input->post('vehicle_number'),
 			'created_by' => $this->user_id,
 			'created_date' => $this->current_date,
 			'created_time' => $this->current_time
@@ -2222,21 +2223,22 @@ class Welcome extends CommonController
 		$id = $this->input->post('id');
 
 		$data = array(
-			'name' => $this->input->post('name'),
+			'name' => $this->input->post('namess'),
 			'transporter_id' => $this->input->post('transporter_id'),
-			'created_by' => $this->user_id
+            'vehicle_number' => $this->input->post('vehicle_number')
 		);
 
 		$update = $this->Crud->update_data('transporter', $data, $id);
-
 		if ($update) {
-			$this->addSuccessMessage('Transporter updated successfully.');
+            $success = 1;
+            $msg = 'Transporter updated successfully.';
 		} else {
-			if ($this->checkNoDuplicateEntryError()) {
-				$this->addErrorMessage('Unable to update transporter details. Please try again.');
-			}
+			$msg = 'Unable to update transporter details. Please try again.';
+                $success = 0;
 		}
-		$this->redirectMessage();
+		$ret_arr['msg'] = $msg;
+        $ret_arr['success'] = $success;
+        echo json_encode($ret_arr);
 	}
 
 
@@ -11311,6 +11313,15 @@ class Welcome extends CommonController
         $result['messages'] = $messages;
         $result['success'] = $success;
         echo json_encode($result);
+        exit();
+    }
+    public function get_transportor_data()
+    {
+        $id = $this->input->post("id");
+        $transporter = $this->Crud->get_data_by_id("transporter", $id, "id");
+        $vehicle_number = $transporter[0]->vehicle_number != null ? $transporter[0]->vehicle_number : "";
+        $return_arr['vehicle_number'] = $vehicle_number;
+        echo json_encode($return_arr);
         exit();
     }
 

@@ -44,11 +44,15 @@
                   <div class="modal-body">
                       <div class="form-group">
                           <label for="name">Transporter Name <span class="text-danger">*</span></label> <br>
-                          <input required type="text" name="namess" placeholder="Enter Transporter" class="form-control" id="nameda">
+                          <input  type="text" name="namess" placeholder="Enter Transporter" class="form-control" id="nameda">
                       </div>
                       <div class="form-group">
                           <label for="transporter_id">Transporter ID <span class="text-danger">*</span></label> <br>
-                          <input required type="text" name="transporter_id" placeholder="Enter Transporter ID" class="form-control" pattern="^([0-9]{2}[0-9A-Z]{13})$" oninvalid="this.setCustomValidity('Please enter a valid Transporter no')" onchange="this.setCustomValidity('')" id="transporter_id">
+                          <input  type="text" name="transporter_id" placeholder="Enter Transporter ID" class="form-control" pattern="^([0-9]{2}[0-9A-Z]{13})$" oninvalid="this.setCustomValidity('Please enter a valid Transporter no')" onchange="this.setCustomValidity('')" id="transporter_id">
+                      </div>
+                      <div class="form-group">
+                        <label for="transporter_id">Vehicle Number  <span class="text-danger">*</span></label> <br>
+                        <input  type="text" name="vehicle_number" placeholder="Enter Vehicle Number" class="form-control" >
                       </div>
                   </div>
                   <div class="modal-footer">
@@ -72,19 +76,30 @@
             <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="transporter">
               <thead>
                  <tr>
-                    <th>Sr No</th>
+                    <!-- <th>Sr No</th> -->
                     <th>Transporter Name</th>
                     <th>Transporter ID</th>
-                    <!-- <th>Action</th> -->
+                    <th>Vehicle Number</th>
+                    <th class="text-center">Action</th>
                  </tr>
               </thead>
               <tbody>
                     <%assign var='i' value=1 %>
                     <%foreach from=$transporter item=u %>
                      <tr>
-                        <td><%$i %></td>
+                        <!-- <td><%$i %></td> -->
                         <td><%$u->name %></td>
                         <td><%$u->transporter_id %></td>
+                        <td><%display_no_character($u->vehicle_number) %></td>
+                        <td class="text-center">
+                          <%if (checkGroupAccess("transporter","export","No")) %>
+                           <a data-bs-toggle="modal" data-bs-target="#updateTranspotor" class="edit-trasportor " data-id="<%$u->id %>" data-name="<%$u->name %>" data-transporter-id="<%$u->transporter_id %>" data-vehicle-number="<%$u->vehicle_number %>"><i class="ti ti-edit"></i></a>
+                           <%else%>
+                              <%display_no_character() %>
+                           <%/if%>
+
+                           
+                        </td>
                      </tr>
                     <%assign var='i' value=$i+1 %>
                     <%/foreach%>
@@ -94,6 +109,38 @@
         </div>
         <!--/ Responsive Table -->
       </div>
+       <div class="modal fade" id="updateTranspotor" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                      <div class="modal-dialog  modal-dialog-centered" role="document">
+                                         <div class="modal-content">
+                                            <div class="modal-header">
+                                               <h5 class="modal-title" id="exampleModalLabel">Update EPR Users</h5>
+                                               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                               </button>
+                                            </div>
+                                            <form id="updateTransporterForm" action="<%base_url('update_transporter')%>" method="POST" enctype="multipart/form-data"> 
+                                            <div class="modal-body">
+                                              <input type="hidden" name="id" id="uid">
+                                               <div class="form-group">
+                                                  <label for="name">Transporter Name <span class="text-danger">*</span></label> <br>
+                                                  <input required type="text" name="namess" placeholder="Enter Transporter" class="form-control" id="uname">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="transporter_id">Transporter ID <span class="text-danger">*</span></label> <br>
+                                                    <input required type="text" name="transporter_id" placeholder="Enter Transporter ID" id="utransporter_id" class="form-control">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="transporter_id">Vehicle Number  <span class="text-danger">*</span></label> <br>
+                                                    <input required type="text" name="vehicle_number" placeholder="Enter Vehicle Number" class="form-control" id="uvehicle_number">
+                                                </div>
+                                               
+                                               <div class="modal-footer">
+                                               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                               <button type="submit" class="btn btn-primary">Save changes</button>
+                                               </form>
+                                               </div>
+                                            </div>
+                                         </div>
+                                      </div>
       <!-- /.col -->
 
 

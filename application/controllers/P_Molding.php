@@ -332,9 +332,9 @@ class P_Molding extends CommonController
 		$data['created_month'] = $created_month;
 		$month_arr = [];
 		$data['month_arr'] = $month_arr;
-       	$data['start_date'] = date("Y/06/01");
+       	$data['start_date'] = date("Y/m/01");
 		$data['end_date'] = date("Y/m/d");
-		$start_date = date("Y-06-01");
+		$start_date = date("Y-m-01");
 		$end_date = date("Y-m-d");
 		
 		$data['molding_production'] = $this->view_p_q_molding_production_data($start_date,$end_date);

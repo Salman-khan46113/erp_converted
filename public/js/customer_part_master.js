@@ -37,7 +37,7 @@ const page = {
                },
                part_description: {
                   required: true,
-                  maxlength:42
+                  maxlength:75
                },
                fg_rate: {
                   required: true,
@@ -50,7 +50,7 @@ const page = {
                },
                part_description: {
                   required: "Please enter part description",
-                  maxlength:"Enter part description is less than 42 characters.",
+                  maxlength:"Enter part description is less than 75 characters.",
                },
                fg_rate: {
                   required: "Please enter a rate",
@@ -87,7 +87,8 @@ const page = {
         $('#updateCustomerPartsForm').validate({
             rules: {
                part_description: {
-                  required: true
+                  required: true,
+                   maxlength:75
                },
                fg_rate: {
                   required: true,
@@ -96,7 +97,8 @@ const page = {
             },
             messages: {
                part_description: {
-                  required: "Please enter the part description"
+                  required: "Please enter the part description",
+                   maxlength:"Enter part description is less than 75 characters.",
                },
                fg_rate: {
                   required: "Please enter a rate",

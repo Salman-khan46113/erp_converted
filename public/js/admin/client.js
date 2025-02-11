@@ -125,7 +125,8 @@ $(document).ready(function() {
                 required: true
             },
             uclientBaddress: {
-                required: true
+                required: true,
+                maxlength: 107 
             },
             uclientSaddress: {
                 required: true
@@ -170,7 +171,8 @@ $(document).ready(function() {
                 required: "Please enter the contact person."
             },
             uclientBaddress: {
-                required: "Please enter the client billing address."
+                required: "Please enter the client billing address.",
+                maxlength: "Billing address must be less than 107 characters."
             },
             uclientSaddress: {
                 required: "Please enter the client shipping address."
@@ -246,7 +248,8 @@ $(document).ready(function() {
                 required: true
             },
             clientBaddress: {
-                required: true
+                required: true,
+                maxlength: 107
             },
             clientSaddress: {
                 required: true
@@ -290,7 +293,8 @@ $(document).ready(function() {
                 required: "Please enter contact person."
             },
             clientBaddress: {
-                required: "Please enter client billing address."
+                required: "Please enter client billing address.",
+                maxlength: "Billing address must be less than 107 characters."
             },
             clientSaddress: {
                 required: "Please enter client shipping address."

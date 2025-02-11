@@ -397,7 +397,7 @@ class SalesController extends CommonController
 		$qty = $this->input->post('qty');
 		$discountType = $this->input->post('discountType');
 		$discount = $this->input->post('discount');
-		$salesdata = $this->db->query('SELECT sales_id FROM `sales_parts` where sales_id = ' . $sales_id . ' ');
+		$salesdata = $this->db->query('SELECT * FROM `sales_parts` where sales_id = ' . $sales_id . ' ');
 		$salesdata_result = $salesdata->result();
 		$added_saled_count = count($salesdata_result);
 		$ret_arr = [];
@@ -407,6 +407,18 @@ class SalesController extends CommonController
 			$msg = "Already 7 Parts Added.";
 			// echo "<script>alert('Already 7 Parts Added.');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
 		}
+		$config_data = $this->Crud->read_data("global_configuration");
+		$config_data = array_column($config_data,"config_value","config_name");
+		if(isset($config_data['salesPdfSetup'])){
+			if($config_data['salesPdfSetup'] == "Single" && $added_saled_count >= 5){
+				$msg = "Already 5 Parts Added.";
+				$ret_arr['msg'] = $msg;
+				$ret_arr['sucess'] = $sucess;
+				echo json_encode($ret_arr);
+				exit();
+			}
+		}
+		// pr($config_data,1);
 		
 		$data = array(
 			"part_id" => $part_id,
@@ -421,6 +433,19 @@ class SalesController extends CommonController
 			} else {
 			
 			$customer_part = $this->Crud->get_data_by_id("customer_part", $part_id, "id");
+			if($added_saled_count > 0){
+				$tax_val = $salesdata_result[0]->tax_id;
+				if($customer_part[0]->gst_id != $tax_val){
+					$msg = "Part tax structure should be same.";
+					$sucess = 0;
+					$ret_arr['msg'] = $msg;
+					$ret_arr['sucess'] = $sucess;
+					
+					echo json_encode($ret_arr);
+					exit();
+				}
+				// pr($tax_val,1);
+			}
 			$customer_parts_master_data = $this->CustomerPart->getCustomerPartByPartNumber($customer_part[0]->part_number);
 			$job_card_data = $this->Crud->get_data_by_id("job_card", $part_id, "customer_part_id");
 

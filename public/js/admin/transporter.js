@@ -4,7 +4,18 @@ var pdf_title = "Transporter";
 
 $(document).ready(function() {
     // Initialize the DataTable
-    
+        
+    $(document).on("click",".edit-trasportor",function(){
+        var id = $(this).attr("data-id");
+        $("#uid").val(id);
+        var name = $(this).attr("data-name");
+        $("#uname").val(name);
+        var transporter_id = $(this).attr("data-transporter-id");
+        $("#utransporter_id").val(transporter_id);
+        var vehicle_number = $(this).attr("data-vehicle-number");
+        console.log(vehicle_number)
+        $("#uvehicle_number").val(vehicle_number);
+    })
     table = $("#transporter").DataTable({
         dom: "Bfrtilp",
         buttons: [
@@ -18,7 +29,7 @@ $(document).ready(function() {
                         var lines = csv.split('\n');
                         var modifiedLines = lines.map(function(line) {
                             var values = line.split(',');
-                            values.splice(7, 1);
+                            values.splice(3, 1);
                             return values.join(',');
                         });
                         return modifiedLines.join('\n');
@@ -42,7 +53,7 @@ $(document).ready(function() {
                         cell.fillColor = theme_color;
                     });
                     doc.content[1].table.body.forEach(function (row, index) {
-                        row.splice(7, 1);
+                        row.splice(3, 1);
                         row.forEach(function (cell) {
                             // Set alignment for each cell
                             cell.alignment = "center"; // Change to 'left' or 'right' as needed
@@ -85,6 +96,10 @@ $(document).ready(function() {
             transporter_id: {
                 required: true,
                 regex: /^([0-9]{2}[0-9A-Z]{13})$/
+            },
+            vehicle_number:{
+                required: true,
+                // regex: /^[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}$/
             }
         },
         messages: {
@@ -95,6 +110,10 @@ $(document).ready(function() {
             transporter_id: {
                 required: "Please enter the transporter ID",
                 regex: "Please enter a valid transporter ID"
+            },
+            vehicle_number: {
+                required: "Please enter the vehicle number",
+                // regex: "Please enter a valid vehicle number"
             }
         },
         submitHandler: function(form) {
@@ -130,7 +149,66 @@ $(document).ready(function() {
     // Custom search filter event
   
    
+    $("#updateTransporterForm").validate({
+        rules: {
+            namess: {
+                required: true,
+                minlength: 3
+            },
+            transporter_id: {
+                required: true,
+                regex: /^([0-9]{2}[0-9A-Z]{13})$/
+            },
+            vehicle_number:{
+                required: true,
+                // regex: /^[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}$/
+            }
+        },
+        messages: {
+            namess: {
+                required: "Please enter the transporter name",
+                minlength: "The name must be at least 3 characters long"
+            },
+            transporter_id: {
+                required: "Please enter the transporter ID",
+                regex: "Please enter a valid transporter ID"
+            },
+            vehicle_number: {
+                required: "Please enter the vehicle number",
+                // regex: "Please enter a valid vehicle number"
+            }
+        },
+        submitHandler: function(form) {
 
+            // Perform AJAX form submission
+            $.ajax({
+                url: $(form).attr('action'),
+                type: 'POST',
+                data: $(form).serialize(),
+                success: function(response) {
+                    // Handle successful response
+                    if(response !== '' && response !== null && typeof response !== 'undefined'){
+                        let res = JSON.parse(response);
+                        if(res['success'] === 1){
+                            toastr.success(res['msg']);
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        }else{
+                            toastr.error(res['msg']);
+                        }
+                    }
+                    // Optionally, hide the modal
+                    $('#addPromo').modal('hide');
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors
+                    console.error('Form submission failed:', error);
+                }
+            });
+
+        }
+    });
 
 
 });

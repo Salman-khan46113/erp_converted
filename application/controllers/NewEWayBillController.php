@@ -621,13 +621,15 @@ class NewEWayBillController extends CommonController {
 	$template_data['transporter_data'] = $transporter_data;
 	include "application/libraries/phpqrcode/qrlib.php";
 	// header('Content-Type: image/png');
-	$folderPath = 'documents/ewayBill/'; // specify the path where you want to create the folder
+
+	$folderPath = 'public/uploads/documents/ewayBill/'; // specify the path where you want to create the folder
 
 	// Check if the folder exists, if not, create it
 	if (!file_exists($folderPath)) {
 	    mkdir($folderPath, 0777, true);
 	}
 	$path = $folderPath.$EwbNo.".png";
+	// pr($path,1);
 	$template_data['qr_code'] = base_url().$path;
 	QRcode::png($EwbNo, $path, QR_ECLEVEL_L, 10, 2);
 

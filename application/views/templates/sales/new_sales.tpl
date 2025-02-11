@@ -72,7 +72,7 @@
                                     <div class="col-lg-4">
                                         <div class="form-group mb-3">
                                             <label for="" class="form-label">Transporter<span class="text-danger">*</span></label>
-                                            <select name="transporter"  class="form-control select2">
+                                            <select name="transporter"  class="form-control select2" id="transporter_drop">
                                                 <option value="">Select Transporter</option>
                                                 <%if !empty($transporter)%>
                                                     <%foreach from=$transporter item=tr%>
@@ -89,7 +89,7 @@
                                                    placeholder="Enter Vehicle No" 
                                                    value="" 
                                                    name="vehicle_number" 
-                                                    class="form-control"/>
+                                                    class="form-control" id="vehicle_number" />
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
@@ -277,6 +277,9 @@
                         required: function() {
                             return $("input[name='ship_addressType']:checked").val() === "consignee";
                         }
+                    },
+                    remark: {
+                        maxlength :100
                     }
                 },
                 messages: {
@@ -300,6 +303,9 @@
                     },
                     consignee: {
                         required: "Please select a consignee address."
+                    },
+                    remark: {
+                        maxlength :"Enter remark is less than 100 characters."
                     }
                 },
                 errorPlacement: function(error, element) {
@@ -378,6 +384,29 @@
             }
           } 
         });
+        $('#transporter_drop').change(function() {
+            var transporter_id  = $(this).val();
+            if(transporter_id > 0){
+                $.ajax({
+                    url: '<%$site_url%>Welcome/get_transportor_data',
+                    type: "POST",
+                    data: {
+                        id: transporter_id
+                    },
+                    success: function(response) {
+                         let res = JSON.parse(response);
+                         $("#vehicle_number").val(res.vehicle_number)
+                    },
+                    complete: function() {
+                        // Hide the loading icon
+                        // $("#loading-overlay").hide();
+                    }        
+                });
+            }else{
+                $("#vehicle_number").val("")
+            }
+        });
+        transporter_drop
 
 
     });

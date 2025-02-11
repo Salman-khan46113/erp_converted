@@ -110,7 +110,13 @@ class Tushar_Controller extends CommonController
 		*/
 		
         $data['customer_id']=$customer_id;
-		$this->getPage('po_tracking_import_export', $data);
+        $data['po_message'] = $this->session->userdata("po_message");
+        if( $this->session->userdata("po_message") != ""){
+            $this->session->set_userdata('po_message', '');
+        }
+        $data['segment_2']=$this->uri->segment('2');
+        $data['segment_3']=$this->uri->segment('3');
+		$this->loadView('customer/po_tracking_import_export', $data);
 	}
 
     /**
@@ -122,7 +128,7 @@ class Tushar_Controller extends CommonController
 
        //only valid types are allowed.
        if($this->isValidUploadFileType()=="false"){
-            $this->addErrorMessage("Only Excel sheets are allowed.");
+            $data['po_message'] = "Only Excel sheets are allowed.";
        } else {
       	if (!empty($_FILES["uploadedDoc"]["name"])) {
         		$error;
@@ -216,20 +222,21 @@ class Tushar_Controller extends CommonController
                                             }
                             }
                             if($error){
-                                $this->addErrorMessage($error);
+                                $data['po_message'] = $error;
                             }else{
-                                $this->addSuccessMessage("Data imported successfully.");
+                                $data['po_message_su'] = "Data imported successfully.";
                             }
 
                         } else {
                             //echo "<br><br>All Errors : ".$error;
                             //echo "<br>ERROR !";
-                            $this->addErrorMessage($error);
+                            // $this->addErrorMessage($error);
+                            $data['po_message'] = $error;
                         }   
 
 					} catch (Exception $e) {
-					    die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME)
-					. '": ' .$e->getMessage());
+					//     die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME)
+					// . '": ' .$e->getMessage());
 					}
 				
 				}
@@ -237,7 +244,10 @@ class Tushar_Controller extends CommonController
                 $data['customer_data'] = $this->Crud->read_data("customer");              
             }
             
-            $this->getPage('po_tracking_import_export',$data);
+            // $this->getPage('po_tracking_import_export',$data);
+            $data['segment_2']=$this->uri->segment('2');
+            $data['segment_3']=$this->uri->segment('3');
+            $this->loadView('customer/po_tracking_import_export', $data);
 		}
 
 
@@ -281,8 +291,10 @@ function po_export_customer_part() {
             ob_end_clean();
             ob_start();
             $objWriter->save('php://output');
+            $this->session->set_userdata('po_message', '');
         } else {
-            echo "<script>alert('No Customer Parts Found');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+            echo "<script>document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+            $this->session->set_userdata('po_message', 'No Customer Parts Found');
         }
     }
 	

@@ -181,25 +181,13 @@
                                           </td>
                                          
                                           <td >
-                                            <%if $r->selected_challan > 0%>
-                                                <%if ($r->challan_parts_data) %>
-                                                   <%foreach from=$r->challan_parts_data item=ch_parts %>
-                                                      <%if ($ch_parts->challan_data) %>
-                                                         <%if ($ch_parts->challan_data[0]->supplier_id == $supplier[0]->id) %>
-                                                            <%if ($ch_parts->challan_data[0]->status == "completed")%>
-                                                               <%foreach from=$ch_parts->challan_data item=c_d %>
-                                                               <%if $r->selected_challan eq $c_d->id %>
-                                                                  <%$c_d->challan_number %>/ <%$ch_parts->remaning_qty%>/ <%$c_d->created_date%>
-                                                               <%/if%>
-                                                               <%/foreach%>
-                                                            <%/if%>
-                                                         <%/if%>
-                                                      <%/if%>
-                                                   <%/foreach%>
-                                                <%/if%>
-
-                                            <%else%>
-                                             <select name="challan_id" style="width:400px" class="select2 form-control" <%if ($inwardCompleted == true) %><%/if%>>
+                                             <%if $r->recevied_req_qty == $r->input_part_req_qty%>
+                                                <%assign var='inwardCompleted' value=true%>
+                                                <%assign var='disabled' value=true%>
+                                             <%/if%>
+                                            
+                                             <select name="challan_id" style="width:400px" class="select2 form-control" <%if ($inwardCompleted == true) %><%/if%>  <%if $inwardCompleted == true %>disabled<%/if%>>
+                                               
                                                 <option value="0">NA</option>
                                                 <%if ($r->challan_parts_data) %>
                                                 <%foreach from=$r->challan_parts_data item=ch_parts %>
@@ -214,8 +202,9 @@
                                                    <%/if%>
                                                 <%/foreach%>
                                                 <%/if%>
+                                                 
                                              </select>
-                                             <%/if%>
+                                             
                                           </td>
                                           <td style="text-align: center;"> 
                                              <input type="hidden" name="part_id" value="<%$r->child_part_new_new[0]->id%>"> 

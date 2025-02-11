@@ -836,6 +836,10 @@
                            <li><a href="<%base_url('customer_challan_report ')%>" class="dropdown-item">
 Customer Challan Report</a></li>
                         <%/if%>
+                        <%if checkGroupAccess("downtime_report","list","No") %>
+                           <li><a href="<%base_url('downtime_report ')%>" class="dropdown-item">
+Downtime Report</a></li>
+                        <%/if%>
                         <%if checkGroupAccess("scrap_report","list","No") %>
                            <li><a href="<%base_url('scrap_report ')%>" class="dropdown-item">
 Scarp Report</a></li>
