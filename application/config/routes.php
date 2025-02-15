@@ -845,3 +845,8 @@ $route['transfer_scrap_stock'] = 'ReportsController/transfer_scrap_stock';
 $route['scrap_category'] = 'welcome/scrap_category';
 $route['add_update_scrap_category'] = 'welcome/add_update_scrap_category';
 
+// export,import
+$route['global_export'] = 'exportImportController/global_export';
+$route['global_import'] = 'exportImportController/global_import';
+
+

@@ -24,26 +24,21 @@ class Tushar_Controller extends CommonController
     public function customer_po_tracking_importExport() {
         $data['customer_data'] = $this->Crud->read_data("customer");
         $customer_id = $this->input->post('customer_id');
-        // $role_management_data = $this->db->query('SELECT customer_part.part_number,customer_part.id, customer.customer_name
-		// FROM customer_part
-		// INNER JOIN customer ON customer_part.customer_id=customer.id;');
-		// 		$data['customer_parts'] = $role_management_data->result();
-		
-        
-        //Manoj - working latest query
-       /* $sql = "SELECT po.po_number, masterParts.part_number, masterParts.part_description, 
-        custPart.imported_price AS imported_price, custPart.qty, custPart.status, custPart.due_date,
-        masterParts.id AS masterParts_id, masterParts.customer_id, rate_query.rate 
-        FROM customer_po_tracking AS po
-            JOIN parts_customer_trackings AS custPart ON custPart.customer_po_tracking_id = po.id
-            JOIN customer_part AS masterParts ON custPart.part_id = masterParts.id
-            LEFT JOIN (
-                SELECT ROW_NUMBER() OVER (PARTITION BY customer_master_id ORDER BY id DESC) AS rownum, id, customer_master_id, rate
-                FROM customer_part_rate
-            ) AS rate_query ON rate_query.customer_master_id = masterParts.id 
-            WHERE rate_query.rownum = 1 ";
-        */
 
+        $fileter_customer = $this->session->userdata("customer_id");
+        if($fileter_customer > 0 && !($customer_id > 0)){
+            $customer_id = $fileter_customer;
+            $this->session->set_userdata('customer_id', '');
+        }
+
+        $data['po_message'] = $this->session->userdata("po_message");
+        if( $this->session->userdata("po_message") != ""){
+            $this->session->set_userdata('po_message', '');
+        }
+         $data['po_message_su'] = $this->session->userdata("po_message_su");
+        if( $this->session->userdata("po_message_su") != ""){
+            $this->session->set_userdata('po_message_su', '');
+        }
         
         $sql =  "SELECT po.po_number, masterParts.part_number, masterParts.part_description, 
                 custPart.imported_price AS imported_price, custPart.qty, custPart.status, custPart.due_date,
@@ -73,19 +68,19 @@ class Tushar_Controller extends CommonController
             where custPart.customer_po_tracking_id = po.id AND custPart.part_id = masterParts.id 
             AND masterParts.id = partRate.customer_master_id"; */
 
-        if($customer_id!=null){
-            if($customer_id != "ALL"){
+        // if($customer_id!=null){
+            if($customer_id != "ALL" && $customer_id!=null){
                     //$old_working_sql = $old_working_sql." AND I.customer_id = ".$customer_id." group by I.masterParts_id";
                     //$query = $this->db->query($old_working_sql);
                     $sql = $sql." WHERE masterParts.customer_id = ".$customer_id." ORDER BY custPart.id DESC";
                     $data['export_data'] = $this->Crud->customQuery($sql);
-            }else if($customer_id == "ALL"){
+            }else if($customer_id == ""){
                     //$old_working_sql = $old_working_sql." group by I.masterParts_id";
                     //$query = $this->db->query($old_working_sql);
                     $sql = $sql." ORDER BY custPart.id DESC";
                     $data['export_data'] = $this->Crud->customQuery($sql);
             }
-        }
+        // }
         /*if($query!=null){
             $data['export_data'] = $query->result();
         }*/
@@ -110,10 +105,7 @@ class Tushar_Controller extends CommonController
 		*/
 		
         $data['customer_id']=$customer_id;
-        $data['po_message'] = $this->session->userdata("po_message");
-        if( $this->session->userdata("po_message") != ""){
-            $this->session->set_userdata('po_message', '');
-        }
+        // pr($data,1);
         $data['segment_2']=$this->uri->segment('2');
         $data['segment_3']=$this->uri->segment('3');
 		$this->loadView('customer/po_tracking_import_export', $data);
@@ -129,6 +121,7 @@ class Tushar_Controller extends CommonController
        //only valid types are allowed.
        if($this->isValidUploadFileType()=="false"){
             $data['po_message'] = "Only Excel sheets are allowed.";
+            $this->session->set_userdata('po_message', $data['po_message']);
        } else {
       	if (!empty($_FILES["uploadedDoc"]["name"])) {
         		$error;
@@ -141,15 +134,16 @@ class Tushar_Controller extends CommonController
 						$flag = true;
 						$i=1;
 
-                        $EXCEL_IMPORT_STATUS_COLUMN = 'A';
+                        $EXCEL_IMPORT_CUSTOMER_NAME_COLUMN = 'A';
                         $EXCEL_IMPORT_PO_COLUMN = 'B';
-                        $EXCEL_IMPORT_ITEM_COLUMN = 'C';
-                        $EXCEL_IMPORT_ITEM_DESC_COLUMN = 'D';
-                        $EXCEL_IMPORT_WAREHOUSE_COLUMN = 'E';
-                        $EXCEL_IMPORT_DELIVERY_DATE_COLUMN = 'F';
-                        $EXCEL_IMPORT_QUANTITY_COLUMN = 'G';
-                        $EXCEL_IMPORT_UNIT_PRICE_COLUMN = 'H';
-                        $EXCEL_IMPORT_REMARK_COLUMN = 'I';
+                        $EXCEL_IMPORT_PO_START_COLUMN = 'C';
+                        $EXCEL_IMPORT_PO_END_COLUMN = 'D';
+                        $EXCEL_IMPORT_ITEM_CODE = 'F';
+                        $EXCEL_IMPORT_ITEM_COLUMN = 'F';
+                        $EXCEL_IMPORT_ITEM_DESC_COLUMN = 'G';
+                        $EXCEL_IMPORT_QUANTITY_COLUMN = 'H';
+                        $EXCEL_IMPORT_WAREHOUSE_COLUMN = 'I';
+                        $EXCEL_IMPORT_REMARK_COLUMN = 'J';
 
 						foreach ($allDataInSheet as $value) {
                             // Check if the row is empty
@@ -163,75 +157,211 @@ class Tushar_Controller extends CommonController
                                 $errorThisRow=null; 
                                 $errorCount;
 
-                                $part_status = empty($value[$EXCEL_IMPORT_STATUS_COLUMN]) ? $errorThisRow =$errorThisRow." Status": trim($value[$EXCEL_IMPORT_STATUS_COLUMN]);
+                                $customer = empty($value[$EXCEL_IMPORT_CUSTOMER_NAME_COLUMN]) ? $errorThisRow =$errorThisRow." Customer": trim($value[$EXCEL_IMPORT_CUSTOMER_NAME_COLUMN]);
                                 $po_number = empty($value[$EXCEL_IMPORT_PO_COLUMN]) ? $errorThisRow =$errorThisRow." PO ,": trim($value[$EXCEL_IMPORT_PO_COLUMN]);
-                                $part_name = empty($value[$EXCEL_IMPORT_ITEM_COLUMN]) ? $errorThisRow = $errorThisRow." Item ," : trim($value[$EXCEL_IMPORT_ITEM_COLUMN]);
-                                $part_description = empty($value[$EXCEL_IMPORT_ITEM_DESC_COLUMN]) ? $errorThisRow = $errorThisRow." Item description ,": trim($value[$EXCEL_IMPORT_ITEM_DESC_COLUMN]);
-                                $part_Warehouse = empty($value[$EXCEL_IMPORT_WAREHOUSE_COLUMN]) ? $errorThisRow =$errorThisRow." Warehouse, ": trim($value[$EXCEL_IMPORT_WAREHOUSE_COLUMN]);
-                                $part_quantity = empty($value[$EXCEL_IMPORT_QUANTITY_COLUMN]) ? $errorThisRow =$errorThisRow." Quantity ,": trim($value[$EXCEL_IMPORT_QUANTITY_COLUMN]);
-                                $part_price = empty($value[$EXCEL_IMPORT_UNIT_PRICE_COLUMN]) ? $errorThisRow =$errorThisRow." Unit Price ," : trim($value[$EXCEL_IMPORT_UNIT_PRICE_COLUMN]);
-                                
-                                $part_due_date = empty($value[$EXCEL_IMPORT_DELIVERY_DATE_COLUMN]) ? $errorThisRow =$errorThisRow." Delivery date ,": trim($value[$EXCEL_IMPORT_DELIVERY_DATE_COLUMN]);
-                                $due_date=date_create($part_due_date);
-                                $part_due_date = date_format($due_date,"d-m-Y");
-                                
-                                $part_remark = trim($value[$EXCEL_IMPORT_REMARK_COLUMN]);
 
+                                $format = "d/m/Y";
+                                $inputDate = $value[$EXCEL_IMPORT_PO_START_COLUMN];
+                                $dateTime = DateTime::createFromFormat($format, $inputDate);
+                                $po_start_date = empty($value[$EXCEL_IMPORT_PO_START_COLUMN]) || !($dateTime && $dateTime->format($format) === $inputDate) ? $errorThisRow =$errorThisRow." PO Start Date format should be dd/mm/yyyy,": trim($value[$EXCEL_IMPORT_PO_START_COLUMN]);
+
+                                $inputDate = $value[$EXCEL_IMPORT_PO_END_COLUMN];
+                                $dateTime = DateTime::createFromFormat($format, $inputDate);
+
+                                $po_end_date = empty($value[$EXCEL_IMPORT_PO_END_COLUMN]) || !($dateTime && $dateTime->format($format) === $inputDate) ? $errorThisRow =$errorThisRow."PO End Date format should be dd/mm/yyyy ,": trim($value[$EXCEL_IMPORT_PO_END_COLUMN]);
+                                $part_name = empty($value[$EXCEL_IMPORT_ITEM_COLUMN]) ? $errorThisRow = $errorThisRow." Part Number ," : trim($value[$EXCEL_IMPORT_ITEM_COLUMN]);
+                                $part_description = empty($value[$EXCEL_IMPORT_ITEM_DESC_COLUMN]) ? $errorThisRow = $errorThisRow." Part description ,": trim($value[$EXCEL_IMPORT_ITEM_DESC_COLUMN]);
+                                $part_quantity = !((float) $value[$EXCEL_IMPORT_QUANTITY_COLUMN] > 0) ? $errorThisRow =$errorThisRow." Quantity Should be greater than 0,": trim($value[$EXCEL_IMPORT_QUANTITY_COLUMN]);
+                                $warehouse = $value[$EXCEL_IMPORT_WAREHOUSE_COLUMN];
+                                $remark = $value[$EXCEL_IMPORT_REMARK_COLUMN];
+
+
+                                if($value[$EXCEL_IMPORT_PO_COLUMN] != "" && $value[$EXCEL_IMPORT_PO_COLUMN] != NULL && !empty($value[$EXCEL_IMPORT_PO_END_COLUMN]) && !empty($value[$EXCEL_IMPORT_PO_START_COLUMN]) && ($startDateTime && $startDateTime->format($format) === $date) && ($endDateTime && $startDateTime->format($format) === $date)){
+                                    //Start Date
+                                    $po_start_date = $formattedDate = DateTime::createFromFormat('d/m/Y', $po_start_date)->format('Y-m-d');
+                                    // End Date
+                                    $po_end_date = $formattedDate = DateTime::createFromFormat('d/m/Y', $po_end_date)->format('Y-m-d');
+                                    $inserdata[$i]['po_number'] = $po_number;
+                                    $inserdata[$i]['po_start_date'] = $po_start_date;
+                                    $inserdata[$i]['po_end_date'] = $po_end_date;
+                                    $inserdata[$i]['part_name'] = $part_name;
+                                    $inserdata[$i]['part_description'] = $part_description;
+                                    $inserdata[$i]['part_quantity'] = $part_quantity;
+                                    $inserdata[$i]['warehouse'] = $warehouse;
+                                    $inserdata[$i]['remark'] = $remark;
+                                }
                                 if(!empty($errorThisRow)){
-									$error = $error."<br>Row Number ".$rowNum." - Required Fields : ".$errorThisRow;
-								}
-                                
-                                $inserdata[$i]['part_name'] = $part_name;
-                                $inserdata[$i]['part_description'] = $part_description;
-                                $inserdata[$i]['po_number'] = $po_number;
-                                $inserdata[$i]['part_price'] = $part_price;
-                                $inserdata[$i]['part_quantity'] = $part_quantity;
-                                $inserdata[$i]['part_due_date'] = $part_due_date;
-                                $inserdata[$i]['part_warehouse'] = $part_Warehouse;
-                                $inserdata[$i]['part_status'] = $part_status;
-                                $inserdata[$i]['part_remark'] = $part_remark;
-
+                                    $error = $error."<br>Row Number ".$rowNum." - Required Fields : ".$errorThisRow;
+                                }
                                 $i++;
+                                    
+                               
                             }
 						}
-
+                        $clientId = $this->Unit->getSessionClientId();
 				        if(empty($error)){
-                            //there are no errors so lets move ahead with executing the file.
-                            foreach($inserdata as $po_item) {
-                                            // use the po number and see whether it exists if yes use it 
-                                            $data = array(
-                                                "po_number" => $po_item['po_number'],
-                                                "customer_id" => $customer_id
-                                            );
+                            // check validation for po unique 
+                            $po_item_arr = [];
+                            $po_arr = [];
+                            $po_data_arr = [];
+                            $invalid_part = [];
+                            $dublicat_po = [];
+                            $custom_err = false;
+                            $po_Key = 0;
+                            foreach ($inserdata as $key => $value) {
+                                if(!in_array($value['po_number'] ,$po_arr)){
+                                    $data = array(
+                                        "po_number" => $value['po_number'],
+                                        "customer_id" => $customer_id
+                                    );
+                                    $check_poNo = $this->Tracking->getPOTracking($data);
+                                    if(empty($check_poNo)){
+                                        $po_arr[] = $value['po_number'];
+                                        $po_data_arr[$po_Key] = [
+                                            "po_number" => $value['po_number'],
+                                            "po_start_date" => $value['po_start_date'],
+                                            "po_end_date" => $value['po_end_date']
+                                        ];
+                                        $po_Key++;
+                                    }else{
+                                        $custom_err = true;
+                                        $dublicat_po[] = $value['po_number'];
+                                    }
+                                }
 
-                                            //$this->UomModel->getAllUOM();
-                                            $check_poNo = $this->Tracking->getPOTracking($data);
-                                            if(!empty($check_poNo)) {
-                                                 //echo "<br><br>PO data is present for PO :".$po_item['po_number']." so use it.";
-                                                 $partMessage = $this->Tracking->addUpdate_customerParts($po_item,$customer_id,$check_poNo[0]->id,false);
-                                            } else {
-                                                //echo "<br>Lets insert record into PO tracking first for ".$po_item['po_number'];
-                                                $po_tracking = $this->Tracking->createPO_tracking($po_item,$customer_id);    
-                                                 if($po_tracking!=0){
-                                                    $partMessage = $this->Tracking->addUpdate_customerParts($po_item,$customer_id,$po_tracking,true);
-                                                } 
-                                            }
-                                            if(!empty($partMessage)){
-                                                //$error = $error."<br>Error added for PO: ".$po_item['po_number']." with Item description: ".$po_item['part_description'].".";
-                                                $error = $error.$partMessage;
-                                            }
+                                // 
+                                $part_master_data = $this->db->query('
+                                    SELECT cp.part_number,cp.id as customer_part_id
+                                    FROM `customer_part` as cp
+                                    WHERE cp.customer_id = '.$customer_id.' AND cp.part_number = "'.$value['part_name'].'"'
+                                );
+                                $part_master_data= $part_master_data->result();
+                                if(!empty($part_master_data)){
+                                    $part_rate_data = $this->db->query('
+                                        SELECT *
+                                        FROM `customer_part_rate` 
+                                        WHERE customer_master_id="'.$part_master_data[0]->customer_part_id.'" 
+                                        ORDER BY `id` DESC');
+                                    $part_rate_data= $part_rate_data->result();
+                                    $part_rate_data = $part_rate_data[0];
+                                    if(!empty($part_rate_data)){
+                                        $po_item_arr[$value['po_number']][] = [
+                                            "part_id" => $part_master_data[0]->customer_part_id,
+                                            "part_name" => $value['part_name'],
+                                            "part_description" => $value['part_description'],
+                                            "part_rate" => $part_rate_data->rate,
+                                            "part_qty" => $value['part_quantity'],
+                                            "warehouse" => $value['warehouse'],
+                                            "remark" => $value['remark'],
+                                            "due_date" => $value['po_end_date']
+                                        ];
+                                    }
+                                }else{
+                                    unset($po_data_arr[$po_Key-1]);
+                                    $custom_err = true;
+                                    $invalid_part[] = $value['part_name'];
+                                }
+                                
                             }
+                            // pr($po_item_arr,1);
+
+                            /* insert po */
+                            $insert_po_data = [];
+                            $import_data = false;
+                            $dublicate_items = [];
+                            foreach ($po_data_arr as $key => $value) {
+                                $dublicate_items_row = [];
+                                $data = array(
+                                    "po_start_date" => $value['po_start_date'],
+                                    "po_end_date" => $value['po_end_date'],
+                                    "po_number" => $value['po_number'],
+                                    "po_amedment_number" => "",
+                                    "po_amendment_date" => "",
+                                    "customer_id" => $customer_id,
+                                    "created_by" => $this->user_id,
+                                    "created_date" => $this->current_date,
+                                    "created_time" => $this->current_time,
+                                    "created_by" => $this->current_date,
+                                    "created_day" => $this->date,
+                                    "created_month" => $this->month,
+                                    "created_year" => $this->year,
+                                    "uploadedDoc" => ""
+                                );
+                                $import_data = true;
+                                    $insert_po_data[$value['po_number']] = $result;
+                                    $po_parts = $po_item_arr[$value['po_number']];
+                                    $po_tracking_parts = [];
+                                    $item_used_arr = [];
+                                    foreach ($po_parts as $key1 => $val) {
+                                        if(!in_array($val['part_name'], $item_used_arr)){
+                                            $po_tracking_parts[] = array(
+                                                "qty" => $val['part_qty'],
+                                                "customer_po_tracking_id" => "",
+                                                "part_id" => $val['part_id'],
+                                                "status" => "pending",
+                                                "remark" => $val['remark'],
+                                                "warehouse" => $val['warehouse'],
+                                                "due_date" => $val['due_date'],
+                                                "imported_price" =>$val['part_rate'],
+                                                "created_by" => $this->user_id,
+                                                "created_date" => $this->current_date,
+                                                "created_time" => $this->current_time,
+                                                "created_day" => $this->date,
+                                                "created_month" => $this->month,
+                                                "created_year" => $this->year,
+                                            );
+                                            $item_used_arr[] = $val['part_name'];
+                                        }else{
+                                            $dublicate_items[] = $val['part_name'];
+                                            $dublicate_items_row[] = $val['part_name'];
+                                        }
+                                }
+
+                                if(is_valid_array($dublicate_items_row)){
+                                    unset($po_data_arr[$key]);
+                                    continue;
+                                }else{
+                                    $result = $this->Crud->insert_data("customer_po_tracking", $data);
+                                    if($result){
+                                        foreach ($po_tracking_parts as $key => $value) {
+                                            $po_tracking_parts[$key]['customer_po_tracking_id'] = $result;
+                                        }
+                                        if(is_array($po_tracking_parts) &&count($po_tracking_parts) > 0){
+                                            $check_poNo = $this->Tracking->batchInsert($po_tracking_parts,"parts_customer_trackings");
+                                        }
+                                        
+                                    }
+                                }
+
+                                
+                            }
+                            
+                            $dublicate_po_message = count($dublicat_po) > 0 ? "Dublicate Po numbers : ".implode(",", array_unique($dublicat_po))."<br>" : "";
+                            $invalid_item_message = count($invalid_part) > 0 ? "Invalid Item : ".implode(",", array_unique($invalid_part))."<br>" : "";
+                            $dublicate_po_item = count($dublicate_items) > 0 ? "Dublicate Item : ".implode(",", array_unique($dublicate_items)) : "";
+                            
+
                             if($error){
                                 $data['po_message'] = $error;
+                                $this->session->set_userdata('po_message', $data['po_message']);
+                            }else if(($custom_err && !$import_data) || !is_valid_array($po_data_arr)){
+                                 $data['po_message'] = $dublicate_po_message.$invalid_item_message.$dublicate_po_item;
+                                 $this->session->set_userdata('po_message', $data['po_message']);
                             }else{
-                                $data['po_message_su'] = "Data imported successfully.";
+                                $added_po = implode(",", array_column($po_data_arr,"po_number"));
+                                $data['po_message'] = $dublicate_po_message.$invalid_item_message.$dublicate_po_item;
+                                $this->session->set_userdata('po_message', $data['po_message']);
+                                $data['po_message_su'] = "Po Data imported successfully for ".$added_po.".";
+                                $this->session->set_userdata('po_message_su', $data['po_message_su']);
                             }
+
 
                         } else {
                             //echo "<br><br>All Errors : ".$error;
                             //echo "<br>ERROR !";
                             // $this->addErrorMessage($error);
                             $data['po_message'] = $error;
+                            $this->session->set_userdata('po_message', $data['po_message']);
                         }   
 
 					} catch (Exception $e) {
@@ -243,12 +373,12 @@ class Tushar_Controller extends CommonController
                 //for view pages
                 $data['customer_data'] = $this->Crud->read_data("customer");              
             }
-            
-            // $this->getPage('po_tracking_import_export',$data);
-            $data['segment_2']=$this->uri->segment('2');
-            $data['segment_3']=$this->uri->segment('3');
-            $this->loadView('customer/po_tracking_import_export', $data);
-		}
+            // pr($data,1);
+            // pr($data,1);
+            $this->session->set_userdata('customer_id', $customer_id);
+            // pr($_SESSION,1);
+            redirect('customer_po_tracking_importExport');
+    }
 
 
 function po_export_customer_part() {
@@ -258,7 +388,7 @@ function po_export_customer_part() {
         $object = new PHPExcel();
         $object->setActiveSheetIndex(0);
 
-        $table_columns = array("Status", "PO", "Item", "Item description", "Warehouse", "Delivery date","Quantity","Unit Price", "Remark");
+        $table_columns = array("Customer Name", "PO","Start Date","End Date", "Item Code", "Part No", "Part Description","Quantity","Warehouse","Remark");
 
         $column = 0;
         foreach ($table_columns as $field) {
@@ -267,16 +397,16 @@ function po_export_customer_part() {
         }
 		
 		$customer = $this->Crud->get_data_by_id("customer", $customer_id, "id");
-
         $customerParts = $this->db->query('SELECT * FROM `customer_part` WHERE customer_id = ' . $customer_id . '  ');
         $customer_parts = $customerParts->result();
-
         if ($customer_parts) {
             $excel_row = 2;
             $rowNo = 1;
             foreach ($customer_parts as $p) {
-                $object->getActiveSheet()->setCellValueByColumnAndRow(2, $excel_row, $p->part_number);
-                $object->getActiveSheet()->setCellValueByColumnAndRow(3, $excel_row, $p->part_description);
+                $object->getActiveSheet()->setCellValueByColumnAndRow(0, $excel_row, $customer[0]->customer_name."[".$customer[0]->customer_code."]");
+                $object->getActiveSheet()->setCellValueByColumnAndRow(4, $excel_row, $p->itemCode);
+                $object->getActiveSheet()->setCellValueByColumnAndRow(5, $excel_row, $p->part_number);
+                $object->getActiveSheet()->setCellValueByColumnAndRow(6, $excel_row, $p->part_description);
                 $excel_row++;
                 $rowNo++;
             }

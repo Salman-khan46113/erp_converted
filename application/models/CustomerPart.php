@@ -66,7 +66,8 @@ class CustomerPart extends CI_Model {
             FROM  customer_parts_master parts
             LEFT JOIN customer_parts_master_stock stock
             ON parts.id = stock.customer_parts_master_id 
-            AND stock.clientId = ".$this->Unit->getSessionClientId()." 
+            AND stock.clientId = ".$this->Unit->getSessionClientId()."
+            WHERE parts.part_type = 'non_scrap'
             ORDER BY parts.id desc");
         return $part_details;
     }
@@ -595,7 +596,18 @@ class CustomerPart extends CI_Model {
         if(is_valid_array($search_params) && $search_params['customer_id'] > 0){
             $this->db->where('cpt.customer_id', $search_params['customer_id']);
         }
-
+        if(is_valid_array($search_params) && $search_params['status'] != ""){
+            if($search_params['status'] == "expired"){
+                $this->db->where('cpt.po_end_date < CURDATE()');
+                $this->db->where('cpt.status != "closed"');
+            }else if($search_params['status'] == "pending"){
+                $this->db->where('cpt.po_end_date > CURDATE()');
+                $this->db->where('cpt.status', $search_params['status']);
+            }else{
+                $this->db->where('cpt.status', $search_params['status']);
+            }
+            
+        }
         if (!empty($search_params['value'])) {
             $keyword = $search_params['value'];
             $this->db->group_start(); // Start a group of OR conditions

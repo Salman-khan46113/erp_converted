@@ -260,7 +260,7 @@ class ConfigController extends AROMConfigController {
 		if(self::C_SHEET_METAL == $this->getCommodity()) {
 			if(self::TUSHAR_ENGG_SMF == $this->getAROMCustomerName()){
 				$tushar_engg_entitlements = array(
-					"po_import_export"=> true,
+					"po_import_export"=> false,
 					"isGrade"=> false,
 					"isPLMEnabled" => true,
 					"Commodity" => C_SHEET_METAL,
@@ -269,7 +269,7 @@ class ConfigController extends AROMConfigController {
 				return $tushar_engg_entitlements;
 			} else if(self::BSP_SMF == $this->getAROMCustomerName()){
 					$bsp_entitlements = array(
-						"po_import_export"=> true,
+						"po_import_export"=> false,
 						"isGrade"=> false,
 						"isPLMEnabled" => false,
 						"Commodity" => C_SHEET_METAL,
@@ -278,7 +278,7 @@ class ConfigController extends AROMConfigController {
 					return $bsp_entitlements;
 			} else if (self::BUDHALE_SMF == $this->getAROMCustomerName()) {
 					$bsp_entitlements = array(
-						"po_import_export" => true,
+						"po_import_export" => false,
 						"isGrade" => false,
 						"isPLMEnabled" => true,
 						"itemCode" => true,
@@ -288,7 +288,7 @@ class ConfigController extends AROMConfigController {
 					return $bsp_entitlements;
 			} else if(self::COMMON_SHEET_METAL == $this->getAROMCustomerName()) {
 				$entitlements = array(
-					"po_import_export"=> true,
+					"po_import_export"=> false,
 					"isGrade"=> false,
 					"isPLMEnabled" => true,
 					"Commodity" => C_SHEET_METAL,
@@ -302,7 +302,7 @@ class ConfigController extends AROMConfigController {
 		if(self::C_PLASTIC == $this->getCommodity()) {
 			if(self::MAYURESH_PLASTIC == $this->getAROMCustomerName()){
 				$mayuresh_entitlements = array(
-					"po_import_export"=> true,
+					"po_import_export"=> false,
 					"isGrade"=> true,
 					"isPLMEnabled" => true,
 					"Commodity" => C_PLASTIC,
@@ -316,7 +316,7 @@ class ConfigController extends AROMConfigController {
 				self::AIMS_PLASTIC == $this->getAROMCustomerName() ||
 				self::SIDHANT_PLASTIC == $this->getAROMCustomerName()){
 				$sp_plastic = array(
-					"po_import_export"=> true,
+					"po_import_export"=> false,
 					"isGrade"=> true,
 					"isPLMEnabled" => true,
 					"Commodity" => C_PLASTIC,
@@ -325,7 +325,7 @@ class ConfigController extends AROMConfigController {
 				return $sp_plastic;
 			} else if(self::COMMON_PLASTIC == $this->getAROMCustomerName()){
 				$entitlements = array(
-					"po_import_export"=> true,
+					"po_import_export"=> false,
 					"isGrade"=> true,
 					"isPLMEnabled" => true,
 					"Commodity" => C_PLASTIC,

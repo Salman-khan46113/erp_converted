@@ -15,7 +15,7 @@
       </nav>
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
          <a class="btn  btn-seconday"
-            href="<%base_url('final_inspection_qa') %>" title="Back To Final Inspection Production Qty ">
+            href="<%base_url('view_p_q') %>" title="Back To Production Qty">
          <i class="ti ti-arrow-left" ></i></a>
       </div>
    <section class="content">

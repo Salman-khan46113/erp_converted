@@ -49,6 +49,7 @@ class CustomerPartController extends CommonController
 		$data['customer_id'] = $this->uri->segment('2');
 
 		$data['customer_parts_master'] = $this->CustomerPart->readCustomerParts();
+		// pr($data['customer_parts_master'],1);
 		$data['customers_part_type'] = $this->Crud->read_data("customer_part_type");
 		$data['customers'] = $this->Crud->read_data("customer");
 		$data['gst_structure'] = $this->Crud->read_data("gst_structure");
@@ -57,7 +58,6 @@ class CustomerPartController extends CommonController
 		$role_management_data = $this->db->query('SELECT DISTINCT part_number,id,customer_id 
 				FROM `customer_part` WHERE customer_id = ' . $customer_id . ' ');
 		$data['customer_part_list'] = $role_management_data->result();
-
 		$data['p_q'] = $this->Crud->read_data("p_q");
 		$data['shifts'] = $this->Crud->read_data("shifts");
 		$data['operator'] = $this->Crud->read_data("operator");

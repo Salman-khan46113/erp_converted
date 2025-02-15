@@ -404,7 +404,7 @@ class InhousePartsController extends CommonController
 		}
 		// $this->inhouse_parts_admin($id);
 		$ret_arr['success'] = $success;
-		$ret_arr['msg'] = $msg;
+		$ret_arr['messages'] = $msg;
 		echo json_encode($ret_arr);
 	}
 

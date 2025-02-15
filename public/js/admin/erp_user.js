@@ -92,7 +92,7 @@ $(document).ready(function() {
         }
     });
 
-    $(".update_users_data").submit(function(e){
+    $(".update_inhouse").submit(function(e){
         e.preventDefault();
         var href = $(this).attr("action");
         var id = $(this).attr("id");

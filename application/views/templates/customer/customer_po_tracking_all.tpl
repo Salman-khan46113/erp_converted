@@ -126,6 +126,7 @@
                                             <!-- <th>Close PO</th>-->
                                             <th>PO Document</th>
                                             <th>Actions</th>
+                                            <th style="display: none;">ID</th>
                                         </tr>
                                     </thead>
 

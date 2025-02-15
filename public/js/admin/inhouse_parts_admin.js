@@ -92,10 +92,48 @@ $(document).ready(function() {
     $('#serarch-filter-input').on('keyup', function() {
             table.search(this.value).draw();
         });
-   
+    
+    $(document).on("submit",".update_inhouse",function(e){
+        e.preventDefault();
+        var href = $(this).attr("action");
+        var id = $(this).attr("id");
+        let flag = formValidate(id);
+
+        if(flag){
+          return;
+        }
+        
+        var formData = new FormData($('.'+id)[0]);
+
+        $.ajax({
+          type: "POST",
+          url: href,
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            var responseObject = JSON.parse(response);
+            var msg = responseObject.messages;
+            var success = responseObject.success;
+            if (success == 1) {
+              toastr.success(msg);
+              $(this).parents(".modal").modal("hide")
+              setTimeout(function(){
+                window.location.reload();
+              },1000);
+
+            } else {
+              toastr.error(msg);
+            }
+          },
+          error: function (error) {
+            console.error("Error:", error);
+          },
+        });
+    });
 
     // Form validation and submission
-    $('.update_inhouse').validate({
+    $(document).on(validate,'.update_inhouse',{
         rules: {
             part_number: {
                 required: true

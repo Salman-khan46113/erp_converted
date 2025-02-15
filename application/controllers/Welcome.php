@@ -905,7 +905,13 @@ class Welcome extends CommonController
 	{
         checkGroupAccess("customer_master","list","Yes");
 		$data['customers'] = $this->Crud->read_data("customer");
-        // pr($data,1);
+
+        $data['export_message'] = "";
+        if($this->session->userdata('export_message') != "" && $this->session->userdata('export_message') != null){
+            $data['export_message'] = $this->session->userdata('export_message');
+            $this->session->set_userdata('export_message',"");
+        }
+        
 		$data['entitlements'] = $this->session->userdata('entitlements');
 		$this->loadView('customer/customer_master', $data);
 	}

@@ -65,7 +65,9 @@
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-      
+      <button type="button" class="btn btn-seconday " data-bs-toggle="modal"
+                        data-bs-target="#exportNoteOnly">
+                     Import Note</button>
   <button type="button" class="btn btn-seconday " data-bs-toggle="modal"
                         data-bs-target="#exportCustomerPartsOnly">
                      Export Customer Parts</button>
@@ -87,7 +89,64 @@
                <div class="card w-100">
                   <div class="">
                      <!-- Button trigger modal -->
+                     <!-- import note  -->
+<div class="modal fade" id="exportNoteOnly" tabindex="-1" role="dialog"
+   aria-labelledby="exampleModalLabel" aria-hidden="true">
+   <div class="modal-dialog modal-lg  modal-dialog-centered" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Import Note</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"
+               aria-label="Close">
+            
+            </button>
+         </div>
+         <div class="modal-body">
+            <form action="<%base_url('import_operation_bom') %>" 
+               method="POST" enctype='multipart/form-data' id="import_operation_bom" class="import_operation_bom custom-form">
+               <div class="row">
+                  <div class="col-lg-10">
+                    <div class="form-group">
+                     <div class="bd-example fs-5">
+                      <ul>
+                      <li >
+                         Customer name, SO no, start date, end date, Part no, part description, QTY are mandatory fields
+                      </li>
+                      <li >
+                          Item code, warehouse & remark are optional fields
+                      </li>
+                      <li >
+                          If part no is defined in customer part price, then only It can be imported to SO tracking
+                      </li>
+                      <li >
+                          Date format for Start date & end date should be dd/mm/yyyy
+                      </li>
+                      <li >
+                          For 1 SO there should be single start date & end date
+                      </li>
+                      <li >
+                          Duplicate entry of SO no is not allowed
+                      </li>
+                      <li >
+                          Duplicate entry of part no is not allowed
+                      </li>
+                      <li >
+                          SO QTY should be greater than zero
+                      </li>
+                      <ul>
                      
+                      
+
+                      </div>
+                  </div>
+               </div>
+         </div>
+         </form>
+      </div>
+   </div>
+</div>
+</div>
+<!-- import note  -->
                      <!-- Export Modal -->
                      <div class="modal fade" id="exportCustomerPartsOnly" tabindex="-1" role="dialog"
                         aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -273,3 +332,14 @@
 </script>
 <script src="<%$base_url%>public/js/planning_and_sales/po_tracking_import_export.js"></script>
 <!-- /.content-wrapper -->
+<style type="text/css">
+  .toast-top-right {
+    top: 12px;
+    right: 12px;
+    width: 98% !important;
+    height: 1px !important;
+}
+.toast {
+    width: 100% !important;
+}
+</style>

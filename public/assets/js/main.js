@@ -3,8 +3,8 @@ $( document ).ready(function() {
 });
 var table_data ;
 if($("body .dashboard-block").length == 0){
-  // console.log("k")
-$(document).ajaxStart(function() {
+$(document).ajaxStart(function(e) {
+  $(e.target.activeElement).prop('disabled', true)
   if($("body").hasClass("modal-open")){
      setTimeout(function(){
        $(".main-loader-box").show();
@@ -26,6 +26,34 @@ $(document).ajaxStop(function() {
       $("body").removeClass("loader-show");
   }
    
+});
+var ajaxResponses = [];
+$(document).ajaxComplete(function(event, xhr, settings) {
+  $(event.target.activeElement).prop('disabled', false); 
+  // console.log(event.target.activeElement)
+    // Store the response from the request
+    ajaxResponses.push(xhr.responseJSON || xhr.responseText);
+    var res = xhr.responseJSON || xhr.responseText;
+
+// if(res.indexOf("success") != -1){
+  try {
+      var response = JSON.parse(xhr.responseJSON || xhr.responseText);
+      console.log(xhr)
+      if(response.success == 0){
+          setTimeout(function(){
+               $(event.target.activeElement).prop('disabled', false);
+          },5000);
+      }else{
+        $(event.target.activeElement).prop('disabled', false); 
+      }
+  } catch (error) {
+      // console.error("Error parsing JSON response:", error);
+      // responseData = { error: "Invalid JSON response", raw: xhr.responseText };
+  }
+    
+    
+// }
+    
 });
 }
 const app = {

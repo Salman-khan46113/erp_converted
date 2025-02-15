@@ -396,9 +396,13 @@
                                  </div>
                               </td>
                               <td>
+                                <%if ($u->status != "pending") %>
                                  <a class="btn btn-info"
                                     href="<%base_url('details_production_qty/') %><%$u->id %>">
                                  View Details</a>
+                                <%else%>
+                                  <%display_no_character("")%>
+                                <%/if%>
                               </td>
                            </tr>
                            <%assign var='i' value=$i+1%>

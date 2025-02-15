@@ -116,5 +116,9 @@ class Tracking extends CI_Model {
         
     }
 
+    public function batchInsert($insert_arr = [],$table_name =""){
+        $this->db->insert_batch($table_name, $insert_arr);
+    }
+
 }
 ?>

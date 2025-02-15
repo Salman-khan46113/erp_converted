@@ -158,7 +158,7 @@
                                          <form
                                             action="<%base_url('update_inhsoue_stock') %>"
                                             method="POST"
-                                            class="update_inhouse">
+                                            class="update_inhouse<%$i %> update_inhouse custom-form" id="update_inhouse<%$i %>">
                                             <div class="row">
                                                <div class="col-lg-12">
                                                   <div class="form-group">
@@ -167,8 +167,8 @@
                                                         class="text-danger">*</span>
                                                      <input readonly type="text"
                                                         value="<%$po->part_number %>"
-                                                        name="part_number" required
-                                                        class="form-control"
+                                                        name="part_number" 
+                                                        class="form-control required-input"
                                                         id="exampleInputEmail1"
                                                         aria-describedby="emailHelp"
                                                         placeholder="Part Number">
@@ -181,8 +181,8 @@
                                                         class="text-danger">*</span>
                                                      <input type="text"
                                                         value="<%$po->part_description  %>"
-                                                        name="part_description" required
-                                                        class="form-control"
+                                                        name="part_description" 
+                                                        class="form-control required-input"
                                                         id="exampleInputEmail1"
                                                         aria-describedby="emailHelp"
                                                         placeholder="Part Description">
@@ -192,9 +192,10 @@
                                                         class="text-danger">*</span>
                                                      <input type="text"
                                                         value="<%$po->production_qty  %>"
-                                                        name="stock" required
-                                                        class="form-control onlyNumericInput  "
+                                                        name="stock" 
+                                                        class="form-control onlyNumericInput  required-input"
                                                         id="exampleInputEmail1"
+                                                        data-min="0"
                                                         aria-describedby="emailHelp"
                                                         placeholder="Part Specification">
                                                   </div>

@@ -622,7 +622,7 @@ class NewEWayBillController extends CommonController {
 	include "application/libraries/phpqrcode/qrlib.php";
 	// header('Content-Type: image/png');
 
-	$folderPath = 'public/uploads/documents/ewayBill/'; // specify the path where you want to create the folder
+	$folderPath = 'dist/uploads/ewayBill/'; // specify the path where you want to create the folder
 
 	// Check if the folder exists, if not, create it
 	if (!file_exists($folderPath)) {

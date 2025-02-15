@@ -47,7 +47,7 @@ const page = {
                             var lines = csv.split('\n');
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
-                                values.splice(13, 1);
+                                values.splice(6, 4);
                                 return values.join(',');
                             });
                             return modifiedLines.join('\n');
@@ -66,7 +66,7 @@ const page = {
                       doc.pageMargins = [15, 15, 15, 15];
                       doc.content[0].text = pdf_title;
                       doc.content[0].color = theme_color;
-                        // doc.content[1].table.widths = ['15%', '19%', '13%', '13%','15%', '15%', '10%'];
+                        doc.content[1].table.widths = ['15%', '15%', '15%', '15%','15%', '15%'];
                         doc.content[1].table.body[0].forEach(function(cell) {
                             cell.fillColor = theme_color;
                         });
@@ -85,7 +85,7 @@ const page = {
                                 }
                                 cell.alignment = alignment;
                             });
-                            row.splice(14, 1);
+                            row.splice(6, 4);
                         });
                     }
                 },

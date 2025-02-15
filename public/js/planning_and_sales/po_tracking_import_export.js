@@ -4,9 +4,41 @@ var pdf_title = "PO Tracking";
 const page = {
     init: function(){
     	if(po_message != "" && po_message != null){
+            toastr.options = {
+                'closeButton': true,
+                'debug': false,
+                'newestOnTop': false,
+                'progressBar': false,
+                'positionClass': 'toast-top-right',
+                'preventDuplicates': false,
+                'showDuration': '1000',
+                'hideDuration': '1000',
+                'timeOut': 0,
+                'extendedTimeOut': '1000',
+                'showEasing': 'swing',
+                'hideEasing': 'linear',
+                'showMethod': 'fadeIn',
+                'hideMethod': 'fadeOut',
+            }
     		toastr.error(po_message);
     	}
     	if(po_message_su != "" && po_message_su != null){
+            toastr.options = {
+                'closeButton': true,
+                'debug': false,
+                'newestOnTop': false,
+                'progressBar': false,
+                'positionClass': 'toast-top-right',
+                'preventDuplicates': false,
+                'showDuration': '1000',
+                'hideDuration': '1000',
+                'timeOut': 0,
+                'extendedTimeOut': '1000',
+                'showEasing': 'swing',
+                'hideEasing': 'linear',
+                'showMethod': 'fadeIn',
+                'hideMethod': 'fadeOut',
+            }
     		toastr.success(po_message_su);
     	}
         this.dataTable();
@@ -87,7 +119,7 @@ const page = {
             },
         ],
         searching: true,
-        // scrollX: true,
+        scrollX: true,
         scrollY: true,
         bScrollCollapse: true,
         columnDefs: [{ sortable: false, targets: 7 }],

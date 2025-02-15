@@ -57,6 +57,15 @@
 </nav>
 <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
     <%if checkGroupAccess("customer_master","import","No")%>
+    <button type="button" class="btn btn-seconday " data-bs-toggle="modal"
+                        data-bs-target="#exportNoteOnly">
+                     Import Note</button>
+    <button type="button" class="btn btn-seconday " data-bs-toggle="modal"
+                        data-bs-target="#exportCustomerPartsPriceOnly">
+                     Export Part Price</button>
+     <button type="button" class="btn btn-seconday " data-bs-toggle="modal"
+                        data-bs-target="#importCustomerPartsPriceOnly">
+                     Import Part Price</button>
     <a class="btn btn-seconday " title="BOM Operation Template export" href="<%base_url('operation_bom_template_excel_export')%>" ><i class="ti ti-download" ></i></a>
     <button type="button" class="btn btn-seconday" data-bs-toggle="modal" data-bs-target="#importCustomerPartsOnly" title="BOM Operation  Import"><i class="ti ti-upload" ></i>
     </button>
@@ -71,6 +80,59 @@
 </div>
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
+
+<!-- import note  -->
+<div class="modal fade" id="exportNoteOnly" tabindex="-1" role="dialog"
+   aria-labelledby="exampleModalLabel" aria-hidden="true">
+   <div class="modal-dialog modal-lg  modal-dialog-centered" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Import Note</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"
+               aria-label="Close">
+            
+            </button>
+         </div>
+         <div class="modal-body">
+            <form action="<%base_url('import_operation_bom') %>" 
+               method="POST" enctype='multipart/form-data' id="import_operation_bom" class="import_operation_bom custom-form">
+               <div class="row">
+                  <div class="col-lg-10">
+                    <div class="form-group">
+                     <div class="bd-example fs-5">
+                      <ul>
+                      <li >
+                         Customer name, part no, part description, part rate, rev no, rev date are mandatory fields
+                      </li>
+                      <li >
+                          Revision remark is optional fields
+                      </li>
+                      <li >
+                          Old part rate and old revision no are informative fields
+                      </li>
+                      <li >
+                          Part price should be greater than zero
+                      </li>
+                      <li >
+                          Revision date format should be dd/mm/yyyy
+                      </li>
+                      <li >
+                          Duplicate entry of part no is not allowed
+                      </li>
+                      <ul>
+                     
+                      
+
+                      </div>
+                  </div>
+               </div>
+         </div>
+         </form>
+      </div>
+   </div>
+</div>
+</div>
+<!-- import note  -->
         <!-- Import Modal -->
 <div class="modal fade" id="importCustomerPartsOnly" tabindex="-1" role="dialog"
    aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -125,7 +187,103 @@
    </div>
 </div>
 <!-- Import end -->
-
+<!-- Import Part Price Modal -->
+<div class="modal fade" id="exportCustomerPartsPriceOnly" tabindex="-1" role="dialog"
+                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                           <div class="modal-content">
+                              <div class="modal-header">
+                                 <h5 class="modal-title w-100" id="exampleModalLabel">
+                                 Export Part Price
+                               </h5>
+                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close">
+                                 </button>
+                              </div>
+                              <div class="modal-body">
+                                 <form action="<%base_url('global_export') %>" 
+                                    method="POST" enctype='multipart/form-data' class="global_export custom-form" id="global_export">
+                                    <div class="row">
+                                       <div class="col-lg-12">
+                                        <div class="form-group">
+                                          <label for="contractorName">Customer</label><span
+                                             class="text-danger">*</span>
+                                          <select name="customer_id_export" class="form-control select2 required-input" id="customer_id_export">
+                                              <option value="">Select Customer</option>
+                                            <%foreach $customers as $val%>
+                                                <option value="<%$val->id%>"><%$val->customer_name%></option>
+                                            <%/foreach%>
+                                            </select>
+                                       </div>
+                                       <input type="hidden" name="export_type" value="customer_part_price">
+                                   </div>
+                                    </div>
+                              </div>
+                              <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary"
+                                 data-bs-dismiss="modal">Cancel</button>
+                              <button type="submit" class="btn btn-primary">Import</button>
+                              </div>
+                              </form>
+                           </div>
+                        </div>
+                     </div>
+<div class="modal fade" id="importCustomerPartsPriceOnly" tabindex="-1" role="dialog"
+                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                           <div class="modal-content">
+                              <div class="modal-header">
+                                 <h5 class="modal-title w-100" id="exampleModalLabel">
+                                 Import Part Price
+                               </h5>
+                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close">
+                                 </button>
+                              </div>
+                              <div class="modal-body">
+                                 <form action="<%base_url('global_import') %>" 
+                                    method="POST" enctype='multipart/form-data' id="global_import" class="global_import custom-form">
+                                    
+                                    <div class="row">
+                                       <div class="col-lg-12">
+                                        <div class="form-group">
+                                          <label for="contractorName">Customer</label><span
+                                             class="text-danger">*</span>
+                                          
+                                          <select name="customer_id" class="form-control select2 required-input" id="customer_name_import">
+                                              <option value="">Select Customer</option>
+                                            <%foreach $customers as $val%>
+                                                <option value="<%$val->id%>"><%$val->customer_name%></option>
+                                            <%/foreach%>
+                                            </select>
+                                       </div>
+                                   </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-lg-12">
+                                          <div class="form-group">
+                                             <label for="po_num">Upload PO</label><span
+                                                class="text-danger">*</span>
+                                             <input type="file" name="uploadedDoc"  class="form-control required-input" id="exampleuploadedDocImport" placeholder="Upload PO" aria-describedby="uploadDocHelp">
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <input type="hidden" name="export_type" value="customer_part_price">
+                              </div>
+                              <div class="modal-footer">
+                              <input type="hidden" value="<%$segment_2%>"
+                                 class="hidden">
+                              <input type="hidden" value="<%$segment_3%>"
+                                 class="hidden">
+                              <button type="button" class="btn btn-secondary"
+                                 data-bs-dismiss="modal">Cancel</button>
+                              <button type="submit" class="btn btn-primary">Import</button>
+                              </div>
+                              </form>
+                           </div>
+                        </div>
+                     </div>
+<!-- Import Part Price Modal -->
         <!-- Main content -->
         <section class="content">
             <div class="">
@@ -289,6 +447,18 @@
     <!-- /.content-wrapper -->
 </div>
 <script type="text/javascript">
-    var isPLMEnabled = <%$entitlements.isPLMEnabled|@json_encode%>
+    var isPLMEnabled = <%$entitlements.isPLMEnabled|@json_encode%>;
+    var export_message = <%$export_message|@json_encode%>;
 </script>
 <script src="<%$base_url%>/public/js/planning_and_sales/customer_master.js"></script>
+<style type="text/css">
+  .toast-top-right {
+    top: 12px;
+    right: 12px;
+    width: 98% !important;
+    height: 1px !important;
+}
+.toast {
+    width: 100% !important;
+}
+</style>
