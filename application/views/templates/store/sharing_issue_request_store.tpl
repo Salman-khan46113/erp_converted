@@ -96,10 +96,10 @@
 				                                 <%if ((int)$u->qty > (int)$u->stock) %>
 				                                        Store Stock Not Available
 				                                  <%else %>
-						                                <form action="<%base_url('accept_sharing_request') %>" class="accept_sharing_request custom-form" method="post" id="accept_sharing_request<%$i %>">
+						                                <form action="<%base_url('accept_sharing_request') %>" class="accept_sharing_request accept_sharing_request<%$i %> custom-form" method="post" id="accept_sharing_request<%$i %>">
 						                                	<div class="form-group">
 						                                		<label style="display: none;">Accept Qty</label>
-						                                    <input  name="accepted_qty" data-max="<%$u->qty %>" data-min="0.001" type="text" step="any"  class="form-control onlyNumericInput required-input">
+						                                    <input  name="accepted_qty" data-max="<%$u->qty %>" data-min="1" type="text" step="any"  class="form-control onlyNumericInput required-input">
 						                                </div>
 						                                    <input  name="id" value="<%$u->id %>" min="1" type="hidden" required class="form-control">
 						                                    <input  name="child_part_id" value="<%$u->child_part_id %>" type="hidden" required class="form-control">

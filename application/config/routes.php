@@ -551,6 +551,8 @@ $route['update_child_stock'] = 'SupplierPartsController/update_child_stock';
 $route['stock_down'] = 'SupplierPartsController/stock_down';
 $route['stock_up'] = 'SupplierPartsController/stock_up';
 $route['add_stock/(:any)'] = 'SupplierPartsController/add_stock';
+$route['stock_up_product_list'] = 'SupplierPartsController/stock_up_product_list';
+$route['delete_stock_up'] = 'SupplierPartsController/delete_stock_up';
 
 
 
@@ -559,6 +561,7 @@ $route['fw_stock'] = 'FGStockController/fg_stock';
 $route['transfer_fg_stock_to_inhouse_stock'] = 'FGStockController/transfer_fg_stock_to_inhouse_stock';
 $route['customer_parts_admin'] = 'FGStockController/customer_parts_admin';
 $route['update_customer_parts_master_fg_stock'] = 'FGStockController/update_customer_parts_master_fg_stock';
+$route['transfer_fg_stock_to_fg_stock'] = 'FGStockController/transfer_fg_stock_to_fg_stock';
 
 
 
@@ -650,6 +653,9 @@ $route['customer_po_tracking'] = 'POTrackingController/customer_po_tracking';
 $route['customer_po_tracking_all'] = 'POTrackingController/customer_po_tracking_all';
 $route['customer_po_tracking_all_closed'] = 'POTrackingController/customer_po_tracking_all_closed';
 
+$route['generateAOPdf/(:any)'] = 'POTrackingController/generateAOPdf';
+$route['sendAOEmail/(:any)'] = 'POTrackingController/sendAOEmail';
+
 #------------ PLM Integration ---------------
 #PLM- drawing
 $route['customer_part_drawing/(:any)'] = 'PLMIntegration/customer_part_drawing';
@@ -675,6 +681,9 @@ $route['grades'] = 'P_Molding/grades';
 $route['add_grades'] = 'P_Molding/add_grades';
 $route['add_stock_up'] = 'P_Molding/add_stock_up';
 $route['remove_stock/(:any)'] = 'P_Molding/remove_stock';
+$route['accept_material_request_qty'] = 'P_Molding/accept_material_request_qty';
+$route['delete_material_request'] = 'P_Molding/delete_material_request';
+$route['get_store_stock_material_request'] = 'P_Molding/get_store_stock_material_request';
 
 $route['get_filtered_clientUnit'] = 'P_Molding/get_filtered_clientUnit';
 

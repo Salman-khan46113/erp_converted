@@ -10,7 +10,7 @@ var pdf_title = "accept_reject_validation";
 
 const page = {
     init: function() {
-
+      
         this.dataTable();
         this.filter();
         this.formValidation();
@@ -171,10 +171,51 @@ const page = {
         let flag = that.formValidate(id);
 
         if(flag){
+          // console.log("uesu",$(e.target).attr("data-form"))
           return;
         }
-        // consle.log(flag);
-        // return ;
+
+        var accepted_qty = $('.'+id+" .accepted_qty").val();
+        var onhold_qty = $('.'+id+" .onhold_qty").val();
+        if($(e.target).attr("data-form") == "update_p_q" && accepted_qty == 0 && onhold_qty == 0){
+          swal({
+          title: "Are you sure?", 
+          text: "You are rejecting production quantity", 
+          type: "warning",
+          confirmButtonText: "Yes",
+          showCancelButton: true
+          })
+            .then((result) => {
+            if (result.value) {
+                var formData = new FormData($('.'+id)[0]);
+                $.ajax({
+                  type: "POST",
+                  url: href,
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  success: function (response) {
+                    var responseObject = JSON.parse(response);
+                    var msg = responseObject.messages;
+                    var success = responseObject.success;
+                    if (success == 1) {
+                      toastr.success(msg);
+                      $(this).parents(".modal").modal("hide")
+                      setTimeout(function(){
+                        window.location.reload();
+                      },1000);
+
+                    } else {
+                      toastr.error(msg);
+                    }
+                  },
+                  error: function (error) {
+                    console.error("Error:", error);
+                  },
+                });
+            }
+          })
+        }else{
         var formData = new FormData($('.'+id)[0]);
 
         $.ajax({
@@ -202,6 +243,7 @@ const page = {
             console.error("Error:", error);
           },
         });
+        }
       });
     },
     formValidate: function(form_class = ''){

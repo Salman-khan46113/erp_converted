@@ -234,15 +234,15 @@
                                         
                                      </div>
                                      <div class="form-group">
-                                     <label for="on click url">Enter Accept Qty</label>
+                                     <label for="on click url">Accept Qty</label>
                                      (Current Stock:<%$req->stock %>)<span
                                         class="text-danger">*</span>
                                      <br>
-                                     <%if ($req->stock > 0 && $req->qty <= $req->stock) %>
+                                     <%if ($req->stock > 0 && $req->qty <= $req->stock) || true%>
                                        <input  type="text" name="accepted_qty"
-                                          placeholder="Enter Accept Qty"
+                                          placeholder="Accept Qty"
                                           class="form-control required-input onlyNumericInput" data-min="1"
-                                          data-max="<%$req->qty %>" value="" id="">
+                                          data-max="<%$req->qty %>" data-req="<%$req->stock %>" value="" id="">
                                        <input type="hidden" value="<%$machine_request_id %>"
                                           name="machine_request_id" required
                                           class="form-control">

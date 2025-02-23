@@ -449,10 +449,19 @@ class SupplierPartsController extends CommonController
 	 */
 	public function child_parts($part_id_selected = null)
 	{
+
+		// pr($this->session->userdata(),1);
 		checkGroupAccess("child_parts","list","Yes");
 		$data['part_select_list'] = $this->SupplierParts->readSupplierPartsOnly();
 		if(empty($part_id_selected)){
 			$part_id_selected = $this->input->post("part_id_selected");
+		}
+
+		$message= "";
+		if($this->session->userdata("child_part_message") != ""){
+			$message = $this->session->userdata("child_part_message");
+			// pr($message,1);
+			$this->session->set_userdata('child_part_message',"") ;
 		}
 
 		
@@ -463,6 +472,7 @@ class SupplierPartsController extends CommonController
 			$data['child_part'] = $this->SupplierParts->getchildPart();
 		// }
 		$data['enableStockUpdate'] = $this->isEnableStockUpdate();
+		$data['message'] = $message;
 		
 		$this->loadView('admin/child_parts', $data);
 	}
@@ -483,10 +493,13 @@ class SupplierPartsController extends CommonController
 			
 			$result = $this->SupplierParts->updateStockById($data, $id);
 			if ($result) {
-				$this->addSuccessMessage('Record updated successfully');
+				$message = 'Record updated successfully';
+				// $this->addSuccessMessage('Record updated successfully');
 			} else {
-				$this->addErrorMessage('Unable to update record. Please try again.');
+				$message = 'Unable to update record. Please try again.';
+				// $this->addErrorMessage('Unable to update record. Please try again.');
 			}
+		$this->session->set_userdata('child_part_message',$message) ;
 		// $this->child_parts($id);
 		redirect('child_parts');
 	}
@@ -509,6 +522,19 @@ class SupplierPartsController extends CommonController
 			WHERE sc.clientId = '".$clientId."'
 			ORDER BY sc.id DESC"
 		);
+		foreach ($data['stock_changes'] as $key => $value) {
+			$stock_data = $this->Crud->customQuery('
+				SELECT
+				    `stock`.stock
+				FROM
+				    `child_part` `parts`
+				LEFT JOIN `child_part_stock` `stock` ON
+				    `parts`.`id` = `stock`.`childPartId` AND `stock`.`clientId` = '.$this->Unit->getSessionClientId().'
+				WHERE `parts`.`id` = '.$value->part_id.''													
+			);
+			$stock_data = $stock_data[0]->stock > 0 ? $stock_data[0]->stock : 0;
+			$data['stock_changes'][$key]->stock = $stock_data;
+		}
 		$data['client_list'] = $this->Crud->read_data_acc("client");
 		$data['clintUnitId'] = $this->Unit->getSessionClientId();
 		$data['role'] = $this->session->userdata("role");
@@ -534,10 +560,99 @@ class SupplierPartsController extends CommonController
 			LEFT JOIN child_part cp ON cp.id = s.part_id
 			LEFT JOIN child_part_stock stock ON cp.id = stock.childPartId AND stock.clientId = " . $unit_id. "
 			LEFT JOIN uom u ON u.id = cp.uom_id
-			WHERE s.clientId = ".$unit_id." AND s.type='addition' ");
+			WHERE s.clientId = ".$unit_id." AND s.type='addition' 
+			ORDER BY s.id DESC");
+
+		$inhouse_parts_list  = $this->Crud->customQuery("SELECT parts.*, stock.* 
+            FROM  inhouse_parts parts
+            LEFT JOIN inhouse_parts_stock stock
+            ON parts.id = stock.inhouse_parts_id
+            AND stock.clientId = " . $this->Unit->getSessionClientId() . "
+            ORDER BY parts.id desc");
+		$transformed_array = [];
+		foreach ($inhouse_parts_list as $item) {
+		    $transformed_array[$item->id] = $item;
+		}
+		$inhouse_parts_list = $transformed_array;
+
+		$customer_parts_list = $this->CustomerPart->getCustomerPartdata();
+		$transformed_array = [];
+		foreach ($customer_parts_list as $item) {
+		    $transformed_array[$item->id] = $item;
+		}
+		$customer_parts_list = $transformed_array;
+		
+
+		foreach ($data['stock_changes'] as $key => $value) {
+			if($value->toStockType == "inhouse_qty"){
+				$part_data = $inhouse_parts_list[$value->part_id] != null ? $inhouse_parts_list[$value->part_id] : [];
+				$data['stock_changes'][$key]->part_number = $part_data->part_number;
+				$data['stock_changes'][$key]->part_description = $part_data->part_description;
+			}else if($value->toStockType == "customer_part"){
+				$part_data = $customer_parts_list[$value->part_id] != null ? $customer_parts_list[$value->part_id] : [];
+				$data['stock_changes'][$key]->part_number = $part_data->part_number;
+				$data['stock_changes'][$key]->part_description = $part_data->part_description;
+			}
+			
+		}
 		$data['supplier'] = $this->Crud->read_data("supplier");
 		$data['rejection_flow'] = $this->Crud->read_data("rejection_flow");
 		$this->loadView('store/stock_up', $data);
+	}
+
+
+	public function delete_stock_up(){
+		$post_data = $this->input->post();
+		$stock_up_id = $post_data['stock_up_id'];
+		$message = "Something went wrong";
+		$success = 0;
+		if($stock_up_id > 0){
+			$data = array(
+				"id" => $stock_up_id
+			);
+			$result = $this->Crud->delete_data("stock_changes", $data);
+			if($result){
+				$message = "Record deleted successfully.";
+				$success = 1;
+			}
+		}
+		$return_arr = [];
+		$return_arr['messages'] = $message;
+		$return_arr['success'] = $success;
+		echo json_encode($return_arr);
+		exit();
+	}
+
+	/**
+	 * Stock UP/Return Parts
+	 */
+	public function stock_up_product_list()
+	{
+		$this->load->model('InhouseParts');
+		$this->load->model('CustomerPart');
+		$post_data = $this->input->post();	
+		// pr($post_data,1);
+		$part_arr = "<option value=''>Select Part Number / Description / Stock</option>";
+		if($post_data['type'] == "production_qty"){
+			$child_part = $this->SupplierParts->readSupplierParts();
+			foreach ($child_part as $key => $value) {
+				$part_arr .= "<option value='".$value->id."' data-qty='".$value->stock."'>".$value->part_number." / ".$value->part_description." / ".$value->stock."</option>";
+			}
+		}else if($post_data['type'] == "inhouse_qty"){
+			$inhouse_parts_list = $this->InhouseParts->getInhousePartById();
+			foreach ($inhouse_parts_list as $key => $value) {
+				$part_arr .= "<option value='".$value->id."' data-qty='".$value->production_qty."'>".$value->part_number." / ".$value->part_description." / ".$value->production_qty."</option>";
+			}
+		}else if($post_data['type'] == "customer_part"){
+			$customer_parts_list = $this->CustomerPart->getCustomerPartdata();
+			foreach ($customer_parts_list as $key => $value) {
+				$part_arr .= "<option value='".$value->id."' data-qty='".$value->fg_stock."'>".$value->part_number." / ".$value->part_description." / ".$value->fg_stock."</option>";
+			}
+		}
+
+		$return_arr['part_arr'] = $part_arr;
+		echo json_encode($return_arr);
+		exit();
 	}
 
 
@@ -545,37 +660,94 @@ class SupplierPartsController extends CommonController
 	{
 		$stock_changes_id  = $this->uri->segment('2');
 		$stock_changes_data = $this->Crud->get_data_by_id("stock_changes", $stock_changes_id, "id");
-		$child_part_data = $this->SupplierParts->getSupplierPartById($stock_changes_data[0]->part_id);
-		if ($child_part_data) {
-			$qty = $stock_changes_data[0]->qty;
-			$current_stock = $child_part_data[0]->stock;
+		$message = "Something went wrong";
+		$success = 0;
+		if($stock_changes_data[0]->toStockType == "production_qty"){
+			$child_part_data = $this->SupplierParts->getSupplierPartById($stock_changes_data[0]->part_id);
+			if ($child_part_data) {
+				$qty = $stock_changes_data[0]->qty;
+				$current_stock = $child_part_data[0]->stock;
 
-			if (false && $qty > $current_stock) {
-				echo "Entered Qty is greater than actual stock please try again";
-			} else {
-				if ($stock_changes_data[0]->type == "addition") {
-					$new_stock = $current_stock + $qty;
+				if (false && $qty > $current_stock) {
+					$message =  "Entered Qty is greater than actual stock please try again";
 				} else {
-					$new_stock = $current_stock - $qty;
-				}
+					if ($stock_changes_data[0]->type == "addition") {
+						$new_stock = $qty;
+					} else {
+						$new_stock = $current_stock - $qty;
+					}
 
-				$data_update_child_part = array(
-					"stock" => $new_stock,
-				);
-				$result2 = $this->SupplierParts->updateStockById($data_update_child_part, $stock_changes_data[0]->part_id);
-				if ($result2) {
-					$data_update_rejection_flow = array(
-						"status" => "stock_transfered"
+					$data_update_child_part = array(
+						"stock" => $new_stock,
 					);
-					$result3 = $this->Crud->update_data("stock_changes", $data_update_rejection_flow, $stock_changes_id);
-					if ($result3) {
-						echo "<script>alert('Stock Transfered successfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+					$result2 = $this->SupplierParts->updateStockById($data_update_child_part, $stock_changes_data[0]->part_id);
+					if ($result2) {
+						$data_update_rejection_flow = array(
+							"status" => "stock_transfered"
+						);
+						$result3 = $this->Crud->update_data("stock_changes", $data_update_rejection_flow, $stock_changes_id);
+						if ($result3) {
+							$success = 1;
+							$message = "Stock updated successfully'";
+						}
 					}
 				}
+			} else {
+				$message = "Item Part Id : " . $stock_changes_data[0]->part_id . " not found. Please try again ";
 			}
-		} else {
-			echo "Item Part Id : " . $stock_changes_data[0]->part_id . " not found. Please try again ";
+		}else if($stock_changes_data[0]->toStockType == "inhouse_qty"){
+			$id = $stock_changes_data[0]->part_id;
+			$stock = $stock_changes_data[0]->qty;
+			$result = $this->InhouseParts->getInhousePartDetails($id);
+			$production_qty = $result[0]->production_qty > 0 ? $result[0]->production_qty : 0;
+			$data = array(
+				"production_qty" =>  $stock,
+			);
+			
+			$ret_arr = [];
+			$success = 1;
+			$msg = '';
+			$result = $this->InhouseParts->updateStockById($data, $id);
+			if ($result) {
+				$data_update_rejection_flow = array(
+					"status" => "stock_transfered"
+				);
+				$success = 1;
+				$this->Crud->update_data("stock_changes", $data_update_rejection_flow, $stock_changes_id);
+				// $this->addSuccessMessage('Record updated successfully');
+				$message = 'Stock updated successfully';
+
+			} else {
+				// $this->addErrorMessage('Unable to update record. Please try again.');
+				$message = 'Unable to update record. Please try again.';
+			}
+		}else if($stock_changes_data[0]->toStockType == "customer_part"){
+			$id = $stock_changes_data[0]->part_id;
+			$stock = $stock_changes_data[0]->qty;
+			$result = $this->CustomerPart->getCustomerPartById($id);
+			$fg_stock = $result[0]->fg_stock > 0 ? $result[0]->fg_stock : 0;
+			$data = array(
+				"fg_stock" => $stock
+			);
+			$result = $this->CustomerPart->updateStockById($data, $id);
+			if ($result) {
+				$data_update_rejection_flow = array(
+					"status" => "stock_transfered"
+				);
+				$this->Crud->update_data("stock_changes", $data_update_rejection_flow, $stock_changes_id);
+				$message = "Stock updated successfully.";
+				$success = 1;
+				// $this->addSuccessMessage('Stock updated successfully.');
+			} else {
+				$message = "Unable to update stock. Please try again.";
+				// $this->addErrorMessage('Unable to update stock. Please try again.');
+			}
 		}
+		$return_arr = [];
+		$return_arr['messages'] = $message;
+		$return_arr['success'] = $success;
+		echo json_encode($return_arr);
+		exit();
 	}
 
 }

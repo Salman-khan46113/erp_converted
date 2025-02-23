@@ -53,10 +53,10 @@
           <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link"
             title="Back to Issue Request Listing">
             <i class="ti ti-chevrons-right"></i>
-            <em>Supplier Parts (Item) Stock</em></a>
+            <em>Purchase Stock Transfer</em></a>
         </h1>
         <br>
-        <span>Supplier Parts (Item) Stock</span>
+        <span>Purchase Stock Transfer</span>
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">

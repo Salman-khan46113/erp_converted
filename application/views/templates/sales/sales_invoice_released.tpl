@@ -182,7 +182,7 @@
                                                                         </div>
                                                                         <div class="modal-body">
                                                                             <div class="row">
-                                                                                <form action="<%base_url('cancel_sale_invoice')%>" method="POST">
+                                                                                <form action="<%base_url('cancel_sale_invoice')%>"  id="cancel_sale_invoice<%$srNo%>" class="cancel_sale_invoice<%$srNo%> cancel_sale_invoice custom-form" method="POST">
                                                                                     <div class="col-lg-12">
                                                                                         <div class="form-group">
                                                                                             <label for=""><b>Are you sure want to Cancel this invoice?</b> </label>
@@ -214,7 +214,7 @@
                                                                         </div>
                                                                         <div class="modal-body">
                                                                             <div class="row">
-                                                                                <form action="<%base_url('delete_sale_invoice')%>" method="POST">
+                                                                                <form action="<%base_url('delete_sale_invoice')%>" method="POST" id="delete_sale_invoice<%$srNo%>" class="delete_sale_invoice<%$srNo%> delete_sale_invoice custom-form">
                                                                                     <div class="col-lg-12">
                                                                                         <div class="form-group">
                                                                                             <label for=""><b>Are you sure want to Delete this invoice?</b> </label>
@@ -330,5 +330,39 @@ var table = new DataTable('#example1',{
               minimumResultsForSearch: Infinity
           });
         },1000)
+
+        $(".delete_sale_invoice,.cancel_sale_invoice").submit(function(e){
+            e.preventDefault();
+            var href = $(this).attr("action");
+            var id = $(this).attr("id");
+            
+            var formData = new FormData($('.'+id)[0]);
+
+            $.ajax({
+              type: "POST",
+              url: href,
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (response) {
+                var responseObject = JSON.parse(response);
+                var msg = responseObject.messages;
+                var success = responseObject.success;
+                if (success == 1) {
+                  toastr.success(msg);
+                  $(this).parents(".modal").modal("hide")
+                  setTimeout(function(){
+                    window.location.reload();
+                  },1000);
+
+                } else {
+                  toastr.error(msg);
+                }
+              },
+              error: function (error) {
+                console.error("Error:", error);
+              },
+            });
+          });
 
 </script>

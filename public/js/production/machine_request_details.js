@@ -98,6 +98,7 @@ const page = {
             if(flag){
                 return;
             }
+            // return;
             var formData = new FormData($(this)[0]);
             $.ajax({
               type: "POST",
@@ -133,6 +134,7 @@ const page = {
           var value = $(this).val();
           var dataMax = parseFloat($(this).attr('data-max'));
           var dataMin = parseFloat($(this).attr('data-min'));
+          var dataReq = parseFloat($(this).attr('data-req'));
           if(value == ''){
             flag = true;
             var label = $(this).parents(".form-group").find("label").contents().filter(function() {
@@ -173,6 +175,21 @@ const page = {
               var exit_ele = $(this).parents(".form-group").find("label.error");
               if(exit_ele.length == 0){
                 var end =" must be less than or equal to "+dataMax;
+                label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+                label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+                label = label.charAt(0).toUpperCase() + label.slice(1)
+                var validation_message =label +end;
+                var label_html = "<label class='error'>"+validation_message+"</label>";
+                $(this).parents(".form-group").append(label_html)
+              }
+          }else if(dataReq !== undefined && dataReq < value){
+              flag = true;
+              var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+                return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+              }).text().trim();
+              var exit_ele = $(this).parents(".form-group").find("label.error");
+              if(exit_ele.length == 0){
+                var end =" must be less than or equal to stock "+dataReq;
                 label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
                 label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
                 label = label.charAt(0).toUpperCase() + label.slice(1)

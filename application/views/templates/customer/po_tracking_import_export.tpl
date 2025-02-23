@@ -272,9 +272,9 @@
                               <th>Due date</th>
                               <th>Status</th>
                               <th>Remark</th>
-                              <th>PO Unit Price</th>
+                              <!-- <th>PO Unit Price</th> -->
                               <th>Part Rate</th>
-                              <th>Price Change</th>
+                              <!-- <th>Price Change</th> -->
                            </tr>
                         </thead>
                         <tbody>
@@ -303,9 +303,9 @@
                                  <%assign var='priceDifferent' value=null%>
                                  <%/if%>
                               </td>
-                              <td style="<%$isMatchstyle%>"><%$exp->imported_price%></td>
+                              <!-- <td style="<%$isMatchstyle%>"><%$exp->imported_price%></td> -->
                               <td><%$exp->rate%></td>
-                              <td style="<%$isMatchstyle%>"><%$priceDifferent%></td>
+                              <!-- <td style="<%$isMatchstyle%>"><%$priceDifferent%></td> -->
                            </tr>
                               <%assign var='srNo' value=$srNo+1%>
                               <%/foreach%>

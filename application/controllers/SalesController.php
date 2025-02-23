@@ -832,7 +832,8 @@ class SalesController extends CommonController
 		);
 
 		$cancel_parts = $this->Crud->update_data_column("sales_parts", $sales_part_data, $sales_id,"sales_id");
-
+		$messages = "Something went wrong.";
+		$success = 0;
 		if($cancel_parts){
 			$cancel_data = array(
 				"status" => 'Cancelled',
@@ -845,17 +846,29 @@ class SalesController extends CommonController
 			//check if transaction status TRUE or FALSE
 			if ($result) {
 				if ($status == 'lock') {
-					$this->addSuccessMessage('Sales invoice ' . $sales_number . ' cancelled. <br> Note: Please update FG Stock manually.');
+					$success = 1;
+					$messages = 'Sales invoice ' . $sales_number . ' cancelled. <br> Note: Please update FG Stock manually.';
+					// $this->addSuccessMessage('Sales invoice ' . $sales_number . ' cancelled. <br> Note: Please update FG Stock manually.');
 				} else {
-					$this->addSuccessMessage('Sales invoice ' . $sales_number . ' cancelled.');
+					$success = 1;
+					$messages = 'Sales invoice ' . $sales_number . ' cancelled.';
+					// $this->addSuccessMessage('Sales invoice ' . $sales_number . ' cancelled.');
 				}
 			} else {
-				$this->addErrorMessage('Failed to cancel Sales invoice ' . $sales_number);
+				$messages = 'Failed to cancel Sales invoice ' . $sales_number;
+				// $this->addErrorMessage('Failed to cancel Sales invoice ' . $sales_number);
 			}
 		} else {
-			$this->addErrorMessage('Failed to cancel Sales invoice ' . $sales_number);
+			$messages = 'Failed to cancel Sales invoice ' . $sales_number;
+			// $this->addErrorMessage('Failed to cancel Sales invoice ' . $sales_number);
 		}	
-		$this->redirectMessage('sales_invoice_released');
+		// $this->redirectMessage('sales_invoice_released');
+		$ret_arr['messages'] = $messages;
+		$ret_arr['success'] = $success;
+		$ret_arr['redirect_url'] = base_url("sales_invoice_released");
+		
+		echo json_encode($ret_arr);
+		exit();
 	}
 
 

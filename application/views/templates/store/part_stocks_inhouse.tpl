@@ -56,7 +56,7 @@
             <em >Stock</em></a>
           </h1>
           <br>
-          <span >Inhouse Parts (Item) Stock</span>
+          <span >Inhouse Parts Stock Transfer</span>
         </div>
       </nav>
       <!-- <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4> -->
@@ -86,22 +86,25 @@
                   <th>Part Number</th>
                   <th>Part Description</th>
                   <th>UOM</th>
-                  <th>Safety Buffer Stock</th>
+                  <th>INHOUSE PARTS PRODUCTION STOCK</th>
+                  <th>Transfer to Fg</th>
                   <th>Store Stock</th>
                   <th>Subcon Stock</th>
-                  <th>Stock Reserve against Job order</th>
+                  <th>Under Inspection Stock</th>
+                  <th>INHOUSE PARTS STOCK RATE</th>
+                  <th>Store Stock Value</th>
+
+
+
+                  <!-- <th>Safety Buffer Stock</th> -->
+                  <!-- <th>Stock Reserve against Job order</th> -->
                   <!-- <th>store_scrap</th> -->
                   <th>Store Rejection Stock</th>
                   <th>Production Rejection Stock</th>
-                  <th>Under Inspection Stock</th>
                   <th>GRN Rejection Stock</th>
                   <th>Store Rack Location</th>
-                  <th>Store Stock Rate</th>
-                  <th>Store Stock Value</th>
-                  <th>Production Stock</th>
                   <th>Production Scrap</th>
                   <th>Production Rejection</th>
-                  <th>Transfer to Fg</th>
                </tr>
             </thead>
             <%* <tfoot>
@@ -129,19 +132,7 @@
                           <td><%$po->part_number %></td>
                           <td><%$po->part_description %></td>
                           <td><%$uom_data[0]->uom_name %></td>
-                          <td><%$po->safty_buffer_stk %></td>
-                          <td class="<%if ($po->safty_buffer_stk <= $stock) %>text-success<%else %>text-danger <%/if%>"><%$stock %></td>
-                          <td><%$po->sub_con_stock %></td>
-                          <td><%$po->onhold_stock %></td>
-
-                          <td><%$po->rejection_stock %></td>
-                          <td><%$po->rejection_prodcution_qty %></td>
-                          <td><%$underinspection_stock %></td>
-                          <td><%$scrap_stock %></td>
-                          <td><%$po->store_rack_location %></td>
-                          <td><%$po->store_stock_rate %></td>
-                          <td><%($stock) * ($po->store_stock_rate) %></td>
-                          <td>
+                           <td>
                              <%if ($child_part_present == "yes") && checkGroupAccess("part_stocks_inhouse","update","No") %>
                                     <%if ($po->$prodQtyColName > 0) %>
                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
@@ -173,7 +164,7 @@
                                                                 </label>
                                                                 <input type="text" step="any" class="form-control onlyNumericInput required-input"
                                                                    value=""
-                                                                   data-max="	<%$po->$prodQtyColName %>"
+                                                                   data-max=" <%$po->$prodQtyColName %>"
                                                                    name="production_qty" data-min="1" 
                                                                    placeholder="Enter Transfer Qty">
                                                                 <input type="hidden" class="form-control"
@@ -201,8 +192,7 @@
                               <%/if%>
 
                           </td>
-                          <td><%$po->production_rejection %></td>
-                          <td><%$po->production_scrap %></td>
+
                           <td>
                             <%if ($po->$prodQtyColName > 0) && checkGroupAccess("part_stocks_inhouse","update","No")%>
                                     <%*if ($role == "Admin" || $role == "production") *%>
@@ -281,7 +271,25 @@
                             <%else %>
                                <%$po->$prodQtyColName %>
                             <%/if%>
-                          </td>
+                          </td>                                                                   
+                          <!-- <td><%$po->safty_buffer_stk %></td> -->
+                          <td class="<%if ($po->safty_buffer_stk <= $stock) %>text-success<%else %>text-danger <%/if%>"><%$stock %></td>
+                          <td><%$po->sub_con_stock %></td>
+                          <td><%$po->onhold_stock %></td>
+                          <td><%$underinspection_stock %></td>
+                           <td><%$po->store_stock_rate %></td>
+                          <!-- <td><%($stock) * ($po->store_stock_rate)  %></td> -->
+
+
+                          <td><%$po->rejection_stock %></td>
+                          <td><%$po->rejection_prodcution_qty %></td>
+                          
+                          <td><%$scrap_stock %></td>
+                          <td><%$po->store_rack_location %></td>
+                         
+                          <td><%$po->production_rejection %></td>
+                          <td><%$po->production_scrap %></td>
+                          
                       </tr>
                       <%assign var='i' value=$i+1 %>
                       <%/foreach%>

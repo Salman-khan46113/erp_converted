@@ -5,6 +5,7 @@ var table = '';
 var file_name = "fg_stock";
 var pdf_title = "FG Stocks";
 var myModal = new bootstrap.Modal(document.getElementById('fgtransfer'))
+var myFgModal = new bootstrap.Modal(document.getElementById('fgtofgtransfer'))
 const page = {
   init: function(){
     this.initiateForm();
@@ -26,7 +27,10 @@ const page = {
                             var lines = csv.split('\n');
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
-                                values.splice(7, 1);
+                                values.splice(0, 1);
+                                if(isSheetMetal == "Yes"){
+                                  values.splice(3, 1);
+                                }
                                 return values.join(',');
                             });
                             return modifiedLines.join('\n');
@@ -44,7 +48,10 @@ const page = {
                       doc.pageMargins = [15, 15, 15, 15];
                       doc.content[0].text = pdf_title;
                       doc.content[0].color = theme_color;
-                        doc.content[1].table.widths = ['20%', '20%', '12%', '12%','12%','12%','12%'];
+                        doc.content[1].table.widths = ['16.6%', '16.6%', '16.6%', '16.6%','16.6%','16.6%'];
+                        if(isSheetMetal == "Yes"){
+                           doc.content[1].table.widths = ['20%', '20%', '20%', '20%','20%'];
+                        }
                         doc.content[1].table.body[0].forEach(function(cell) {
                             cell.fillColor = theme_color;
                         });
@@ -68,7 +75,10 @@ const page = {
                                 }
                                 cell.alignment = alignment;
                             });
-                            row.splice(7, 1);
+                            if(isSheetMetal == "Yes"){
+                                  row.splice(3, 1);
+                            }
+                            row.splice(0, 1);
                         });
                     }
                 },
@@ -103,7 +113,7 @@ const page = {
                 url: "FGStockController/get_fg_stock_view",
                 type: "POST",
             },
-             columnDefs: [{ sortable: false, targets: 7 }],
+             // columnDefs: [{ sortable: false, targets: 7 }],
         });
         $('.dataTables_length').find('label').contents().filter(function() {
             return this.nodeType === 3; // Filter out text nodes
@@ -181,6 +191,44 @@ const page = {
       });
     });
 
+    $(".fg_to_fg_stock_form").submit(function(e){
+      e.preventDefault();
+      let flag = that.formValidate("fg_to_fg_stock_form");
+    
+      if(flag){
+        return;
+      }
+      
+    
+      var formData = new FormData($('.fg_to_fg_stock_form')[0]);
+
+      $.ajax({
+        type: "POST",
+        url: base_url+"transfer_fg_stock_to_fg_stock",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+          var responseObject = JSON.parse(response);
+          var msg = responseObject.messages;
+          var success = responseObject.success;
+          if (success == 1) {
+            toastr.success(msg);
+            $(this).parents(".modal").modal("hide")
+            setTimeout(function(){
+              window.location.reload();
+            },1000);
+
+          } else {
+            toastr.error(msg);
+          }
+        },
+        error: function (error) {
+          console.error("Error:", error);
+        },
+      });
+    });
+
     $(document).on("click",".fg-transfer",function(){
       var stock = $(this).attr("data-stock");
       var part_number = $(this).attr("data-part-number");
@@ -189,6 +237,21 @@ const page = {
       $("#part_number_form").val(part_number);
       $("#stock_form").attr("data-max",stock);
       myModal.show()
+    })
+    $(document).on("click",".fg-to-fg-transfer",function(){
+      var stock = $(this).attr("data-stock");
+      var part_number = $(this).attr("data-part-number");
+      var customer_part_id = $(this).attr("data-customer-part-id");
+      var custom_opt = '<option value="">Select Transfer Part Number</option>';
+      for (var i = 0; i < customer_parts.length; i++) {
+          custom_opt += `<option value="${customer_parts[i]['customer_parts_master_id']}">${customer_parts[i]['part_number']}/${customer_parts[i]['part_description']}</option>`;
+      }
+      $("#fg_part_data").html(custom_opt).trigger("change");
+      console.log(customer_parts,customer_part_id)
+      $("#fg_customer_parts_master_id_fomr").val(customer_part_id);
+      $("#fg_part_number_form").val(part_number);
+      $("#fg_stock_form").attr("data-max",stock);
+      myFgModal.show()
     })
 
   },

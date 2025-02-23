@@ -95,12 +95,15 @@ class P_Molding extends CommonController
 	 */
 	public function add_stock_up()
 	{
+
 		$name = $this->input->post('parttypeName');
 		$type = $this->input->post('type');
 		$reason = $this->input->post('reason');
 		$qty = $this->input->post('qty');
 		$part_id = $this->input->post('part_id');
 		$toUnit = $this->input->post('clientUnitTo');
+		$stock_up_type = $this->input->post('stock_up_type');
+		$old_qty = $this->input->post('old_qty') > 0 ? $this->input->post('old_qty') : 0;
 
 		$clientId = $this->Unit->getSessionClientId();
 		$success = 0;
@@ -114,9 +117,13 @@ class P_Molding extends CommonController
 			$toUnit = $clientId;
 		}
 
+		$toStockType = $stock_up_type;
+
 		if(empty($toStockType)){
 			$toStockType = "production_qty";
 		}
+
+		
 		
 		if (empty($type)) {
 			$type = "addition";
@@ -153,6 +160,7 @@ class P_Molding extends CommonController
 			"reason" => $reason,
 			"uploading_document" => $picture4,
 			"qty" => $qty,
+			"old_qty" => $old_qty,
 			"fromStockType" => "stock",
 			"fromUnit" => $clientId,
 			"toStockType" => $toStockType,
@@ -162,6 +170,8 @@ class P_Molding extends CommonController
 			"created_date" => $this->current_date,
 			"created_time" => $this->current_time,
 		);
+		// pr($data_history,1);
+
 		$result = $this->Crud->insert_data("stock_changes", $data_history);
 		
 		if ($result) {
@@ -180,10 +190,10 @@ class P_Molding extends CommonController
 		// $this->redirectMessage();	
 	}
 
-	public function remove_stock()
+	public function remove_stock($id = 0)
 	{
 
-		$stock_changes_id  = $this->uri->segment('2');
+		$stock_changes_id  = $id;
 
 		$stock_changes_data = $this->Crud->get_data_by_id("stock_changes", $stock_changes_id, "id");
 		$stockFromCol = $stock_changes_data[0]->fromStockType;
@@ -205,8 +215,7 @@ class P_Molding extends CommonController
 
 		
 		if ($child_part_from_unit && $child_part_to_unit) {
-				$qty = $stock_changes_data[0]->qty;
-			
+				$qty = $stock_changes_data[0]->accepted_qty;
 				//$toProdCol_index = stripos($stockToCol, "production_qty");
 				//if to column is not  having production it means we are transferring stocks to stock
 					$current_stock_from_unit = $child_part_from_unit[0]->$stockFromCol;
@@ -256,9 +265,91 @@ class P_Molding extends CommonController
 			// $this->addErrorMessage("Item part id : " . $stock_changes_data[0]->part_id . "Not Found in child_part table Please try again.");
 		}
 
+		// $result = [];
+		// $result['messages'] = $messages;
+		// $result['success'] = $success;
+		// echo json_encode($result);
+		// exit();
+	}
+
+	public function accept_material_request_qty()
+	{
+
+		$post_data  = $this->input->post();
+		$success = 0;
+		$messages = "Something went wrong.";
+		
+		$id = $post_data['id_val']; 
+		$accepted_qty = $post_data['accepted_qty'];
+		if ($accepted_qty > 0 && $id > 0) {
+			$data = array(
+				'accepted_qty' => $accepted_qty,
+				'status' => "accepted"
+			);
+			$update = $this->Crud->update_data("stock_changes", $data, $id);
+			if($update){
+				$this->remove_stock($id);
+				$success = 1;
+				$messages = "Material transfer request qty accepted successfully";
+			}
+		}
 		$result = [];
 		$result['messages'] = $messages;
 		$result['success'] = $success;
+		echo json_encode($result);
+		exit();
+	}
+	public function delete_material_request()
+	{
+
+		$post_data  = $this->input->post();
+		$success = 0;
+		$messages = "Something went wrong.";
+		
+		$id = $post_data['id_val'];
+		if ($id > 0) {
+			$data = array(
+				"id" => $id
+			);
+			$result = $this->Crud->delete_data("stock_changes", $data);
+			if ($result) {
+				$messages ="Material transfer request deleted successfully.";
+				$success = 1;
+			}
+		}
+		$result = [];
+		$result['messages'] = $messages;
+		$result['success'] = $success;
+		echo json_encode($result);
+		exit();
+	}
+	public function get_store_stock_material_request()
+	{
+
+		$post_data  = $this->input->post();
+	
+		$success = 0;
+		$messages = "Something went wrong.";
+		$id = $post_data['part_id'];
+		$stock = 0;
+		if ($id > 0) {
+			$stock_data = $this->Crud->customQuery('
+				SELECT
+				    `stock`.stock
+				FROM
+				    `child_part` `parts`
+				LEFT JOIN `child_part_stock` `stock` ON
+				    `parts`.`id` = `stock`.`childPartId` AND `stock`.`clientId` = '.$this->Unit->getSessionClientId().'
+				WHERE `parts`.`id` = '.$id.''													
+			);
+			$stock_data = $stock_data[0]->stock > 0 ? $stock_data[0]->stock : 0;
+			$stock = $stock_data;
+			$success = 1;
+		}
+		$result = [];
+		$result['messages'] = $messages;
+		$result['success'] = $success;
+		$result['stock'] = $stock;
 		echo json_encode($result);
 		exit();
 	}
@@ -443,7 +534,7 @@ class P_Molding extends CommonController
 
 				$routing_data = $this->Crud->read_data_where("molding_production", $data);
 
-				if ($routing_data) {
+				if ($routing_data && false) {
 					$messages = 'already present';
 					// echo "<script>alert('already present');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
 				} else {

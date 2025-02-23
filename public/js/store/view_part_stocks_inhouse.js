@@ -87,6 +87,9 @@ const page = {
         $('#serarch-filter-input').on('keyup', function() {
             table.search(this.value).draw();
         });
+        $(document).on("click","[data-bs-toggle='modal']",function(){
+          $(".select2").select2();
+        })
             // table = $('#example1').DataTable();
       },
       initiateValidate: function(){

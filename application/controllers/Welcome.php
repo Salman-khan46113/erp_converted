@@ -3088,8 +3088,17 @@ class Welcome extends CommonController
 	public function report_stock_transfer()
 	{
         checkGroupAccess("report_stock_transfer","list","Yes");
-		$child_part_list = $this->db->query("SELECT * FROM `stock_report` WHERE clientId =".$this->Unit->getSessionClientId());
+		$child_part_list = $this->db->query("
+            SELECT s.* ,u.user_name
+            FROM `stock_report` as s
+            LEFT JOIN userinfo as u ON u.id = s.updated_by
+            WHERE s.clientId =".$this->Unit->getSessionClientId()
+        );
 		$data['stock_report'] = $child_part_list->result();
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
 		$this->loadView('reports/report_stock_transfer', $data);
 	}
 
@@ -4700,6 +4709,7 @@ class Welcome extends CommonController
         $messages = "Something went wrong.";
 		$query = $this->InhouseParts->updateStockById($data_update_child_part_inhouse, $inhouse_parts_data[0]->id);
 		if ($query) {
+            $this->Crud->stock_report($child_part[0]->part_number,$child_part[0]->part_number, "production_qty", "store_stock", $old_stock, $new_stock);
             $messages = "Updated Successfully";
             $success = 1;
 			// echo "<script>alert('Updated Successfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
@@ -10076,6 +10086,7 @@ class Welcome extends CommonController
 		$selected_customer_part_number = $this->input->post("selected_customer_part_number");
 		$data['selected_customer_part_number'] = $selected_customer_part_number;
 		if (!empty($selected_customer_part_number)) {
+
 			$data['operations_bom'] = $this->Crud->get_data_by_id("operations_bom", $selected_customer_part_number, "customer_part_number");
 		} else {
 			$data['operations_bom'] = array();
@@ -10083,8 +10094,10 @@ class Welcome extends CommonController
 			// $data['operations_bom'] = $role_management_data->result();
 
 		}
-
-		foreach ($operations_bom as $po) {
+        // pr($this->db->last_query(),1);
+        $data['customer_data'] = [];
+		foreach ($data['operations_bom'] as $po) {
+            // pr($po);
 			$current_stock = "";
 			$type = "";
 
@@ -10093,23 +10106,24 @@ class Welcome extends CommonController
 
 			if ($po->output_part_table_name == "inhouse_parts") {
 				$data['type'][$po->id] = "inhouse_parts";
-				$data['output_part_data'][$po->id] = $this->InhouseParts->getInhousePartById($po->output_part_id);
+				$output_part_data = $data['output_part_data'][$po->id] = $this->InhouseParts->getInhousePartById($po->output_part_id);
 				$data['current_stock'][$po->id] = $output_part_data[0]->production_qty;
 				$data['uom_data'][$po->id] = $this->Crud->get_data_by_id("uom", $output_part_data[0]->uom_id, "id");
 				$uom = $uom_data[0]->uom_name;
 			} else {
 				$data['type'][$po->id] = "customer_stock";
 				// echo "s";
-				// echo $po->output_part_id;
-				$data['output_part_data'][$po->id] = $this->Crud->get_data_by_id("customer_part", $po->output_part_id, "id");
-				$data['customer_parts_master_data'][$po->id] = $this->CustomerPart->getCustomerPartByPartNumber($output_part_data[0]->part_number);
-				// print_r($customer_parts_master_data);
+				// echo $po;
+				$output_part_data = $data['output_part_data'][$po->id] = $this->Crud->get_data_by_id("customer_part", $po->output_part_id, "id");
+				$customer_parts_master_data = $data['customer_parts_master_data'][$po->id] = $this->CustomerPart->getCustomerPartByPartNumber($output_part_data[0]->part_number);
+				// print_r($customer_parts_master_data[0]->fg_stock);
 				$data['current_stock'][$po->id]= $customer_parts_master_data[0]->fg_stock;
 				// $uom_data = $this->Crud->get_data_by_id("uom", $output_part_data[0]->upm, "id");
 				$uom = $output_part_data[0]->uom;
 				// print_r($output_part_data);
 			}
-		}
+		} 
+        // pr($data['current_stock'],1);
 
 		// print_r($data['operations_bom']);
 		// $this->load->view('header');
@@ -10180,6 +10194,7 @@ class Welcome extends CommonController
             "title" => "Value (Challan Qty)",
             "width" => "17%",
             "className" => "dt-center",
+            "orderable"=>false
         ];
        
         $column[] = [
@@ -10187,6 +10202,7 @@ class Welcome extends CommonController
             "title" => "Value (Remaining Qty)",
             "width" => "7%",
             "className" => "dt-center",
+            "orderable"=>false
         ];
 		
 		  
@@ -10249,8 +10265,8 @@ class Welcome extends CommonController
 		$data = $this->welcome_model->getSubConReportView($condition_arr,$post_data["search"]);
         // pr($data,1);
 		foreach ($data as $key => $val) {
-			$data[$key]['value_qty'] = $val['qty'] * $val['part_rate'];
-			$data[$key]['value_qty_remaning'] = $val['remaning_qty'] * $val['part_rate'];
+			$data[$key]['value_qty'] = number_format($val['qty'] * $val['part_rate'],2,".","");
+			$data[$key]['value_qty_remaning'] = number_format($val['remaning_qty'] * $val['part_rate'],2,".","");
 			$date1 = date_create(date('Y-m-d'));
 			$date2 = date_create($val['created_date']);
 			$diff = date_diff($date1, $date2);
@@ -11219,9 +11235,7 @@ class Welcome extends CommonController
         if(count($category_list) == 0){
             $data = array(
                 "parent_id" => $post_data['parent_category_id'],
-                "category_name" => $category_name,
-                "updated_by" => $this->user_id,
-                "updated_date" => date("Y-m-d H:i:s") 
+                "category_name" => $category_name 
             );
             $update_result = $this->welcome_model->update_category($data, $category_id);
             if ($update_result) {

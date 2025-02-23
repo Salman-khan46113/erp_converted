@@ -113,7 +113,7 @@
                               </select>
                            </div>
                         </div>
-                        <div class="col-lg-12">
+                        <div class="col-lg-12 ship_addressType_row">
                            <div class="form-group">
                               <label>Shipping Address <span class="text-danger">*</span></label>
                               <div class="row">
@@ -121,10 +121,11 @@
                                     <input type="radio" name="ship_addressType" checked value="supplier" onchange="toggleConsigneeSelection()">
                                     <label>Same as Supplier</label><br>
                                  </div>
-                                 <div class="col-lg-4">
+                                 <div class="col-lg-4 ship_addressType_consignee" >
                                     <input type="radio" name="ship_addressType" value="consignee" onchange="toggleConsigneeSelection()">
                                     <label>Select Consignee Address</label><br>
-                                    <select name="consignee" id="consigneeSelect"  disabled  class="form-control required-input">
+                                    <div style="display: none" class="select_box">
+                                    <select name="consignee" id="consigneeSelect"  disabled  class="form-control select2">
                                        <option value="">Select</option>
                                        <%foreach from=$consignee_list item=c %>
                                          <option value="<%$c->id %>">
@@ -132,6 +133,7 @@
                                          </option>
                                        <%/foreach%>
                                     </select>
+                                     </div>
                                  </div>
                               </div>
                            </div>
@@ -240,13 +242,18 @@
       function toggleConsigneeSelection() {
           var shipAddressType = $('input[name="ship_addressType"]:checked').val();
           var consigneeSelect = $('#consigneeSelect');
-
+          $("#consigneeSelect").removeClass("required-input");
           if (shipAddressType === "supplier") {
+            $(".ship_addressType_consignee .select_box").hide();
+             $(".ship_addressType_row .error").remove();
               consigneeSelect.prop('disabled', true);
               consigneeSelect.hide();
+              $("#consigneeSelect").val("").trigger("change");
               // consigneeSelect.val(''); //change to default value as select.
           } else if (shipAddressType === "consignee") {
+              $(".ship_addressType_consignee .select_box").show();
               consigneeSelect.prop('disabled', false);
+              $("#consigneeSelect").addClass("required-input");
               consigneeSelect.show();
           }
       }

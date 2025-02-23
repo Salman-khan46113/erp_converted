@@ -2,9 +2,26 @@ $( document ).ready(function() {
     app.init();
 });
 var table_data ;
+var active_form_ele = '';
 if($("body .dashboard-block").length == 0){
 $(document).ajaxStart(function(e) {
-  $(e.target.activeElement).prop('disabled', true)
+  
+  if($(e.target.activeElement).parents(".modal").length || $(e.target.activeElement).parents("form").length || $(e.target.activeElement).attr("href") != ""){
+    if($(e.target.activeElement).attr("href") != "" ){
+        $(e.target.activeElement).addClass("disable-btn")
+    }
+    
+   
+      active_form_ele = e.target.activeElement;
+      $(active_form_ele).prop('disabled', true);
+      setTimeout(function(){
+        $(active_form_ele).prop('disabled', false);
+        if($(e.target.activeElement).attr("href") != "" ){
+            $(active_form_ele).removeClass("disable-btn")
+        }
+      },5000)
+  }
+
   if($("body").hasClass("modal-open")){
      setTimeout(function(){
        $(".main-loader-box").show();
@@ -29,6 +46,7 @@ $(document).ajaxStop(function() {
 });
 var ajaxResponses = [];
 $(document).ajaxComplete(function(event, xhr, settings) {
+  // console.log(event)
   $(event.target.activeElement).prop('disabled', false); 
   // console.log(event.target.activeElement)
     // Store the response from the request
@@ -38,7 +56,6 @@ $(document).ajaxComplete(function(event, xhr, settings) {
 // if(res.indexOf("success") != -1){
   try {
       var response = JSON.parse(xhr.responseJSON || xhr.responseText);
-      console.log(xhr)
       if(response.success == 0){
           setTimeout(function(){
                $(event.target.activeElement).prop('disabled', false);
@@ -46,6 +63,9 @@ $(document).ajaxComplete(function(event, xhr, settings) {
       }else{
         $(event.target.activeElement).prop('disabled', false); 
       }
+      if($(e.target.activeElement).attr("href") != "" ){
+            $(active_form_ele).removeClass("disable-btn")
+        }
   } catch (error) {
       // console.error("Error parsing JSON response:", error);
       // responseData = { error: "Invalid JSON response", raw: xhr.responseText };

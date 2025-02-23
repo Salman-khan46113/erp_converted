@@ -151,7 +151,8 @@ class PlanningController extends CommonController
 			"customer_part_id" => $customer_part_id,
 			"clientId" => $this->Unit->getSessionClientId()
 		);
-
+		$success = 0;
+		$message = 'Something went wrong.';
 		$planing_data = $this->Crud->get_data_by_id_multiple("planing", $data1);
 		if ($planing_data) {
 			$this->addWarningMessage('<br>Plan already added for this month and year, please try with another part.');
@@ -192,15 +193,23 @@ class PlanningController extends CommonController
 					$result = $this->Crud->insert_data("planing_data", $data);
 				}
 				if ($result) {
-					$this->addSuccessMessage('Plan sucessfully added.');
+					$success = 1;
+					$message = 'Plan sucessfully added.';
 				} else {
-					$this->addErrorMessage('<br>Unable to Add,please check bom and price data');
+					$message = 'Unable to Add,please check bom and price data';
 				}
 			} else {
-				$this->addErrorMessage('<br>Unable to Add, please check bom and price data');
+				$message = 'Unable to Add, please check bom and price data';
 			}
-			$this->redirectMessage();
+			// $this->redirectMessage();
 		}
+		$return_arr = array(
+	        'message' => $message,
+	        'success' => $success
+	    );
+
+	    echo json_encode($return_arr);
+	    exit();
 	}
 	
 	public function add_planning_fg_stock()

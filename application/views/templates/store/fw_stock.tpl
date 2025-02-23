@@ -53,7 +53,7 @@
             <em >Stock</em></a>
           </h1>
           <br>
-          <span >FG Stocks</span>
+          <span >FG Stock Transfer</span>
         </div>
       </nav>
       <!-- <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4> -->
@@ -106,7 +106,7 @@
                                 <div class="form-group">
                                 <label for="">Stock Qty <span class="text-danger">*</span>
                                 </label>
-                                <input type="text" step="any" class="form-control required-input onlyNumericInput" value="" data-max="" name="stock" placeholder="Enter Transfer Qty"  id="stock_form">
+                                <input type="text" step="any" class="form-control required-input onlyNumericInput" value="" data-min="1" data-max="" name="stock" placeholder="Enter Transfer Qty"  id="stock_form">
                                 <input type="hidden" class="form-control" value="" name="part_number" required placeholder="Enter Transfer Qty" id="part_number_form">
                                 <input type="hidden" class="form-control" value="" name="customer_parts_master_id" required placeholder="Enter Transfer Qty" id="customer_parts_master_id_fomr">
                                 </div>
@@ -123,6 +123,49 @@
                                     <%$tt->part_number %></option>
                                     <%/foreach%>
                                     <%/if%>
+                                  </select>
+                                </div>
+                              </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss=" modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+        <div class="modal fade" id="fgtofgtransfer" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel">
+                            Transfer FG Stock to FG Stock
+                          </h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+
+                          </button>
+                        </div>
+                        <form action="javascript:void(0)" class="custom-form fg_to_fg_stock_form" method="POST" enctype="multipart/form-data">
+                        <div class="modal-body">
+                          <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                <label for="">Stock Qty <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" step="any" class="form-control required-input onlyNumericInput" value="" data-max="" data-min="1" name="stock" placeholder="Enter Transfer Qty"  id="fg_stock_form">
+                                <input type="hidden" class="form-control" value="" name="part_number" required placeholder="Enter Transfer Qty" id="fg_part_number_form">
+                                <input type="hidden" class="form-control" value="" name="customer_parts_master_id" required placeholder="Enter Transfer Qty" id="fg_customer_parts_master_id_fomr">
+                                </div>
+                              </div>
+                              <div class="col-lg-12 mb-3">
+                                <div class="form-group">
+                                <label for="">Transfer Part Number <span class="text-danger">*</span>
+                                </label>
+                                <select name="fg_part_id"  class="form-control required-input select2" style="width: 100%;" id="fg_part_data">
+                                  <option value="">Select Transfer Part Number</option>
                                   </select>
                                 </div>
                               </div>
@@ -154,5 +197,7 @@
     var sorting_column = <%$sorting_column%>;
     var api_name =  <%$api_name|json_encode%>;
     var base_url = <%$base_url|json_encode%>;
+    var customer_parts = <%$customer_parts|json_encode%>;
+    var isSheetMetal = <%$isSheetMetal|json_encode%>;
 </script>
       <script src="<%$base_url%>public/js/store/fw_stock.js"></script>

@@ -154,7 +154,8 @@ const page = {
         if(flag){
           return;
         }
-
+        var submitterButton = e.originalEvent.submitter;                            
+        $(submitterButton).prop('disabled', true);
         var formData = new FormData($('.'+id)[0]);
 
         $.ajax({
@@ -167,6 +168,7 @@ const page = {
             var responseObject = JSON.parse(response);
             var msg = responseObject.messages;
             var success = responseObject.success;
+            $(submitterButton).prop('disabled', false);
             if (success == 1) {
               toastr.success(msg);
               $(this).parents(".modal").modal("hide")

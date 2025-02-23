@@ -1408,26 +1408,29 @@ TECHNIQUE </td>
         $font_size ="11.59";
         // pr($einvoice_data,1);
         // $new_sales_data[0]->discountType = "tte";
-        $height_of_each_row = 55.6;
+        $height_of_each_row = 53.6;
         $type_pdf = "Normal";
         if (!empty($einvoice_data[0]->Irn) || $new_sales_data[0]->discountType!='NA') {
              $font_size ="11.4";
             if(!empty($einvoice_data[0]->Irn) && $new_sales_data[0]->discountType!='NA'){
-                $page_count = "4";
-                $height_of_each_row = 54.6;
+                $page_count = "5";
+                $height_of_each_row = 51.6;
                 $type_pdf = "Both";
+            }else if(!empty($einvoice_data[0]->Irn)){
+                $page_count = "5";
+                $height_of_each_row = 53.6;
+                $type_pdf = "Invoice";
             }else{
-                $page_count = "4";
-                 $height_of_each_row = 64.6;
-                 $type_pdf = "Discount";
+                $page_count = "5";
+                $height_of_each_row = 53.6;
+                $type_pdf = "Discount";
             }
         }else{
             $page_count = "5";
         }
+        
         $page_row_count = 1;
-        // $po_parts_data[] = $po_parts_data[0];
-        // $po_parts_data[] = $po_parts_data[0];
-        // $po_parts_data[] = $po_parts_data[0];
+        // unset($po_parts_data[0]);
         // $po_parts_data[] = $po_parts_data[0];
         // $po_parts_data[] = $po_parts_data[0];
         // $po_parts_data[] = $po_parts_data[0];
@@ -1553,16 +1556,16 @@ TECHNIQUE </td>
                        $height = 216;
                         break;
                     case '4':
-                       $height = 222;
+                       $height = 214;
                         break;
                     case '3':
-                       $height = 167;
+                       $height = 160;
                         break;
                     case '2':
-                       $height = 111;
+                       $height = 107;
                         break;
                     case '1':
-                       $height = 56;
+                       $height = 53;
                         break;
                     
                     default:
@@ -1578,16 +1581,16 @@ TECHNIQUE </td>
                        $height = 216;
                         break;
                     case '4':
-                       $height = 242;
+                       $height = 198;
                         break;
                     case '3':
-                       $height = 195;
+                       $height = 148;
                         break;
                     case '2':
-                       $height = 130;
+                       $height = 99;
                         break;
                     case '1':
-                       $height = 65;
+                       $height = 49;
                         break;
                     
                     default:
@@ -1603,16 +1606,41 @@ TECHNIQUE </td>
                        $height = 216;
                         break;
                     case '4':
-                       $height = 242;
+                       $height = 205;
                         break;
                     case '3':
-                       $height = 164;
+                       $height = 154;
                         break;
                     case '2':
-                       $height = 110;
+                       $height = 103;
                         break;
                     case '1':
-                       $height = 54;
+                       $height = 50;
+                        break;
+                    
+                    default:
+                        # code...
+                        break;
+                }
+            }else if($type_pdf == "Invoice"){
+                switch ($remaining_row) {
+                    case '6':
+                       $height = 259.4;
+                        break;
+                    case '5':
+                       $height = 216;
+                        break;
+                    case '4':
+                       $height = 215;
+                        break;
+                    case '3':
+                       $height = 160;
+                        break;
+                    case '2':
+                       $height = 107;
+                        break;
+                    case '1':
+                       $height = 53;
                         break;
                     
                     default:
@@ -1621,6 +1649,7 @@ TECHNIQUE </td>
                 }
             }
 
+            // pr($type_pdf,1);
  
             $parts_html .='<tr style="font-size:11px;" class="part-box"><td style="height:'.$height.'px;">&nbsp;</td>
             </tr>';
@@ -1843,7 +1872,7 @@ TECHNIQUE </td>
               </td>
               <td width="20.9%" style="align-items:center;padding-top:5px;height:110px;" >
                   <img width="100em" height="80em" src="'.$qrCodeImageString.'" alt="QR Code">
-                  <!-- <img width="200em" height="200em" src="' . $dataUri . '"><br> -->
+                  <!-- <img width="100em" height="80em" src="http://localhost/extra_work/erp_converted/dist/uploads/ewayBill/231893735083.png" alt="QR Code"> -->
                  
                      <!--<img width="140em" height="100px" src="data:image/png;base64,' . base64_encode($qrCodeImageString) . '" alt="QR Code" alt="QR Code" width="140" height="100"> -->
               </td>
@@ -2005,19 +2034,19 @@ TECHNIQUE </td>
     public function generatePdf($html_content = "",$header="",$footer="",$type="",$pdf_download_type="",$extra_condition ="normal"){
         if($extra_condition == "both"){
             $meddle_content =125.9;
-            $footer_content =-109.5;
+            $footer_content =-98.5;
             $top_margin = 5.8;
         }else if($extra_condition == "e_invoicing"){
             $meddle_content =125.9;
-            $footer_content =-98;
+            $footer_content =-95.5;
             $top_margin = 5.8;
         }else if($extra_condition == "discount"){
             $meddle_content =114.9;
-            $footer_content =-108.9;
+            $footer_content =-112.3;
             $top_margin = 7;
         }else{
             $meddle_content =114.8;
-            $footer_content =-103.7;
+            $footer_content =-106.5;
             $top_margin = 6.8;
         }
         // pr("ok",1);
@@ -3313,7 +3342,6 @@ TECHNIQUE </td>
                 been effected by me/us and it shall be accounted for in the turnover of sales while filling
                 of return and the due tax. If any, payable on the sale has been paid or shall be paid
                 <br>Certified that the particulars given above are true.Interest @24% P.A. will be charged on all overdue invoices.<br>Subject To Pune Jurisdiction
-                <b><br>This is computer generated document. No signature required.</b>
                 </td>
                 </tr>
                 </table>

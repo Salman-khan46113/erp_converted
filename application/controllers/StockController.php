@@ -33,6 +33,10 @@ class StockController extends CommonController
 	}
 
 	public function part_stocks_view($filter_part_id = 0, $filter_client='') {
+		
+		$entitlements = $this->session->userdata("entitlements");
+		$isSheetMetal = isset($entitlements['isSheetMetal']) && $entitlements['isSheetMetal'] != null ? "Yes" : "No";
+		
 
 		checkGroupAccess("part_stocks","list","Yes");
 		$data['child_part_list'] = $this->SupplierParts->readSupplierParts();
@@ -64,35 +68,126 @@ class StockController extends CommonController
             "data" => "uom_name",
             "title" => "UOM",
             "width" => "10%",
-            "className" => "dt-center",
-			'orderable' => false
+            "className" => "dt-center"
         ];
         $column[] = [
             "data" => "safty_buffer_stk_val",
-            "title" => "Safety Buffer Stock",
+            "title" => "Minimum Stock Level",
             "width" => "17%",
             "className" => "dt-center",
         ];
         $column[] = [
             "data" => "stock_html",
-            "title" => "Store Stock",
+            "title" => "Purchase item Stock",
             "width" => "17%",
             "className" => "dt-center",
 			'orderable' => false
         ];
+        $column[] = [
+            "data" => "underinspection_stock",
+            "title" => "Under Inspection Qty",
+            "width" => "7%",
+            "className" => "dt-center"
+        ];
+
+        if($isSheetMetal == "Yes"){
+	        $column[] = [
+	            "data" => $sheet_prod_column_name,
+	            "title" => "Production Stock",
+	            "width" => "17%",
+	            "className" => "dt-center",
+				
+	        ];
+        }
+
+        if($isSheetMetal != "Yes"){
+	        $column[] = [
+	            "data" => "$plastic_prod_column_name",
+	            "title" => "Machine Mold Stock",
+	            "width" => "7%",
+	            "className" => "dt-center",
+	        ];
+	        $column[] = [
+	            "data" => "deflashing_stock",
+	            "title" => "Deflashing Location",
+	            "width" => "7%",
+	            "className" => "dt-center",
+				'orderable' => false
+	        ];
+	    }
+
+		$column[] = [
+            "data" => "transfer_fg",
+            "title" => "Transfer To FG",
+            "width" => "7%",
+            "className" => "dt-center",
+			'orderable' => false
+        ];
+
+        if($isSheetMetal == "Yes"){
+	        $column[] = [
+	            "data" => "$sharingQtyColName",
+	            "title" => "Shearing Stock",
+	            "width" => "7%",
+	            "className" => "dt-center",
+	            'orderable' => false
+	        ];
+	    }
+
+
         $column[] = [
             "data" => "sub_con_stock",
             "title" => "Subcon Stock",
             "width" => "7%",
             "className" => "dt-center",
         ];
+
         $column[] = [
-            "data" => "onhold_stock",
-            "title" => "Stock Reserve against Job order",
+            "data" => "scrap_stock",
+            "title" => "GRN Rejection Stock",
             "width" => "7%",
-            "className" => "dt-center status-row",
-			'orderable' => false
+            "className" => "dt-center"
         ];
+
+        $column[] = [
+            "data" => "store_rack_location",
+            "title" => "Store Rack Location",
+            "width" => "7%",
+            "className" => "dt-center"
+        ];	
+
+
+        $column[] = [
+            "data" => "store_stock_rate",
+            "title" => "Store Stock Rate",
+            "width" => "7%",
+            "className" => "dt-center",
+        ];
+
+        $column[] = [
+            "data" => "stock_value",
+            "title" => "Store Stock Value",
+            "width" => "17%",
+            "className" => "dt-center",
+            'orderable' => false
+			
+        ];
+
+
+
+
+
+
+
+
+        
+   //      $column[] = [
+   //          "data" => "onhold_stock",
+   //          "title" => "Stock Reserve against Job order",
+   //          "width" => "7%",
+   //          "className" => "dt-center status-row",
+			// 'orderable' => false
+   //      ];
         $column[] = [
             "data" => "store_scrap",
             "title" => "Production Rejection Stock",
@@ -114,68 +209,7 @@ class StockController extends CommonController
             "className" => "dt-center",
 			'orderable' => false
         ];
-        $column[] = [
-            "data" => "underinspection_stock",
-            "title" => "Under Inspection Stock",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        
-        $column[] = [
-            "data" => "scrap_stock",
-            "title" => "GRN Rejection Stock",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-
-		$column[] = [
-            "data" => "store_rack_location",
-            "title" => "Store Rack Location",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-        
-          $column[] = [
-            "data" => "store_stock_rate",
-            "title" => "Store Stock Rate",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "stock_value",
-            "title" => "Store Stock Value",
-            "width" => "17%",
-            "className" => "dt-center",
-            'orderable' => false
-			
-        ];
-        
-		$column[] = [
-            "data" => $sheet_prod_column_name,
-            "title" => "Production Stock",
-            "width" => "17%",
-            "className" => "dt-center",
-			
-        ];
-        
-        
-       
-        $column[] = [
-            "data" => "$sharingQtyColName",
-            "title" => "Sharing Stock",
-            "width" => "7%",
-            "className" => "dt-center",
-            'orderable' => false
-        ];
-		$column[] = [
-            "data" => "$plastic_prod_column_name",
-            "title" => "Machine Mold Stock",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
+        		
 
 		// pr($plastic_prod_column_name,1);			
 
@@ -194,21 +228,7 @@ class StockController extends CommonController
 			'orderable' => false
         ];
         
-        $column[] = [
-            "data" => "deflashing_stock",
-            "title" => "Deflashing Location",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
-
-		$column[] = [
-            "data" => "transfer_fg",
-            "title" => "Transfer To FG",
-            "width" => "7%",
-            "className" => "dt-center",
-			'orderable' => false
-        ];
+        
         
         
         $data["data"] = $column;
@@ -297,7 +317,7 @@ class StockController extends CommonController
 				$fg_data = base64_encode(json_encode($value)); 
 				if(checkGroupAccess("part_stocks","update","No")){
 					$transfer_fg = '<button type="button" class="btn btn-primary fg_data_edit" data-bs-toggle="modal"  data-value='.$fg_data.' data-bs-target="#fgtransfer">
-											Transfer FG Stock
+											Transfer To FG
 											</button>';
 				}else{
 					$transfer_fg = display_no_character();

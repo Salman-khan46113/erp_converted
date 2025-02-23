@@ -593,13 +593,19 @@
                 type: 'POST',                // Set the request type
                 data: $(form).serialize(),   // Serialize the form data
                 success: function (response) {
-                    // Handle success response
-                    toastr.success('Planning data added successfully!');
-                    // Optionally, close the modal or perform other actions
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                    $('.modal').modal('hide');
+                        var responseObject = JSON.parse(response);
+                      var msg = responseObject.message;
+                      var success = responseObject.success;
+                      if (success == 1) {
+                        toastr.success(msg);
+                        $(this).parents(".modal").modal("hide")
+                        setTimeout(function(){
+                          // window.location.reload();
+                        },1000);
+
+                      } else {
+                        toastr.error(msg);
+                      }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     // Handle error response

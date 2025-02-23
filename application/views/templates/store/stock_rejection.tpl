@@ -46,7 +46,7 @@
                         <div class="col-lg-12">
                            <div class="form-group">
                               <label for="po_num">Select Part Number / Description / Stock </label><span class="text-danger">*</span>
-                              <select name="part_id" id="" class="from-control form-select required-input">
+                              <select name="part_id" id="" class="from-control form-select required-input select2">
                                  <%if ($child_part) %>
                                         <%foreach from=$child_part item=c %>
                                             <%if ($c->stock > 0) %>
@@ -58,7 +58,7 @@
                            </div>
                            <div class="form-group">
                               <label for="po_num">Select Supplier</label><span class="text-danger">*</span>
-                              <select name="supplier_id" id="" class="from-control form-select required-input">
+                              <select name="supplier_id" id="" class="from-control form-select required-input select2">
                                  <%if ($supplier) %>
                                         <%foreach from=$supplier item=c %>
                                       <option value="<%$c->id %>"><%$c->supplier_name %></option>

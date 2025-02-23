@@ -147,7 +147,7 @@
                               <td style="display: none"><%$u->id %></td>
                               <td><%$u->output_part_data[0]->part_number %>/<%$u->output_part_data[0]->part_description %>
                               </td>
-                              <td><%$u->date %></td>
+                              <td><%defaultDateFormat($u->date) %></td>
                               <td><%$u->shift_type %>/<%$u->shift_name %>
                               </td>
                               <td><%$u->machine_name %></td>
@@ -300,7 +300,7 @@
                                           </div>
                                           <div class="modal-body">
                                              <form action="<%base_url('update_p_q') %>"
-                                                method="POST" enctype='multipart/form-data' id="update_p_q<%$i %>" class="update_p_q update_p_q<%$i %> custom-form">
+                                                method="POST" enctype='multipart/form-data' id="update_p_q<%$i %>" class="update_p_q update_p_q<%$i %> custom-form" data-form="update_p_q">
                                                 <div class="row">
                                                    <div class="col-lg-12">
                                                       <div class="form-group">
@@ -422,7 +422,12 @@
                </div>
    </section>
 </div>
-
+<style type="text/css">
+  .swal2-container.swal2-shown {
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 100000;
+}
+</style>
 <script type="text/javascript">
    var url = <%site_url("SheetProdController/production_qty_add")|@json_encode%>
 </script>

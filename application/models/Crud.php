@@ -90,7 +90,7 @@ class Crud extends CI_Model
 
     public function update_data($table_name, $array, $id)
     {	
-		if ($this->db->field_exists('date', $table_name)) {
+		if ($this->db->field_exists('date', $table_name) && $table_name != "p_q") {
 			$array["date"]= $this->getSQLDateFormatToStore();
 		}
 		if ($this->db->field_exists('time', $table_name)) {

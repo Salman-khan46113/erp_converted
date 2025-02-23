@@ -94,8 +94,7 @@
             </button>
          </div>
          <div class="modal-body">
-            <form action="<%base_url('import_operation_bom') %>" 
-               method="POST" enctype='multipart/form-data' id="import_operation_bom" class="import_operation_bom custom-form">
+            
                <div class="row">
                   <div class="col-lg-10">
                     <div class="form-group">
@@ -127,7 +126,7 @@
                   </div>
                </div>
          </div>
-         </form>
+        
       </div>
    </div>
 </div>

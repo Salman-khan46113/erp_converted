@@ -233,7 +233,8 @@
 
 
     <script type="text/javascript">
-    var base_url = <%$base_url|@json_encode%>
+    var base_url = <%$base_url|@json_encode%>;
+    var message = <%$message|@json_encode%>
     </script>
 
     <script src="<%$base_url%>public/js/admin/child_parts.js"></script>

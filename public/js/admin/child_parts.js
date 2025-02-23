@@ -4,6 +4,13 @@ var pdf_title = "Item Master";
 
 $(document).ready(function() {
 
+    if(message != ""){
+        if(message == "Record updated successfully"){
+            toastr.success(message);
+        }else{
+            toastr.error(message);
+        }
+    }
     // Initialize the DataTable
     table = $("#child_parts").DataTable({
         dom: "Bfrtilp",
