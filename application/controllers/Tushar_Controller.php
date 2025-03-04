@@ -118,13 +118,17 @@ class Tushar_Controller extends CommonController
 	   $customer_id = $this->input->post('customer_id');
        $uploadedDoc = $this->input->post('uploadedDoc');
 
+
+
        //only valid types are allowed.
        if($this->isValidUploadFileType()=="false"){
             $data['po_message'] = "Only Excel sheets are allowed.";
             $this->session->set_userdata('po_message', $data['po_message']);
        } else {
+
       	if (!empty($_FILES["uploadedDoc"]["name"])) {
         		$error;
+
 				$inputFileName = $_FILES["uploadedDoc"]["tmp_name"];
 					try {
 						$inputFileType = PHPExcel_IOFactory::identify($inputFileName);
@@ -161,12 +165,12 @@ class Tushar_Controller extends CommonController
                                 $po_number = empty($value[$EXCEL_IMPORT_PO_COLUMN]) ? $errorThisRow =$errorThisRow." PO ,": trim($value[$EXCEL_IMPORT_PO_COLUMN]);
 
                                 $format = "d/m/Y";
-                                $inputDate = $value[$EXCEL_IMPORT_PO_START_COLUMN];
-                                $dateTime = DateTime::createFromFormat($format, $inputDate);
+                                $startDate = $inputDate = $value[$EXCEL_IMPORT_PO_START_COLUMN];
+                                $startDateTime = $dateTime = DateTime::createFromFormat($format, $inputDate);
                                 $po_start_date = empty($value[$EXCEL_IMPORT_PO_START_COLUMN]) || !($dateTime && $dateTime->format($format) === $inputDate) ? $errorThisRow =$errorThisRow." PO Start Date format should be dd/mm/yyyy,": trim($value[$EXCEL_IMPORT_PO_START_COLUMN]);
 
-                                $inputDate = $value[$EXCEL_IMPORT_PO_END_COLUMN];
-                                $dateTime = DateTime::createFromFormat($format, $inputDate);
+                                $endDate = $inputDate = $value[$EXCEL_IMPORT_PO_END_COLUMN];
+                                $endDateTime = $dateTime = DateTime::createFromFormat($format, $inputDate);
 
                                 $po_end_date = empty($value[$EXCEL_IMPORT_PO_END_COLUMN]) || !($dateTime && $dateTime->format($format) === $inputDate) ? $errorThisRow =$errorThisRow."PO End Date format should be dd/mm/yyyy ,": trim($value[$EXCEL_IMPORT_PO_END_COLUMN]);
                                 $part_name = empty($value[$EXCEL_IMPORT_ITEM_COLUMN]) ? $errorThisRow = $errorThisRow." Part Number ," : trim($value[$EXCEL_IMPORT_ITEM_COLUMN]);
@@ -176,7 +180,7 @@ class Tushar_Controller extends CommonController
                                 $remark = $value[$EXCEL_IMPORT_REMARK_COLUMN];
 
 
-                                if($value[$EXCEL_IMPORT_PO_COLUMN] != "" && $value[$EXCEL_IMPORT_PO_COLUMN] != NULL && !empty($value[$EXCEL_IMPORT_PO_END_COLUMN]) && !empty($value[$EXCEL_IMPORT_PO_START_COLUMN]) && ($startDateTime && $startDateTime->format($format) === $date) && ($endDateTime && $startDateTime->format($format) === $date)){
+                                if($value[$EXCEL_IMPORT_PO_COLUMN] != "" && $value[$EXCEL_IMPORT_PO_COLUMN] != NULL && !empty($value[$EXCEL_IMPORT_PO_END_COLUMN]) && !empty($value[$EXCEL_IMPORT_PO_START_COLUMN]) && ($startDateTime && $startDateTime->format($format) === $startDate) && ($endDateTime && $endDateTime->format($format) === $endDate)){
                                     //Start Date
                                     $po_start_date = $formattedDate = DateTime::createFromFormat('d/m/Y', $po_start_date)->format('Y-m-d');
                                     // End Date
@@ -198,8 +202,11 @@ class Tushar_Controller extends CommonController
                                
                             }
 						}
+
+
                         $clientId = $this->Unit->getSessionClientId();
 				        if(empty($error)){
+
                             // check validation for po unique 
                             $po_item_arr = [];
                             $po_arr = [];
@@ -228,6 +235,7 @@ class Tushar_Controller extends CommonController
                                         $dublicat_po[] = $value['po_number'];
                                     }
                                 }
+
 
                                 // 
                                 $part_master_data = $this->db->query('
@@ -265,10 +273,31 @@ class Tushar_Controller extends CommonController
                             }
                             // pr($po_item_arr,1);
 
+
+
                             /* insert po */
                             $insert_po_data = [];
                             $import_data = false;
                             $dublicate_items = [];
+                            if(date("m") < 4){
+                                $start_year = substr(date("Y", strtotime("-1 year")), -2);
+                                $start_year_val = date("Y", strtotime("-1 year"));
+                                $end_year = substr(date("Y", strtotime("-1 year")), -2);
+                                $end_year_val = date("Y");
+                            }else{
+                                $start_year = substr(date("Y"), -2);
+                                $start_year_val = date("Y");
+                                $end_year = substr(date("Y", strtotime("+1 year")), -2);
+                                $end_year_val = date("Y", strtotime("+1 year"));
+                            }
+                            $role_management_data = $this->db->query('
+                                SELECT COUNT(cpt.id) as total_record
+                                FROM `customer_po_tracking` as cpt
+                                WHERE ((cpt.created_year = '.$start_year_val.' AND cpt.created_month >= 5) OR (cpt.created_year = '.$end_year_val.' AND cpt.created_month <= 4)) AND cpt.acceptance_number != ""
+                                ORDER BY `id` DESC
+                            ');
+                            $parts_customer_trackings = $role_management_data->result();
+                            $total_records = $parts_customer_trackings[0]->total_record;
                             foreach ($po_data_arr as $key => $value) {
                                 $dublicate_items_row = [];
                                 $data = array(
@@ -321,6 +350,9 @@ class Tushar_Controller extends CommonController
                                     unset($po_data_arr[$key]);
                                     continue;
                                 }else{
+                                    $total_records++;
+                                    $acceptance_number = "OA/".$start_year."-".$end_year."/".$total_records;
+                                    $data['acceptance_number'] = $acceptance_number;
                                     $result = $this->Crud->insert_data("customer_po_tracking", $data);
                                     if($result){
                                         foreach ($po_tracking_parts as $key => $value) {
@@ -373,6 +405,7 @@ class Tushar_Controller extends CommonController
                 //for view pages
                 $data['customer_data'] = $this->Crud->read_data("customer");              
             }
+
             // pr($data,1);
             // pr($data,1);
             $this->session->set_userdata('customer_id', $customer_id);

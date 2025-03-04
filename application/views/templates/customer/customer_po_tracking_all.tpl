@@ -113,22 +113,7 @@
 
                             <div class="card p-0">
                                 <table id="example1" class="table  table-striped">
-                                    <thead>
-                                        <tr>
-                                         
-                                            <th>Customer</th>
-                                            <th>PO Number</th>
-                                            <th>Start Date</th>
-                                            <th>End Date</th>
-                                            <th>Amendment No</th>
-                                            <th>Status</th>
-                                            <th>View Details</th>
-                                            <!-- <th>Close PO</th>-->
-                                            <th>PO Document</th>
-                                            <th>Actions</th>
-                                            <th style="display: none;">ID</th>
-                                        </tr>
-                                    </thead>
+                                 
 
                                    
                                 </table>
@@ -255,6 +240,8 @@
     var sorting_column = <%$sorting_column%>;
     var api_name =  <%$api_name|json_encode%>;
     var base_url = <%$base_url|json_encode%>;
+    var order_acceptance_enable = <%$order_acceptance_enable|json_encode%>;
+    var left_fix_column = <%$left_fix_column|json_encode%>;
 </script>
 
     <script src="<%$base_url%>/public/js/potracking.js"></script>

@@ -29547,6 +29547,7 @@ table.dataTable.no-footer {
             visibility: visible;
             display: block;
     }
+    
 }
 .login-nav-block  .dropdown-menu h5{
     font-family: 'gilroysemibold';
@@ -29570,4 +29571,10 @@ table.dataTable.no-footer {
   50% { transform: rotate(0eg); }
   75% { transform: rotate(-5deg); }
   100% { transform: rotate(0deg); }
+}
+.dropdown-submenu .dropdown-menu.hide {
+        display: none !important;
+}
+.dropdown-submenu .dropdown-menu.show {
+        display: block; !important;
 }
