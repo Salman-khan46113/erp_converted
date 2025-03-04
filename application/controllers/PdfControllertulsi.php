@@ -1897,7 +1897,7 @@ TECHNIQUE </td>
         <td width="50%" style="height:110px;">
           <span style="font-size:13px;"><b>INVOICE NO :&nbsp;&nbsp;' . $new_sales_data[0]->sales_number . '</b></span><br>
           <b>INVOICE DATE :</b> ' . $new_sales_data[0]->created_date . '<br>
-          <b>PO NUMBER : </b>' . $po_parts_data[0]->po_number . '<br>
+          <b>PO NO : </b>' . $po_parts_data[0]->po_number . '<br>
           <b>PO DATE : </b>' . defaultDateFormat($po_parts_data[0]->po_date) . '<br>
           <b>TIME OF SUPPLY :</b> ' . $new_sales_data[0]->created_time . '<br>
           <span style="font-size:8px">WHETHER TAX ON REVERSE CHARGE: NO</span>

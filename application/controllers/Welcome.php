@@ -4249,6 +4249,16 @@ class Welcome extends CommonController
 		// $this->load->view('header');
 		// $this->load->view('planning_year_page', $data);
 		// $this->load->view('footer');
+        $current_year = date("Y");
+        if(date("m") > 3 ){
+            $current_year++;
+        }
+
+        $year_arr =[];
+        for ($i=2021; $i < $current_year ; $i++) { 
+            $year_arr[] = $i;
+        }
+        $data['year_arr'] = $year_arr;
 		$this->loadView('customer/planning_year_page',$data);
 	}
 
@@ -8699,6 +8709,7 @@ class Welcome extends CommonController
         $emailId = trim($this->input->post('emailId'));
         $discount = $this->input->post('discount');
         $discountType = $this->input->post('discountType');
+        $tds = $this->input->post('tds');
 
 		$data = array(
 			"customer_code" => $customerCode,
@@ -8756,6 +8767,7 @@ class Welcome extends CommonController
         				"created_id" => $this->user_id,
         				"date" => $this->current_date,
         				"time" => $this->current_time,
+                        "tds" => $tds > 0 ? $tds : 0,
         			);
         			$result = $this->Crud->insert_data("customer", $data);
         			if ($result) {
@@ -8806,6 +8818,7 @@ class Welcome extends CommonController
         $emailId = trim($this->input->post('emailId'));
         $discount = trim($this->input->post('discount'));
         $discountType = trim($this->input->post('discountType'));
+        $tds = $this->input->post('tds');
 		
 		$data = array(	
 			"customer_name" => $customerName,
@@ -8828,7 +8841,8 @@ class Welcome extends CommonController
             "distncFrmClnt3"=> $distance3,
             "emailId" => $emailId,
             "discount" => $discount,
-            "discountType" => $discountType
+            "discountType" => $discountType,
+            "tds" => $tds > 0 ? $tds : 0
 		);
         // pr($data,1); 
         if(count(str_split($state_no)) > 2 || count(str_split($pos)) > 2 || count(str_split($paymentTerms)) > 2){

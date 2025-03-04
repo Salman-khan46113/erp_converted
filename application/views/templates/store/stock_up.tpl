@@ -11,10 +11,13 @@
             <em>Material Requisition</em></a>
         </h1>
         <br>
-        <span>Stock Up/Return</span>
+        <span>Stock Up</span>
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
+        <button type="button" class="btn btn-seconday " data-bs-toggle="modal" data-bs-target="#importChildPartStock" title="Import Child Part  Stock Data"><i class="ti ti-archive"></i><i class="ti ti-upload"></i></button>
+        <button type="button" class="btn btn-seconday " data-bs-toggle="modal" data-bs-target="#importInhousePartStock" title="Import Inhouse Part Stock Data"><i class="ti ti-building-warehouse"></i><i class="ti ti-upload"></i></button>
+        <button type="button" class="btn btn-seconday " data-bs-toggle="modal" data-bs-target="#importCustomerPartStock" title="Import Customer Part  Stock"><i class="ti ti-package"></i><i class="ti ti-upload"></i></button>
         <%if checkGroupAccess("stock_up","add","No")%>
           <button type="button" class="btn btn-seconday float-left" data-bs-toggle="modal" data-bs-target="#exampleModal">
                      Add Stock </button>
@@ -25,6 +28,116 @@
         <%/if%>
     </div>
    <!-- Main content -->
+   <!-- Import child part  Modal -->
+                                <div class="modal fade" id="importChildPartStock" tabindex="-1" role="dialog"
+                                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title w-100" style="line-height: 41px;" id="exampleModalLabel">Import Part Stock <a class="float-end btn btn-seconday"  href="<%base_url('export_parts_stock/supplier')%>" target="_blank" title="Export Child Parts"><i class="ti ti-download"></i></a></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close">
+                                                                       
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="<%base_url('import_parts_stock/supplier') %>" 
+                                                method="POST" enctype='multipart/form-data' id="import_parts_stock" class="import_parts_stock custom-form">
+                                                    <div class="row">            
+                                                        <div class="col-lg-10">
+                                                            <div class="form-group">
+                                                                <label for="po_num">Upload File</label><span
+                                                                class="text-danger">*</span>
+                                                                <input type="file" name="uploadedDoc"  class="form-control required-input" id="exampleuploadedDoc" placeholder="Upload PO" aria-describedby="uploadDocHelp">
+                                                                <input type="hidden" name="type" value="stock_up">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">Import</button>
+                                            </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Import end -->
+    <!-- Import Inhouse Modal -->
+                                <div class="modal fade" id="importInhousePartStock" tabindex="-1" role="dialog"
+                                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title w-100" id="exampleModalLabel" style="line-height: 41px;">Import Inhouse Stock
+                                                  <a class="float-end btn btn-seconday" href="<%base_url('export_parts_stock/inhouse')%>" target="_blank" title="Export Child Parts"><i class="ti ti-download"></i></a></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close">
+                                                                       
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="<%base_url('import_parts_stock/inhouse') %>" 
+                                                method="POST" enctype='multipart/form-data' id="import_inhouse_parts_stock" class="import_inhouse_parts_stock custom-form">
+                                                    <div class="row">            
+                                                        <div class="col-lg-10">
+                                                            <div class="form-group">
+                                                                <label for="po_num">Upload File</label><span
+                                                                class="text-danger">*</span>
+                                                                <input type="file" name="uploadedDoc"  class="form-control required-input" id="exampleuploadedDoc" placeholder="Upload PO" aria-describedby="uploadDocHelp">
+                                                                <input type="hidden" name="type" value="stock_up">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">Import</button>
+                                            </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Import end -->
+     <!-- Import Inhouse Modal -->
+                                <div class="modal fade" id="importCustomerPartStock" tabindex="-1" role="dialog"
+                                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                              <h5 class="modal-title w-100" id="exampleModalLabel" style="line-height: 41px;">Import Customer Part Stock
+                                                  <a class="float-end btn btn-seconday" href="<%base_url('export_parts_stock/customer')%>" target="_blank" title="Export Child Parts"><i class="ti ti-download"></i></a></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close">
+                                                                       
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="<%base_url('import_parts_stock/customer') %>" 
+                                                method="POST" enctype='multipart/form-data' id="import_customer_parts_stock" class="import_customer_parts_stock custom-form">
+                                                    <div class="row">            
+                                                        <div class="col-lg-10">
+                                                            <div class="form-group">
+                                                                <label for="po_num">Upload File</label><span
+                                                                class="text-danger">*</span>
+                                                                <input type="file" name="uploadedDoc"  class="form-control required-input" id="exampleuploadedDoc" placeholder="Upload PO" aria-describedby="uploadDocHelp">
+                                                                <input type="hidden" name="type" value="stock_up">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">Import</button>
+                                            </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Import end -->
    <section class="content">
       <div class="">
          <div class="row">
@@ -71,6 +184,11 @@
                                           </select>
                                        </div>
                                        <div class="form-group">
+                                          <label for="po_num">Enter Qty <span class="text-danger">*</span></label>
+                                          <input type="text" name="qty" step="any" placeholder="Enter Qty"  class="form-control required-input onlyNumericInput" data-min="1">
+                                          <input type="hidden" name="old_qty" id="old_qty_stock">
+                                       </div>
+                                       <div class="form-group">
                                           <label for="po_num">Enter Reason <span class="text-danger">*</span></label>
                                           <input type="text" name="reason"  placeholder="Enter Reason" class="form-control required-input">
                                        </div>
@@ -78,11 +196,7 @@
                                           <label for="po_num">Upload document</label>
                                           <input type="file" name="uploading_document"  class="form-control">
                                        </div>
-                                       <div class="form-group">
-                                          <label for="po_num">Enter Qty <span class="text-danger">*</span></label>
-                                          <input type="text" name="qty" step="any" placeholder="Enter Qty"  class="form-control required-input onlyNumericInput" data-min="1">
-                                          <input type="hidden" name="old_qty" id="old_qty_stock">
-                                       </div>
+                                       
                                     </div>
                                  </div>
                            </div>
@@ -106,7 +220,7 @@
                               <th>UOM</th>
                               <th>Reason</th>
                               <th>Document</th>
-                              <th>Request Date</th>
+                              <th>Updated Date</th>
                               <th>Type</th>
                               <th>Action</th>
                            </tr>
@@ -129,7 +243,7 @@
 					                                 <a class="btn btn-dark" download href="<%base_url('documents/') %> <%$c->uploading_document %>">Download</a>
 					                                <%/if%>
 					                              </td>
-					                              <td><%$c->created_date %></td>
+					                              <td><%defaultDateFormat($c->created_date) %></td>
                                         <td>
                                           <%if ($c->toStockType == "production_qty" )%>
                                             Child Part
@@ -198,3 +312,18 @@
   var base_url = <%base_url()|@json_encode%>
 </script>
     <script src="<%$base_url%>public/js/store/stock_up.js"></script>
+<style type="text/css">
+  .ti-upload {
+    position: relative;
+    font-size: 18px !important;
+    left: -12px;
+    top: 9px;
+    background: var(--bs-theme-light4-color);
+    border-radius: 48px;
+    padding: 0px;
+  }
+  .btn-seconday:hover .ti-upload {
+      background: var(--bs-theme-color) !important;
+      color: #ffffff !important;
+  }
+</style>

@@ -313,7 +313,7 @@ class StockController extends CommonController
 			// }else{
 			// 	$stock_temp_html = 0;
 			// }
-			if($value[$stock_column_name] > 0 && ($role == "Admin" || $role=="stores")){
+			// if($value[$stock_column_name] > 0 && ($role == "Admin" || $role=="stores")){
 				$fg_data = base64_encode(json_encode($value)); 
 				if(checkGroupAccess("part_stocks","update","No")){
 					$transfer_fg = '<button type="button" class="btn btn-primary fg_data_edit" data-bs-toggle="modal"  data-value='.$fg_data.' data-bs-target="#fgtransfer">
@@ -322,10 +322,10 @@ class StockController extends CommonController
 				}else{
 					$transfer_fg = display_no_character();
 				}
-			}else{
-				$transfer_fg = display_no_character();
-			}
-			if($value[$sheet_prod_column_name] > 0 && ($role == "Admin")){
+			// }else{
+			// 	$transfer_fg = display_no_character();
+			// }
+			// if($value[$sheet_prod_column_name] > 0 && ($role == "Admin")){
 				$product__data = base64_encode(json_encode($value)); 
 				if(checkGroupAccess("part_stocks","update","No")){
 					$production_stocks = '<button type="button" class="btn btn-primary product-store" data-bs-toggle="modal" data-bs-target="#prodToStore" data-value='.$product__data.'>
@@ -334,8 +334,8 @@ class StockController extends CommonController
 				}else{
 					$production_stocks = $value[$sheet_prod_column_name];
 				}
-			}
-			if($value[$plastic_prod_column_name] > 0 && ($role == "Admin")){
+			// }
+			// if($value[$plastic_prod_column_name] > 0 && ($role == "Admin")){
 				$plastic_prod_column_name_data = base64_encode(json_encode($value)); 
 				if(checkGroupAccess("part_stocks","update","No")){
 					$plastic_prod_details = '<button type="button" class="btn btn-primary product-store-plas" data-bs-toggle="modal" data-bs-target="#prodToStorePlastic" data-value='.$plastic_prod_column_name_data.'>
@@ -344,7 +344,7 @@ class StockController extends CommonController
 				}else{
 					$plastic_prod_details = $value[$plastic_prod_column_name];
 				}
-			}
+			// }
 			$data[$key][$sheet_prod_column_name] = $production_stocks;
 			$data[$key]['stock_html'] = $stock_temp_html;
 			$data[$key]['transfer_fg'] = $transfer_fg;

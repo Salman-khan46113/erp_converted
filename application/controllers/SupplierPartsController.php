@@ -563,17 +563,19 @@ class SupplierPartsController extends CommonController
 			WHERE s.clientId = ".$unit_id." AND s.type='addition' 
 			ORDER BY s.id DESC");
 
-		$inhouse_parts_list  = $this->Crud->customQuery("SELECT parts.*, stock.* 
+		$inhouse_parts_list  = $this->Crud->customQuery("SELECT parts.*, stock.*,uom.uom_name
             FROM  inhouse_parts parts
             LEFT JOIN inhouse_parts_stock stock
             ON parts.id = stock.inhouse_parts_id
             AND stock.clientId = " . $this->Unit->getSessionClientId() . "
+            LEFT JOIN uom uom ON uom.id = parts.uom_id
             ORDER BY parts.id desc");
 		$transformed_array = [];
 		foreach ($inhouse_parts_list as $item) {
 		    $transformed_array[$item->id] = $item;
 		}
 		$inhouse_parts_list = $transformed_array;
+		// pr($inhouse_parts_list,1);
 
 		$customer_parts_list = $this->CustomerPart->getCustomerPartdata();
 		$transformed_array = [];
@@ -587,6 +589,7 @@ class SupplierPartsController extends CommonController
 			if($value->toStockType == "inhouse_qty"){
 				$part_data = $inhouse_parts_list[$value->part_id] != null ? $inhouse_parts_list[$value->part_id] : [];
 				$data['stock_changes'][$key]->part_number = $part_data->part_number;
+				$data['stock_changes'][$key]->uom_name = $part_data->uom_name;
 				$data['stock_changes'][$key]->part_description = $part_data->part_description;
 			}else if($value->toStockType == "customer_part"){
 				$part_data = $customer_parts_list[$value->part_id] != null ? $customer_parts_list[$value->part_id] : [];
@@ -639,7 +642,13 @@ class SupplierPartsController extends CommonController
 				$part_arr .= "<option value='".$value->id."' data-qty='".$value->stock."'>".$value->part_number." / ".$value->part_description." / ".$value->stock."</option>";
 			}
 		}else if($post_data['type'] == "inhouse_qty"){
-			$inhouse_parts_list = $this->InhouseParts->getInhousePartById();
+			$inhouse_parts_list = $this->Crud->customQuery("SELECT parts.*, stock.* 
+            FROM  inhouse_parts parts
+            LEFT JOIN inhouse_parts_stock stock
+            ON parts.id = stock.inhouse_parts_id
+            AND stock.clientId = " . $this->Unit->getSessionClientId() . " 
+           $where
+            ORDER BY parts.id desc");
 			foreach ($inhouse_parts_list as $key => $value) {
 				$part_arr .= "<option value='".$value->id."' data-qty='".$value->production_qty."'>".$value->part_number." / ".$value->part_description." / ".$value->production_qty."</option>";
 			}

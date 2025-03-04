@@ -252,7 +252,8 @@ class SalesModel extends CI_Model {
             SUM(s.gst_amount) as gst, 
             SUM(s.total_rate) as ttlrt, 
             SUM(s.gst_amount) as gstamnt, 
-            SUM(s.tcs_amount) as tcsamnt, 
+            SUM(s.tcs_amount) as tcsamnt,
+            SUM((IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) )/(IF(cus.tds > 0,cus.tds,0)) as tdsamnt, 
             cus.customer_name, 
             cus.payment_terms, 
             rrp.payment_receipt_date,
@@ -262,7 +263,7 @@ class SalesModel extends CI_Model {
            rrp.tds_amount as tds_amount,
             rrp.remark as remark_val,
             ROUND(SUM(
-                IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
+                IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - ((IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) )/(IF(cus.tds > 0,cus.tds,0)) - IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
                 2) AS bal_amnt,
             s.sales_id as sales_id_val');
         
@@ -439,12 +440,12 @@ class SalesModel extends CI_Model {
             $this->db->order_by('s.id', 'DESC');
         }
         
-        // if (count($condition_arr) > 0) {
-        //     $this->db->limit($condition_arr["length"], $condition_arr["start"]);
-        //     if ($condition_arr["order_by"] != "") {
-        //         $this->db->order_by($condition_arr["order_by"]);
-        //     }
-        // }
+        if (count($condition_arr) > 0) {
+            // $this->db->limit($condition_arr["length"], $condition_arr["start"]);
+            if ($condition_arr["order_by"] != "") {
+                $this->db->order_by($condition_arr["order_by"]);
+            }
+        }
 
 
         $current_year = (int) date("Y");
@@ -651,12 +652,12 @@ class SalesModel extends CI_Model {
 
         $this->db->where('po.clientId', $this->Unit->getSessionClientId());
         $this->db->where('inward.grn_number !=', '');
-        // if (count($condition_arr) > 0) {
-        //     $this->db->limit($condition_arr["length"], $condition_arr["start"]);
-        //     if ($condition_arr["order_by"] != "") {
-        //         $this->db->order_by($condition_arr["order_by"]);
-        //     }
-        // }
+        if (count($condition_arr) > 0) {
+            // $this->db->limit($condition_arr["length"], $condition_arr["start"]);
+            if ($condition_arr["order_by"] != "") {
+                $this->db->order_by($condition_arr["order_by"]);
+            }
+        }
         if (is_array($search_params) && count($search_params) > 0) {
             if ($search_params["supplier_id"] != "") {
                 $this->db->where("s.id", $search_params["supplier_id"]);

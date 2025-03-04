@@ -278,7 +278,7 @@
                                                         placeholder="Transaction Details" value="">
                                                 </div>
                                                 <div class="form-group">
-                                                                                <label for="amount_received">TDS</label>
+                                                                                <label for="amount_received">Debit Amount</label>
                                                                                 <input type="text"
                                                                                     name="tds" id="tds_val" 
                                                                                     class="form-control onlyNumericInput"

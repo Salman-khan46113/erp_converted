@@ -18,9 +18,9 @@ const page = {
             $("#payment_date_modal").val(data.payment_receipt_date);
             $("#receivable_amount_modal").val(data.amount_received);
             $("#transection_detail_modal").val(data.transaction_details);
-            $("#tds_val").val(data.tds_amount);
+            $("#tds_val").val(data.debit_amount);
             $("#remark").val(data.remark_val);
-            $("#total_amount_value").val(data.row_total);
+            $("#total_amount_value").val(data.row_total); // bal_amnt
             myModal.show();
         })
         $('#receivable_amount_modal').on('keyup', function(e){
@@ -138,7 +138,7 @@ const page = {
                             var lines = csv.split('\n');
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
-                                values.splice(13, 1);
+                                values.splice(16, 2);
                                 return values.join(',');
                             });
                             return modifiedLines.join('\n');
@@ -176,7 +176,7 @@ const page = {
                                 }
                                 cell.alignment = alignment;
                             });
-                            row.splice(14, 1);
+                            row.splice(16,2);
                         });
                     }
                 },

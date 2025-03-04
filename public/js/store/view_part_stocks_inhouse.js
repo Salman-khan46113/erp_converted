@@ -88,8 +88,16 @@ const page = {
             table.search(this.value).draw();
         });
         $(document).on("click","[data-bs-toggle='modal']",function(){
-          $(".select2").select2();
+          var id = $(this).attr("data-bs-target");
+          $(`${id}`).find("select").chosen({
+            width: "auto",
+            disable_search_threshold: 10, // You can adjust this threshold for no search bar
+            dropdownAutoWidth: true,
+            search_contains: true
+        });
+                                                                              
         })
+
             // table = $('#example1').DataTable();
       },
       initiateValidate: function(){

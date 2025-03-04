@@ -1545,7 +1545,7 @@ class ExportController extends CommonController
        $uploadedDoc = $this->input->post('uploadedDoc');
        $importType = $this->uri->segment('2');
        $clientId = $this->Unit->getSessionClientId();
-       
+       $type_of_upload= $this->input->post('type');
        //only valid types are allowed.
        $messages = "Something went wron.";
        $success = 0;
@@ -1620,6 +1620,43 @@ class ExportController extends CommonController
 
                         
                         if(empty($error)){
+                            if($type_of_upload == "stock_up"){
+                                $parts_details = [];
+                                $this->load->model('ExportImportModel');
+                                if($importType == 'supplier'){
+                                    $parts_no = array_column($inserdata,"part_no");
+                                    $child_part_data = $this->ExportImportModel->getSupplierPartStock($parts_no);
+                                    $child_part_stock_data = array_column($child_part_data,"stock","part_number");
+                                    $child_part_id_data = array_column($child_part_data,"part_id","part_number");
+                                    $parts_details = [
+                                        "part_stock_data" => $child_part_stock_data,
+                                        "part_id_data" => $child_part_id_data
+                                    ];
+                                }else if($importType == 'inhouse'){
+
+                                    $parts_no = array_column($inserdata,"part_no");
+                                    $child_part_data = $this->ExportImportModel->getInhousePartStock($parts_no);
+
+                                    $child_part_stock_data = array_column($child_part_data,"stock","part_number");
+                                    $child_part_id_data = array_column($child_part_data,"part_id","part_number");
+                                    $parts_details = [
+                                        "part_stock_data" => $child_part_stock_data,
+                                        "part_id_data" => $child_part_id_data
+                                    ];
+                                }else if($importType == 'customer'){
+
+                                    $parts_no = array_column($inserdata,"part_no");
+                                    $child_part_data = $this->ExportImportModel->getCustomerPartStock($parts_no);
+
+                                    $child_part_stock_data = array_column($child_part_data,"stock","part_number");
+                                    $child_part_id_data = array_column($child_part_data,"part_id","part_number");
+                                    $parts_details = [
+                                        "part_stock_data" => $child_part_stock_data,
+                                        "part_id_data" => $child_part_id_data
+                                    ];
+                                }
+                            }
+
                             //there are no errors so lets move ahead with executing the file.
                             foreach($inserdata as $po_item) {
 
@@ -1650,7 +1687,11 @@ class ExportController extends CommonController
                             }else{
                                 $messages = "Data imported successfully.";
                                 $success = 1;
-                                // $this->addSuccessMessage("Data imported successfully.");
+                                if($type_of_upload == "stock_up"){
+                                    $this->addStockUpRecord($importType,$inserdata,$parts_details);
+                                }
+                                
+                                
                             }
 
                         } else {
@@ -1673,6 +1714,43 @@ class ExportController extends CommonController
             echo json_encode($result);
             exit();
            // $this->redirectToParent();
+    }
+
+    public function addStockUpRecord($importType,$inserdata,$parts_details){
+        
+        if($importType == 'supplier'){
+            $toStockType = "production_qty";
+        }else if ($importType == 'inhouse'){
+            $toStockType = "inhouse_qty";
+        }else if ($importType == 'customer'){
+            $toStockType = "customer_part";
+        }
+
+        $child_part_stock_data = $parts_details['part_stock_data'];
+        $child_part_id_data = $parts_details['part_id_data'];
+        $data_history = [];
+        foreach ($inserdata as $key => $value) {
+            $data_history_row = array(
+                "clientId"=> $this->Unit->getSessionClientId(),
+                "part_id" => $child_part_id_data[$value['part_no']],
+                "reason" => "",
+                "uploading_document" => "",
+                "qty" => $value['part_stock'],
+                "old_qty" => $child_part_stock_data[$value['part_no']],
+                "fromStockType" => "stock",
+                "fromUnit" => $this->Unit->getSessionClientId(),
+                "toStockType" => $toStockType,
+                "toUnit" => $this->Unit->getSessionClientId(),
+                "type" => "addition",
+                "created_by" => $this->user_id,
+                "status" => "stock_transfered",
+                "created_date" => $this->current_date,
+                "created_time" => $this->current_time,
+            );
+            array_push($data_history, $data_history_row);
+        }
+        $this->ExportImportModel->addStockUpRecord($data_history);
+
     }
     
 

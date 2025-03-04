@@ -14,7 +14,7 @@
             <em >Planning data</em></a>
         </h1>
         <br>
-        <span >Planning data</span>
+        <span >Planning data <%$month%> (FY <%$financial_year_value%>-<%$financial_year_value+1%>) </span>
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5 listing-btn">

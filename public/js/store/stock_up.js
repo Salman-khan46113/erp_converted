@@ -10,6 +10,7 @@ const page = {
     init: function() {
         this.dataTable();
         this.initiateValidate();
+        this.imports();
     },
     dataTable: function() {
         var data = {};
@@ -84,7 +85,48 @@ const page = {
         });
             // table = $('#example1').DataTable();
       },
-      initiateValidate: function(){
+      imports: function(){
+        let that = this;
+        $("#import_parts_stock,#import_inhouse_parts_stock,#import_customer_parts_stock").submit(function(e){
+        e.preventDefault();
+       
+        var href = $(this).attr("action");
+        var id = $(this).attr("id");
+        var formData = new FormData($('.'+id)[0]);
+        let flag = that.formValidate(id);
+
+        if(flag){
+          return;
+        }
+
+        $.ajax({
+          type: "POST",
+          url: href,
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            var responseObject = JSON.parse(response);
+            var msg = responseObject.messages;
+            var success = responseObject.success;
+            if (success == 1) {
+              toastr.success(msg);
+              $(this).parents(".modal").modal("hide")
+              setTimeout(function(){
+                window.location.reload();
+              },1000);
+
+            } else {
+              toastr.error(msg);
+            }
+          },
+          error: function (error) {
+            console.error("Error:", error);
+          },
+        });
+      });
+      },
+    initiateValidate: function(){
       	let that = this;
       	$("#add_stock_up").submit(function(e){
 	      e.preventDefault();
@@ -121,7 +163,7 @@ const page = {
 	          console.error("Error:", error);
 	        },
 	      });
-	    });
+	 });
 	    $(document).on("click",".transfer-stock-value",function(e){
 	      e.preventDefault();
 	      // console.log("ok")

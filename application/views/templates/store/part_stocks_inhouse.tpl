@@ -140,8 +140,7 @@
                                            <%$po->$prodQtyColName %>
                                            </button>
                                            <div class="modal fade" id="edit<%$i %>" tabindex="-1"
-                                              role="dialog" aria-labelledby="exampleModalLabel"
-                                              aria-hidden="true">
+                                              role="dialog" aria-labelledby="exampleModalLabel">
                                               <div class="modal-dialog modal-dialog-centered" role="document">
                                                  <div class="modal-content">
                                                     <div class="modal-header">
@@ -201,8 +200,7 @@
                                   Transfer to FG
                                   </button>
                                   <div class="modal fade" id="fgtransfer<%$i %>" tabindex="-1"
-                                     role="dialog" aria-labelledby="exampleModalLabel"
-                                     aria-hidden="true">
+                                     role="dialog" aria-labelledby="exampleModalLabel">
                                     <div class="modal-dialog modal-dialog-centered" role="document">
                                     <div class="modal-content">
                                     <div class="modal-header">
@@ -240,11 +238,12 @@
                                     </div>
                                     </div>
                                     <div class="col-lg-12">
-                                      <div class="form-group">
+                                      <div class="form-group" inerts>
                                     <label for=""><br>Select Customer Part Number /
                                     Customer Name </label>
+                                    <div class="w-100">
                                     <select name="customer_part_number" 
-                                       id="" class="form-control select2  required-input" style="width: 100%;">
+                                       class="form-control w-100   required-input" style="width: 100%;">
                                     <option value="">Select Part</option>
                                     <%if ($transfer_part_list) %>
                                            <%foreach from=$transfer_part_list item=t %>
@@ -254,6 +253,7 @@
                                         <%/foreach%>
                                     <%/if%>
                                     </select>
+                                  </div>  
                                   </div>
                                     </div>
                                     </div>
@@ -306,11 +306,45 @@
 
     <div class="content-backdrop fade"></div>
   </div>
+  <style type="text/css">
+    .chosen-container {
+    width: 100% !important;
+}
+.modal-body .row {
+    overflow-y: unset !important; 
+    
+}
+.chosen-container-single .chosen-single{
+    display: block !important;
+    padding-left: 8px !important;
+    padding-right: 20px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    height: 32px !important;
+    padding-top: 2px !important;
+    background: white !important;
+    font-size: 15px !important;
+}
+.chosen-container .chosen-results li.highlighted {
+    background-color: var(--bs-theme-color) !important;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(20%, var(--bs-theme-color)), color-stop(90%, var(--bs-theme-color)));
+    background-image: linear-gradient(var(--bs-theme-color) 20%, var(--bs-theme-color) 90%) !important;
+    color: #fff !important;
+}
+
+        /* Adjust Chosen Dropdown z-index for visibility */
+        .chosen-container {
+            z-index: 9999 !important; /* Make sure dropdown appears on top */
+        }
+  </style>
   <script>
      $(function() {
          $("#total_value_id").val(<%$total_value %>);
      });
   </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>
    <script src="<%$base_url%>public/js/store/view_part_stocks_inhouse.js"></script>
 
   

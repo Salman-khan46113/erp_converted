@@ -354,7 +354,7 @@ class SheetProdController extends ProductionController
 				ORDER BY 
 					p.date DESC 
 				');
-		
+		// pr($data['p_q'],1);
 
 		$data['reject_remark'] = $this->Crud->read_data("reject_remark");
 		$CI =& get_instance();
@@ -814,29 +814,34 @@ class SheetProdController extends ProductionController
 			"status" => "completed"
 		);
 
-		$unit_id = $this->Unit->getSessionClientId();
-		$get_previous_qty = $this->Crud->customQuery("SELECT *FROM child_part_stock WHERE childPartId = ".$child_part_id." AND clientId = $unit_id");
-		$get_previous_qty = isset($get_previous_qty[0]->sharing_qty) && $get_previous_qty[0]->sharing_qty > 0 ? $get_previous_qty[0]->sharing_qty : 0;
-		
-		$update = $this->Crud->update_data("sharing_issue_request", $data23333, $id);
-		if ($update) {
-			$new_stock = $actual_stock - $accepted_qty;
-			$new_sharing_qty = $get_previous_qty + $accepted_qty;
-			$stockColName = $this->Unit->getStockColNmForClientUnit();
-			$sharingQtyColName = $this->Unit->getSharingQtyColNmForClientUnit();
+		$sharing_p_q = $this->Crud->customQuery("SELECT pq.id FROM sharing_issue_request pq WHERE pq.status = 'completed' AND pq.id = ".$id);
+		if(empty($sharing_p_q)){
+			$unit_id = $this->Unit->getSessionClientId();
+			$get_previous_qty = $this->Crud->customQuery("SELECT *FROM child_part_stock WHERE childPartId = ".$child_part_id." AND clientId = $unit_id");
+			$get_previous_qty = isset($get_previous_qty[0]->sharing_qty) && $get_previous_qty[0]->sharing_qty > 0 ? $get_previous_qty[0]->sharing_qty : 0;
+			
+			$update = $this->Crud->update_data("sharing_issue_request", $data23333, $id);
+			if ($update) {
+				$new_stock = $actual_stock - $accepted_qty;
+				$new_sharing_qty = $get_previous_qty + $accepted_qty;
+				$stockColName = $this->Unit->getStockColNmForClientUnit();
+				$sharingQtyColName = $this->Unit->getSharingQtyColNmForClientUnit();
 
-			$data2 = array(
-				$stockColName => $new_stock,
-				$sharingQtyColName => $new_sharing_qty,
-			);
+				$data2 = array(
+					$stockColName => $new_stock,
+					$sharingQtyColName => $new_sharing_qty,
+				);
 
-			$result2 = $this->SupplierParts->updateStockById($data2, $child_part_id);
-			// echo "<script>alert('Updated Successfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
-			$messages = "Updated Successfully";
-			$success  =1;
-		} else {
-			$messages = "Error While Updating";
-			// echo "<script>alert('Error While Updating ');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+				$result2 = $this->SupplierParts->updateStockById($data2, $child_part_id);
+				// echo "<script>alert('Updated Successfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+				$messages = "Updated Successfully";
+				$success  =1;
+			} else {
+				$messages = "Error While Updating";
+				// echo "<script>alert('Error While Updating ');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+			}
+		}else{
+			$messages = "Request already accepted.<br>Please refresh page.";
 		}
 		$result = [];
 		$result['messages'] = $messages;
@@ -947,7 +952,8 @@ class SheetProdController extends ProductionController
 		FROM sharing_p_q_history h 
 			JOIN child_part c ON c.id = h.output_part_id 
 			JOIN child_part cp ON cp.id = h.input_part_id 
-			WHERE h.sharing_p_q_id = ".$sharing_p_q_id);
+			WHERE h.sharing_p_q_id = ".$sharing_p_q_id."
+			ORDER BY h.id DESC");
 		
 		$data['reject_remark'] = $this->Crud->read_data("reject_remark");
 

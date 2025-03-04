@@ -196,7 +196,7 @@
                         <%/if%>
                      </td>
                      <td>
-                        <%if ($u->status != "pending") %>
+                        <%if ($u->status != "pending") && false %>
                            <%if checkGroupAccess("view_p_q_molding_production","update","No")%>
                               <button type="button" class="btn btn-danger float-left "
                                  data-bs-toggle="modal" data-bs-target="#acceptReject<%$i %>">

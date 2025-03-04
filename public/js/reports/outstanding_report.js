@@ -118,17 +118,26 @@ const page = {
                             var total_receive = 0;
                             var total_payable = 0;
                             var i = 0
+                            
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
                                 values.splice(13, 1);
                                 if( i > 0){
-                                    total_receive += parseFloat((values[1].replaceAll('"',"")).replaceAll(',',""));
-                                    total_payable += parseFloat((values[2].replaceAll('"',"")).replaceAll(',',""));
+                                    
+                                    if (!Number.isNaN(parseFloat((values[1].replaceAll('"', "")).replaceAll(',', "")))) {
+                                       total_receive += parseFloat((values[1].replaceAll('"',"")).replaceAll(',',""));
+                                    }
+                                    if (!Number.isNaN(parseFloat((values[2].replaceAll('"', "")).replaceAll(',', "")))) {
+                                       total_payable += parseFloat((values[2].replaceAll('"',"")).replaceAll(',',""));
+                                    }
                                 }
                                 i++;
                                 return values.join(',');
                             });
-                            modifiedLines.push(`Total,${total_receive.toFixed(2)},${total_payable.toFixed(2)}`);
+                            modifiedLines.unshift(`Date : ${start_date} - ${end_date}`);
+                            total_receive = total_receive == 0 ? "" : total_receive.toFixed(2);
+                            total_payable = total_payable == 0 ? "" : total_payable.toFixed(2);
+                            modifiedLines.push(`Total,${total_receive},${total_payable}`);
                             return modifiedLines.join('\n');
                         },
                         filename : file_name
@@ -143,7 +152,7 @@ const page = {
                     filename: file_name,
                     customize: function (doc) {
                       doc.pageMargins = [15, 15, 15, 15];
-                      doc.content[0].text = pdf_title;
+                      doc.content[0].text = pdf_title+"\n("+start_date+"-"+end_date+")";
                       doc.content[0].color = theme_color;
                         // doc.content[1].table.widths = ['15%', '19%', '13%', '13%','15%', '15%', '10%'];
                         doc.content[1].table.body[0].forEach(function(cell) {
@@ -153,9 +162,14 @@ const page = {
                         var total_payable = 0;
                         doc.content[1].table.body.forEach(function(row, rowIndex) {
                             if(rowIndex > 0){
-
-                                total_receive +=  parseFloat((row[1]['text'].replaceAll('"',"")).replaceAll(',',""));
-                                total_payable += parseFloat((row[2]['text'].replaceAll('"',"")).replaceAll(',',""));
+                                if (!Number.isNaN(parseFloat((row[1]['text'].replaceAll('"', "")).replaceAll(',', "")))) {
+                                       total_receive +=  parseFloat((row[1]['text'].replaceAll('"',"")).replaceAll(',',""));
+                                }
+                                if (!Number.isNaN(parseFloat((row[2]['text'].replaceAll('"', "")).replaceAll(',', "")))) {
+                                     total_payable += parseFloat((row[2]['text'].replaceAll('"',"")).replaceAll(',',""));
+                                }
+                                
+                                
                             }
                             row.forEach(function(cell, cellIndex) {
                                 var alignmentClass = $('#child_part_view tbody tr:eq(' + rowIndex + ') td:eq(' + cellIndex + ')').attr('class');
@@ -173,10 +187,12 @@ const page = {
                             });
                             row.splice(14, 1);
                         });
+                        total_receive = total_receive == 0 ? "" : total_receive.toFixed(2);
+                        total_payable = total_payable == 0 ? "" : total_payable.toFixed(2);
                         var newRow = [
                             { text: 'Total', style: 'tableCell',fillColor:"#f0f0f0" , bold: true},
-                            { text: total_receive.toFixed(2), style: 'tableCell' ,fillColor:"#f0f0f0", bold: true},
-                            { text: total_payable.toFixed(2), style: 'tableCell',fillColor:"#f0f0f0" , bold: true}
+                            { text: total_receive, style: 'tableCell' ,fillColor:"#f0f0f0", bold: true},
+                            { text: total_payable, style: 'tableCell',fillColor:"#f0f0f0" , bold: true}
                         ];
 
                         // Add the row to the table body
@@ -219,13 +235,14 @@ const page = {
                     // Log the entire response to see what extra data is included
                     
                     for (var i = 0; i < json.data.length; i++) {
-                        var value_t = parseFloat(json.data[i]['receivable_amount']);
-                        json.data[i]['receivable_amount'] = (value_t).toFixed(2);
-                        var value_p = parseFloat(json.data[i]['payable_amount']);
-                        json.data[i]['payable_amount'] = (value_p).toFixed(2)
+                        var value_t = json.data[i]['receivable_amount'] != "" ? parseFloat(json.data[i]['receivable_amount']) : "";
+                        json.data[i]['receivable_amount'] = value_t != "" ? (value_t).toFixed(2) : "";
+                        var value_p = json.data[i]['payable_amount'] != "" ? parseFloat(json.data[i]['payable_amount']) : "";
+                        json.data[i]['payable_amount'] = value_p != "" ?(value_p).toFixed(2)  : ""
                     }
                     $(".total_paid_amount").html(json.total_paid_amount)
                     $(".total_pay_amount").html(json.total_pay_amount)
+                    $(".total_diffence").html(json.total_diff)
                     return json.data; // This is what populates the DataTable
                 }
             },

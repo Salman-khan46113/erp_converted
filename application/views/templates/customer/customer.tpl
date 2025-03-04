@@ -233,6 +233,12 @@
                                                 </div>
                                               </div>
                                               </div>
+                                              <div class="col-lg-6">
+                                                <div class="form-group">
+                                                  <label>TDS(%)</label><span class="text-danger"></span>
+                                                    <input type="text" step="any" value="0" name="tds" class="form-control onlyNumericInput" aria-describedby="emailHelp" placeholder="Discount">
+                                                </div>
+                                              </div>
                                                              
                                             </div>
                                             <div class="modal-footer">
@@ -462,6 +468,12 @@
                                                   <label  class="form-check-label" for="discountType">Percentage</label>
                                                 </div>
                                               </div>
+                                              </div>
+                                               <div class="col-lg-6">
+                                                <div class="form-group">
+                                                  <label>TDS(%)</label><span class="text-danger"></span>
+                                                    <input type="text" step="any" value="0" name="tds" class="form-control onlyNumericInput" aria-describedby="emailHelp" id="update_tds" placeholder="Discount">
+                                                </div>
                                               </div>
                 </div>
                 <div class="modal-footer">

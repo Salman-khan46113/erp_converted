@@ -4673,7 +4673,13 @@ class SalesController extends CommonController
             "className" => "dt-center",
 			'orderable' => false
         ];
-       
+       	$column[] = [
+            "data" => "debit_amount",
+            "title" => "Debit Amount",
+            "width" => "7%",
+            "className" => "dt-center",
+			'orderable' => false
+        ];
        	$column[] = [
             "data" => "bal_amnt",
             "title" => "Balance Amount to Receive",
@@ -4737,7 +4743,7 @@ class SalesController extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([[16,'desc']]);
+        $data["sorting_column"] = json_encode([[17,'desc']]);
         $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
@@ -4782,6 +4788,7 @@ class SalesController extends CommonController
 		
 		// pr($this->db->last_query(),1);
 		foreach ($data as $key => $objs) {
+
 			$date_convert = DateTime::createFromFormat('d-m-Y', $objs['created_date']);
 			// Format the date to d/m/Y
 			$objs['created_date'] = $date_convert->format('d/m/Y');
@@ -4797,8 +4804,9 @@ class SalesController extends CommonController
 			$data[$key]['subtotal'] = $subtotal;
 			$data[$key]['row_total'] = number_format($row_total,2,".","");
 			$data[$key]['payment_receipt_date_formated'] = $payment_receipt_date_formated;
-			$tds_amount = $data[$key]['tds_amount'] = $objs['tds_amount'] > 0 ? $objs['tds_amount'] : 0;
-
+			$tds_amount = $data[$key]['tds_amount'] = $objs['tdsamnt'] > 0 ? number_format($objs['tdsamnt'],2,".","") : 0;
+			$data[$key]['debit_amount'] = $objs['tds_amount'] > 0 ? $objs['tds_amount'] : 0;
+			// pr($objs,1);
 			// $data[$key]['bal_amnt'] = $row_total - $val['amount_received'] - $tds_amount;
 
 			// Create a DateTime object by specifying the format
@@ -4908,13 +4916,13 @@ class SalesController extends CommonController
         ];
         $column[] = [
             "data" => "receivable_amount",
-            "title" => "Receivable Amount Due<br>(With Gst)",
+            "title" => "Receivable Amount Due<br>(With GST)",
             "width" => "16%",
             "className" => "dt-left",
         ];
         $column[] = [
             "data" => "payable_amount",
-            "title" => "Payable Amount Due<br>(With Gst)",
+            "title" => "Payable Amount Due<br>(With GST)",
             "width" => "17%",
             "className" => "dt-center",
         ];
@@ -4924,6 +4932,7 @@ class SalesController extends CommonController
         if(!((int) date("m",1) > 3)){
         	$current_year--;
         }
+
 		$date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
@@ -4939,11 +4948,10 @@ class SalesController extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([]);
+        $data["sorting_column"] = json_encode([[0, 'asc']]);
         $data["page_length_arr"] = [[10,50,100,200,500,1000,2500,5000], [10,50,100,200,500,1000,2500,5000]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
-		
 		$this->loadView('reports/outstanding_report',$data);
 	}
 	public function getOutstandingReportData(){
@@ -4968,6 +4976,7 @@ class SalesController extends CommonController
 		
 		$outstanding_data = [];
 		$recevivable_data = [];
+		$total_paid_amount = 0;
 		if(!($post_data["search"]['supplier_id'] > 0) || ($post_data["search"]['customer_id'] > 0)){
 		$data = $this->SalesModel->getOutstandingReportView($condition_arr,$post_data["search"]);
 
@@ -4978,13 +4987,19 @@ class SalesController extends CommonController
 					$outstanding_data[$val['customer_id']] = [
 						"customer_name" => $val['customer_name'],
 						"receivable_amount" => round($val['bal_amnt']),
-						"payable_amount" => 0
+						"payable_amount" => ""
 					];
 				}
+				
 				
 			}
 			$recevivable_data =  array_values($outstanding_data);
 		}
+
+		$total_paid_amount = array_sum(array_column($outstanding_data, "receivable_amount"));
+
+	
+
 
 		$payable_data = [];
 		if(!($post_data["search"]['customer_id'] > 0)|| ($post_data["search"]['supplier_id'] > 0)){
@@ -5001,7 +5016,7 @@ class SalesController extends CommonController
 						$payable_data[$val['supplier_id']] = [
 							"customer_name" => $val['customer_name'],
 							"payable_amount" => round($bal_amnt,2),
-							"receivable_amount" => 0
+							"receivable_amount" => ""
 						];
 					}
 				}
@@ -5009,67 +5024,25 @@ class SalesController extends CommonController
 			}
 			$payable_data =  array_values($payable_data);
 		}
+		$total_pay_amount = array_sum(array_column($payable_data, "payable_amount"));
 		$data = array_merge($recevivable_data,$payable_data);
 		$data = array_merge($recevivable_data,$payable_data);
 		$chunk_number = $post_data["start"]/$post_data["length"];
 		$array_chunk = array_chunk($data,$post_data["length"]);
 		$data = $array_chunk[($chunk_number)];
-		$data["data"] = $data;
-		$total_paid_amount = 0;
-	    $outstanding_data = [];
-	    $receivable_count_data = [];
-		if(!($post_data["search"]['supplier_id'] > 0) || ($post_data["search"]['customer_id'] > 0)){
-	        $total_receivable_record = $this->SalesModel->getOutstandingReportViewCount([], $post_data["search"]);
-	        foreach ($total_receivable_record as $key => $val) {
-				if(array_key_exists($val['customer_id'], $outstanding_data)){
-					$outstanding_data[$val['customer_id']]['receivable_amount'] += number_format($val['bal_amnt'],2,".","");
-				}else{
-					$outstanding_data[$val['customer_id']] = [
-						"customer_name" => $val['customer_name'],
-						"receivable_amount" => number_format($val['bal_amnt'],2,".",""),
-						"payable_amount" => 0
-					];
-				}
-				$total_paid_amount += $val['bal_amnt'];
-				
-			}
-			$receivable_count_data =  array_values($outstanding_data);
-		}
-
-		$total_pay_amount = 0;
-	    $payable_data = [];
+		// pr($data,1);
+		$data["data"] = is_valid_array($data) ? $data : [];
+	    
 	    $payable_count_data = [];
-		if(!($post_data["search"]['customer_id'] > 0)|| ($post_data["search"]['supplier_id'] > 0)){
-	        $total_payable_record = $this->SalesModel->getOutstandingPayableReportViewCount([], $post_data["search"]);
-	        // pr($total_payable_record,1);
-			foreach ($total_payable_record as $key => $val) {
-				$gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);
-	            $total_with_gst = $gst_amount + $val['base_amount'];  
-	            $bal_amnt = $total_with_gst - $val['amount_received'] - $val['tds_amount'];
-	            if($val['bal_amnt'] > 0){
-		            if($bal_amnt > 0){
-						if(array_key_exists($val['supplier_id'], $payable_data)){
-							$payable_data[$val['supplier_id']]['payable_amount'] += $bal_amnt;
-						}else{
-							$payable_data[$val['supplier_id']] = [
-								"customer_name" => $val['customer_name'],
-								"payable_amount" => $bal_amnt,
-								"receivable_amount" => 0
-							];
-						}
-					}
-					$total_pay_amount += $bal_amnt;
-				}
-				
-			}
-			$payable_count_data =  array_values($payable_data);
-		}
+	    $receivable_count_data = count($recevivable_data) + count($payable_data);
+		
 		
 		// pr($total_paid_amount,1);
-        $data["recordsTotal"] = count($receivable_count_data)+count($payable_count_data);
-        $data["recordsFiltered"] = count($receivable_count_data)+count($payable_count_data);
+        $data["recordsTotal"] = count($outstanding_data);
+        $data["recordsFiltered"] = count($outstanding_data);
         $data["total_paid_amount"] = number_format($total_paid_amount,2);
         $data["total_pay_amount"] = number_format($total_pay_amount,2);
+        $data["total_diff"] = number_format($total_paid_amount - $total_pay_amount,2);
         echo json_encode($data);
 	}
 

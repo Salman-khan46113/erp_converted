@@ -132,67 +132,7 @@ $(document).ready(function() {
         });
     });
 
-    // Form validation and submission
-    $(document).on(validate,'.update_inhouse',{
-        rules: {
-            part_number: {
-                required: true
-            },
-            part_description: {
-                required: true
-            },
-            stock: {
-                required: true,
-                number: true // Ensures that the stock field is a number
-            },
-            id: {
-                required: true
-            }
-        },
-        messages: {
-            part_number: {
-                required: "Please enter Part Number"
-            },
-            part_description: {
-                required: "Please enter Part Description"
-            },
-            stock: {
-                required: "Please enter Stock",
-                number: "Please enter a valid number"
-            },
-            id: {
-                required: "ID is required"
-            }
-        },
-        submitHandler: function(form) {
-            $.ajax({
-                url: $(form).attr('action'),
-                type: 'POST',
-                data: new FormData(form),
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if (response) {
-                        let res = JSON.parse(response);
-                        if (res.success == 1) {
-                            toastr.success(res.msg);
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1000);
-                        } else {
-                            toastr.error(res.msg);
-                        }
-                    }
-                    $(form)[0].reset();
-                    $('.modal').modal('hide');
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    alert('An error occurred: ' + errorThrown);
-                }
-            });
-            return false; // Prevent default form submit
-        }
-    });
+    
     $("#import_parts_stock").submit(function(e){
         e.preventDefault();
        

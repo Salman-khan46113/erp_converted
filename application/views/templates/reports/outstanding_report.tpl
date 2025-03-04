@@ -148,6 +148,14 @@
                         <p class="tgdp-rgt-tp-ttl">Total Amount Payable Due</p>
                         <p class="tgdp-rgt-tp-txt total_pay_amount" title="12">0.00</p>
                     </div>
+                    <div class="tgdp-rgt-tp-sect">
+                        <p class="tgdp-rgt-tp-ttl">Diffrence Amount</p>
+                        <p class="tgdp-rgt-tp-txt total_diffence" title="12">0.00</p>
+                    </div>
+                    <div class="tgdp-rgt-tp-sect">
+                        <p class="tgdp-rgt-tp-ttl">Date</p>
+                        <p class="tgdp-rgt-tp-txt " title="12"><%defaultDateFormat($start_date)%> - <%defaultDateFormat($end_date)%></p>
+                    </div>
                 </div>
             </div>
         </div>

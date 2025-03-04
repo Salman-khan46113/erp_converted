@@ -91,7 +91,7 @@
 				                                                         </div>
 				                                                         <div class="form-group">
 				                                                            <label for="po_num">Part Price </label><span class="text-danger">*</span>
-				                                                            <input type="text" value="<%$po[0]->part_rate  %>" name="upart_desc"   class="form-control onlyNumericInput required-input" id="exampleInputEmail1" data-min="1">
+				                                                            <input type="text" value="<%$po[0]->part_rate  %>" name="upart_desc"   class="form-control onlyNumericInput required-input" id="exampleInputEmail1" data-min="0">
 				                                                            
 				                                                         </div>
 				                                                      </div>

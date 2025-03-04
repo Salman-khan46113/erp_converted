@@ -526,7 +526,7 @@
                         <%if checkGroupAccess("fw_stock","list","No")%>
                         <li><a href="<%base_url('fw_stock')%>" class="dropdown-item">FG Stock Transfer</a></li>
                         <%/if%>
-                        <%if ($entitlements['isSheetMetal']!=null && (checkGroupAccess("stock_down","list","No") || checkGroupAccess("stock_up","list","No") || checkGroupAccess("sharing_issue_request_store","list","No") || checkGroupAccess("sharing_issue_request_store_completed","list","No"))) %>
+                        <%if ((checkGroupAccess("stock_down","list","No") || checkGroupAccess("stock_up","list","No") || checkGroupAccess("sharing_issue_request_store","list","No") || checkGroupAccess("sharing_issue_request_store_completed","list","No"))) %>
                            <li class="dropdown-submenu">
                               <a href="javascript:void(0)" class="dropdown-toggle dropdown-item" data-toggle="dropdown" aria-expanded="false">Material Requisition</a>
                               <ul class="dropdown-menu">
@@ -681,7 +681,7 @@
                               <li><a href="<%base_url('customer')%>" class="dropdown-item">Customers</a></li>
                               <%/if%>
                               <%if checkGroupAccess("customer_master","list","No") %>
-                              <li><a href="<%base_url('customer_master')%>" class="dropdown-item">Customer Master</a></li>
+                              <li><a href="<%base_url('customer_master')%>" class="dropdown-item">Sales Master</a></li>
                               <%/if%>
                               <%if checkGroupAccess("consignee","list","No") %>
                               <li><a href="<%base_url('consignee')%>" class="dropdown-item">Consignee</a></li>

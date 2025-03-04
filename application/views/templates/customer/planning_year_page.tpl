@@ -42,41 +42,15 @@
                                     </thead>
                                     
                                     <tbody>
+                                        <%foreach from=$year_arr key=key item=year%>
                                         <tr>
-                                            <td>1</td>
-                                            <td>FY-2021</td>
+                                            <td><%$key+1%></td>
+                                            <td>FY <%$year%>-<%$year+1%></td>
                                             <td>
-                                                <a class="btn btn-info" href="<%$base_url%>planing_data_month/FY-2021">View Details</a>
+                                                <a class="btn btn-info" href="<%$base_url%>planing_data_month/FY-<%$year%>">View Details</a>
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td>2</td>
-                                            <td>FY-2022</td>
-                                            <td>
-                                                <a class="btn btn-info" href="<%$base_url%>planing_data_month/FY-2022">View Details</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>3</td>
-                                            <td>FY-2023</td>
-                                            <td>
-                                                <a class="btn btn-info" href="<%$base_url%>planing_data_month/FY-2023">View Details</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>4</td>
-                                            <td>FY-2024</td>
-                                            <td>
-                                                <a class="btn btn-info" href="<%$base_url%>planing_data_month/FY-2024">View Details</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>5</td>
-                                            <td>FY-2025</td>
-                                            <td>
-                                                <a class="btn btn-info" href="<%$base_url%>planing_data_month/FY-2025">View Details</a>
-                                            </td>
-                                        </tr>
+                                        <%/foreach%>
                                     </tbody>
                                 </table>
                             </div>

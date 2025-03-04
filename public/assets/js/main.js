@@ -5,13 +5,12 @@ var table_data ;
 var active_form_ele = '';
 if($("body .dashboard-block").length == 0){
 $(document).ajaxStart(function(e) {
-  
-  if($(e.target.activeElement).parents(".modal").length || $(e.target.activeElement).parents("form").length || $(e.target.activeElement).attr("href") != ""){
-    if($(e.target.activeElement).attr("href") != "" ){
+  if($(e.target.activeElement).parents(".modal").length || $(e.target.activeElement).parents(".filter-popup-block").length == 0 && ($(e.target.activeElement).parents("form").length || $(e.target.activeElement).attr("href") != "")){
+    if($(e.target.activeElement).attr("href") != "" && $(e.target.activeElement).attr("href") != undefined && $(e.target.activeElement).attr("href") != null){
         $(e.target.activeElement).addClass("disable-btn")
     }
     
-   
+    if(!$(e.target.activeElement.localName).hasClass("serarch-filter-input") || $(e.target.activeElement).parents(".modal").length){
       active_form_ele = e.target.activeElement;
       $(active_form_ele).prop('disabled', true);
       setTimeout(function(){
@@ -20,6 +19,7 @@ $(document).ajaxStart(function(e) {
             $(active_form_ele).removeClass("disable-btn")
         }
       },5000)
+    }
   }
 
   if($("body").hasClass("modal-open")){
@@ -168,9 +168,33 @@ const app = {
         }
         
       })
+      $('.dropdown-submenu > a').on('click', function (e) {
+        if ($(window).width() <= 768) {
+        e.preventDefault();
+                e.stopPropagation();
+        if($(this).parents(".dropdown-submenu").find(".dropdown-menu").hasClass("show")){
+            var nextMenu = $(this).next('.dropdown-menu').removeClass("show");
+            var nextMenu = $(this).next('.dropdown-menu');
+            $(this).parents(".dropdown-menu").addClass("show222");
+            nextMenu.addClass('hide');
+        }else{
+            // Only for mobile view
+                
+               
+                var nextMenu = $(this).next('.dropdown-menu');
+                nextMenu.removeClass('hide');
+                if (nextMenu.length) {
+                    // Toggle the clicked submenu
+                    nextMenu.toggleClass('show');
+                }
+           
+        }
+    }
+        
+    });
   },
   allowNumber:function(){
-    $('.onlyNumericInput').on('keypress', function(event) {
+    $(document).on('keypress','.onlyNumericInput', function(event) {
       var charCode = (event.which) ? event.which : event.keyCode;
 
       var value = $(this).val();
@@ -185,7 +209,7 @@ const app = {
       console.log(this.value.replace(/[^0-9.]/g, ''));
         
     });
-    $('.onlyNumericInput').on('input', function(event) {
+    $(document).on('input','.onlyNumericInput', function(event) {
       var charCode = (event.which) ? event.which : event.keyCode;
 
       var value = $(this).val();

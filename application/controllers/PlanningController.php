@@ -31,6 +31,8 @@ class PlanningController extends CommonController
 
 		$data['financial_year'] = $this->uri->segment('2');
 		$financial_year = $this->uri->segment('2');
+		$data['financial_year_value'] = explode("-",$financial_year);
+		$data['financial_year_value'] = $data['financial_year_value'][1];
 		// $this->load->view('header');
 		$this->loadView('customer/planing_data_month', $data);
 		// $this->load->view('footer');
@@ -52,6 +54,9 @@ class PlanningController extends CommonController
 		$financial_year = $this->uri->segment('2');
 		$month = $this->uri->segment('3');
 		$data['financial_year'] = $financial_year;
+		$data['financial_year_value'] = explode("-",$financial_year);
+		$data['financial_year_value'] = $data['financial_year_value'][1];
+		
 		$data['month'] = $month;
 		$data['customer'] = $this->Crud->read_data("customer");
 		if($customer_id === "ALL") {
@@ -95,8 +100,8 @@ class PlanningController extends CommonController
 					// 		GROUP BY s.customer_part_id');
 						$sales_invoice_data = $this->Crud->customQuery('SELECT s.*,p.qty as dispatched_qty FROM new_sales s, sales_parts p
 							WHERE s.clientId = '.$this->Unit->getSessionClientId().' 
-							 AND ((s.created_year = "'.$year_number.'" AND s.created_month > "4") 
-         					OR (s.created_year = "'.($year_number+1).'" AND s.created_month < "3"))
+							 AND ((s.created_year = "'.$year_number.'" AND s.created_month >= "4") 
+         					OR (s.created_year = "'.($year_number+1).'" AND s.created_month <= "3"))
 							AND s.status = "lock"
 							AND p.part_id = '.$t->customer_part_id.'
 							AND s.id = p.sales_id
@@ -129,6 +134,7 @@ class PlanningController extends CommonController
 		$customer_id = $this->input->post('id');
 		$customer_parts = $this->Crud->get_data_by_id("customer_part", $customer_id, 'customer_id');
 		echo '<select>Select Part Number / Description';
+		echo "<option value=''>Select Part Number / Description</option>";
 		if ($customer_parts) {
 			foreach ($customer_parts as $value) {
 					echo '<option value="' . $value->id . '">' . $value->part_number. ' / ' . $value->part_description . '</option>';
@@ -699,9 +705,11 @@ class PlanningController extends CommonController
 					AND cp.customer_id = c.id
 					AND p.clientId = ".$this->Unit->getSessionClientId()." 
 					AND EXTRACT(MONTH FROM shop_date) = ".$filter_month."
-					AND EXTRACT(YEAR FROM shop_date) = ".$filter_year);
+					AND ((EXTRACT(YEAR FROM shop_date) = '".$filter_year."' AND EXTRACT(MONTH FROM shop_date) >= '4') 
+         					OR (EXTRACT(YEAR FROM shop_date) = '".($filter_year+1)."' AND EXTRACT(MONTH FROM shop_date) <= '3'))");
 
 			} else {
+
 				$data['planing_data'] = $this->Crud->customQuery("SELECT c.customer_name, cp.part_number, cp.part_description, p.*, EXTRACT(MONTH FROM shop_date) as shop_month, 
 				EXTRACT(YEAR FROM shop_date) as shop_year
 				FROM planning_shop_order p, 
@@ -710,10 +718,15 @@ class PlanningController extends CommonController
 					AND cp.id = p.customer_part_id
 					AND cp.customer_id = c.id
 					AND p.clientId = ".$this->Unit->getSessionClientId()." 
-					AND EXTRACT(MONTH FROM shop_date) = ".$filter_month."
-					AND EXTRACT(YEAR FROM shop_date) = ".$filter_year);
+					AND p.shop_month = ".$filter_month."
+					AND ((p.shop_year = '".$filter_year."' AND p.shop_month >= '4') 
+         					OR (p.shop_year = '".($filter_year+1)."' AND p.shop_month <= '3'))");
 			}
+			// ((EXTRACT(YEAR FROM shop_date) = '".$year_number."' AND EXTRACT(MONTH FROM shop_date) >= '4') 
+   //       					OR (EXTRACT(YEAR FROM shop_date) = '".($year_number+1)."' AND EXTRACT(MONTH FROM shop_date) <= '3'))
 		}
+
+		// pr($this->db->last_query(),1);
 
 		for ($i = 1; $i <= 12; $i++) {
 			$data['month_data'][$i] = $this->Common_admin_model->get_month($i);
@@ -727,6 +740,8 @@ class PlanningController extends CommonController
 		// $this->load->view('header');
 		// $this->load->view('planning_shop_order_list', $data);
 		// $this->load->view('footer');
+		$data['min_date'] =  date("Y-m-d", strtotime("+ 1 day")); 
+		$data['max_date'] =  date("Y-m-d", strtotime("+ 3 day")); 
 		$this->loadView('customer/planning_shop_order_list',$data);
 	}
 
@@ -735,28 +750,33 @@ class PlanningController extends CommonController
 		$customer_part_id = $this->input->post('customerPartId');
 		$schQty = $this->input->post('scheduleQty');
 		$shopDate = $this->input->post('shop_date');
-		
+		$year = explode("-",$shopDate);
+		$year_value = $year[0];
+		if((int) $year[1] <= 3){
+			$year[0]--;
+		}
 		//Get the total quantity for shop order month,year to cross check it.
 		$total_consumed_qty = $this->Crud->customQuery("SELECT sum(scheduleQty) as total FROM 
 			`planning_shop_order`
 			WHERE customer_part_id = ".$customer_part_id."
 			AND shop_month = date_format('".$shopDate."','%c')
-			AND shop_year = EXTRACT(YEAR FROM '".$shopDate."')
+			AND shop_year = ".$year_value."
 			GROUP BY customer_part_id");
-
 		//Get the planned schedule qty for specific year-month
 		$month_planned_qty = $this->Crud->customQuery("SELECT pd.schedule_qty 
 		FROM planing_data pd, planing p
 		WHERE p.customer_part_id = ".$customer_part_id."
 		AND pd.planing_id = p.id
 		AND pd.month = UPPER(date_format('".$shopDate."','%b'))
-		AND pd.financial_year = CONCAT('FY-',EXTRACT(YEAR FROM '".$shopDate."'))
+		AND pd.financial_year = CONCAT('FY-',".$year[0].")
 		GROUP BY p.customer_part_id");
 		
 		$pending_qty = $month_planned_qty[0]->schedule_qty - $total_consumed_qty[0]->total;
-		
+		$success = 0;
+        $messages = "Something went wrong";
 		if($schQty > $pending_qty) {
-			$this->addErrorMessage('Shop order quantity can not be more than months schedule quantity. Pending quantity is '.$pending_qty);
+			// $this->addErrorMessage('Shop order quantity can not be more than months schedule quantity. Pending quantity is '.$pending_qty);
+			$messages = 'Shop order quantity can not be more than months schedule quantity. Pending quantity is '.$pending_qty;
 		}else{
 			$sql = "SELECT shop_no FROM planning_shop_order WHERE shop_no like '" . $this->getShopOrderSerialNo() . "%' order by id desc LIMIT 1";
 			$latestSeqFormat = $this->Crud->customQuery($sql);
@@ -786,14 +806,19 @@ class PlanningController extends CommonController
 		
 			$result = $this->Crud->insert_data("planning_shop_order", $insert_data);
 			if ($result) {
-				$this->addSuccessMessage('Shop order added sucessfully.');
+				$success = 1;
+				$messages = "Shop order added sucessfully.";
+				// $this->addSuccessMessage('Shop order added sucessfully.');
 			} else {
-				$this->addErrorMessage('Failed to add Shop order. Please try again.');
+				$messages = "Failed to add Shop order. Please try again.";
+				// $this->addErrorMessage('Failed to add Shop order. Please try again.');
 			}
 		}
 
-		
-		$this->redirectMessage();
+		$return_arr['success']=$success;
+        $return_arr['messages']=$messages;
+        echo json_encode($return_arr);
+        exit;
 	}
 
 
