@@ -210,6 +210,7 @@ const datatable = {
         scrollY: true,
         bScrollCollapse: true,
         pagingType: "full_numbers",
+        order:[]
        
         
         });

@@ -4744,7 +4744,7 @@ class SalesController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([[17,'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,25000], [10,50,100,200,500,1000,25000]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		$current_year = (int) date("Y");
@@ -4786,7 +4786,7 @@ class SalesController extends CommonController
 		
 		$data = $this->SalesModel->getReceivableReportView($condition_arr,$post_data["search"]);
 		
-		// pr($this->db->last_query(),1);
+		// pr($data,1);
 		foreach ($data as $key => $objs) {
 
 			$date_convert = DateTime::createFromFormat('d-m-Y', $objs['created_date']);
@@ -4879,6 +4879,7 @@ class SalesController extends CommonController
 
 		$data["data"] = $data;
         $total_record = $this->SalesModel->getReceivableReportCount([], $post_data["search"]);
+        // pr($this->db->last_query(),1);
         $total_with_gst_val = 0;
         $total_paid_amount = 0;
         $total_balance_amount_to_pay = 0;
@@ -4887,7 +4888,7 @@ class SalesController extends CommonController
 			$row_total = round($value['ttlrt'],2) + round($value['tcsamnt'],2);
 			$total_with_gst_val += $row_total;
 			$total_paid_amount += $value['amount_received'];
-			$total_tds_amount += $value['tds_amount'];
+			$total_tds_amount += $value['tdsamnt'] > 0 ? number_format($value['tdsamnt'],2,".","") : 0;
 			if($value['bal_amnt'] > 0){
 				$total_balance_amount_to_pay += $value['bal_amnt'];
 			}

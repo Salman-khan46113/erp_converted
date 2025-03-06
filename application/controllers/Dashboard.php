@@ -352,6 +352,17 @@ class Dashboard extends CommonController
         $count_arr['count'] = $total_amount;// - $total_discount;
         return $count_arr;
     }
+    public function get_total_receivable_tds($year = '',$month_arr = []){
+        $sales_data = $this->dashboard_model->get_total_receivable_tds($year,$month_arr);
+        // pr($sales_data,1);
+        if(count($sales_data) >0){
+            $tdsamnt = array_sum(array_column($sales_data, "tdsamnt"));
+        }else{
+            $tdsamnt = 0;
+        }
+        $count_arr['count'] = $tdsamnt;// - $total_discount;
+        return $count_arr;
+    }
     public function get_total_receivable_due_gst($year = '',$month_arr = []){
         $sales_data = $this->dashboard_model->get_total_receivable_due_gst($year,$month_arr);
         // pr($sales_data,1);

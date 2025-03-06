@@ -49,10 +49,10 @@
     Planning & Sales
     <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link" title="Back to Issue Request Listing" >
       <i class="ti ti-chevrons-right" ></i>
-      <em >Customer Master</em></a>
+      <em >Sales Master</em></a>
   </h1>
   <br>
-  <span >Customer Master</span>
+  <span >Sales Master</span>
 </div>
 </nav>
 <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">

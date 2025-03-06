@@ -103,6 +103,7 @@ const page = {
             //     leftColumns: 2,
             //     // end: 1
             // },
+            order:sorting_column,
             ajax: {
                 data: {'search':data},    
                 url: "P_Molding/get_machine_request_view",

@@ -141,7 +141,11 @@
    <section class="content">
       <div class="">
          <div class="row">
+         <div class="w-100">
+    <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
+  </div>
             <div class="col-12">
+
                <div class="card">
                   
                   <!-- Modal -->

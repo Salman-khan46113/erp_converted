@@ -534,7 +534,7 @@
                                        <li><a href="<%base_url('stock_down')%>" class="dropdown-item">Material issue</a></li>
                                     <%/if%>
                                     <%if checkGroupAccess("stock_up","list","No")%>
-                                     <li><a href="<%base_url('stock_up')%>" class="dropdown-item">Stock Up/Return</a></li>
+                                     <li><a href="<%base_url('stock_up')%>" class="dropdown-item">Stock Up</a></li>
                                     <%/if%>
                                     <%if checkGroupAccess("sharing_issue_request_store","list","No")%>
                                        <li><a href="<%base_url('sharing_issue_request_store')%>" class="dropdown-item">Sharing Isuue Request - Pending</a></li>

@@ -780,6 +780,23 @@
                               </div>
                            </article>
                         </div>
+                        <div class="col-md-6 col-xl-3 ">
+                           <article class="stat-cards-item widget-box" id="TOTAL_TDS_BLOCK" data-widget="TOTAL_TDS">
+                              <div class="refresh-btn-block ">
+                                 <i class="las la-sync cursor" title="Refresh"></i>
+                              </div>
+                              <div class="loader-box">
+                                 <div class="dot-elastic"></div>
+                              </div>
+                              <div class="stat-cards-icon primary">
+                                 <i class="las la-check-circle"></i>
+                              </div>
+                              <div class="stat-cards-info">
+                                 <p class="stat-cards-info__title">Total TDS (INR)</p>
+                                 <p class="stat-cards-info__num timer count-title count-number" data-to="" data-speed="1500"></p>
+                              </div>
+                           </article>
+                        </div>
                      </div>
                      <div class="row">
                         <div class="col-lg-5">
