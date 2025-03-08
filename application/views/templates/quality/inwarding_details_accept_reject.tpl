@@ -252,9 +252,9 @@
                      <th style="width: 6%;">Price</th>
                      <th style="width: 6%;">Inwarding Qty</th>
                      <th style="width: 8%;">GRN Validation Qty</th>
-                     <th style="width: 6%;">Accept Qty</th>
-                     <th style="width: 6%;">Reject Qty</th>
-                     <th style="width: 6%;">Remark</th>
+                     <th style="width: 10%;">Accept Qty</th>
+                     <th style="width: 10%;">Reject Qty</th>
+                     <th style="width: 12%;">Remark</th>
                      <th style="width: 6%;">Submit </th>
                      <th style="width: 6%;">GRN Rejection</th>
                      <th style="width: 6%;">RM Batch No</th>
@@ -297,7 +297,7 @@
                      <td style="width: 6%;"><%$p->verified_qty %></td>
                      <%if ((empty($p->accept_qty) && $p->accept_qty != 0 && ($p->reject_qty) > 0) || ($p->accept_qty == 0 && $p->reject_qty == 0)) %>
 
-                     <td style="width: 6%;">
+                     <td style="width: 10%;">
                         <form action="<%base_url('update_grn_qty_accept_reject') %>"
                            method="post" class="update_grn_qty_accept_reject update_grn_qty_accept_reject<%$p->part_id %> custom-form" id="update_grn_qty_accept_reject<%$p->part_id %>">
                            <div class="form-group">
@@ -331,11 +331,11 @@
                               </div>
                            <%assign var='accept_inwarding_btn' value=false%>
                            <%else %>
-                     <td style="width: 6%;">
+                     <td style="width: 10%;">
                      <%$p->accept_qty %>
                      <%/if%>
                      </td>
-                     <td style="width: 6%;">
+                     <td style="width: 12%;">
                      <%if (empty($p->reject_qty) && empty($p->accept_qty)) %>
                      <%assign var='accept_inwarding_btn' value=false%>
                      <div class="form-group">
@@ -348,7 +348,7 @@
                      <%$p->reject_qty %>
                      <%/if%>
                      </td>
-                     <td style="width: 6%;">
+                     <td style="width: 10%;">
                      <%if ((empty($p->accept_qty) && $p->accept_qty != 0 && ($p->reject_qty) > 0) || ($p->accept_qty == 0 && $p->reject_qty == 0)) %>
                      <input type="text" name="remark" placeholder="Remark"
                         class="form-control">

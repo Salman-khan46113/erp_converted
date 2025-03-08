@@ -546,7 +546,7 @@ class CustomerPart extends CI_Model {
                 $this->db->where('cpt.po_end_date < CURDATE()');
                 $this->db->where('cpt.status != "closed"');
             }else if($search_params['status'] == "pending"){
-                $this->db->where('cpt.po_end_date > CURDATE()');
+                $this->db->where('cpt.po_end_date >= CURDATE()');
                 $this->db->where('cpt.status', $search_params['status']);
             }else{
                 $this->db->where('cpt.status', $search_params['status']);
@@ -601,7 +601,7 @@ class CustomerPart extends CI_Model {
                 $this->db->where('cpt.po_end_date < CURDATE()');
                 $this->db->where('cpt.status != "closed"');
             }else if($search_params['status'] == "pending"){
-                $this->db->where('cpt.po_end_date > CURDATE()');
+                $this->db->where('cpt.po_end_date >= CURDATE()');
                 $this->db->where('cpt.status', $search_params['status']);
             }else{
                 $this->db->where('cpt.status', $search_params['status']);

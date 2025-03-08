@@ -1213,7 +1213,8 @@ class SalesModel extends CI_Model {
             SUM(s.gst_amount) as gst, 
             SUM(s.total_rate) as ttlrt, 
             SUM(s.gst_amount) as gstamnt, 
-            SUM(s.tcs_amount) as tcsamnt, 
+            SUM(s.tcs_amount) as tcsamnt,
+            SUM((IF(s.basic_total > 0,s.basic_total,0))*(IF(cus.tds > 0,cus.tds,0)/100) ) as tdsamnt,  
             cus.customer_name, 
             cus.payment_terms, 
             rrp.payment_receipt_date,
@@ -1223,7 +1224,7 @@ class SalesModel extends CI_Model {
            rrp.tds_amount as tds_amount,
             rrp.remark as remark_val,
             ROUND(SUM(
-                IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
+                IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - (IF(s.basic_total > 0,s.basic_total,0))*(IF(cus.tds > 0,cus.tds,0)/100) - IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
                 2) AS bal_amnt,
             s.sales_id as sales_id_val,cl.client_unit as client_name');
         

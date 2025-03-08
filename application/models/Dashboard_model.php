@@ -322,7 +322,7 @@ class Dashboard_model extends CI_Model
 			    $this->db->or_where("s.created_year = ".$month_arr['end_year']." AND s.created_month <= ".$month_arr['end_month']."");
 		   	}
 	   	}
-	   	$this->db->having('bal_amnt >', 0);
+	   	// $this->db->having('bal_amnt >', 0);
         $result_obj = $this->db->get();
         $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
         // pr($this->db->last_query(),1);

@@ -78,6 +78,7 @@ class Newcontroller extends CommonController
 		$loading_unloading_gst = $this->input->post('loading_unloading_gst');
 		$freight_amount = $this->input->post('freight_amount');
 		$freight_amount_gst = $this->input->post('freight_amount_gst');
+		$target_delivery_date = $this->input->post('target_delivery_date');
 		//$data['new_po'] = $this->Crud->read_data("new_po");
 		$supplier_data = $this->Crud->get_data_by_id("supplier", $supplier_id, "id");
 		
@@ -172,7 +173,9 @@ class Newcontroller extends CommonController
 				"clientId" => $this->Unit->getSessionClientId(),
 				"po_discount_type" => $po_discount_type,
 				"discount_type" => $discount_type,
-				"discount" => $discount
+				"discount" => $discount,
+				// "target_delivery_date" => $target_delivery_date
+
 			);
 
 
@@ -420,7 +423,7 @@ class Newcontroller extends CommonController
 		$data['isSubPO'] = $isSubPO;
 		$final_po_amount = 0;
 		$po_part = $data['po_parts'];
-
+		$part_added = !empty($po_part) > 0 ? "Yes" : "No";
 		foreach ($po_part as $key=>$p) {
 			$data_arr = array(
             	'supplier_id' => $supplier[0]->id,
@@ -454,8 +457,13 @@ class Newcontroller extends CommonController
             $po_part[$key]->gst_amount= $gst_amount  = $cgst_amount + $sgst_amount + $igst_amount;
             $po_part[$key]->total_rate = $total_rate = $total_rate_old + $cgst_amount + $sgst_amount + $igst_amount;
             $final_po_amount = $final_po_amount + $total_rate;
+
+            if(!($p->qty > 0)){
+            	$part_added = "No";
+            }
         }
-        // pr($new_po,1);
+        $data['part_added'] = $part_added;
+        // pr($part_added,1);
 
         $data['po_parts'] = $po_part;
         $data['final_po_amount'] = $final_po_amount;

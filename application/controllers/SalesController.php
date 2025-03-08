@@ -2253,7 +2253,7 @@ class SalesController extends CommonController
 			        "orderable" => false,
 			    ],
 			    [
-			        "data" => "tds_amount",
+			        "data" => "tdsamnt",
 			        "title" => "TDS",
 			        "width" => "7%",
 			        "className" => "dt-center",
@@ -2315,7 +2315,7 @@ class SalesController extends CommonController
 				$data[$key]['subtotal'] = $subtotal;
 				$data[$key]['row_total'] = number_format($row_total,2,".","");
 				$data[$key]['payment_receipt_date_formated'] = $payment_receipt_date_formated;
-				$tds_amount = $data[$key]['tds_amount'] = $objs['tds_amount'] > 0 ? $objs['tds_amount'] : 0;
+				$tds_amount = $data[$key]['tdsamnt'] = $objs['tdsamnt'] > 0 ? $objs['tdsamnt'] : 0;
 
 				// $data[$key]['bal_amnt'] = $row_total - $val['amount_received'] - $tds_amount;
 
@@ -4868,7 +4868,7 @@ class SalesController extends CommonController
 			$data[$key]['due_days'] = $due_days;
 			$data[$key]['due_days_status'] = $due_days_status;
 		}
-		// pr($data,1);
+		
 		foreach ($data as $key => $value) {
 			$edit_data = base64_encode(json_encode($value)); 
 			$data[$key]['action'] = display_no_character("");
@@ -4880,6 +4880,7 @@ class SalesController extends CommonController
 		$data["data"] = $data;
         $total_record = $this->SalesModel->getReceivableReportCount([], $post_data["search"]);
         // pr($this->db->last_query(),1);
+        // pr($total_record,1);
         $total_with_gst_val = 0;
         $total_paid_amount = 0;
         $total_balance_amount_to_pay = 0;
@@ -4888,10 +4889,10 @@ class SalesController extends CommonController
 			$row_total = round($value['ttlrt'],2) + round($value['tcsamnt'],2);
 			$total_with_gst_val += $row_total;
 			$total_paid_amount += $value['amount_received'];
-			$total_tds_amount += $value['tdsamnt'] > 0 ? number_format($value['tdsamnt'],2,".","") : 0;
-			if($value['bal_amnt'] > 0){
+			$total_tds_amount += $value['tdsamnt'] > 0 ? $value['tdsamnt'] : 0;
+			// if($value['bal_amnt'] > 0){
 				$total_balance_amount_to_pay += $value['bal_amnt'];
-			}
+			// }
 		}
         $data["recordsTotal"] = count($total_record);
         $data["recordsFiltered"] = count($total_record);

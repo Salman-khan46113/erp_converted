@@ -1708,8 +1708,10 @@ class Welcome extends CommonController
 		);
 
 		$data['po_parts'] = $this->Crud->get_data_by_id("po_parts", $new_po_id, "po_id");
+        $part_added = "Yes";
 
 		foreach ($data['po_parts'] as $key => $p) {
+
 			$child_part = $this->Crud->get_data_by_id("child_part", $p->part_id, "id");
 			$data['po_parts'][$key]->child_part = $child_part;
 			$child_part_data = $this->Crud->get_data_by_id("child_part_master", $p->part_id, "child_part_id");
@@ -1726,6 +1728,9 @@ class Welcome extends CommonController
                 //         'grn_number' => $inwarding_data[0]->grn_number,
            	);
            	$grn_details_data = $this->Crud->get_data_by_id_multiple("grn_details", $arr1);
+            if(!($grn_details_data[0]->verified_qty > 0)){
+                $part_added = "No";
+            }
            	$data['po_parts'][$key]->grn_details_data = $grn_details_data;
 
            	$arr2 = array(
@@ -1738,6 +1743,7 @@ class Welcome extends CommonController
             $rejection_flow_data = $this->Crud->get_data_by_id_multiple("rejection_flow", $arr2);
             $data['po_parts'][$key]->rejection_flow_data = $rejection_flow_data;
 		}
+       
 
 		$arr = array(
             'inwarding_id' => $inwarding_data[0]->id,
@@ -1775,6 +1781,7 @@ class Welcome extends CommonController
         $data['minus_price'] = $minus_price;
         $data['plus_price'] = $plus_price;
         $data['status'] = $status;
+        $data['part_added'] = $part_added;
         // pr($data,1);
 		// $this->load->view('header');
 		$this->loadView('store/inwarding_details_validation', $data);

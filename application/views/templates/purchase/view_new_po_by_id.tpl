@@ -321,7 +321,7 @@
                            <%/if%>
                         <%/if%>
                         <%if ($new_po[0]->status == "pending" && $status_value != "Expired") %>
-                           <%if ($user_type == 'admin' || $user_type == 'Admin') %>
+                           <%if ($user_type == 'admin' || $user_type == 'Admin') && $part_added eq "Yes" %>
                                  <button type="button" class="btn btn-success ml-1" data-bs-toggle="modal" data-bs-target="#accept">
                                  Approve & Release PO
                                  </button>

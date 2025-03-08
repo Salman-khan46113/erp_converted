@@ -110,16 +110,16 @@
                           </div>
                           <div class="col-lg-12">
                           <%if ($inwarding_data[0]->status == "validate_grn") %>
-                      <button type="button" disabled class="btn btn-success mt-4"
-                      data-bs-toggle="modal">
-                      GRN Already Validated</button>
-                      <%else %>
-                      <%if ($j === $i) %>
-                      <button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal"
-                      data-bs-target="#exampleModalgenerate">
-                      Validate GRN </button>
-                      <%/if%>
-                      <%/if%>
+                            <button type="button" disabled class="btn btn-success mt-4"
+                            data-bs-toggle="modal">
+                            GRN Already Validated</button>
+                            <%else %>
+                            <%if ($j === $i  && $part_added == "Yes") %>
+                            <button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal"
+                            data-bs-target="#exampleModalgenerate">
+                            Validate GRN </button>
+                            <%/if%>
+                        <%/if%>
                        </div>
                       
                      
