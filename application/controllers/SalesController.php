@@ -356,7 +356,7 @@ class SalesController extends CommonController
 		//$data['uom'] = $this->Crud->read_data("uom");
 		$data['customer_tracking'] = $this->Crud->customQuery('SELECT po.* FROM customer_po_tracking as po, 
 		parts_customer_trackings as po_parts 
-		WHERE po.po_end_date > CURDATE() AND po.status = "pending" AND po.customer_id =' . $data['new_sales'][0]->customer_id . '
+		WHERE po.po_end_date >= CURDATE() AND po.status = "pending" AND po.customer_id =' . $data['new_sales'][0]->customer_id . '
 		 AND po.id = po_parts.customer_po_tracking_id AND po_parts.part_id = ' . $data['new_sales'][0]->customer_part_id);
 
 
@@ -2255,6 +2255,13 @@ class SalesController extends CommonController
 			    [
 			        "data" => "tdsamnt",
 			        "title" => "TDS",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "tds_amount",
+			        "title" => "Debit Amount",
 			        "width" => "7%",
 			        "className" => "dt-center",
 			        "orderable" => false,

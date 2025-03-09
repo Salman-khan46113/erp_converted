@@ -56,7 +56,7 @@ class FGStockController extends CommonController
             "width" => "10%",
             "className" => "dt-center",
         ];
-        if($isSheetMetal == "Yes"){
+        // if($isSheetMetal == "Yes"){
             $column[] = [
                 "data" => "transfer_to_inhouse_part",
                 "title" => "FG Stock Transfer",
@@ -64,7 +64,7 @@ class FGStockController extends CommonController
                 "className" => "dt-center status-row",
                 'orderable' => false
             ];
-        }
+        // }
 
         if($isSheetMetal != "Yes"){
             $column[] = [
@@ -141,12 +141,16 @@ class FGStockController extends CommonController
             $post_data["search"]
         );
 		// pr($data,1);
+        $entitlements = $this->session->userdata("entitlements");
+        $isSheetMetal = isset($entitlements['isSheetMetal']) && $entitlements['isSheetMetal'] != null ? "Yes" : "No";
 		foreach ($data as $key => $value) {
 			
             if(checkGroupAccess("fw_stock","update","No") && $value['fg_stock'] > 0){
+                if($isSheetMetal == "Yes"){
             	$data[$key]['transfer_to_inhouse_part'] = "<button type='button' class='btn btn-primary fg-transfer me-2'  data-stock='".$value['fg_stock']."' data-customer-part-id='".$value['customer_parts_master_id']."' data-part-number='".$value['part_number']."'>
                     Transfer To Inhouse
                   </button>";
+                }
                 $data[$key]['transfer_to_inhouse_part'] .= "<button type='button' class='btn btn-primary fg-to-fg-transfer'  data-stock='".$value['fg_stock']."' data-customer-part-id='".$value['customer_parts_master_id']."' data-part-number='".$value['part_number']."'>
                     Transfer To FG
                   </button>";

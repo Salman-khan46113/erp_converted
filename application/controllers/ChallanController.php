@@ -195,93 +195,93 @@ class ChallanController extends CommonController {
 
 	public function add_challan_parts()
 	{
-		
+		error_reporting(-1);
+		ini_set('display_errors', 1);	
 		$challan_id = $this->input->post('challan_id');
 		$client_id = $this->Unit->getSessionClientId();
 		$challanPartCount = $this->db->query('SELECT COUNT(*) as count FROM `challan_parts` where challan_id = ' . $challan_id)->row();
-		if($challanPartCount->count >= 7) {
-			$this->addWarningMessage("Already 7 parts added. No more parts are allowed.");
-			$this->redirectMessage();
-			exit();
-		}
-
-		$qty = $this->input->post('qty');
-		$part_id = $this->input->post('part_id');
-		$process = $this->input->post('process');
-
-		$uniqueCheck = array(
-			'challan_id' => $challan_id,
-			'part_id' => $this->input->post('part_id'),
-
-		);
-
-		$challan_parts = $this->Crud->get_data_by_id_multiple_condition("challan_parts", $uniqueCheck);
 		$success = 0;
 		$messages = "Somthing went Wrong";
-		if ($challan_parts) {
-			$messages = "Part already present.";
-			// $this->addWarningMessage("Part already present.");
-			// $this->redirectMessage();
-		} else {
-			$child_part_data = $this->SupplierParts->getSupplierPartById($this->input->post('part_id'));
-			$data = array(
+		if($challanPartCount->count >= 7) {
+			$success = 0;
+			$messages = "Already 7 parts added. No more parts are allowed.";
+		}else{
+			$qty = $this->input->post('qty');
+			$part_id = $this->input->post('part_id');
+			$process = $this->input->post('process');
+
+			$uniqueCheck = array(
 				'challan_id' => $challan_id,
 				'part_id' => $this->input->post('part_id'),
-				'qty' => $this->input->post('qty'),
-				'remaning_qty' => $this->input->post('qty'),
-				'process' => $process,
-				'value' => $child_part_data[0]->store_stock_rate * $qty,
-				'hsn' => $child_part_data[0]->hsn_code,
-				"created_date" => $this->current_date,
-				"created_time" => $this->current_time,
-				"day" => $this->date,
-				"month" => $this->month,
-				"year" => $this->year,
+
 			);
 
-			$current_stock = $child_part_data[0]->stock;
-
-			if ((float)$qty > (float)$current_stock) {
-				$messages = "Store stock quantity is less than entered quantity.";
-				// $this->addWarningMessage("Store stock quantity is less than entered quantity.");
+			$challan_parts = $this->Crud->get_data_by_id_multiple_condition("challan_parts", $uniqueCheck);
+			if ($challan_parts) {
+				$messages = "Part already present.";
+				// $this->addWarningMessage("Part already present.");
 				// $this->redirectMessage();
 			} else {
-				$inser_query = $this->Crud->insert_data("challan_parts", $data);
-				if ($inser_query) {
-					$updateResult = $this->db->query("update child_part_stock set stock = COALESCE(stock, 0) - ".$qty.", sub_con_stock = COALESCE(sub_con_stock, 0) + ".$qty."
-					where childPartId =".$part_id." AND clientId=".$client_id);
-					if($updateResult){
-						$messages = "Part added.";
-						$success = 1;
-						// $this->addSuccessMessage("Part added.");
-					}else{
-						$messages = "Error while adding quantity to stock.";
-						// $this->addErrorMessage("Error while adding quantity to stock.");
-					}
+				$child_part_data = $this->SupplierParts->getSupplierPartById($this->input->post('part_id'));
+				$data = array(
+					'challan_id' => $challan_id,
+					'part_id' => $this->input->post('part_id'),
+					'qty' => $this->input->post('qty'),
+					'remaning_qty' => $this->input->post('qty'),
+					'process' => $process,
+					'value' => $child_part_data[0]->store_stock_rate * $qty,
+					'hsn' => $child_part_data[0]->hsn_code,
+					"created_date" => $this->current_date,
+					"created_time" => $this->current_time,
+					"day" => $this->date,
+					"month" => $this->month,
+					"year" => $this->year,
+				);
+
+				$current_stock = $child_part_data[0]->stock;
+
+				if ((float)$qty > (float)$current_stock) {
+					$messages = "Store stock quantity is less than entered quantity.";
+					// $this->addWarningMessage("Store stock quantity is less than entered quantity.");
 					// $this->redirectMessage();
-
-						/*
-						$current_stock = $child_part_data[0]->stock;
-						old code $new_stock = $current_stock - $qty;
-						$oldSubcon = $child_part_data[0]->sub_con_stock;
-						$newsubcon = $oldSubcon + $qty;
-
-						$stockUpdate = array(
-							'stock' => $new_stock,
-							'sub_con_stock' => $newsubcon,
-						);
-
-						$update = $this->Crud->update_data("child_part", $stockUpdate, $part_id);
-						if ($update) {
-							$this->addSuccessMessage("Part added successfully");
-						} else {
-							$this->addErrorMessage("Error while updating Qty to stock");
-						}*/
-
 				} else {
-					$messages = "Error while adding quantity.";
-					// $this->addErrorMessage("Error while adding quantity.");
-					// $this->redirectMessage();
+					$inser_query = $this->Crud->insert_data("challan_parts", $data);
+					if ($inser_query) {
+						$updateResult = $this->db->query("update child_part_stock set stock = COALESCE(stock, 0) - ".$qty.", sub_con_stock = COALESCE(sub_con_stock, 0) + ".$qty."
+						where childPartId =".$part_id." AND clientId=".$client_id);
+						if($updateResult){
+							$messages = "Part added.";
+							$success = 1;
+							// $this->addSuccessMessage("Part added.");
+						}else{
+							$messages = "Error while adding quantity to stock.";
+							// $this->addErrorMessage("Error while adding quantity to stock.");
+						}
+						// $this->redirectMessage();
+
+							/*
+							$current_stock = $child_part_data[0]->stock;
+							old code $new_stock = $current_stock - $qty;
+							$oldSubcon = $child_part_data[0]->sub_con_stock;
+							$newsubcon = $oldSubcon + $qty;
+
+							$stockUpdate = array(
+								'stock' => $new_stock,
+								'sub_con_stock' => $newsubcon,
+							);
+
+							$update = $this->Crud->update_data("child_part", $stockUpdate, $part_id);
+							if ($update) {
+								$this->addSuccessMessage("Part added successfully");
+							} else {
+								$this->addErrorMessage("Error while updating Qty to stock");
+							}*/
+
+					} else {
+						$messages = "Error while adding quantity.";
+						// $this->addErrorMessage("Error while adding quantity.");
+						// $this->redirectMessage();
+					}
 				}
 			}
 		}

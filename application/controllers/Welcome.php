@@ -4261,13 +4261,28 @@ class Welcome extends CommonController
             $current_year++;
         }
 
-        $year_arr =[];
+        $month = ["APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC","JAN","FEB","MAR"];
+        $year_arr = [];
+        $month_arr = [];
         for ($i=2021; $i < $current_year ; $i++) { 
             $year_arr[] = $i;
+            foreach ($month as $key => $value) {
+                $month_arr[] = [
+                    "Key" => $i,
+                    "value" => "FY ".$i."-".($i+1)." ".$value,
+                    "url" => "FY-".$i."/".$value."/0"
+                ];
+            }
+            
         }
-        $data['year_arr'] = $year_arr;
+        // pr($month_arr,1);
+        $data['selected_year'] = date("m") < 4 ? date("Y")-1 : date("Y");
+        $data['year_arr'] = $month_arr;
+        $data['year_array'] = $year_arr;
 		$this->loadView('customer/planning_year_page',$data);
 	}
+
+    
 
 	public function planing_data_report_view()
 	{
@@ -4902,9 +4917,10 @@ class Welcome extends CommonController
             ');
 		$data['customer_parts_master'] = $role_management_data->result();
 		$data['final_inspection_request'] = $this->Crud->customQuery("
-			SELECT fi.*,cp.part_number as part_number,cp.part_description as part_description,cp.final_inspection_location as final_inspection_location
+			SELECT fi.*,cp.part_number as part_number,cp.part_description as part_description,cpm.final_inspection_location as final_inspection_location
 			FROM final_inspection_request as fi
 			LEFT JOIN customer_parts_master as cp ON cp.id = fi.customer_part_id
+             LEFT JOIN customer_parts_master_stock as cpm ON cp.id = cpm.customer_parts_master_id
 			WHERE fi.clientId = '".$this->Unit->getSessionClientId()."'
 			ORDER BY fi.id DESC
 		");
