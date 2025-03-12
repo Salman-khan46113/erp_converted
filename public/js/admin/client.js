@@ -22,9 +22,10 @@ $(document).ready(function() {
     $(document).on("click",".edit-part",function(){
         var data = $(this).attr("data-value");
         data = JSON.parse(atob(data)); 
-        console.log(data.emailId);
+        
+         
         $("#client_unit").val(data.client_unit);
-        $("#client_unit").val(data.client_unit);
+        $("#client_name").val(data.client_name);
         $("#contact_person").val(data.contact_person);
         $("#billing_address").val(data.billing_address);
         $("#shifting_address").val(data.shifting_address);

@@ -171,6 +171,9 @@
                      <div class="signatureLogo">
                          <input required type="file" name="SignatureImage" placeholder="Config Value" class="form-control" value="<?php echo $config->config_value; ?>">
                      </div>
+                     <div class="poSignatureLogo">
+                         <input required type="file" name="PoSignatureImage" placeholder="Config Value" class="form-control" value="">
+                     </div>
                      <div class="regularValue">
                         <input required type="text" name="config_value" placeholder="Config Value" class="form-control" value="<%$config->config_value %>">
                      </div>

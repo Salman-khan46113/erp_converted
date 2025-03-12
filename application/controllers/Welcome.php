@@ -4265,7 +4265,10 @@ class Welcome extends CommonController
         $year_arr = [];
         $month_arr = [];
         for ($i=2021; $i < $current_year ; $i++) { 
-            $year_arr[] = $i;
+            $year_arr[] = [
+                "key" => $i,
+                "val" => "FY ".$i."-".($i+1)
+            ];
             foreach ($month as $key => $value) {
                 $month_arr[] = [
                     "Key" => $i,
@@ -4275,6 +4278,7 @@ class Welcome extends CommonController
             }
             
         }
+
         // pr($month_arr,1);
         $data['selected_year'] = date("m") < 4 ? date("Y")-1 : date("Y");
         $data['year_arr'] = $month_arr;
@@ -4922,6 +4926,7 @@ class Welcome extends CommonController
 			LEFT JOIN customer_parts_master as cp ON cp.id = fi.customer_part_id
              LEFT JOIN customer_parts_master_stock as cpm ON cp.id = cpm.customer_parts_master_id
 			WHERE fi.clientId = '".$this->Unit->getSessionClientId()."'
+            GROUP BY fi.id
 			ORDER BY fi.id DESC
 		");
 		// $this->load->view('header');
@@ -9102,6 +9107,7 @@ class Welcome extends CommonController
                 "discount" => $discount,
                 "discount_type" => $discount_type
 			);
+            // pr($data,1);
 			$supplier_id = $this->input->post('supplier_id');
 			$result = $this->welcome_model->update_supplier_data($data,$supplier_id);
 			if ($result) {
@@ -10385,6 +10391,9 @@ class Welcome extends CommonController
 		$data['gst_structure'] = $this->Crud->read_data("gst_structure");
 		$data['customer_part_list'] = $this->Crud->read_data("customer_part");
 		$data['bom_list'] = $this->Crud->get_data_by_id("bom", $data['id'], "customer_part_id");
+        $configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
+        $configuration = array_column($configuration, "config_value","config_name");
+        $data['TritonPurchaseOrderChange'] = isset($configuration['TritonPurchaseOrderChange']) && $configuration['TritonPurchaseOrderChange'] == "Yes" ? "Yes" : "No";
 		// $this->load->view('header');
 		$this->loadView('purchase/new_po', $data);
 		// $this->load->view('footer');

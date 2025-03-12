@@ -215,6 +215,153 @@ class MagrationScript_Controller extends CommonController
          }
          
   }
+
+  public function send_monthly_schedule_report(){
+    $year = date("Y");
+    if(date("n") < 4){
+       $year--; 
+    }
+    $current_finatial_year = "FY-".$year;
+    
+
+    $planing_data = $this->Crud->customQuery("SELECT p.* FROM planing p, customer_part cp
+            WHERE p.clientId = ".$this->Unit->getSessionClientId()." 
+            AND cp.id = p.customer_part_id AND p.financial_year = '".$current_finatial_year."' AND p.month = '".strtoupper(date("M"))."'");
+        // pr($planing_data,1);
+        $total_schedule_amount = 0;
+        $total_dispatched_amount = 0;
+        // error_reporting(-1);
+        // ini_set('display_errors', 1);
+        $month = strtoupper(date("M"));
+        $monthly_schedule_arr = [];
+        $customers = $this->Crud->read_data("customer");
+        $customers = array_column($customers,"customer_name","id");
+        foreach ($planing_data as $key => $t) {
+                $total_dispatched_qty = 0;
+                $total_schedule_qty = 0;
+                if ($month == $t->month) {
+                    $customer_part_data = $this->Crud->get_data_by_id("customer_part", $t->customer_part_id, "id");
+                    $customers_data = $this->Crud->get_data_by_id("customer", $customer_part_data[0]->customer_id, "id");
+                    $planing_data_val= $this->Crud->get_data_by_id("planing_data", $t->id, "planing_id");
+                    $planing_data = $planing_data_val[0];
+                    $part_rate = $customer_part_rate[0]->rate > 0 ? $customer_part_rate[0]->rate : 0; 
+                    $total_schedule_qty += $planing_data->schedule_qty > 0 ? $planing_data->schedule_qty : 0;
+                   
+                    $sales_invoice_data = $this->Crud->customQuery('SELECT s.*,p.qty as dispatched_qty FROM new_sales s, sales_parts p
+                            WHERE s.clientId = '.$this->Unit->getSessionClientId().' 
+                             AND ((s.created_year = "'.$year.'" AND s.created_month >= "4") 
+                            OR (s.created_year = "'.($year+1).'" AND s.created_month <= "3"))
+                            AND s.status = "lock"
+                            AND p.part_id = '.$t->customer_part_id.'
+                            AND s.id = p.sales_id
+                            ');
+
+                        foreach ($sales_invoice_data as $key => $value) {
+                            if($value->created_month == date(n)){
+                                $total_dispatched_qty = $value->dispatched_qty > 0 ? $value->dispatched_qty : 0;
+                            }
+                        }
+
+                    }
+
+                    $customer_part_data['total_schedule_qty'] = $total_schedule_qty;
+                    $customer_part_data['total_dispatched_qty'] = $total_dispatched_qty;
+
+                    $monthly_schedule_arr[$customer_part_data[0]->customer_id][] = $customer_part_data;
+
+                    
+
+                
+    }
+    $html = "
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+
+        .customers {
+          background-color: #dddddd;
+        }
+        </style>
+        <div style='width:1023px;margin: 25px;'>
+        <div >
+        <table border='1' cellpadding='5' cellspacing='0' style='border-collapse: collapse;''>
+          <tr>
+            <th style='width:25%;text-align: left;'>Part No</th>
+            <th style='width:30%;text-align: left;'>Part Description</th>
+            <th style='width:10%;text-align: left;'>UOM</th>
+            <th style='width:10%;    text-align: left;'>Schedule QTY</th>
+            <th style='width:10%;    text-align: left;'>Dispatched QTY</th>
+            <th style='width:15%;    text-align: left;'>Balance Schedule QTY</th>
+          </tr>
+    ";
+    foreach ($monthly_schedule_arr as $key => $value) {
+        $html .= "<tr><td colspan='6' class='customers'>".$customers[$key]."</td></tr>";
+        foreach ($value as $k => $val) {
+            // pr($val);
+            $html .= "<tr >
+                        <td >".$val[0]->part_number."</td>
+                        <td >".$val[0]->part_description."</td>
+                        <td >".$val[0]->uom."</td>
+                        <td >".$val['total_schedule_qty']."</td>
+                        <td >".$val['total_dispatched_qty']."</td>
+                        <td >".($val['total_schedule_qty']-$val['total_dispatched_qty'])."</td>
+                    </tr>";
+        }
+    }
+    $html .= "</table></div></div>";
+    $data['html'] = $html;
+    $data[''] = $html;
+    $configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
+    $configuration = array_column($configuration, "config_value","config_name");
+    $data['subject'] = date("F")." ".$year." schedule vs actual report";
+    $email = $configuration["MontlyScheduleSenderEmail"];
+    if($email != ""){
+        $this->mail_sender($data,$configuration,$email);
+    }else{
+        echo "monthly schedule send email not found!";
+    }
+    
+  }
+  public function mail_sender($data = array(),$configuration = [],$email = ""){
+        $data['base_url']  = $this->config->item('base_url');
+        $mail = $this->phpmailer_lib->load();
+        $mail->isSMTP();                                      // Set mailer to use SMTP
+        $mail->Host = 'smtp.gmail.com';                       // 'smtp.gmail.com'; //'smtpout.secureserver.net';          // Specify main and backup SMTP servers
+        $mail->SMTPAuth = true;                               // Enable SMTP authentication
+        $mail->Username = $configuration['SMTPUserName'];     // SMTP username
+        $mail->Password = $configuration['SMTPUserPassword']; // SMTP password
+        $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+        $mail->Port = 587; //465; //587;                       // TCP port to connect to
+        $mail->From = $configuration['SMTPUserName'];
+        $mail->FromName = $data['subject'];
+        $mail->addAddress($email);                            // Name is optional
+        $mail->isHTML(true);                                  // Set email format to HTML
+        $mail->Subject = $data['subject'];
+        $html = $html;
+        $mail->Body    = $data['html'];
+        // $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+        // if($this->config->item("email_notification") == "Yes" || $email_notification){
+            if(!$mail->send()) {
+                $message =  '\n Message could not be sent.';
+                // echo 'Mailer Error: ' . $mail->ErrorInfo;
+            } else {
+                $message =  '\n Message has been sent';
+            }
+        // }else{
+        //    $message =  'notification turn off';
+        // }
+        echo $message;  
+
+  }
  
   
 

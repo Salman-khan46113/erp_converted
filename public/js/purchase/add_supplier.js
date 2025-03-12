@@ -45,8 +45,6 @@ const page = {
                 },
                 supplierMnumber: {
                     required: false,
-                    minlength:10,
-                    maxlength:10
                 },
                 gst_no: {
                     required: true,

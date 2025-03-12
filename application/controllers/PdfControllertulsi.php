@@ -354,6 +354,13 @@ class PdfControllertulsi extends CommonController
 
         $part_arr = [];
         // pr($po_parts_data,1);
+        // $po_parts_data[] = $po_parts_data[0];
+        // $po_parts_data[] = $po_parts_data[0];
+        // $po_parts_data[] = $po_parts_data[0];
+
+        // $po_parts_data[] = $po_parts_data[0];
+        // $po_parts_data[] = $po_parts_data[0];
+        // pr($po_parts_data,1);
         foreach ($po_parts_data as $p) {
             // pr($po_parts_data,1);
             $data = array(
@@ -489,6 +496,8 @@ class PdfControllertulsi extends CommonController
         $configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
         $configuration = array_column($configuration, "config_value","config_name");
         
+       
+        $TritonPurchaseOrderChange = isset($configuration['TritonPurchaseOrderChange']) && $configuration['TritonPurchaseOrderChange'] == "Yes" ? "Yes" : "No";
 
         $po_formate_number = $configuration['PoFormateNumber'];
         $po_rev_number = $configuration['PoRevNo'];
@@ -665,8 +674,64 @@ class PdfControllertulsi extends CommonController
                             <b>DISCOUNT RATE</b>
                         </td>';
         }
+        
+        $image_enable  = $configuration['poPdfLogo'] == "Yes" ? "Yes" : "No";
+        $companyLogo  = $configuration['companyLogo'] != "" ? $configuration['companyLogo'] : "";
+        if($image_enable  == "Yes"){
+            $header_img = '<td width="20%" style="text-align:center;" rowspan="2" colspan="1">
+                            <img src="'.base_url("dist/img/company_logo/".$companyLogo).'" height="55" width="140" /> 
+                    </td>
+                    <td width="50%" style="text-align:center;line-height:2" rowspan="2" colspan="1">
+                    <b style="font-size:12.8px;">PURCHASE ORDER</b><br>
+                    <b style="font-size:15.8px;">'.$client_data[0]->client_name.'</b>
+                    </td>
+                    <td width="30%" style="text-align:left;font-size:10.6px;"><b>&nbsp;Format No : '.$po_formate_number.'</b></td>';
+        }else{
+            $header_img = '
+                    <td width="70%" style="text-align:center;height:65px;line-height:2;" rowspan="2" colspan="2">
+                    <b style="font-size:12.8px;">PURCHASE ORDER</b><br>
+                    <b style="font-size:15.8px;">'.$client_data[0]->client_name.'</b>
+                    </td>
+                    <td width="30%" style="text-align:left;font-size:10.6px;"><b>&nbsp;Format No : '.$po_formate_number.'</b></td>';
+        }
 
 
+        
+
+        $billing_address_changes = '<tr>
+                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>GSTIN- </b>' . $client_data[0]->gst_number . '</td>
+                                    </tr>
+                                   
+                                    <tr>
+                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>STATE: </b>  ' . $client_data[0]->state . '</td>
+                                    </tr>';
+
+        $shipping_address_changes ='
+        <tr>
+                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>GSTIN- </b>' . $client_data[0]->gst_number . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>STATE: </b>  ' . $client_data[0]->state . '</td>
+                                    </tr>
+        ';
+        if($TritonPurchaseOrderChange == "Yes" && $configuration['TritonPurchaseOrderBillingContactPerson'] && $configuration['TritonPurchaseOrderShippingContactPerson']){
+            $billing_address_changes = '<tr>
+                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>GSTIN- </b>' . $client_data[0]->gst_number . '<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STATE: </b>  ' . $client_data[0]->state . '</td>
+                                    </tr>
+                                   
+                                    <tr>
+                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>Contact Name:</b> '.$configuration['TritonPurchaseOrderBillingContactPerson'].'</td>
+                                    </tr>';
+             $shipping_address_changes ='
+        <tr>
+                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>GSTIN- </b>' . $client_data[0]->gst_number . '<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STATE: </b>  ' . $client_data[0]->state . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>Contact Name:</b> '.$configuration['TritonPurchaseOrderShippingContactPerson'].'</td>
+                                    </tr>
+        ';
+
+        }
        $header_html =  '
        <style>
              
@@ -678,11 +743,7 @@ class PdfControllertulsi extends CommonController
        <table cellspacing="0" cellpadding="4.4" border="1">
             <tbody>
                 <tr>
-                    <td width="70%" style="text-align:center;" rowspan="2" colspan="2">
-                    <b style="font-size:12.8px;">PURCHASE ORDER</b><br>
-                    <b style="font-size:15.8px;">'.$client_data[0]->client_name.'</b>
-                    </td>
-                    <td width="30%" style="text-align:left;font-size:10.6px;"><b>&nbsp;Format No : '.$po_formate_number.'</b></td>
+                    '.$header_img.'
                 </tr>
                 <tr>
                     <td width="30%" style="text-align:left;font-size:10.6px;"><b>&nbsp;Rev No : '.$po_rev_number.'</b></td>
@@ -699,7 +760,7 @@ class PdfControllertulsi extends CommonController
                     <td width="16%" style="text-align:left;font-size:10.6px;"><b>&nbsp;' . $new_po_data[0]->amendment_no . '</b></td>
                 </tr> 
                 <tr>
-                    <td width="50%" style="text-align:left;font-size:10.6px;height:85px;" rowspan="2">
+                    <td width="50%" style="text-align:left;font-size:10.6px;height:85px;" rowspan="3">
                     <table cellspacing="0" cellpadding="0" border="0">
                                     <tr>
                                         <td width="100%" style="text-align:left;font-size:10.6px;" >' . $supplier_data[0]->location . '</td>
@@ -709,24 +770,30 @@ class PdfControllertulsi extends CommonController
                                     </tr>
                                    
                                     <tr>
-                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>CONTACT No: </b>  ' . $supplier_data[0]->mobile_no  . '</td>
+                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>CONTACT Details: </b>  ' . $supplier_data[0]->mobile_no  . '</td>
                                     </tr>
                                     
 
                     </table>
 
  </td>
-                    <td width="16%" style="text-align:left;font-size:10.6px;" rowspan="2"><b></b></td>
+                    <td width="16%" style="text-align:left;font-size:10.6px;" rowspan="3"><b></b></td>
                     <td width="18%" style="text-align:left;font-size:10.6px;"><b>&nbsp;PO Amendment Date:</b></td>
                     <td width="16%" style="text-align:left;font-size:10.6px;">' . $new_po_data[0]->amendment_date . '</td>
                 </tr>  
+
                 <tr>
-                    <td width="18%" style="text-align:left;font-size:10.8px;"><b>&nbsp;&nbsp;PO Expiry  Date:</b></td>
+                    <td width="18%" style="text-align:left;font-size:10.8px;"><b>&nbsp;PO Expiry  Date:</b></td>
                     <td width="16%" style="text-align:left;font-size:10.8px;">' . defaultDateFormat($new_po_data[0]->expiry_po_date) . '</td>
-                </tr> 
+                </tr>
                 <tr>
-                    <td width="50%" style="text-align:center;font-size:10.8px;" ><b>&nbsp;&nbsp;BILLING ADDRESS:  </b></td>
-                    <td width="50%" style="text-align:center;font-size:10.8px;"><b>&nbsp;&nbsp;SHIPPING ADDRESS:</b></td>
+                    <td width="18%" style="text-align:left;font-size:10.8px;"><b>&nbsp;Delivery Date:</b></td>
+                    <td width="16%" style="text-align:left;font-size:10.8px;">' . defaultDateFormat($new_po_data[0]->target_delivery_date) . '</td>
+                </tr> 
+                
+                <tr>
+                    <td width="50%" style="text-align:center;font-size:10.8px;" ><b>&nbsp;&nbsp;BILLING ADDRESS: '.$client_data[0]->client_name.'  </b></td>
+                    <td width="50%" style="text-align:center;font-size:10.8px;"><b>&nbsp;&nbsp;SHIPPING ADDRESS: '.$client_data[0]->client_name.'  </b></td>
                 </tr> 
                 <tr>
                     <td width="50%" style="text-align:left;font-size:10.8px;height:85px;" >
@@ -734,13 +801,7 @@ class PdfControllertulsi extends CommonController
                                     <tr>
                                         <td width="100%" style="text-align:left;font-size:10.6px;" >' . $billing_address . ' </td>
                                     </tr>
-                                    <tr>
-                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>GSTIN- </b>' . $client_data[0]->gst_number . '</td>
-                                    </tr>
-                                   
-                                    <tr>
-                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>STATE: </b>  ' . $client_data[0]->state . '</td>
-                                    </tr>
+                                    '.$billing_address_changes.'
                                     
 
                         </table>
@@ -751,13 +812,8 @@ class PdfControllertulsi extends CommonController
                                     <tr>
                                         <td width="100%" style="text-align:left;font-size:10.6px;" >' . $shipping_address . ' </td>
                                     </tr>
-                                    <tr>
-                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>GSTIN- </b>' . $client_data[0]->gst_number . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td width="100%" style="text-align:left;font-size:10.6px;" ><b>STATE: </b>  ' . $client_data[0]->state . '</td>
-                                    </tr>
                                     
+                                    '.$shipping_address_changes.'
 
                         </table>
                         
@@ -792,48 +848,25 @@ class PdfControllertulsi extends CommonController
                 </tr>    
             </tbody>
         </table>';
-            $footer_html  = '
-            <style>
-             
-            th, td {
-                    
-                font-family: "Poppins", sans-serif;
-                line-height: 1.4
-            }
-           </style>
-            <table cellspacing="0" cellpadding="4" border="1">
+
+        $image_signature  = $configuration['POPdfSignatureImgEnable'] == "Yes" ? "Yes" : "No";
+        $image_signature_footer = "";
+        if($image_signature == "Yes"){
+            $image_signature_url = base_url("dist/img/signature_image/").$configuration['PoPdfSignatureImg'];
+            $image_signature_footer = '
                         <tr>
-                            <td width="55%" style="text-left:center;font-size:10.3px;" rowspan="2">&nbsp;&nbsp;<b> Payment Days : </b> ' . $payment_days . ' days after GRN clearance <br>
-                                <b> Payment Terms : </b> ' . $payment_terms . ' days after GRN clearance </td>
-                            <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;Sub Total</td>
-                            <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $sub_total_amount, 2, '.', '') . '</td>
-                        </tr>
-                        <tr>
-                            <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;Loading / Unloading charges</td>
-                            <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $new_po_data[0]->loading_unloading, 2, '.', '') . '</td>
-                        </tr>
-                        <tr>
-                            <td width="55%" style="text-align:left;font-size:8px;" rowspan="11">'.$notes.' </td>
-                             <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;P&F Charges</td>
-                            <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $new_po_data[0]->freight_amount, 2, '.', '') . '</td>
-                        </tr>
-                        
-                        '.$discount_amount_after_subtotal.$footer_gst.'
-                        <tr>
-                            
-                            <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;TCS Amount</td>
-                            <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $tcs_amount, 2, '.', '') . '</td>
-                        </tr>
-                       
-                        <tr>
-                            <td width="26.3%" style="text-align:left;font-size:10.3px;" ><b>&nbsp;GRAND TOTAL</b></td>
-                            <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $final_final_amount, 2, '.', '') . '</td>
-                        </tr>
-                        '.$gst_block_html.'
-                        <tr>
-                            <td width="45%" style="text-align:center;font-size:10.3px;" >
-                                <table cellspacing="0" cellpadding="0" border="0">
+                                        <td width="100%" style="text-align:center;font-size:10.6px;" ><b>'.$this->getCustomerNameDetails().' </b></td>
+                                    </tr>
+                                    <tr rowspan="5">
+                                        <td width="100%" style="text-align:center;font-size:10.6px;" >
+                                        <img src="'.$image_signature_url.'" height="65" width="150" />
+                                        </td>
+                                    </tr>
                                     <tr>
+                                        <td width="100%" style="text-align:center;font-size:10.6px;" >Authorised Signatory </td>
+                                    </tr>';
+        }else{
+            $image_signature_footer = ' <tr>
                                         <td width="100%" style="text-align:center;font-size:10.6px;" ><b>'.$this->getCustomerNameDetails().' </b></td>
                                     </tr>
                                     <tr>
@@ -853,8 +886,57 @@ class PdfControllertulsi extends CommonController
                                     </tr>
                                     <tr>
                                         <td width="100%" style="text-align:center;font-size:10.6px;" >Authorised Signatory </td>
-                                    </tr>
+                                    </tr>';
+        }
 
+            $footer_html  = '
+            <style>
+             
+            th, td {
+                    
+                font-family: "Poppins", sans-serif;
+                line-height: 1.4
+            }
+           </style>
+            <table cellspacing="0" cellpadding="4" border="1">
+                        <tr>
+                            <td width="55%" style="text-left:center;font-size:10.3px;" rowspan="2">&nbsp;<b> Payment Days : </b> ' . $payment_days . ' days after GRN clearance <br>&nbsp;<b> Payment Terms : </b> ' . $payment_terms . ' days after GRN clearance </td>
+                            <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;Sub Total</td>
+                            <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $sub_total_amount, 2, '.', '') . '</td>
+                        </tr>
+                        <tr>
+                            <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;Loading / Unloading charges</td>
+                            <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $new_po_data[0]->loading_unloading, 2, '.', '') . '</td>
+                        </tr>
+                        <tr>
+                            <td width="55%" style="text-align:left;font-size:8px;" rowspan="11">
+                            <table cellspacing="0" cellpadding="0" border="0" >
+                                    <tr>
+                                        <td>'.$notes.' 
+                                        </td>
+                                    </tr>
+                            </table>
+                            </td>
+                             <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;P&F Charges</td>
+                            <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $new_po_data[0]->freight_amount, 2, '.', '') . '</td>
+                        </tr>
+                        
+                        '.$discount_amount_after_subtotal.$footer_gst.'
+                        <tr>
+                            
+                            <td width="26.3%" style="text-align:left;font-size:10.3px;" >&nbsp;TCS Amount</td>
+                            <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $tcs_amount, 2, '.', '') . '</td>
+                        </tr>
+                       
+                        <tr>
+                            <td width="26.3%" style="text-align:left;font-size:10.3px;" ><b>&nbsp;GRAND TOTAL</b></td>
+                            <td width="18.7%" style="text-align:center;font-size:10.3px;" >' . number_format((float) $final_final_amount, 2, '.', '') . '</td>
+                        </tr>
+                        '.$gst_block_html.'
+                        <tr>
+                            <td width="45%" style="text-align:center;font-size:10.3px;" >
+                                <table cellspacing="0" cellpadding="0" border="0">
+                                   '.$image_signature_footer.'
                                 </table>
                             </td>
                             
@@ -866,9 +948,9 @@ class PdfControllertulsi extends CommonController
             $html_content = $this->smarty->fetch('purchase/po_generate_pdf.tpl', $data, TRUE);
             // pr($html_content,1);
             // $pdf = new Pdf1(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-            $pdf = new Pdf1('P', 'mm', 'A4', true, 'UTF-8', false,'',$header_html,$footer_html,4, -83.8);
+            $pdf = new Pdf1('P', 'mm', 'A4', true, 'UTF-8', false,'',$header_html,$footer_html,4, -86.4);
 
-            $pdf->SetMargins(5, 103.6, 5, 5);
+            $pdf->SetMargins(5, 111.5, 5, 5);
 
         // set document information
 

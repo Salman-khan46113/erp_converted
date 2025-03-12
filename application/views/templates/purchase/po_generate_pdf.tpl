@@ -10,7 +10,7 @@
 		     <%foreach from=$val key=key item=value %>
 			      <tr>
 			         <td width="4%" style="text-align:center;padding:20px;font-size:9.6px;height:47.7px"><%$key+1 %></td>
-			         <td width="38%" style="text-align:left;padding:20px;font-size:9.6px;height: 64.6px"><%$value['part_number']%>/<%$value['part_description'] %> </td>
+			         <td width="38%" style="text-align:left;padding:20px;font-size:9.6px;height: 58.6px"><%$value['part_number']%>/<%$value['part_description'] %> </td>
 			         <td width="8%" style="text-align:center;font-size:9.6px;"><%$value['hsn_code'] %></td>
 			         <td width="10.333333333%" style="text-align:center;font-size:9.6px;"><%$value['part_rate_new'] %></td>
 			         <%if ($po_discount_type == 'Part Level') %>
@@ -48,17 +48,15 @@
    
    <%assign var=sapce value=0%>
    	<%if ($remaining_count == 1)%>
-   		<%assign var=sapce  value=19 %>
+   		<%assign var=sapce  value=15.7 %>
    	<%else if ($remaining_count == 2)%>
-   		<%assign var=sapce  value=19 %>
+   		<%assign var=sapce  value=15.7 %>
    	<%else if ($remaining_count == 3)%>
-   		<%assign var=sapce  value=19 %>
-   	<%else if ($remaining_count == 3)%>
-   		<%assign var=sapce  value=10.3 %>
+   		<%assign var=sapce  value=15.7 %>
    	<%else if ($remaining_count == 4)%>
-   		<%assign var=sapce  value=19 %>
+   		<%assign var=sapce  value=15.7 %>
    	<%else if ($remaining_count == 5)%>
-   		<%assign var=sapce  value=18.9 %>
+   		<%assign var=sapce  value=15.7 %>
    	<%else if ($remaining_count == 6)%>
    		<%assign var=sapce  value=18.3 %>
    	<%else if ($remaining_count == 7)%>

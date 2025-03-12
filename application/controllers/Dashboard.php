@@ -146,35 +146,52 @@ class Dashboard extends CommonController
         return $count_arr;
     }
     public function get_current_month_plan($year = '',$month_arr = []){
-        
-        $month_array = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-        // $start_month = [];
-        // for ($i=$month_arr['start_month']-1; $i < 12; $i++) { 
-        //     array_push($start_month, $month_arr1[$i]);
-        // }
-        // $month_arr['start_year'] = 'FY-'.$month_arr['start_year'];
-        // $month_arr['start_month'] = $start_month;
-        // $end_month = [];
-        // for ($i=0; $i < $month_arr['end_month']; $i++) { 
-        //     array_push($end_month, $month_arr1[$i]);
-        // }
-        // $month_arr['end_year'] = 'FY-'.$month_arr['end_year'];
-        // $month_arr['end_month'] = $end_month;
-        
-        $current_month = (int) date('m');
-        $current_year = (int) date('Y');
-        $month_arr['month'] = $month_array[$current_month-1];
-        $month_arr['year'] = "FY-".$current_year;
-        $current_month_plan_data = $this->dashboard_model->get_current_month_plan($month_arr);
-        if(count($current_month_plan_data) >0){
-            $total_amount = array_sum(array_column($current_month_plan_data, "total_amount"));
-        }else{
-            $total_amount = 0;
+        $current_year = date("Y");
+        if(date("m") < 4){
+            $current_year--;
         }
-        $return_arr = [
-            "total_qty" => "₹ ".number_format($total_amount,2),
-            "total_amount" => "" 
-        ];
+        $financial_year = "FY-".$current_year;
+        $planing_data = $this->Crud->customQuery("SELECT p.* FROM planing p, customer_part cp
+            WHERE p.clientId = ".$this->Unit->getSessionClientId()." 
+            AND cp.id = p.customer_part_id AND p.financial_year = '".$financial_year."' AND p.month = '".strtoupper(date("M"))."'");
+        // pr($planing_data,1);
+        $total_schedule_amount = 0;
+        $total_dispatched_amount = 0;
+        foreach ($planing_data as $key => $t) {
+                if (strtoupper(date("M")) == $t->month) {
+
+                    $customer_part_data = $this->Crud->get_data_by_id("customer_part", $t->customer_part_id, "id");
+                    $customer_part_rate = $this->Crud->get_data_by_id("customer_part_rate", $t->customer_part_id, "customer_master_id");
+                    $planing_data_val= $this->Crud->get_data_by_id("planing_data", $t->id, "planing_id");
+                    // pr($planing_data_val[count($planing_data_val)-1]);
+                    $planing_data = $planing_data_val[0];
+                    $part_rate = $customer_part_rate[0]->rate > 0 ? $customer_part_rate[0]->rate : 0; 
+                    $total_schedule_amount += $planing_data->schedule_qty > 0 ? $planing_data->schedule_qty*$part_rate : 0;
+                   
+                    $sales_invoice_data = $this->Crud->customQuery('SELECT s.*,p.qty as dispatched_qty FROM new_sales s, sales_parts p
+                            WHERE s.clientId = '.$this->Unit->getSessionClientId().' 
+                             AND ((s.created_year = "'.$current_year.'" AND s.created_month >= "4") 
+                            OR (s.created_year = "'.($current_year+1).'" AND s.created_month <= "3"))
+                            AND s.status = "lock"
+                            AND p.part_id = '.$t->customer_part_id.'
+                            AND s.id = p.sales_id
+                            ');
+
+                        foreach ($sales_invoice_data as $key => $value) {
+                            if($value->created_month == date(n)){
+                                $total_dispatched_amount += $value->dispatched_qty > 0 ? $value->dispatched_qty*$part_rate : 0;
+                            }
+                        }
+
+                    }                
+            }
+            $balance_amount = $total_schedule_amount - $total_dispatched_amount;
+            $return_arr = [
+                ["Schedule Amount",number_format($total_schedule_amount,2)],
+                ["Dispatched Amount",number_format($total_dispatched_amount,2)],
+                ["Balance Amount",number_format($balance_amount,2)]
+            ];
+         // pr($return_arr,1);
         return $return_arr;
     }
     /* pie chart */

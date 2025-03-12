@@ -161,8 +161,8 @@ class PlanningController extends CommonController
 		$message = 'Something went wrong.';
 		$planing_data = $this->Crud->get_data_by_id_multiple("planing", $data1);
 		if ($planing_data) {
-			$this->addWarningMessage('<br>Plan already added for this month and year, please try with another part.');
-			$this->redirectMessage();
+			$message = 'Plan already added for this month and year, please try with another part.';
+			// $this->redirectMessage();
 		} else {
 			$data222 = array(
 				"financial_year" => $financial_year,
@@ -263,7 +263,7 @@ class PlanningController extends CommonController
 		$month_id = $this->input->post('month_id');
 		$schedule_qty = $this->input->post('schedule_qty');
 		$financial_year = $this->input->post('financial_year');
-		$planing_id = $this->input->post('planing_id');
+		$planing_id = $this->input->post('planning_id');
 		$data1 = array(
 			"financial_year" => $financial_year,
 			"month" => $month_id,
@@ -271,6 +271,12 @@ class PlanningController extends CommonController
 			"clientId" =>  $this->Unit->getSessionClientId()
 		);
 		$planing_data = $this->Crud->get_data_by_id_multiple("planing", $data1);
+		$data1 = array(
+			"planing_id" => $planing_id
+		);
+		$planing_part_data = $this->Crud->get_data_by_id_multiple("planing_data", $data1);
+		$planing_part_id_data = array_column($planing_part_data, "id","child_part_id");
+		$planing_part_data = array_column($planing_part_data, "child_part_id");
 		$success = 0;
         $messages = "Something went wrong.";
 		if ($planing_data) {
@@ -279,25 +285,42 @@ class PlanningController extends CommonController
 			);
 
 			$bom_data = $this->Crud->get_data_by_id_multiple("bom", $arr);
+			// pr($bom_data,1);
 			if ($bom_data) {
+				// pr($bom_data,1);
 				foreach ($bom_data as $b) {
 					$child_part_data = $this->SupplierParts->getSupplierPartById($b->child_part_id);
 					$actual_stock = $child_part_data[0]->stock;
 					$bom_qty = $b->quantity;
+
 					$required_qty = $schedule_qty * $bom_qty;
 					$shortage_qty = $required_qty - $actual_stock;
-					$data = array(
-						"planing_id" => $planing_data[0]->id,
-						"child_part_id" => $b->child_part_id,
-						"bom_qty" => $bom_qty,
-						"schedule_qty" => $schedule_qty,
-						"required_qty" => $required_qty,
-						"shortage_qty" => $shortage_qty,
-						"actual_stock" => $actual_stock,
-						"financial_year" => $financial_year,
-						"month" => $month_id,
-					);
-					$result = $this->Crud->update_data("planing_data", $data, $planing_id);
+					
+					if(!in_array($b->child_part_id, $planing_part_data)){
+						$data = array(
+							"planing_id" => $planing_data[0]->id,
+							"child_part_id" => $b->child_part_id,
+							"bom_qty" => $bom_qty,
+							"schedule_qty" => $schedule_qty,
+							"required_qty" => $required_qty,
+							"shortage_qty" => $shortage_qty,
+							"actual_stock" => $actual_stock,
+							"financial_year" => $financial_year,
+							"month" => $month_id,
+						);
+						$result = $this->Crud->insert_data("planing_data", $data);
+					}else{
+						$data = array(
+							"bom_qty" => $bom_qty,
+							"schedule_qty" => $schedule_qty,
+							"required_qty" => $required_qty,
+							"shortage_qty" => $shortage_qty,
+							"actual_stock" => $actual_stock,
+							"financial_year" => $financial_year,
+							"month" => $month_id,
+						);
+						$result = $this->Crud->update_data("planing_data", $data, $planing_part_id_data[$b->child_part_id]);
+					}
 					
 				}
 				if ($result) {

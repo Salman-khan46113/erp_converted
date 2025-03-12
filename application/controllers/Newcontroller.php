@@ -174,7 +174,7 @@ class Newcontroller extends CommonController
 				"po_discount_type" => $po_discount_type,
 				"discount_type" => $discount_type,
 				"discount" => $discount,
-				// "target_delivery_date" => $target_delivery_date
+				"target_delivery_date" => $target_delivery_date
 
 			);
 

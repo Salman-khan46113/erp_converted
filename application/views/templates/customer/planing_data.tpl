@@ -352,6 +352,12 @@
                                     </div>
                                     </form>
                                 </div>
+                                <div class="col-lg-2">
+                                </div>
+                                <div class="col-lg-3">
+                                    <label class="label-ext">Schedule Compliance</label><br>
+                                    <span class="span-ext compliance-value"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -391,6 +397,8 @@
                                 <%assign var="i" value=1%>
                                 <%assign var="total1" value=0%>
                                 <%assign var="total2" value=0%>
+                                <%assign var="total_dispatch_qty_val" value=0%>
+                                <%assign var="total_schedule_qty" value=0%>
                                 
                                 <%if $planing_data%>
                                     <%foreach from=$planing_data item=t%>
@@ -420,6 +428,8 @@
                                                 <%/foreach%>
                                             <%/if%>
                                             <%assign var="balance_s_qty" value= $planing_data_val[0]->schedule_qty - $total_dispatched_qty%>
+                                             <%assign var="total_schedule_qty" value=$total_schedule_qty+$planing_data_val[0]->schedule_qty%>
+                                              <%assign var="total_dispatch_qty_val" value=$total_dispatch_qty_val+$total_dispatched_qty%>
                                 <tr>
 
 
@@ -541,15 +551,49 @@
 </section>
 <!-- /.content -->
 </div>
+<style type="text/css">
+    .label-ext {
+            font-size: 18px !important;
+        margin-bottom: 0px;
+        color: #000;
+        font-size: 18px;
+        font-family: "gilroymedium" !important;
+        margin: 0;
+        font-weight: 500;
+    }
+    .span-ext {
+        font-weight: 500;
+    color: #000 !important;
+    max-width: 95%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #000;
+    font-size: 26px !important;
+    font-family: 'gilroymedium';
+    margin: 0;
+    display: inline-block;
+    line-height: 48px;
+    cursor: pointer;
+    }
+</style>
 <!-- /.content-wrapper -->
-
+<script type="text/javascript">
+    var total_schedule_qty = <%$total_schedule_qty|@json_encode%>;
+    var total_dispatch_qty = <%$total_dispatch_qty_val|@json_encode%>;
+</script>
 
 <script>
     $(document).ready(function() {
-        
+        total_schedule_qty = total_schedule_qty > 0 ? total_schedule_qty : 0;
+        total_dispatch_qty = total_dispatch_qty > 0 ? total_dispatch_qty : 0;
+        console.log(total_schedule_qty,total_dispatch_qty)
+        var compliance = (total_dispatch_qty/total_schedule_qty)*100;
+        compliance = compliance > 0 ? compliance.toFixed(2): 0;
+        $(".compliance-value").html(compliance+"%");
         var table = '';
-var file_name = "planning_data";
-var pdf_title = "Planning Data";
+        var file_name = "planning_data";
+        var pdf_title = "Planning Data";
         table = $("#example1").DataTable({
         dom: "Bfrtilp",
          buttons: [
@@ -602,6 +646,7 @@ var pdf_title = "Planning Data";
         bScrollCollapse: true,
         // columnDefs: [{ sortable: false, targets: 7 }],
         pagingType: "full_numbers",
+        lengthMenu: [[10,50,100,200,500,1000,25000], [10,50,100,200,500,1000,25000]]
        
         
         });

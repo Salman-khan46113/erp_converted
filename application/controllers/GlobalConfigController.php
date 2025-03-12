@@ -166,7 +166,37 @@ class GlobalConfigController extends CommonController
 		        }else{
 		        	$value = $this->input->post("old_val");
 		        }
-		    }
+		}
+		if($this->input->post("config_name") == "PoPdfSignatureImg"){
+
+				if($_FILES['PoSignatureImage']['name'] != ""){
+		            $profileImageData =
+		                $_FILES["PoSignatureImage"]["name"] != ""
+		                    ? $_FILES["PoSignatureImage"]
+		                    : [];
+		            $config["upload_path"] = "dist/img/signature_image/";
+		            $config["allowed_types"] = "jpg|png|jpeg|png";
+		            $this->load->library("upload", $config);
+		            $upload_error_msg = "";
+		            if (!empty($profileImageData)) {
+		                if (!$this->upload->do_upload("PoSignatureImage")) {
+		                    $upload_error_msg = $error = [
+		                        "error" => $this->upload->display_errors(),
+		                    ];
+		                    $upload_error = 1;
+		                } else {
+		                    $upload_data = $this->upload->data();
+		                }
+		            }
+
+		        }
+
+		        if($upload_error == 0){
+		        	$value = $upload_data['file_name'];
+		        }else{
+		        	$value = $this->input->post("old_val");
+		        }
+		}
         	
         if($upload_error == 0){
 			if($forArom=='on' || $forArom==1) { $forArom = 1; } else { $forArom = 0;}

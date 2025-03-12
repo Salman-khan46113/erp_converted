@@ -858,4 +858,6 @@ $route['add_update_scrap_category'] = 'welcome/add_update_scrap_category';
 $route['global_export'] = 'exportImportController/global_export';
 $route['global_import'] = 'exportImportController/global_import';
 
+// send monthly schedule
+$route['send_monthly_schedule_report'] = 'MagrationScript_Controller/send_monthly_schedule_report';
 
