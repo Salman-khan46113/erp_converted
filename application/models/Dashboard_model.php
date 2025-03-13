@@ -299,9 +299,16 @@ class Dashboard_model extends CI_Model
             n.created_date as created_date_val,
             rrp.tds_amount as tds_amount,
             rrp.remark as remark_val,
-            ROUND(SUM(
-                IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - (IF(s.basic_total > 0,s.basic_total,0))*(IF(cus.tds > 0,cus.tds,0)/100) - IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
-                2) AS bal_amnt,
+           	ROUND(
+                SUM(
+                    IF(s.total_rate > 0, s.total_rate, 0) 
+                    + IF(s.tcs_amount > 0, s.tcs_amount, 0) 
+                 )
+                    - IF(rrp.amount_received > 0, rrp.amount_received, 0) 
+                    - (IF(rrp.tds_amount > 0, rrp.tds_amount, 0)) 
+                    - IF(rrp.debit_amount > 0, rrp.debit_amount, 0)
+               , 
+            2) AS bal_amnt,
             s.sales_id as sales_id_val');
         
         $this->db->from('sales_parts s');
@@ -971,18 +978,25 @@ class Dashboard_model extends CI_Model
             SUM(s.total_rate) as ttlrt, 
             SUM(s.gst_amount) as gstamnt, 
             SUM(s.tcs_amount) as tcsamnt,
-            SUM((IF(s.basic_total > 0,s.basic_total,0))*(IF(cus.tds > 0,cus.tds,0)/100) ) as tdsamnt, 
+            SUM((IF(s.basic_total > 0,s.basic_total,0))*(IF(cus.tds > 0,cus.tds,0)/100) ) as tds_calculate_amnt, 
             cus.customer_name, 
             cus.payment_terms, 
             rrp.payment_receipt_date,
             rrp.amount_received as amount_received, 
             rrp.transaction_details, 
             n.created_date as created_date_val,
-            rrp.tds_amount as tds_amount,
+            rrp.tds_amount as tdsamnt,
             rrp.remark as remark_val,
-            ROUND(SUM(
-                IF(s.total_rate > 0,s.total_rate,0) + IF(s.tcs_amount > 0,s.tcs_amount,0)) - IF(rrp.amount_received > 0,rrp.amount_received,0) - (IF(s.basic_total > 0,s.basic_total,0))*(IF(cus.tds > 0,cus.tds,0)/100) - IF(rrp.tds_amount > 0,rrp.tds_amount,0), 
-                2) AS bal_amnt,
+            ROUND(
+                SUM(
+                    IF(s.total_rate > 0, s.total_rate, 0) 
+                    + IF(s.tcs_amount > 0, s.tcs_amount, 0) 
+                 )
+                    - IF(rrp.amount_received > 0, rrp.amount_received, 0) 
+                    - (IF(rrp.tds_amount > 0, rrp.tds_amount, 0)) 
+                    - IF(rrp.debit_amount > 0, rrp.debit_amount, 0)
+               , 
+            2) AS bal_amnt,
             s.sales_id as sales_id_val');
         
         $this->db->from('sales_parts s');

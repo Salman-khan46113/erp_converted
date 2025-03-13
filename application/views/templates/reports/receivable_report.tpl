@@ -181,7 +181,7 @@
                         <p class="tgdp-rgt-tp-txt total_amount_paid">0.00</p>
                     </div>
                     <div class="tgdp-rgt-tp-sect">
-                        <p class="tgdp-rgt-tp-ttl">Total Balance Amount to Received</p>
+                        <p class="tgdp-rgt-tp-ttl">Total Balance Amount to Receive</p>
                         <p class="tgdp-rgt-tp-txt total_balance_amount_to_pay" title="12">0.00</p>
                     </div>
                     <div class="tgdp-rgt-tp-sect">
@@ -278,13 +278,24 @@
                                                         placeholder="Transaction Details" value="">
                                                 </div>
                                                 <div class="form-group">
-                                                                                <label for="amount_received">Debit Amount</label>
+                                                <label for="amount_received">TDS Calculate Amount : <span class="tds_calculate"></span></label>
+                                                </div>
+                                                <div class="form-group">
+                                                                                <label for="amount_received">TDS Amount</label>
                                                                                 <input type="text"
                                                                                     name="tds" id="tds_val" 
                                                                                     class="form-control onlyNumericInput"
                                                                                     aria-describedby="emailHelp"
                                                                                     placeholder="TDS" value="" >
                                                                             </div>
+                                                                            <div class="form-group">
+                                                                            <label for="amount_received">Debit Amount</label>
+                                                                            <input type="text"
+                                                                                name="debit_amount" id="debit_amount_val" 
+                                                                                class="form-control onlyNumericInput"
+                                                                                aria-describedby="emailHelp"
+                                                                                placeholder="Debit Amount" value="" >
+                                                                        </div>
                                                                             <div class="form-group">
                                                                                 <label for="amount_received">Remark</label>
                                                                                 <input type="text"

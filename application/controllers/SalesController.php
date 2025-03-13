@@ -2260,7 +2260,7 @@ class SalesController extends CommonController
 			        "orderable" => false,
 			    ],
 			    [
-			        "data" => "tds_amount",
+			        "data" => "debit_amount",
 			        "title" => "Debit Amount",
 			        "width" => "7%",
 			        "className" => "dt-center",
@@ -2306,6 +2306,7 @@ class SalesController extends CommonController
 
 
 		    $data = $this->SalesModel->getReceivableReportExportData($post_data);
+			// pr($data,1);
 			foreach ($data as $key => $objs) {
 				$date_convert = DateTime::createFromFormat('d-m-Y', $objs['created_date']);
 				// Format the date to d/m/Y
@@ -2322,7 +2323,7 @@ class SalesController extends CommonController
 				$data[$key]['subtotal'] = $subtotal;
 				$data[$key]['row_total'] = number_format($row_total,2,".","");
 				$data[$key]['payment_receipt_date_formated'] = $payment_receipt_date_formated;
-				$tds_amount = $data[$key]['tdsamnt'] = $objs['tdsamnt'] > 0 ? $objs['tdsamnt'] : 0;
+				// $tds_amount = $data[$key]['tdsamnt'] = $objs['tdsamnt'] > 0 ? $objs['tdsamnt'] : 0;
 
 				// $data[$key]['bal_amnt'] = $row_total - $val['amount_received'] - $tds_amount;
 
@@ -4812,9 +4813,9 @@ class SalesController extends CommonController
 			$data[$key]['row_total'] = number_format($row_total,2,".","");
 			$data[$key]['payment_receipt_date_formated'] = $payment_receipt_date_formated;
 			$tds_amount = $data[$key]['tds_amount'] = $objs['tdsamnt'] > 0 ? number_format($objs['tdsamnt'],2,".","") : 0;
-			$data[$key]['debit_amount'] = $objs['tds_amount'] > 0 ? $objs['tds_amount'] : 0;
-			// pr($objs,1);
-			// $data[$key]['bal_amnt'] = $row_total - $val['amount_received'] - $tds_amount;
+			// $data[$key]['debit_amount'] = $objs['tds_amount'] > 0 ? $objs['tds_amount'] : 0;
+			
+			$data[$key]['bal_amnt'] = $objs['bal_amnt'] == -0 ? 0 : $objs['bal_amnt'];
 
 			// Create a DateTime object by specifying the format
 			$dateTime = DateTime::createFromFormat('d/m/Y', $created_date_str);
@@ -4988,14 +4989,14 @@ class SalesController extends CommonController
 		$total_paid_amount = 0;
 		if(!($post_data["search"]['supplier_id'] > 0) || ($post_data["search"]['customer_id'] > 0)){
 		$data = $this->SalesModel->getOutstandingReportView($condition_arr,$post_data["search"]);
-
+		// pr($data,1);
 			foreach ($data as $key => $val) {
 				if(array_key_exists($val['customer_id'], $outstanding_data)){
 					$outstanding_data[$val['customer_id']]['receivable_amount'] +=round($val['bal_amnt'],2);
 				}else{
 					$outstanding_data[$val['customer_id']] = [
 						"customer_name" => $val['customer_name'],
-						"receivable_amount" => round($val['bal_amnt']),
+						"receivable_amount" => round($val['bal_amnt'],2),
 						"payable_amount" => ""
 					];
 				}
@@ -5036,6 +5037,12 @@ class SalesController extends CommonController
 		$total_pay_amount = array_sum(array_column($payable_data, "payable_amount"));
 		$data = array_merge($recevivable_data,$payable_data);
 		$data = array_merge($recevivable_data,$payable_data);
+		foreach ($data as $key => $value) {
+			if($value['receivable_amount'] == 0 && 	$value['payable_amount'] == ""){
+					unset($data[$key]);
+			}
+		}
+		$data = array_values($data);
 		$chunk_number = $post_data["start"]/$post_data["length"];
 		$array_chunk = array_chunk($data,$post_data["length"]);
 		$data = $array_chunk[($chunk_number)];
@@ -5243,7 +5250,7 @@ class SalesController extends CommonController
 		$tds = $this->input->post('tds');
 		$remark = $this->input->post('remark');
 		$check = $this->Common_admin_model->get_data_by_id_count("receivable_report", $this->input->post('sales_number'), "sales_number");
-		
+		$debit_amount = $this->input->post("debit_amount");
 		if ($check == 0) 
 		{
 		    $data = array(
@@ -5252,6 +5259,7 @@ class SalesController extends CommonController
 						"amount_received" => $amount_received,
 						"transaction_details" => $transaction_details,
 						"tds_amount" => $tds,
+						"debit_amount" => $debit_amount,
 						"remark" => $remark
 					);
 					$result = $this->Crud->insert_data("receivable_report", $data);
@@ -5268,6 +5276,7 @@ class SalesController extends CommonController
 				"amount_received" => $amount_received,
 				"transaction_details" => $transaction_details,
 				"tds_amount" => $tds,
+				"debit_amount" => $debit_amount,
 				"remark" => $remark
 				
 			);

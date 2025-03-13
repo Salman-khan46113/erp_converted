@@ -82,7 +82,8 @@
                         <div class="card w-100">
                            <p class="ps-2 pt-2" style="color: red;">Note: <br>
                             1.If price for purchase parts is not defined, MRP requirement will not be generated.<br>
-                            2.If the BOM is updated, edit the scheduled quantity to update the gross MRP requirement.</p>  
+                            2.If the BOM is updated, edit the scheduled quantity to update the gross MRP requirement.<br>
+                            3.After refresh the page,details will be updated.</p>  
                         </div>
                         <div class="card w-100 mt-4">
                             <!-- /.card-header -->

@@ -146,17 +146,16 @@
                      <div class="form-group mb-3">
                         <label class="form-label" for="">Notes </label>
                         <textarea cols="50" rows="8" name="notes" class="form-control">1.PDIR & MTC Required with each lot. Pls mention PO No. on Invoice.<br>
-2.Rejection if any will be debited to suppliers account<br>
-3. Inspection & Testing Requirements as per Customer drawing/ standard/ quality plan will be done at your end and reports will share to us.<br>
-<b>GST Extra.</b><br>
-<b>Delivery :</b>   Door Delivery. <br>
-<b>Validity :</b>  30 Days from date of purchase order
-<%if $TritonPurchaseOrderChange eq 'Yes'%>
-<br><b>Specific Requirements:</b><br>
-1. 3.1 MTC<br>
-2. 100% Ultrasonic testing and PMI report<br>
-3. Chemical / Physical test report required<br>
-<%/if%>
+                        2.Rejection if any will be debited to suppliers account<br>
+                        3. Inspection & Testing Requirements as per Customer drawing/ standard/ quality plan will be done at your end and reports will share to us.<br>
+                        <b>GST Extra.</b><br>
+                        <b>Delivery :</b>   Door Delivery. <br>
+                        <b>Validity :</b>  30 Days from date of purchase order
+                        <%if $TritonPurchaseOrderChange eq 'Yes'%>
+                        <br><b>Specific Requirements:</b><br>
+                        1. 3.1 MTC Required.100% Ultrasonic testing and PMI report.<br>
+                        2. Chemical / Physical test report required.<br>
+                        <%/if%>
                         </textarea>
                      </div>
                   </div>

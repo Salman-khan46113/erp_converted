@@ -714,6 +714,8 @@ class PdfControllertulsi extends CommonController
                                         <td width="100%" style="text-align:left;font-size:10.6px;" ><b>STATE: </b>  ' . $client_data[0]->state . '</td>
                                     </tr>
         ';
+        $delivery_date = "";
+        $delivery_date_row_span = 2;
         if($TritonPurchaseOrderChange == "Yes" && $configuration['TritonPurchaseOrderBillingContactPerson'] && $configuration['TritonPurchaseOrderShippingContactPerson']){
             $billing_address_changes = '<tr>
                                         <td width="100%" style="text-align:left;font-size:10.6px;" ><b>GSTIN- </b>' . $client_data[0]->gst_number . '<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STATE: </b>  ' . $client_data[0]->state . '</td>
@@ -731,6 +733,11 @@ class PdfControllertulsi extends CommonController
                                     </tr>
         ';
 
+        $delivery_date = '<tr>
+                    <td width="18%" style="text-align:left;font-size:10.8px;"><b>&nbsp;Delivery Date:</b></td>
+                    <td width="16%" style="text-align:left;font-size:10.8px;">' . defaultDateFormat($new_po_data[0]->target_delivery_date) . '</td>
+                </tr> ';
+        $delivery_date_row_span = 3;
         }
        $header_html =  '
        <style>
@@ -760,7 +767,7 @@ class PdfControllertulsi extends CommonController
                     <td width="16%" style="text-align:left;font-size:10.6px;"><b>&nbsp;' . $new_po_data[0]->amendment_no . '</b></td>
                 </tr> 
                 <tr>
-                    <td width="50%" style="text-align:left;font-size:10.6px;height:85px;" rowspan="3">
+                    <td width="50%" style="text-align:left;font-size:10.6px;height:105px;" rowspan="'.$delivery_date_row_span.'">
                     <table cellspacing="0" cellpadding="0" border="0">
                                     <tr>
                                         <td width="100%" style="text-align:left;font-size:10.6px;" >' . $supplier_data[0]->location . '</td>
@@ -777,7 +784,7 @@ class PdfControllertulsi extends CommonController
                     </table>
 
  </td>
-                    <td width="16%" style="text-align:left;font-size:10.6px;" rowspan="3"><b></b></td>
+                    <td width="16%" style="text-align:left;font-size:10.6px;" rowspan="'.$delivery_date_row_span.'"><b></b></td>
                     <td width="18%" style="text-align:left;font-size:10.6px;"><b>&nbsp;PO Amendment Date:</b></td>
                     <td width="16%" style="text-align:left;font-size:10.6px;">' . $new_po_data[0]->amendment_date . '</td>
                 </tr>  
@@ -786,11 +793,8 @@ class PdfControllertulsi extends CommonController
                     <td width="18%" style="text-align:left;font-size:10.8px;"><b>&nbsp;PO Expiry  Date:</b></td>
                     <td width="16%" style="text-align:left;font-size:10.8px;">' . defaultDateFormat($new_po_data[0]->expiry_po_date) . '</td>
                 </tr>
-                <tr>
-                    <td width="18%" style="text-align:left;font-size:10.8px;"><b>&nbsp;Delivery Date:</b></td>
-                    <td width="16%" style="text-align:left;font-size:10.8px;">' . defaultDateFormat($new_po_data[0]->target_delivery_date) . '</td>
-                </tr> 
                 
+                '.$delivery_date.'
                 <tr>
                     <td width="50%" style="text-align:center;font-size:10.8px;" ><b>&nbsp;&nbsp;BILLING ADDRESS: '.$client_data[0]->client_name.'  </b></td>
                     <td width="50%" style="text-align:center;font-size:10.8px;"><b>&nbsp;&nbsp;SHIPPING ADDRESS: '.$client_data[0]->client_name.'  </b></td>

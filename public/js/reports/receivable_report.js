@@ -10,6 +10,9 @@ const page = {
         this.formValidation();
         let that = this;
         $(document).on("click",".edit-part",function(){
+            $("#update_report_data").find(":input").prop("disabled", false);
+            $("#update_report_data").find(":button").prop("disabled", false);
+            
             $("#error-message-block").hide();
             var data = $(this).attr("data-value");
             data = JSON.parse(atob(data)); 
@@ -18,9 +21,15 @@ const page = {
             $("#payment_date_modal").val(data.payment_receipt_date);
             $("#receivable_amount_modal").val(data.amount_received);
             $("#transection_detail_modal").val(data.transaction_details);
-            $("#tds_val").val(data.debit_amount);
+            $("#tds_val").val(data.tdsamnt);
+            $("#debit_amount_val").val(data.debit_amount);
             $("#remark").val(data.remark_val);
             $("#total_amount_value").val(data.row_total); // bal_amnt
+            $(".tds_calculate").html(data.tds_calculate_amnt)
+            if(data.transaction_details == "" || data.transaction_details == null){
+                console.log("ij")
+                $("#tds_val").val(data.tds_calculate_amnt);
+            }
             myModal.show();
         })
         $('#receivable_amount_modal').on('keyup', function(e){

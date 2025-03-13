@@ -718,7 +718,7 @@
                         toastr.success(msg);
                         $(this).parents(".modal").modal("hide")
                         setTimeout(function(){
-                          // window.location.reload();
+                          window.location.reload();
                         },1000);
 
                       } else {

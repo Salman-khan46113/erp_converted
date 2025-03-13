@@ -24,6 +24,10 @@ SET time_zone = "+00:00";
 ALTER TABLE customer ADD tds DECIMAL(15,2) NOT NULL DEFAULT '0' AFTER emailId;
 INSERT INTO `widget` (`tab_name`, `widget_name`, `widget_type`, `widget_funtion`, `status`) VALUES
 ('Account', 'TOTAL_TDS', 'Block', 'get_total_receivable_tds', 'Active');
+
+ALTER TABLE `receivable_report` ADD `debit_amount` DECIMAL(10,2) NOT NULL DEFAULT '0' AFTER `tds_amount`;
+
+
 INSERT INTO `DB_Upgrade` (`Script_name`, `updated_time`) 
 VALUES ('112-AROM-23B-Receivable-Report-Changes.sql', CURRENT_TIMESTAMP);
 
