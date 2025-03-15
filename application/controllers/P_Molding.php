@@ -873,6 +873,7 @@ class P_Molding extends CommonController
 			'machine_id' => $this->input->post('machine_id'),
 			'operator_id' => $this->input->post('operator_id'),
 			'customer_part_id' => $this->input->post('customer_part_id'),
+			'qty' => $this->input->post('qty'),
 			"created_date" => $this->current_date,
 			"created_time" => $this->current_time,
 			"day" => $this->date,
@@ -891,6 +892,36 @@ class P_Molding extends CommonController
 				// $this->addSuccessMessage('Added Successfully.');
 		} else {
 			$messages = "AFailed to add record.Try again.";
+				// $this->addErrorMessage('Failed to add record.Try again.');
+		}
+			// $this->redirectMessage();
+		$result = [];
+		$result['messages'] = $messages;
+		$result['success'] = $success;
+		echo json_encode($result);
+		exit();
+
+	}
+	public function update_machine_request()
+	{
+
+	
+		$id = $this->input->post('id');
+		$data = array(
+			'machine_id' => $this->input->post('u_machine_id'),
+			'operator_id' => $this->input->post('u_operator_id'),
+			'customer_part_id' => $this->input->post('u_customer_part_id'),
+			'qty' => $this->input->post('u_qty')
+		);
+		$machine_request_update_result = $this->Crud->update_data("machine_request", $data, $id);
+		$success = 0;
+		$messages = "Something went wrong.";
+		if ($machine_request_update_result) {
+			$success = 1;
+			$messages = "updated Successfully.";
+				// $this->addSuccessMessage('Added Successfully.');
+		} else {
+			$messages = "Failed to update record.Try again.";
 				// $this->addErrorMessage('Failed to add record.Try again.');
 		}
 			// $this->redirectMessage();
@@ -949,65 +980,64 @@ class P_Molding extends CommonController
 	public function issue_material_request_qty()
 
 	{
-		
 		$id = $this->input->post('id');
 		$machine_request_id = $this->input->post('machine_request_id');
-
 		$qty = $this->input->post('qty');
 		$accepted_qty = $this->input->post('accepted_qty');
 		$part_number = $this->input->post('part_number');
 		$rejected_qty = $qty - $accepted_qty;
 
+
+
+		/* add material request part */
 		$data = array(
+			'remark' => $this->input->post('remark'),
+			'machine_request_id' => $machine_request_id,
+			'child_part_id' => $this->input->post('id'),
+			'qty' => $this->input->post('qty'),
+			"status" => 'Completed',
 			'accepted_qty' => $accepted_qty,
 			'rejected_qty' => $rejected_qty,
-			'status' => "Completed",
 		);
-		$success = 0;
-        $messages = "Something went wrong.";
-		$update = $this->Crud->update_data("machine_request_parts", $data, $id);
-		if (false && $update != 0) {
-			$messages = "Already Exists";
-			// echo "<script>alert('Already Exists');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
-		} else {
-			if ($update) {
-				$child_part = $this->SupplierParts->getSupplierPartByPartNumber($part_number);
-				$old_stock = $child_part[0]->stock;
+		$inser_query = $this->Crud->insert_data("machine_request_parts", $data);
 
-				$old_machine_mold_issue_stock = $child_part[0]->machine_mold_issue_stock;
-				$new_stock = $old_stock - $accepted_qty;
+		if ($inser_query) {
+			$child_part = $this->SupplierParts->getSupplierPartByPartNumber($part_number);
+			$old_stock = $child_part[0]->stock;
 
-				$new_machine_mold_issue_stock = $old_machine_mold_issue_stock + $accepted_qty;
+			$old_machine_mold_issue_stock = $child_part[0]->machine_mold_issue_stock;
+			$new_stock = $old_stock - $accepted_qty;
 
-				$data23333 = array(
-					"stock" => $new_stock,
-					"machine_mold_issue_stock" => $new_machine_mold_issue_stock
-				);
+			$new_machine_mold_issue_stock = $old_machine_mold_issue_stock + $accepted_qty;
 
-				$update = $this->SupplierParts->updateStockById($data23333, $child_part[0]->id);
-				$child_part[0]->id;
+			$data23333 = array(
+				"stock" => $new_stock,
+				"machine_mold_issue_stock" => $new_machine_mold_issue_stock
+			);
 
-				//update the status
-				$custom_query = "select count(*) as pendingItems from machine_request_parts where machine_request_id = " . $machine_request_id . " and status ='pending'";
-				$result = $this->Crud->customQuery($custom_query);
-				$isPending = $result[0]->pendingItems;
+			$update = $this->SupplierParts->updateStockById($data23333, $child_part[0]->id);
+			$child_part[0]->id;
 
-				$status = "pending";
-				if ($isPending == 0) {
-					$status = "Completed";
-				}
-				$update_machine_request = array(
-					"status" => $status,
-				);
+			//update the status
+			$custom_query = "select count(*) as pendingItems from machine_request_parts where machine_request_id = " . $machine_request_id . " and status ='pending'";
+			$result = $this->Crud->customQuery($custom_query);
+			$isPending = $result[0]->pendingItems;
 
-				$machine_status_update_result = $this->Crud->update_data("machine_request", $update_machine_request, $machine_request_id);
-				$messages = "Updated Sucessfully";
-				$success = 1;
-				// echo "<script>alert('Updated Sucessfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
-			} else {
-				$messages = "Not Updated";
-				// echo "<script>alert(' Not Updated');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+			$status = "pending";
+			if ($isPending == 0) {
+				$status = "Completed";
 			}
+			$update_machine_request = array(
+				"status" => $status,
+			);
+
+			$machine_status_update_result = $this->Crud->update_data("machine_request", $update_machine_request, $machine_request_id);
+			$messages = "Updated Sucessfully";
+			$success = 1;
+			// echo "<script>alert('Updated Sucessfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+		} else {
+			$messages = "Not Updated";
+			// echo "<script>alert(' Not Updated');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
 		}
 		$result = [];
         $result['messages'] = $messages;
@@ -1168,14 +1198,14 @@ class P_Molding extends CommonController
 		/* datatable */
         $column[] = [
             "data" => "request_no",
-            "title" => "Request No",
+            "title" => "SO No",
             "width" => "14%",
             "className" => "dt-left",
         ];
         $column[] = [
             "data" => "machine_name",
-            "title" => "Machine Mold",
-            "width" => "20%",
+            "title" => "Machine",
+            "width" => "15%",
             "className" => "dt-left",
         ];
         $column[] = [
@@ -1187,7 +1217,13 @@ class P_Molding extends CommonController
         $column[] = [
             "data" => "customer_part",
             "title" => "Customer Part",
-            "width" => "10%",
+            "width" => "18%",
+            "className" => "dt-center",
+        ];
+		$column[] = [
+            "data" => "qty",
+            "title" => "SO Qty",
+            "width" => "17%",
             "className" => "dt-center",
         ];
         $column[] = [
@@ -1254,11 +1290,12 @@ class P_Molding extends CommonController
 
 		foreach ($data as $key => $value) {
 			// $edit_data = base64_encode(json_encode($value)); 
-			$value['request_no'] = "MR-".$value['request_no'];
+			$value['request_no'] = "SO-".$value['request_no'];
 			$data[$key]['request_no'] = '<a href="'.base_url("machine_request_details/").$value['id'].'" title="'.$value['request_no'].'">'.$value['request_no'].'</a>';
 			$data[$key]['action'] = display_no_character("");
 			if(checkGroupAccess("machine_request","delete","No")){
 				$data[$key]['action'] = '<i class="ti ti-trash delete-request" data-id="'.$value['id'].'" data-request-code="'.$value['request_no'].'" title="delete"></i>';
+				$data[$key]['action'] .= '<i class="ti ti-edit edit-request" data-id="'.$value['id'].'" data-details="'.base64_encode(json_encode($value)).'" title="edit"></i>';
 			}
 			if($value['req_parts']){
 				$data[$key]['action'] = display_no_character();
@@ -1468,22 +1505,56 @@ class P_Molding extends CommonController
 	{
 
 
-
 		$machine_request_id = $this->uri->segment('2');
-		$data['child_part'] = $this->Crud->customQuery("SELECT c.id,c.part_number, c.part_description 
+		$data['machine_request'] = $machine_request = $this->Crud->get_data_by_id("machine_request", $machine_request_id, "id");
+		$data['part'] = $this->Crud->get_data_by_id("customer_part", $data['machine_request'][0]->customer_part_id, "id");
+		$data['child_part'] = $this->Crud->customQuery("
+		SELECT c.id,c.part_number, c.part_description,u.uom_name,b.quantity,s.machine_mold_issue_stock, s.stock
 		FROM bom b, machine_request m,child_part c 
+		INNER JOIN child_part_stock s ON s.childPartId = c.id
+		INNER JOIN uom u ON c.uom_id = u.id
 		WHERE m.customer_part_id = b.customer_part_id 
 		AND m.id = ".$machine_request_id."
-		AND b.child_part_id = c.id");
-
-		$data['machine_request_parts'] = $this->Crud->customQuery("SELECT parts.id,c.part_number,c.part_description, u.uom_name,parts.qty, s.machine_mold_issue_stock, parts.status, parts.remark, s.stock, parts.accepted_qty, req.status as request_status FROM machine_request req
+		AND b.child_part_id = c.id
+		GROUP BY c.id");
+		$data['part_name'] = $data['part'][0]->part_number."(".$data['part'][0]->part_description.")";
+		$data['machine_request_parts']  = $machine_request_parts_added = $this->Crud->customQuery("SELECT c.id as child_part_id, parts.id,c.part_number,c.part_description, u.uom_name,  parts.status, parts.remark, parts.accepted_qty, req.status as request_status,parts.qty FROM machine_request req
 				INNER JOIN machine_request_parts parts ON parts.machine_request_id = req.id
 				INNER JOIN child_part c ON parts.child_part_id = c.id
-				INNER JOIN child_part_stock s ON s.childPartId = c.id
 				INNER JOIN uom u ON c.uom_id = u.id
 				WHERE req.id = ".$machine_request_id." 
-				AND s.clientId = ".$this->Unit->getSessionClientId()." order by parts.id desc");
+				GROUP BY c.id
+				order by parts.id desc");
 		$data['machine_request_id'] = $this->uri->segment('2');  
+		$machine_request_parts_added = array_column($machine_request_parts_added,"part_number");
+		$machine_request_parts = [];
+		
+		foreach ($data['machine_request_parts'] as $key => $value) {
+			$stock =  $this->Crud->customQuery("
+			SELECT s.machine_mold_issue_stock, s.stock
+			FROM child_part_stock s
+			WHERE s.childPartId = '".$value->child_part_id."'");
+			$value->machine_mold_issue_stock = $stock[0]->machine_mold_issue_stock;
+			$value->stock = $stock[0]->stock;
+			$bom =  $this->Crud->customQuery("
+			SELECT b.*
+			FROM bom b
+			WHERE b.customer_part_id = ".$data['machine_request'][0]->customer_part_id." AND b.child_part_id = '".$value->child_part_id."'");
+			$value->bom_qty = $bom[0]->quantity;
+			$machine_request_parts[] = $value;
+		}
+		foreach ($data['child_part'] as $key => $value) {
+			$value->bom_qty = $value->quantity;
+			$value->qty = $value->quantity * $machine_request[0]->qty;
+			$value->status = "";
+			$value->remark = "";
+			if(!in_array($value->part_number,$machine_request_parts_added)){
+				$machine_request_parts[] = $value;
+			}
+			
+		}
+		$data['machine_request_parts_arr'] = $machine_request_parts;
+		// pr($machine_request_parts,1);
 		$this->loadView('admin/molding/machine_request_details', $data);
 
 	}

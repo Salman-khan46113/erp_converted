@@ -248,7 +248,7 @@ class CustomerPart extends CI_Model {
         $this->db->select(
             'm_req.id as request_no,m_req.id as id, m.name as machine_name, o.name as operator_name, 
 		CONCAT(part.part_number ,"<br>(",part.part_description,")") as customer_part,CONCAT(m_req.created_date," ",m_req.created_time) as created_date, m_req.created_time, m_req.status, req_parts.id as req_parts,
-		m_req.customer_parts_master_id'
+		m_req.customer_parts_master_id,m_req.qty,m_req.operator_id,m_req.machine_id,m_req.customer_part_id'
         );
         $this->db->from(" machine_request m_req");
         $this->db->join("operator as o", "m_req.operator_id = o.id",'left');

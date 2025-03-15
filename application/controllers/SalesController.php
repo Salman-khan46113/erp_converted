@@ -4794,7 +4794,7 @@ class SalesController extends CommonController
 		
 		$data = $this->SalesModel->getReceivableReportView($condition_arr,$post_data["search"]);
 		
-		// pr($data,1);
+		// pr($this->db->last_query(),1);
 		foreach ($data as $key => $objs) {
 
 			$date_convert = DateTime::createFromFormat('d-m-Y', $objs['created_date']);
@@ -4893,6 +4893,7 @@ class SalesController extends CommonController
         $total_paid_amount = 0;
         $total_balance_amount_to_pay = 0;
         $total_tds_amount = 0;
+		$total_debit_amount = 0;
 		foreach ($total_record as $key => $value) {
 			$row_total = round($value['ttlrt'],2) + round($value['tcsamnt'],2);
 			$total_with_gst_val += $row_total;
@@ -4901,6 +4902,7 @@ class SalesController extends CommonController
 			// if($value['bal_amnt'] > 0){
 				$total_balance_amount_to_pay += $value['bal_amnt'];
 			// }
+			$total_debit_amount += $value['debit_amount'];
 		}
         $data["recordsTotal"] = count($total_record);
         $data["recordsFiltered"] = count($total_record);
@@ -4908,6 +4910,7 @@ class SalesController extends CommonController
         $data["total_paid_amount"] = number_format($total_paid_amount,2);
         $data["total_balance_amount_to_pay"] = number_format($total_balance_amount_to_pay,2);
         $data["total_tds_amount"] = number_format($total_tds_amount,2);
+		$data["total_debit_amount"] = number_format($total_debit_amount,2);
         echo json_encode($data);
 	}
 

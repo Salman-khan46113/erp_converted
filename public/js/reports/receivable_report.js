@@ -222,11 +222,12 @@ const page = {
                 type: "POST",
                 dataSrc: function(json) {
                     // Log the entire response to see what extra data is included
-                    console.log('Full Response:', json);
-                    $(".total_amount_with_gst").html(json.total_with_gst_val)
-                    $(".total_tds_amount").html(json.total_tds_amount)
-                    $(".total_amount_paid").html(json.total_paid_amount)
-                    $(".total_balance_amount_to_pay").html(json.total_balance_amount_to_pay)
+                    // console.log('Full Response:', json);
+                    $(".total_amount_with_gst").html(json.total_with_gst_val).attr("title",json.total_with_gst_val);
+                    $(".total_tds_amount").html(json.total_tds_amount).attr("title",json.total_tds_amount)
+                    $(".total_amount_paid").html(json.total_paid_amount).attr("title",json.total_paid_amount)
+                    $(".total_balance_amount_to_pay").html(json.total_balance_amount_to_pay).attr("title",json.total_balance_amount_to_pay);
+                    $(".total_debit_amount").html(json.total_debit_amount).attr("title",json.total_debit_amount)
                     return json.data; // This is what populates the DataTable
                 }
             },

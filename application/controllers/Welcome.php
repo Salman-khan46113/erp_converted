@@ -1193,7 +1193,7 @@ class Welcome extends CommonController
 			LEFT JOIN supplier as s ON  s.id  = np.supplier_id
 			WHERE i.delivery_unit = '".$this->Unit->getSessionClientUnitName()."'"." 
             ORDER BY i.id DESC");
-        
+        // pr($data['inwarding_data'],1);
         // pr($this->db->last_query());
 		$data['isMultiClient'] = $this->session->userdata['isMultipleClientUnits'];
 		// $this->load->view('header');
@@ -1728,7 +1728,7 @@ class Welcome extends CommonController
                 //         'grn_number' => $inwarding_data[0]->grn_number,
            	);
            	$grn_details_data = $this->Crud->get_data_by_id_multiple("grn_details", $arr1);
-            if(!($grn_details_data[0]->verified_qty > 0)){
+            if(count($grn_details_data) > 0 && !($grn_details_data[0]->verified_qty > 0)){
                 $part_added = "No";
             }
            	$data['po_parts'][$key]->grn_details_data = $grn_details_data;

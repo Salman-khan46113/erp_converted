@@ -92,6 +92,7 @@ const page = {
         let that = this;
         $(".issue_material_request_qty,.add_machine_request_details").submit(function(e){
             e.preventDefault();
+            
             var href = $(this).attr("action");
             let id = $(this).attr("id");
             let flag = that.formValidate(id);

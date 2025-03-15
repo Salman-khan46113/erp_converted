@@ -96,7 +96,7 @@
                </em></a>
           </h1>
           <br>
-          <span >View Material Request MR-<%$machine_request_id %></span>
+          <span >MR-<%$machine_request_id %>  &nbsp;&nbsp;&nbsp;(<%$part_name%>) &nbsp;&nbsp;&nbsp;SO Qty: <%$machine_request[0]->qty%></span>
         </div>
       </nav>
 
@@ -187,97 +187,97 @@
           <table width="100%" border="1" cellspacing="0" cellpadding="0" class="table table-striped" style="border-collapse: collapse;" border-color="#e1e1e1" id="machine_request_details">
             <thead>
                <tr>
-                  <th>Sr No</th>
-                  <th>Child Part </th>
-                  <th>UOM</th>
-                  <th>Requsted Qty</th>
-                  <th>Issued Qty</th>
-                  <th>Status</th>
-                  <th>Remark</th>
+                  <th width="1%" class="text-center">Sr No</th>
+                  <th width="15%">Purchase Item </th>
+                  <th width="5%" class="text-center">UOM</th>
+                  <th width="5%" class="text-center">BOM Qty</th>
+                  <th width="8%">Required Qty</th>
+                  <th width="5%" class="text-center">Store Stock</th>
+                  <th width="5%" class="text-center">Production Stock</th>
+                  <th width="12%">Issued Qty</th>
+                  <th width="12%">Remark</th>
+                  <th width="5%" class="text-center">Action</th>
+                  <th width="5%" class="text-center">Status</th>
                </tr>
             </thead>
             <tbody>
-               <%if ($machine_request_parts) %>
+               <%if ($machine_request_parts_arr) %>
                     <%assign var='i' value= 1 %>
-                    <%foreach from=$machine_request_parts item=req %>
+                    <%foreach from=$machine_request_parts_arr item=req %>
                    <tr>
-                      <td><%$i %></td>
+                      <td class="text-center"><%$i %></td>
                       <td><%$req->part_number %>/<%$req->part_description %></td>
-                      <td><%$req->uom_name %></td>
+                      <td class="text-center"><%$req->uom_name %></td>
+                      <td class="text-center"><%$req->bom_qty %></td>
                       <td><%$req->qty %></td>
+                      <td class="text-center"><%$req->stock %></td>
+                      <td class="text-center"><%$req->machine_mold_issue_stock %></td>
                       <td>
                          <%if ($req->status == "pending") %>
                          <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                             data-bs-target="#addPromo<%$i %>">
                          Issue Qty
                          </button>
-                         <%else %>
-                            <%$req->accepted_qty %>
-                         <%/if%>
-                         <div class="modal fade" id="addPromo<%$i %>" tabindex="-1"
-                            role="dialog" aria-labelledby="exampleModalLabel"
-                            aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                               <div class="modal-content">
-                                  <div class="modal-header">
-                                     <h5 class="modal-title" id="exampleModalLabel">Issue Qty</h5>
-                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close">
-                                    
-                                     </button>
-                                  </div>
-                                  <form
-                                           action="<%base_url('issue_material_request_qty') %>"
-                                           method="POST" enctype="multipart/form-data" id="issue_material_request_qty<%$i %>" class="issue_material_request_qty<%$i %> issue_material_request_qty custom-form">
-                                  <div class="modal-body">
-                                     <div class="form-group">
-                                        
-                                     </div>
-                                     <div class="form-group">
-                                     <label for="on click url">Accept Qty</label>
-                                     (Current Stock:<%$req->stock %>)<span
-                                        class="text-danger">*</span>
-                                     <br>
-                                     <%if ($req->stock > 0 && $req->qty <= $req->stock) || true%>
-                                       <input  type="text" name="accepted_qty"
-                                          placeholder="Accept Qty"
-                                          class="form-control required-input onlyNumericInput" data-min="1"
-                                          data-max="<%$req->qty %>" data-req="<%$req->stock %>" value="" id="">
-                                       <input type="hidden" value="<%$machine_request_id %>"
-                                          name="machine_request_id" required
-                                          class="form-control">
-                                       <input required type="hidden" name="qty"
-                                          placeholder="Enter Accept Qty"
-                                          class="form-control" min="1"
-                                          value="<%$req->qty %>">
-                                       <input required type="hidden" name="id"
-                                          placeholder="Enter Accept Qty"
-                                          class="form-control"
-                                          value="<%$req->id %>" id="">
-                                       <input required type="hidden" name="part_number"
-                                        placeholder="Enter Accept Qty"
-                                        class="form-control"
-                                        value="<%$req->part_number %>"
-                                        id="">
-                                     <%assign var='disableSave' value="" %>
-                                     <%else %>
-                                      Please Add Store Stock
-                                        <%assign var='disableSave' value="disabled" %>
-                                     <%/if %>
-                                     </div>
-                                  </div>
-                                  <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary"
-                                     data-bs-dismiss="modal">Close</button>
-                                  <button type="submit" <%$disableSave %> class="btn btn-primary">Save</button>
-                                  </form>
-                                  </div>
-                               </div>
-                            </div>
+                         <%else if ($req->status == "") %>
+                         <form
+                         action="<%base_url('issue_material_request_qty') %>"
+                         method="POST" enctype="multipart/form-data" id="issue_material_request_qty<%$i %>" class="issue_material_request_qty<%$i %> issue_material_request_qty custom-form">
+                         <div class="form-group">
+                         <label for="on click url" style="display: none;">Accept Qty</label>
+                         <input  type="text" name="accepted_qty"
+                         placeholder="Accept Qty"
+                         class="form-control required-input onlyNumericInput" data-min="1"
+                         data-max="<%$req->stock %>" data-req="<%$req->stock %>" value="" id="">
                          </div>
+                      <input type="hidden" value="<%$machine_request_id %>"
+                         name="machine_request_id" required
+                         class="form-control">
+                      <input required type="hidden" name="qty"
+                         placeholder="Enter Accept Qty"
+                         class="form-control" min="1"
+                         value="<%$req->qty %>">
+                      <input required type="hidden" name="id"
+                         placeholder="Enter Accept Qty"
+                         class="form-control"
+                         value="<%$req->id %>" id="">
+                      <input required type="hidden" name="part_number"
+                       placeholder="Enter Accept Qty"
+                       class="form-control"
+                       value="<%$req->part_number %>"
+                       id="">
+                         <%else %>
+                            <%$req->accepted_qty%>
+                         <%/if%>
+                         
                       </td>
-                      <td><%$req->status %></td>
-                      <td><%$req->remark %></td>
+                      <td class="text-center">
+                      <%if ($req->status != "Completed") %>
+                        <input  type="text" name="remark"
+                        placeholder="Enter Remark"
+                        class="form-control"
+                        value="<%$req->remark %>" />
+                      <%else%>
+                      <%$req->remark %>
+                      <%/if%>
+                      </td>
+                      <td class="text-center">
+                      <%if ($req->status != "Completed") %>
+                        <button type="submit" class="btn btn-primary" >
+                          Submit
+                        </button>
+                        </form>
+                        <%else%>
+                        <%display_no_character("")%>
+                      <%/if%>
+                      </td>
+                      <td class="text-center">
+                      <%if ($req->status != "Completed") %>
+                        Pending
+                      <%else%>
+                      <%$req->status %>
+                      <%/if%>
+                         
+                      </td>
                    </tr>
                 <%assign var='i' value=$i+1 %>
                  <%/foreach%>

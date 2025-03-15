@@ -280,6 +280,7 @@ class SalesModel extends CI_Model {
         $this->db->join('new_sales n', 's.sales_id = n.id AND n.status != "unlocked" AND n.clientId = ' . $this->Unit->getSessionClientId(), 'inner');
         $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
         $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
+        $this->db->where('n.status', 'lock');
         if(is_valid_array($search_params) && $search_params['customer_part_id'] > 0){
             $this->db->where('s.customer_id', $search_params['customer_part_id']);
         }
@@ -352,6 +353,7 @@ class SalesModel extends CI_Model {
             rrp.amount_received as amount_received, 
             rrp.transaction_details, 
             n.created_date as created_date_val,
+            rrp.debit_amount as debit_amount,
             rrp.tds_amount as tdsamnt,
             rrp.remark as remark_val,
              ROUND(
@@ -372,6 +374,7 @@ class SalesModel extends CI_Model {
         $this->db->join('new_sales ns', 'ns.id = s.sales_id', 'left');
         $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
         $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
+        $this->db->where('n.status', 'lock');
         if(is_valid_array($search_params) && $search_params['customer_part_id'] > 0){
             $this->db->where('s.customer_id', $search_params['customer_part_id']);
         }
@@ -453,6 +456,7 @@ class SalesModel extends CI_Model {
         $this->db->join('new_sales n', 's.sales_id = n.id AND n.status != "unlocked" AND n.clientId = ' . $this->Unit->getSessionClientId(), 'inner');  
         $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
         $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
+        $this->db->where('n.status', 'lock');
         if(is_valid_array($search_params) && $search_params['customer_id'] > 0){
             $this->db->where('s.customer_id', $search_params['customer_id']);
         }
@@ -557,6 +561,7 @@ class SalesModel extends CI_Model {
         $this->db->join('new_sales ns', 'ns.id = s.sales_id', 'left');
         $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
         $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
+        $this->db->where('n.status', 'lock');
         if(is_valid_array($search_params) && $search_params['customer_id'] > 0){
             $this->db->where('s.customer_id', $search_params['customer_id']);
         }
@@ -861,6 +866,7 @@ class SalesModel extends CI_Model {
         $this->db->join('new_sales n', 's.sales_id = n.id AND n.status != "unlocked" AND n.clientId = ' . $this->Unit->getSessionClientId(), 'inner');
         $this->db->join('new_sales ns', 'ns.id = s.sales_id', 'left');
         $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
+        $this->db->where('n.status', 'lock');
         $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
         if ($date != "") {
                 $date_filter =  explode((" - "),$date);
@@ -1279,6 +1285,7 @@ class SalesModel extends CI_Model {
         $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
         $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
         $this->db->join('client AS cl', 'cl.id = n.clientId', 'inner');
+        $this->db->where('n.status', 'lock');
         $this->db->group_by('s.sales_number');
         if ($search_params["date"] != "") {
                 $date_filter =  explode((" - "),$search_params["date"]);

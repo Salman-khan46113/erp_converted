@@ -10,10 +10,10 @@
                         Planning & Sales
                         <a hijacked="yes" href="javascript:void(0)" class="backlisting-link" title="">
                         <i class="ti ti-chevrons-right"></i>
-                        <em>Shop Order Details</em></a>
+                        <em>Production Plan</em></a>
                      </h1>
                      <br>
-                     <span>Shop Order Details</span>
+                     <span>Production Plan</span>
                   </div>
                </nav>
 
@@ -38,7 +38,7 @@
                                         <div class="modal-dialog modal-dialog-centered" role=" document">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title" id="exampleModalShop">Shop Order</h5>
+                                                    <h5 class="modal-title" id="exampleModalShop">Production Plan</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                         aria-label="Close">
                                                     </button>
@@ -78,7 +78,7 @@
                                                             </div>
                                                                 <div class="col-lg-12">
                                                                     <div class="form-group">
-                                                                        <label for="contractorName">SO Qty</label><span class="text-danger">*</span>
+                                                                        <label for="contractorName">Production Plan Qty</label><span class="text-danger">*</span>
                                                                         <input type="text"  name="scheduleQty"
                                                                             class="form-control onlyNumericInput required-input" data-min="0">
                                                                     </div>
@@ -158,12 +158,12 @@
                                    <thead>
                                         <tr>
                                             <!-- <th>Sr.No.</th> -->
-                                            <th>Shop Order No</th>
+                                            <th>Production Plan No</th>
                                             <th>Customer</th>
                                             <th>Part Number</th>
                                             <th>Part Description</th>                                         
-                                            <th>SO Date</th>
-                                            <th>SO Quantity</th>
+                                            <th>Production Plan Date</th>
+                                            <th>Production Plan Quantity</th>
                                         </tr>
                                     </thead>
                                     <tbody>

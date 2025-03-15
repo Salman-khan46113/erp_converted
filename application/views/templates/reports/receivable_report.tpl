@@ -188,6 +188,10 @@
                         <p class="tgdp-rgt-tp-ttl">Total TDS Amount</p>
                         <p class="tgdp-rgt-tp-txt total_tds_amount" title="12">0.00</p>
                     </div>
+                    <div class="tgdp-rgt-tp-sect">
+                        <p class="tgdp-rgt-tp-ttl">Total Debit Amount</p>
+                        <p class="tgdp-rgt-tp-txt total_debit_amount" title="12">0.00</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -342,7 +346,7 @@
 .tgdp-rgt-tp-sect {
     float: left;
     width: 25%;
-    width: calc(25% - 19px);
+    width: calc(20% - 19px);
     border-radius: 10px;
     background: #fff;
     height: 105px;

@@ -703,6 +703,7 @@ $route['update_downtime_details'] = 'P_Molding/update_downtime_details';
 $route['add_mold_maintenance'] = 'P_Molding/add_mold_maintenance';
 $route['add_machine_mold'] = 'P_Molding/add_machine_mold';
 $route['add_machine_request'] = 'P_Molding/add_machine_request';
+$route['update_machine_request'] = 'P_Molding/update_machine_request';
 $route['add_machine_request_details'] = 'P_Molding/add_machine_request_details';
 $route['add_molding_stock_transfer'] = 'P_Molding/add_molding_stock_transfer';
 $route['add_molding_final_inspection_location'] = 'P_Molding/add_molding_final_inspection_location';

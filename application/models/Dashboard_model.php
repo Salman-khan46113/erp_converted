@@ -299,7 +299,7 @@ class Dashboard_model extends CI_Model
             n.created_date as created_date_val,
             rrp.tds_amount as tds_amount,
             rrp.remark as remark_val,
-           	ROUND(
+           	 ROUND(
                 SUM(
                     IF(s.total_rate > 0, s.total_rate, 0) 
                     + IF(s.tcs_amount > 0, s.tcs_amount, 0) 
@@ -308,7 +308,7 @@ class Dashboard_model extends CI_Model
                     - (IF(rrp.tds_amount > 0, rrp.tds_amount, 0)) 
                     - IF(rrp.debit_amount > 0, rrp.debit_amount, 0)
                , 
-            2) AS bal_amnt,
+            2)  AS bal_amnt,
             s.sales_id as sales_id_val');
         
         $this->db->from('sales_parts s');
@@ -317,17 +317,20 @@ class Dashboard_model extends CI_Model
         $this->db->join('new_sales ns', 'ns.id = s.sales_id', 'left');
         $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
         $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
+		$this->db->where('n.status', 'lock');
         
         $this->db->group_by('s.sales_number');
         
         
         if($year != ""){
+			$this->db->group_start();
 	    	if(array_key_exists("year", $month_arr)){
 	    		$this->db->where("s.created_year = ".$month_arr['year']." AND s.created_month = ".$month_arr['month']."");
 	    	}else{
 			    $this->db->where("s.created_year = ".$month_arr['start_year']." AND s.created_month >= ".$month_arr['start_month']."");
 			    $this->db->or_where("s.created_year = ".$month_arr['end_year']." AND s.created_month <= ".$month_arr['end_month']."");
 		   	}
+			   $this->db->group_end();
 	   	}
 	   	// $this->db->having('bal_amnt >', 0);
         $result_obj = $this->db->get();
@@ -346,6 +349,7 @@ class Dashboard_model extends CI_Model
 	    $this->db->join('new_sales n', 'sp.sales_id = n.id AND n.status != "unlocked"', 'inner');
 	    $this->db->join('receivable_report as rr', 'rr.sales_number = sp.sales_number '.$unit_condition);
 	    $this->db->join('customer as c', 'c.id = sp.customer_id', 'left');
+		$this->db->where('n.status', 'lock');
 	    if($date != ""){
 	    	$this->db->where("sp.created_date",$date);
 	    }
@@ -353,12 +357,14 @@ class Dashboard_model extends CI_Model
 	    	$this->db->where("sp.created_month",$month);
 	    }
 	    if($year != ""){
+			$this->db->group_start();
 	    	if(array_key_exists("year", $month_arr)){
 	    		$this->db->where("sp.created_year = ".$month_arr['year']." AND sp.created_month = ".$month_arr['month']."");
 	    	}else{
 			    $this->db->where("sp.created_year = ".$month_arr['start_year']." AND sp.created_month >= ".$month_arr['start_month']."");
 			    $this->db->or_where("sp.created_year = ".$month_arr['end_year']." AND sp.created_month <= ".$month_arr['end_month']."");
 		   	}
+			$this->db->group_end();
 	   	}
 	   	$this->db->group_by('sp.sales_number');
 	    $result_obj = $this->db->get();
@@ -987,7 +993,7 @@ class Dashboard_model extends CI_Model
             n.created_date as created_date_val,
             rrp.tds_amount as tdsamnt,
             rrp.remark as remark_val,
-            ROUND(
+             ROUND(
                 SUM(
                     IF(s.total_rate > 0, s.total_rate, 0) 
                     + IF(s.tcs_amount > 0, s.tcs_amount, 0) 
@@ -1005,17 +1011,20 @@ class Dashboard_model extends CI_Model
         $this->db->join('new_sales ns', 'ns.id = s.sales_id', 'left');
         $this->db->join('receivable_report rrp', 'rrp.sales_number = s.sales_number', 'left');
         $this->db->join('customer cus', 's.customer_id = cus.id', 'left');
+		$this->db->where('n.status', 'lock');
         
         $this->db->group_by('s.sales_number');
         
         
         if($year != ""){
+			$this->db->group_start();
 	    	if(array_key_exists("year", $month_arr)){
 	    		$this->db->where("s.created_year = ".$month_arr['year']." AND s.created_month = ".$month_arr['month']."");
 	    	}else{
 			    $this->db->where("s.created_year = ".$month_arr['start_year']." AND s.created_month >= ".$month_arr['start_month']."");
 			    $this->db->or_where("s.created_year = ".$month_arr['end_year']." AND s.created_month <= ".$month_arr['end_month']."");
 		   	}
+			   $this->db->group_end();
 	   	}
         $result_obj = $this->db->get();
         $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
