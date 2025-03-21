@@ -117,7 +117,7 @@
                                             <div class="col-lg-5">
                                                 <div class="form-group mb-3 mt-2">   
                                                     <input type="radio" name="ship_addressType" value="consignee" onchange="toggleConsigneeSelection()" id="customerAddress">
-                                                    &nbsp;<label >Select Consignee Address</label><br>
+                                                    &nbsp;<label >Consignee Address</label><br>
                                                 </div>
                                                 <div class="form-group" id="consigneeSelect">
                                                     <select name="consignee"   disabled class="form-control select2" id="consigneeSelectInput">
@@ -132,7 +132,20 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <label class="form-label">Tally Categories</label>
+                                            <select name="tally_category" id="tallyCategorySelect" class="form-control">
+                                                <option value="-">Select</option>
+                                                <%foreach from=$tally_sales_category item=t%>
+                                                <option value="<%$t->sales_category_id%>">
+                                                    <%$t->category_name%>
+                                                </option>
+                                                <%/foreach%>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="col-lg-2">
                                         <div class="form-group">
                                             <label for="" class="form-label">Remark</label>

@@ -84,10 +84,10 @@ class Reports_model extends CI_Model {
             	}
             }
             if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
@@ -196,9 +196,9 @@ class Reports_model extends CI_Model {
             }
             if ($search_params["date_range"] != "") {
 	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
@@ -284,10 +284,10 @@ class Reports_model extends CI_Model {
             }
    
             if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
@@ -362,16 +362,11 @@ class Reports_model extends CI_Model {
             }
             if ($search_params["date_range"] != "") {
 	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
-   			if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
-			}
+   			
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
 	            $keyword = $search_params["value"];
@@ -470,10 +465,10 @@ class Reports_model extends CI_Model {
             }
    
             if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
@@ -565,10 +560,10 @@ class Reports_model extends CI_Model {
             }
    
             if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
@@ -668,10 +663,10 @@ WHERE pq.output_part_table_name = "inhouse_parts"','inner');
             }
    
             if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(pq.date, '%Y-%m-%d') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(pq.date, '%Y-%m-%d') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
@@ -720,10 +715,10 @@ WHERE pq.output_part_table_name = "inhouse_parts"','inner');
                 $this->db->where("cp.scrap_category_id", $search_params["scrap_category"]);
             }
    			if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(pq.date, '%Y-%m-%d') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(pq.date, '%Y-%m-%d') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
    			if (isset($search_params["value"]) && $search_params["value"] != "") {
@@ -772,10 +767,10 @@ WHERE pq.output_part_table_name = "inhouse_parts"','inner');
             }
    
             if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(st.added_date, '%Y-%m-%d') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(st.added_date, '%Y-%m-%d') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {

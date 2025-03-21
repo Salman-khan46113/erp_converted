@@ -45,39 +45,7 @@
                 </div>
               </li>
             </div>  
-            <div class="filter-row">
-              <li class="nav-small-cap">
-                <span class="hide-menu">Name</span>
-                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
-              </li>
-              <li class="sidebar-item">
-                <div class="input-group">
-                  <input type="text" id="employee_name_search" class="form-control" placeholder="Name">
-                </div>
-              </li>
-            </div>
-            <div class="filter-row">
-              <li class="nav-small-cap">
-                <span class="hide-menu">Name</span>
-                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
-              </li>
-              <li class="sidebar-item">
-                <div class="input-group">
-                  <input type="text" id="employee_name_search" class="form-control" placeholder="Name">
-                </div>
-              </li>
-            </div>
-            <div class="filter-row">
-              <li class="nav-small-cap">
-                <span class="hide-menu">Name</span>
-                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
-              </li>
-              <li class="sidebar-item">
-                <div class="input-group">
-                  <input type="text" id="employee_name_search" class="form-control" placeholder="Name">
-                </div>
-              </li>
-            </div>
+            
 
         </ul>
       </div>

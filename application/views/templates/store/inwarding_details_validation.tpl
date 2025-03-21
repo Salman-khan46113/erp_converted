@@ -306,6 +306,9 @@
             <th>Price</th>
             <th>Inwarding Qty</th>
             <th>GRN Validation Qty</th>
+            <%if $configuration['RMCount'] eq 'Yes'%>
+            <th>RM Count</th>
+            <%/if%>
             <th>Submit </th>
             <th>MDR</th>
             <th>Action</th>
@@ -336,7 +339,7 @@
           <%else %>
           <%assign var="data_present" value='no'%>
           <%/if%>
-          <tr>
+          <tr class="item-row" data="testy">
              <!-- <td><%$i %></td> -->
             <td><%$child_part[0]->part_number %></td>
             <td><%$child_part[0]->part_description %></td>
@@ -395,8 +398,8 @@
                 value="<%$new_po[0]->freight_amount_gst %>"
                 class="form-control">
                 <%/if%>
-              </td>
-              <td>
+            </td>
+            <td>
                 <%if (empty($grn_details_data[0]->verified_qty)) %>
                 <form action="javascript:void(0);"  method="post"  class=" update_grn_qty_form_<%$p->part_id %> custom-form"  >
                 <div class="form-group">
@@ -422,7 +425,20 @@
                   <%else %>
                   <%$grn_details_data[0]->verified_qty %>
                   <%/if%>
-                </td>
+                </td >
+                <%if $configuration['RMCount'] eq 'Yes' %>
+                       <td class="rm-count-row">
+                       <%if $grn_details_data[0]->route_count > 0%>
+                       <%if !(empty($grn_details_data[0]->verified_qty)) %>
+                       <%$grn_details_data[0]->verified_route_count %>
+                       <%else%>
+                           <input type="text" step="any" data-max="<%$grn_details_data[0]->route_count %>" data-min="1" placeholder="RM Count" name="verified_route_count" class="form-control <%if $grn_details_data[0]->route_count gt 0 %>required-input-route required-input <%/if%> onlyIntergerInput" value="">
+                       <%/if%>
+                       <%else%>
+                       <%display_no_character()%>
+                       <%/if%>
+                       
+                <%/if%>
                 <td>
                   <%assign var='diff' value= (float)$grn_details_data[0]->qty - (float)$grn_details_data[0]->verified_qty%>
                   <%if (empty($grn_details_data[0]->verified_qty) || $grn_details_data[0]->verified_qty == 0) %>
@@ -601,6 +617,20 @@
                                                   >
                                             </div>
                                          </div>
+                                         <%if $configuration['RMCount'] eq 'Yes' && $grn_details_data[0]->route_count > 0%>
+                                         <div class="col-lg-12">
+                                            <div class="form-group rm-count-row">
+                                               <label for="po_num">RM Count </label><span
+                                                  class="text-danger">*</span>
+                                               <input type="text" class="form-control onlyIntergerInput <%if $grn_details_data[0]->route_count gt 0 %>required-input-route required-input <%/if%>"
+                                                  value="<%$grn_details_data[0]->verified_route_count%>"
+                                                  name="verified_route_count" data-max="<%$grn_details_data[0]->route_count %>" data-min="1"
+                                                  >
+                                            </div>
+                                         </div>
+                                               
+                                                
+                                          <%/if%>
                                       </div>
                                 </div>
                                 <div class="modal-footer">

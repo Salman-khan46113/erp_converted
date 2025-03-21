@@ -51,7 +51,9 @@ class StockController extends CommonController
 		
 		//Sharing_qty
 		$sharingQtyColName = $this->Unit->getSharingQtyColNmForClientUnit();
-
+		$configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
+        $configuration = array_column($configuration, "config_value","config_name");
+		// pr($configuration,1);
         $column[] = [
             "data" => "part_number",
             "title" => "Part Number",
@@ -83,6 +85,15 @@ class StockController extends CommonController
             "className" => "dt-center",
 			'orderable' => false
         ];
+		if($configuration['RMCount'] == "Yes"){
+			$column[] = [
+				"data" => "route_count",
+				"title" => "RM Count Store",
+				"width" => "17%",
+				"className" => "dt-center",
+				'orderable' => false
+			];
+		}
         $column[] = [
             "data" => "underinspection_stock",
             "title" => "Under Inspection Qty",
@@ -351,6 +362,9 @@ class StockController extends CommonController
 			$data[$key]['stock_value'] = number_format($stock_val,2,".","");
 			$data[$key][$plastic_prod_column_name] = $plastic_prod_details;
 			$data[$key]['plastic_prod_details'] = $value['production_rejection'];
+			if($value['sub_category'] != "RM count"){
+				$data[$key]['route_count'] = "--";
+			}
 			
 		}
 		// pr($data,1);
@@ -423,24 +437,31 @@ class StockController extends CommonController
 		$child_part_to  = $this->input->post('customer_part_number');//transferred to location
 		$child_part_id  = $this->input->post('child_part_id');
 		$stock  = (float)$this->input->post('stock');
+		$route_count = $this->input->post('route_count');
 
 		$stock_column_name = $this->Crud->getStockColNmForClientUnit();
 		
 		$child_part = $this->SupplierParts->getSupplierPartById($child_part_id);
+		// pr($child_part,1);
 		$old_stock = (float)$child_part[0]->$stock_column_name;
 		$new_stock = $old_stock - $stock;
 
+		$old_route_stock = $child_part[0]->route_count;
+		$new_route_count = $old_route_stock - $route_count;
+		
 		$part_to_data = $this->SupplierParts->getSupplierPartById($child_part_to);
 		$new_stock_part_to_data =(float)$part_to_data[0]->$stock_column_name + $stock;
-
+		$new_stock_route_count =$part_to_data[0]->route_count + $route_count;
 		$data_update_child_part = array(
-			$stock_column_name => $new_stock
+			$stock_column_name => $new_stock,
+			"route_count"=> $new_route_count
 		);
 		$data_update_child_part_to = array(
-			$stock_column_name => $new_stock_part_to_data
+			$stock_column_name => $new_stock_part_to_data,
+			"route_count"=> $new_stock_route_count
 		);
 
-		// pr($data_update_child_part_to,1);
+		
 		$query = $this->SupplierParts->updateStockById($data_update_child_part, $child_part_id);
 		$query = $this->SupplierParts->updateStockById($data_update_child_part_to, $child_part_to);
 		$success = 0;

@@ -161,6 +161,14 @@
                               placeholder="Enter Qty" name="qty" required
                               class="form-control">
                           </div>
+                          <%if $configuration['RMCount'] eq 'Yes'%>
+                          <div class="form-group rm-count-row"  style="display: none;">
+                            <label for="route_count" style="    float: left;">RM Count <span></span></label>
+                            <input type="text" name="route_count" step="any"
+                              placeholder="Enter RM Count" name="route_count" 
+                              class="form-control required-input-route onlyNumericInput" data-min='1' data-max="" >
+                          </div>
+                          <%/if%>
                         </div>
                       </div>
                   </div>
@@ -181,7 +189,13 @@
                     <th>Request Number</th>
                     <th>Part Number / Description</th>
                     <th width="15%">Request Qty</th>
+                    <%if $configuration['RMCount'] eq 'Yes'%>
+                    <th width="15%">RM Count</th>
+                    <%/if%>
                     <th  width="15%">Accept Qty</th>
+                    <%if $configuration['RMCount'] eq 'Yes'%>
+                    <th width="15%">Accept RM Count</th>
+                    <%/if%>
                     <th>Submit</th>
                     <th>UOM</th>
                     <th>Reason</th>
@@ -196,11 +210,14 @@
                     <%if ($stock_changes) %>
                         <%foreach from=$stock_changes item=c %>
 	                            <%if ($c->type == "minus") %>
-					                  <tr>
+					                  <tr class="item-row">
 						                    <td><%$i %></td>
 						                    <td><%$c->id %></td>
 						                    <td><%$c->part_number %>/<%$c->part_description %></td>
 						                    <td><%$c->qty %></td>
+                                <%if $configuration['RMCount'] eq 'Yes'%>
+                                  <td><%$c->route_count %></td>
+                                <%/if%>
                                 <td>
                                   <%if checkGroupAccess("stock_down","update","No") %>
                                   <%if ($c->status == "pending") %>
@@ -217,6 +234,22 @@
                                       <%display_no_character()%> 
                                   <%/if%>
                                 </td>
+                                <%if $configuration['RMCount'] eq 'Yes'%>
+                                  <td>
+                                  <%if checkGroupAccess("stock_down","update","No") %>
+                                  <%if ($c->status == "pending") %>
+                                  <div class="form-group rm-count-row">
+                                                <label style="display: none;">Accept RM Count</label>
+                                                <input name="accepted_route_qty" data-max="<%$c->route_count%>"  data-min="1"  type="text" step="any" class="form-control required-input-route required-input">
+                                            </div>
+                                  <%else if ($c->status != "pending") %>
+                                    <%$c->accepted_route_qty %> 
+                                  <%/if%>
+                                  <%else%>
+                                      <%display_no_character()%> 
+                                  <%/if%>
+                                  </td>
+                                <%/if%>
                                 <td>
 
                                   <%if ($c->status == "pending") && checkGroupAccess("stock_down","update","No") %>
@@ -481,6 +514,25 @@
       if(flag){
         return;
       }
+      if($(this).parents(".modal-dialog").find(".required-input-route").length > 0){
+          var data_max = parseFloat($(this).parents(".modal-dialog").find(".required-input-route").data('max'));
+          var data_min = parseFloat($(this).parents(".modal-dialog").find(".required-input-route").data('min'));
+          var value = parseFloat($(this).parents(".modal-dialog").find(".required-input-route").val());
+          console.log(data_max,data_min,value)
+          $(this).parents(".modal-dialog").find(".rm-count-row .error").remove();
+          if(data_min > value){
+            var validation_message = "RM Count should be greater than 0";
+            var label_html = "<label class='error'>"+validation_message+"</label>";
+            $(this).parents(".modal-dialog").find(".required-input-route").after(label_html);
+            return;
+          }else if(data_max < value){
+            var validation_message = "RM Count should be less than or equals to "+data_max;
+            var label_html = "<label class='error'>"+validation_message+"</label>";
+            $(this).parents(".modal-dialog").find(".required-input-route").after(label_html);
+            return;
+          }
+      }
+
       var formData = new FormData($('#add_stock_up')[0]);
 
       $.ajax({
@@ -600,7 +652,64 @@
         return flag;
   }
 
-  $(document).on("submit",".accept_material_request_qty,.delete_material_request",function(e){
+  $(document).on("submit",".accept_material_request_qty",function(e){
+            e.preventDefault();
+           
+            var href = $(this).attr("action");
+            var id = $(this).attr("id");
+            let flag = that.formValidate1(id);
+
+            if(flag){
+              return;
+            }
+
+            if($(this).parents(".item-row").find(".required-input-route").length > 0){
+                var data_max = parseFloat($(this).parents(".item-row").find(".required-input-route").data('max'));
+                var data_min = parseFloat($(this).parents(".item-row").find(".required-input-route").data('min'));
+                var value = parseFloat($(this).parents(".item-row").find(".required-input-route").val());
+                $(this).parents(".item-row").find(".rm-count-row .error").remove();
+                if(data_min > value){
+                  var validation_message = "RM Count should be greater than 0";
+                  var label_html = "<label class='error'>"+validation_message+"</label>";
+                  $(this).parents(".item-row").find(".required-input-route").after(label_html);
+                  return;
+                }else if(data_max < value){
+                  var validation_message = "RM Count should be less than or equals to "+data_max;
+                  var label_html = "<label class='error'>"+validation_message+"</label>";
+                  $(this).parents(".item-row").find(".required-input-route").after(label_html);
+                  return;
+                }
+            }
+            var formData = new FormData($('.'+id)[0]);
+
+            $.ajax({
+              type: "POST",
+              url: href,
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (response) {
+                var responseObject = JSON.parse(response);
+                var msg = responseObject.messages;
+                var success = responseObject.success;
+                if (success == 1) {
+                  toastr.success(msg);
+                  $(this).parents(".modal").modal("hide")
+                  setTimeout(function(){
+                    window.location.reload();
+                  },1000);
+
+                } else {
+                  toastr.error(msg);
+                }
+              },
+              error: function (error) {
+                console.error("Error:", error);
+              },
+            });
+          });
+
+  $(document).on("submit",".delete_material_request",function(e){
             e.preventDefault();
            
             var href = $(this).attr("action");
@@ -734,6 +843,15 @@
         success: function (response) {
           var responseObject = JSON.parse(response);
           $("#add_stock_up #material_transfer_request_qty").html("(Stock : "+responseObject.stock+")");
+          if(responseObject.sub_category != "RM count" || parseInt(responseObject.route_count) <= 0){
+            responseObject.sub_category = 0;
+            $(".rm-count-row").hide();
+          }else{
+            $(".rm-count-row").show();
+            console.log("ok")
+            $(".rm-count-row label span").html(`(${responseObject.route_count})`)
+          }
+          $("#add_stock_up .required-input-route").attr("data-max",responseObject.route_count);
         },
         error: function (error) {
           console.error("Error:", error);

@@ -252,9 +252,12 @@
                      <th style="width: 6%;">Price</th>
                      <th style="width: 6%;">Inwarding Qty</th>
                      <th style="width: 8%;">GRN Validation Qty</th>
-                     <th style="width: 10%;">Accept Qty</th>
-                     <th style="width: 10%;">Reject Qty</th>
-                     <th style="width: 12%;">Remark</th>
+                     <th style="    min-width: 114px !important;" >Accept Qty</th>
+                     <th style=" min-width: 114px !important;;">Reject Qty</th>
+                     <%if $configuration['RMCount'] eq 'Yes'%>
+                     <th style=" min-width: 114px !important;">RM Count</th>
+                     <%/if%>
+                     <th style=" min-width: 114px !important;">Remark</th>
                      <th style="width: 6%;">Submit </th>
                      <th style="width: 6%;">GRN Rejection</th>
                      <th style="width: 6%;">RM Batch No</th>
@@ -286,7 +289,7 @@
                   <%/if%>
                   <%if $p->grn_qty > 0%>
                   
-                  <tr>
+                  <tr class="item-row">
                      
                      <!--<td><%$i %></td>-->
                      <td style="width: 9%;"><%$p->child_part_data->part_number %></td>
@@ -348,6 +351,24 @@
                      <%$p->reject_qty %>
                      <%/if%>
                      </td>
+                     <%if $configuration['RMCount'] eq 'Yes'%>
+                     <td style="width: 12%;">
+                     <%if $p->verified_route_count > 0%>
+                     <%if (empty($p->reject_qty) && empty($p->accept_qty)) %>
+                     <div class="form-group rm-count-row">
+                     <label class="form-label" style="display: none;">RM Count</label>
+                     <input type="text"  data-min="1" value="" 
+                                                        step="any"  
+                                                        placeholder="RM Count" name="accept_route_count" data-max="<%$p->verified_route_count%>" class="form-control onlyNumericInput required-input-route">
+                     </div>
+                     <%else %>
+                     <%$p->accept_route_count %>
+                     <%/if%>
+                     <%else%>
+                     <%display_no_character()%>
+                     <%/if%>
+                     </td>
+                     <%/if%>
                      <td style="width: 10%;">
                      <%if ((empty($p->accept_qty) && $p->accept_qty != 0 && ($p->reject_qty) > 0) || ($p->accept_qty == 0 && $p->reject_qty == 0)) %>
                      <input type="text" name="remark" placeholder="Remark"

@@ -38,10 +38,10 @@ INSERT INTO `global_configuration`(
 VALUES(
     'monthly Schedule Send Email',
     'MontlyScheduleSenderEmail',
-    'aarbaj10@yopmail.com',
+    '',
     1,
     1,
-    'user for monthly schedule send email',
+    'User for monthly schedule send email',
     1,
     CURRENT_TIMESTAMP,
     'arom'

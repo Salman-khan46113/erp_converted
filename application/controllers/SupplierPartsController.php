@@ -542,6 +542,8 @@ class SupplierPartsController extends CommonController
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
+		$configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
+        $data['configuration'] = array_column($configuration, "config_value","config_name");
 		$this->loadView('store/stock_down', $data);
 	}
 

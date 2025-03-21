@@ -92,7 +92,7 @@ const page = {
         let that = this;
         $('#date_range_filter').daterangepicker({
             locale: {
-            format: 'YYYY/MM/DD' // Example format, adjust as needed
+            format: 'DD/MM/YYYY' // Example format, adjust as needed
         }
         });
         $('#date_range_filter').data('daterangepicker').setStartDate(start_date);
@@ -111,7 +111,6 @@ const page = {
     serachParams: function(){
         let that = this;
         var date_filter_val = $("#date_range_filter").val();
-        console.log(date_filter_val);
         $.ajax({
             url: base_url+'P_Molding/filter_p_q_molding_production_data',
             type: "POST",
@@ -121,7 +120,6 @@ const page = {
             cache: false,
             success: function(response) {
                 let response_arr = JSON.parse(response);
-                console.log(response_arr.html);
                 $('#p_q_molding_production_view').DataTable().destroy();
                 $("#p_q_molding_production_view tbody").html(response_arr.html);
                 that.dataTable();

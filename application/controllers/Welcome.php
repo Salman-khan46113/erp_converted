@@ -1236,6 +1236,11 @@ class Welcome extends CommonController
 				"child_part_id" => $p->part_id,
 				"supplier_id" =>  $data['supplier'][0]->id );
 			$child_part_data = $this->Crud->get_data_by_id_multiple_condition("child_part_master", $data_where);
+			$data_where = array(
+				"id" => $p->part_id,
+			);
+			$child_part = $this->Crud->get_data_by_id_multiple_condition("child_part", $data_where);
+			$data['po_parts'][$key]->sub_category = $child_part[0]->sub_category;
 			$data['po_parts'][$key]->child_part_data = $child_part_data;
 			// $gst_structure_data = $this->Crud->get_data_by_id("gst_structure", $p->tax_id, "id");
 			$uom_data = $this->Crud->get_data_by_id("uom", $p->uom_id, "id");
@@ -1343,6 +1348,10 @@ class Welcome extends CommonController
           // pr($data['po_parts'],1);
 	   // pr($status,1);
 		// $this->load->view('header');
+
+		$configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
+        $data['configuration'] = array_column($configuration, "config_value","config_name");
+		// pr($data['configuration'],1);
 		$this->loadView('store/inwarding_details', $data);
 		// $this->load->view('footer');
 	}
@@ -1784,6 +1793,8 @@ class Welcome extends CommonController
         $data['part_added'] = $part_added;
         // pr($data,1);
 		// $this->load->view('header');
+		$configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
+        $data['configuration'] = array_column($configuration, "config_value","config_name");
 		$this->loadView('store/inwarding_details_validation', $data);
 		// $this->load->view('footer');
 	}
@@ -1819,14 +1830,17 @@ class Welcome extends CommonController
 
 		$invoice_number = $inwarding_data[0]->invoice_number;
 		$supplier_id = $data['supplier'][0]->id;
-		$data['po_parts'] = $this->Crud->customQuery("SELECT p.*,u.uom_name as uom_name,gd.qty as grn_qty,gd.verified_qty as verified_qty,gd.accept_qty as accept_qty,gd.reject_qty as reject_qty,gd.remark as remark,gd.rm_batch_no as rm_batch_no,gd.mtc_report as mtc_report,gd.id as grn_details_id
+		$data['po_parts'] = $this->Crud->customQuery("SELECT p.*,u.uom_name as uom_name,gd.qty as grn_qty,gd.verified_qty as verified_qty,gd.accept_route_count as accept_route_count,gd.verified_route_count as verified_route_count,gd.accept_qty as accept_qty,gd.reject_qty as reject_qty,gd.remark as remark,gd.rm_batch_no as rm_batch_no,gd.mtc_report as mtc_report,gd.id as grn_details_id
 			FROM po_parts as p
 			LEFT JOIN uom as u ON u.id = p.uom_id
 			LEFT JOIN grn_details as gd ON gd.part_id = p.part_id AND gd.inwarding_id = $inwarding_id AND gd.po_number = $new_po_id AND gd.invoice_number = '$invoice_number'
 			WHERE p.po_id = $new_po_id
 			ORDER BY p.id DESC
 		");
+		
 		foreach ($data['po_parts'] as $key => $p) {
+			$child_part = $this->Crud->get_data_by_id("child_part", $p->part_id, "id");
+			$data['po_parts'][$key]->sub_category = $child_part[0]->sub_category;
 			$data_con = array(
 				'supplier_id' => $supplier_id,
                 "child_part_id" => $p->part_id,
@@ -1842,6 +1856,7 @@ class Welcome extends CommonController
             $rejection_flow_data = $this->Crud->get_data_by_id_multiple("rejection_flow", $arr2);
             $data['po_parts'][$key]->rejection_flow_data = $rejection_flow_data[0];
 		}
+		// pr(            $data['po_parts'],1);
 
 
 		/* extra query */
@@ -1888,6 +1903,8 @@ class Welcome extends CommonController
             $is_accept_inwarding = true;
         }
         $data['is_accept_inwarding'] = $is_accept_inwarding;
+		$configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
+        $data['configuration'] = array_column($configuration, "config_value","config_name");
 		// $this->load->view('header');
 		$this->loadView('quality/inwarding_details_accept_reject', $data);
 		// $this->load->view('footer');
@@ -10249,7 +10266,7 @@ class Welcome extends CommonController
         ];
 		
 		  
-		$date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+		$date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];

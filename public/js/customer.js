@@ -49,6 +49,7 @@ const datatable = {
                 var customer_unit = "distncFrmClnt"+i;
                 $('#updateCustomerForm #distncFrmClnt'+i).val(data[customer_unit])
             }
+            $("#updateCustomerForm #updateEmailId").val(data['emailId']);
             $("#updateCustomerForm #update_tds").val(data['tds']);
             console.log(data['tds'])
             myModal.show();

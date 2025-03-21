@@ -91,7 +91,7 @@ const page = {
         let that = this;
         $('#date_range_filter').daterangepicker({
             locale: {
-            format: 'YYYY/MM/DD' // Example format, adjust as needed
+            format: 'DD/MM/YYYY' // Example format, adjust as needed
         }
         });
         $('#date_range_filter').data('daterangepicker').setStartDate(start_date);
@@ -113,19 +113,32 @@ const page = {
             function(settings, data, dataIndex) {
                 var date_range_filter =  $("#date_range_filter").val();
                 var dates = date_range_filter.split(' - ');
-                var startDate = dates[0].replace(/\//g, '-');
-                var endDate = dates[1].replace(/\//g, '-');
+                // var startDate = dates[0].replace(/\//g, '-');
+                // var endDate = dates[1].replace(/\//g, '-');
                 var date = data[3]; // Assuming the date is in the 5th column (index 4)
+              
+                var startDate = dates[0].split('/');
+                startDate = `${startDate[2]}-${startDate[1]}-${startDate[0]}`;
+             
+                var endDate = dates[1].split('/');
+                endDate = `${endDate[2]}-${endDate[1]}-${endDate[0]}`;
 
-                if (
-                    (startDate === '' && endDate === '') ||
-                    (startDate === '' && new Date(date) <= new Date(endDate)) ||
-                    (new Date(startDate) <= new Date(date) && endDate === '') ||
-                    (new Date(startDate) <= new Date(date) && new Date(date) <= new Date(endDate))
-                ) {
-                    return true;
+                // Convert targetDate to YYYY-MM-DD format
+                var parts = date.split('/');
+                var formattedTargetDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+
+                // Create Date objects
+                var targetDateObj = new Date(formattedTargetDate);
+                var startDateObj = new Date(startDate);
+                var endDateObj = new Date(endDate);
+
+                // Comparison
+                if (targetDateObj > startDateObj && targetDateObj < endDateObj) {
+                  return true;
+                } else {
+                  return false;
                 }
-                return false;
+                
             }
         );
     },

@@ -1232,9 +1232,10 @@ public function rejected_po()
         $deliveryUnit = $inwarding_data[0]->delivery_unit;
 		$client_data = $this->Crud->get_data_by_id("client", $deliveryUnit, "client_unit");
 		$grn_details_data = $this->Crud->get_data_by_id_multiple("grn_details", $arr2);
-
+		
 		if ($grn_details_data) {
 			if (true) {
+				$accept_route_count = $grn_details_data[0]->accept_route_count;
 				$data_update_inwarding = array(
 					"status" => "accept"
 				);
@@ -1245,22 +1246,25 @@ public function rejected_po()
 					$part_wise_qty = array_column($grn_details_data,"accept_qty","part_id");
 					$child_part_master_data_new = $this->SupplierParts->getSupplierPartByIds($part_ids,$client_data[0]->id);
 					$stockColName = $this->Crud->getStockColNmForClientUnit($client_data[0]->id);
+					
 					$update_arr = [];
 					foreach ($child_part_master_data_new as $key => $value) {
 						$grn_qty = $part_wise_qty[$value->id] > 0 ? $part_wise_qty[$value->id] : 0;
 						if($grn_qty > 0){
 							$update_arr[] = [
 								"childPartStockId" => $value->childPartStockId,
-								$stockColName => $value->$stockColName + $grn_qty
+								$stockColName => $value->$stockColName + $grn_qty,
+								"route_count" => $value->route_count + $accept_route_count
 							];
 						}
 						
 					}
 
+					
 					if(is_array($update_arr) && count($update_arr) > 0){
 						$affected_row = $this->SupplierParts->updateBatchSupplierPartByIds($update_arr);
 					}
-
+					// pr($update_arr,1);
 					$messages = "Updated Sucessfully";
 					$success = 1;
 					// echo "<script>alert('Updated Sucessfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
@@ -2782,9 +2786,11 @@ echo "<script>alert('Unable to Add');document.location='" . $_SERVER['HTTP_REFER
 
 public function update_grn_qty()
 {
+	// pr("ok",1);
 	$verified_qty = $this->input->post('verified_qty');
 	$privious_qty = $this->input->post('privious_qty');
 	$grn_details_id = $this->input->post('grn_details_id');
+	$verified_route_count = $this->input->post('verified_route_count') > 0 ? $this->input->post('verified_route_count') : 0;
 
 	$tax_id = $this->input->post('tax_id');
 	$part_rate = $this->input->post('part_rate');
@@ -2803,6 +2809,7 @@ public function update_grn_qty()
 	}
 	$data = array(
 		"verified_qty" => $verified_qty,
+		"verified_route_count" => $verified_route_count,
 		"verfified_price" => round($inwarding_price,2),
 		"verified_status" => $verified_status,
 
@@ -2827,8 +2834,10 @@ public function update_grn_qty()
 public function edit_grn_qty(){
 	$verified_qty = $this->input->post('grn_details_validate_qty');
 	$grn_details_id = $this->input->post('grn_details_id');
+	$verified_route_count = $this->input->post('verified_route_count') > 0 ? $this->input->post('verified_route_count') : 0;
 	$data = array(
-		"verified_qty" => $verified_qty
+		"verified_qty" => $verified_qty,
+		"verified_route_count"=> $verified_route_count
 	);
 	$success = 0;
 	$messages = "Something went wrong";
@@ -2868,11 +2877,13 @@ public function update_grn_qty_accept_reject()
 	$prev_stock = $child_part_master_data_new[0]->$stockColName;
 	$new_stock = (float)$prev_stock + (float)$accept_qty;
 	$total_qty = $accept_qty+ $reject_qty;
+	$accept_route_count = $this->input->post('accept_route_count') > 0 ? $this->input->post('accept_route_count') : 0;
 	if($total_qty == $verified_qty){
 			// pr($new_stock,1);
 			$data = array(
 				"accept_qty" => $accept_qty,
 				"reject_qty" => $reject_qty,
+				"accept_route_count" => $accept_route_count,
 				"remark" => $remark,
 			);
 

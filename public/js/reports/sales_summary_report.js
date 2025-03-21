@@ -56,7 +56,7 @@ const page = {
             showDropdowns: true,
             autoApply: true,
             locale: {
-                format: 'YYYY/MM/DD' // Change this format as per your requirement
+                format: 'DD/MM/YYYY' // Change this format as per your requirement
             }
         });
         var dateRangePicker1 = $('#report_date').data('daterangepicker');
@@ -233,7 +233,7 @@ const page = {
             showDropdowns: true,
             autoApply: true,
             locale: {
-                format: 'YYYY/MM/DD' // Change this format as per your requirement
+                format: 'DD/MM/YYYY' // Change this format as per your requirement
             }
         });
         dateRangePicker = $('#date_range_filter').data('daterangepicker');

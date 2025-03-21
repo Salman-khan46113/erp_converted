@@ -95,7 +95,6 @@ class P_Molding extends CommonController
 	 */
 	public function add_stock_up()
 	{
-
 		$name = $this->input->post('parttypeName');
 		$type = $this->input->post('type');
 		$reason = $this->input->post('reason');
@@ -104,6 +103,7 @@ class P_Molding extends CommonController
 		$toUnit = $this->input->post('clientUnitTo');
 		$stock_up_type = $this->input->post('stock_up_type');
 		$old_qty = $this->input->post('old_qty') > 0 ? $this->input->post('old_qty') : 0;
+		$route_count = $this->input->post('route_count') > 0 ? $this->input->post('route_count') : 0;
 
 		$clientId = $this->Unit->getSessionClientId();
 		$success = 0;
@@ -160,6 +160,7 @@ class P_Molding extends CommonController
 			"reason" => $reason,
 			"uploading_document" => $picture4,
 			"qty" => $qty,
+			"route_count" => $route_count,
 			"old_qty" => $old_qty,
 			"fromStockType" => "stock",
 			"fromUnit" => $clientId,
@@ -212,14 +213,18 @@ class P_Molding extends CommonController
 			$child_part_from_unit = $this->SupplierParts->getSupplierPartById($stock_changes_data[0]->part_id, $stockFromUnit);
 			$child_part_to_unit = $this->SupplierParts->getSupplierPartById($stock_changes_data[0]->part_id, $stockToUnit);
 		}
-
+		
 		
 		if ($child_part_from_unit && $child_part_to_unit) {
 				$qty = $stock_changes_data[0]->accepted_qty;
+				$accepted_route_qty = $stock_changes_data[0]->accepted_route_qty;
+				
 				//$toProdCol_index = stripos($stockToCol, "production_qty");
 				//if to column is not  having production it means we are transferring stocks to stock
 					$current_stock_from_unit = $child_part_from_unit[0]->$stockFromCol;
+					$current_route_count_from_unit = $child_part_from_unit[0]->route_count;
 					$current_stock_to_unit = $child_part_to_unit[0]->$stockToCol;
+					$current_route_count_to_unit = $child_part_to_unit[0]->route_count;
 
 					if ($qty > $current_stock_from_unit) {
 						// $this->addWarningMessage("Stock transfer request qty : ".$qty." is greater than actual stock : ".$current_stock_from_unit);
@@ -228,18 +233,26 @@ class P_Molding extends CommonController
 					} else {
 						if ($stock_changes_data[0]->type == "addition") {
 							$new_stock_from = $current_stock_from_unit + $qty;
+							$new_route_count_from_unit = $current_route_count_from_unit - $accepted_route_qty;
 						} else {
 							$new_stock_from = $current_stock_from_unit - $qty;
+							$new_route_count_from_unit = $current_route_count_from_unit - $accepted_route_qty;
 						}
+
+						
+
 						$new_stock_to = $current_stock_to_unit + $qty;
+						$new_route_count_to = $current_route_count_to_unit - $accepted_route_qty;
 		
 						$fromStockUpdate = array(
 							$stockFromCol => $new_stock_from,
+							"route_count" => $new_route_count_from_unit > 0 ? $new_route_count_from_unit : 0,
 							"clientId"   => $child_part_from_unit[0]->clientId
 						);
 
 						$toStockUpdate = array(
 							$stockToCol   => $new_stock_to,
+							"route_count" => $new_route_count_to > 0 ? $new_route_count_to : 0,
 							"clientId"   => $child_part_to_unit[0]->clientId
 						);
 
@@ -281,9 +294,12 @@ class P_Molding extends CommonController
 		
 		$id = $post_data['id_val']; 
 		$accepted_qty = $post_data['accepted_qty'];
+		$accepted_route_qty = $post_data['accepted_route_qty'];
+		
 		if ($accepted_qty > 0 && $id > 0) {
 			$data = array(
 				'accepted_qty' => $accepted_qty,
+				'accepted_route_qty' => $accepted_route_qty,
 				'status' => "accepted"
 			);
 			$update = $this->Crud->update_data("stock_changes", $data, $id);
@@ -335,21 +351,26 @@ class P_Molding extends CommonController
 		if ($id > 0) {
 			$stock_data = $this->Crud->customQuery('
 				SELECT
-				    `stock`.stock
+				    `stock`.stock,parts.sub_category,stock.route_count
 				FROM
 				    `child_part` `parts`
 				LEFT JOIN `child_part_stock` `stock` ON
 				    `parts`.`id` = `stock`.`childPartId` AND `stock`.`clientId` = '.$this->Unit->getSessionClientId().'
 				WHERE `parts`.`id` = '.$id.''													
 			);
+			$sub_category = $stock_data[0]->sub_category;
+			$route_count = $stock_data[0]->route_count > 0 ? $stock_data[0]->route_count : 0;
 			$stock_data = $stock_data[0]->stock > 0 ? $stock_data[0]->stock : 0;
 			$stock = $stock_data;
+			
 			$success = 1;
 		}
 		$result = [];
 		$result['messages'] = $messages;
 		$result['success'] = $success;
 		$result['stock'] = $stock;
+		$result['sub_category'] = $sub_category;
+		$result['route_count'] = $route_count;
 		echo json_encode($result);
 		exit();
 	}
@@ -399,8 +420,8 @@ class P_Molding extends CommonController
 		$data['reject_remark'] = $this->Crud->read_data("reject_remark");
 
 
-		$data['start_date'] = date("Y/m/01");
-		$data['end_date'] = date("Y/m/d");
+		$data['start_date'] = date("01/m/Y");
+		$data['end_date'] = date("d/m/Y");
 		$this->loadView('admin/molding/p_q_molding_production', $data);
 
 	}
@@ -423,8 +444,8 @@ class P_Molding extends CommonController
 		$data['created_month'] = $created_month;
 		$month_arr = [];
 		$data['month_arr'] = $month_arr;
-       	$data['start_date'] = date("Y/m/01");
-		$data['end_date'] = date("Y/m/d");
+       	$data['start_date'] = date("01/m/Y");
+		$data['end_date'] = date("d/m/Y");
 		$start_date = date("Y-m-01");
 		$end_date = date("Y-m-d");
 		
@@ -454,6 +475,8 @@ class P_Molding extends CommonController
 	}
 
 	public function view_p_q_molding_production_data($start_date = "",$end_date = ""){
+		$start_date = date("Y-m-d", strtotime(str_replace('/', '-', $start_date)));
+		$end_date = date("Y-m-d", strtotime(str_replace('/', '-', $end_date)));
 		$data = $this->Crud->customQuery("
 			SELECT mp.*,s.name as name,s.name as name,s.ppt as ppt,s.shift_type as shift_type,m.name as machine_name,op.name as operator_name,cp.production_target_per_shift as production_target_per_shift,cp.part_number as part_number,cp.part_description as part_description
 			from molding_production as mp

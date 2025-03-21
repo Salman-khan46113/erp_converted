@@ -141,19 +141,23 @@
             <div class="col-lg-12">
               <div class="form-group">
               <label for="">Supplier Part no / Description </label>
-              
-              <%$filter_part_id|pr%>
               <select name="customer_part_number"  id="suppler_parts" class="form-control select2 required-input" style="width: 100%;">
                 <option value="">Select Part</option>
-
+                
                 <%foreach  $supplier_part_select_list as  $val%>
     
                 <%if $filter_part_id neq $val->id%>
-                <option value="<%$val->id%>"><%$val->part_number%> / <%$val->part_description%></option>
+                <option value="<%$val->id%>" data-sub-category="<%$val->sub_category%>"><%$val->part_number%> / <%$val->part_description%></option>
                 <%/if%>
                 <%/foreach%>         
                
               </select>
+              </div>
+            </div>
+            <div class="col-lg-12 rm-count-row-block">
+              <div class="form-group rm-count-row">
+                <label for="">RM Count <span class="text-danger">*</span></label>
+                <input type="text" step="any" class="form-control  onlyNumericInput route_count required-input-route" data-min="1" value="" data-max="" name="route_count"  placeholder="RM Count">
               </div>
             </div>
           </div>

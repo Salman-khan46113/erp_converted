@@ -168,7 +168,7 @@ class ReportsController extends CommonController
         checkGroupAccess("reports_grn","list","Yes");
 
 		$created_month  = $this->input->post("created_month");
-		$created_year  = $this->input->post("created_y	ear");
+		$created_year  = $this->input->post("created_year");
 
 		if (empty($created_year)) {
 			$created_year = $this->year;
@@ -346,7 +346,7 @@ class ReportsController extends CommonController
         $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
-        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -362,7 +362,7 @@ class ReportsController extends CommonController
         if(!((int) date("m",1) > 3)){
             $current_year--;
         }
-        $date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/04/$current_year") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['export_start_date'] = $date_filter[0];
         $data['export_end_date'] = $date_filter[1];
@@ -580,7 +580,7 @@ class ReportsController extends CommonController
 
        
        
-        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -604,7 +604,7 @@ class ReportsController extends CommonController
         if(!((int) date("m",1) > 3)){
             $current_year--;
         }
-        $date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/04/$current_year") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['export_start_date'] = $date_filter[0];
         $data['export_end_date'] = $date_filter[1];
@@ -922,7 +922,7 @@ class ReportsController extends CommonController
 
        
        
-        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -947,7 +947,7 @@ class ReportsController extends CommonController
         if(!((int) date("m",1) > 3)){
             $current_year--;
         }
-        $date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/04/$current_year") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['export_start_date'] = $date_filter[0];
         $data['export_end_date'] = $date_filter[1];
@@ -1146,7 +1146,7 @@ class ReportsController extends CommonController
 
        
        
-        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -1171,7 +1171,7 @@ class ReportsController extends CommonController
         if(!((int) date("m",1) > 3)){
             $current_year--;
         }
-        $date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/04/$current_year") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['export_start_date'] = $date_filter[0];
         $data['export_end_date'] = $date_filter[1];
@@ -1409,7 +1409,7 @@ class ReportsController extends CommonController
             'orderable' => false
         ];
         
-        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -1526,7 +1526,7 @@ class ReportsController extends CommonController
         // ];
         
         
-        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];

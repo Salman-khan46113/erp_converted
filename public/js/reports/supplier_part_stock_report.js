@@ -25,12 +25,25 @@ const page = {
             }else if(data.sub_type == 'asset'){
                 option = '<option sub_type value="asset" >Asset</option>';
             }
-           
+            $(".rm-count-row-block").hide();
+            if(data.sub_category == "RM count" && data.route_count > 0){
+                // $(".rm-count-row-block").show();
+            }
+            $("#suppler_parts").val("").trigger("change");
             $("#storeToStore #part_id").val(data.childPartId);
             $("#storeToStore #part_number").val(data.part_number);
+            $("#storeToStore .route_count").attr("data-max",data.route_count);
             $("#storeToStore [name='stock']").attr("data-max",data[stock_column_name]);
             
             // myModal.show();
+        })
+        $(document).on("change","#suppler_parts",function(){
+            var sub_category = $(this).find('option:selected').attr("data-sub-category"); 
+            var route_val = $(".required-input-route").attr("data-max");
+            console.log(route_val)
+            if(sub_category == "RM count" && parseInt(route_val) > 0){
+              $(".rm-count-row-block").show();
+            }
         })
         $(document).on("click",".fg_data_edit",function(){
             $("label.error").remove();
@@ -232,7 +245,7 @@ const page = {
         //        });
             
         // });
-        $(".transfer_child_store_to_store_stock,.transfer_child_part_to_fg_stock,.update_rm_batch_mtc_report,.update_production_qty_child_part_production_qty,.update_production_qty_child_part").submit(function(e){
+        $(".transfer_child_part_to_fg_stock,.update_rm_batch_mtc_report,.update_production_qty_child_part_production_qty,.update_production_qty_child_part").submit(function(e){
             e.preventDefault();
            
             var href = $(this).attr("action");
@@ -244,6 +257,70 @@ const page = {
             }
             // console.log(flag);
             // return;
+            var formData = new FormData($('.'+id)[0]);
+
+            $.ajax({
+              type: "POST",
+              url: href,
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (response) {
+                var responseObject = JSON.parse(response);
+                var msg = responseObject.messages;
+                var success = responseObject.success;
+                if (success == 1) {
+                  toastr.success(msg);
+                  $(this).parents(".modal").modal("hide")
+                  setTimeout(function(){
+                    window.location.reload();
+                  },1000);
+
+                } else {
+                  toastr.error(msg);
+                }
+              },
+              error: function (error) {
+                console.error("Error:", error);
+              },
+            });
+          });
+          $(".transfer_child_store_to_store_stock").submit(function(e){
+            e.preventDefault();
+           
+            var href = $(this).attr("action");
+            var id = $(this).attr("id");
+            let flag = that.formValidate(id);
+
+            if(flag){
+              return;
+            }
+            var data_max = parseFloat($(this).parents(".modal-dialog").find(".required-input-route").data('max'));
+            if($(this).parents(".modal-dialog").find(".required-input-route").length > 0 && data_max > 0){
+                var data_min = parseFloat($(this).parents(".modal-dialog").find(".required-input-route").data('min'));
+                var value = parseFloat($(this).parents(".modal-dialog").find(".required-input-route").val());
+                $(this).parents(".modal-dialog").find(".rm-count-row .error").remove();
+                value = value > -1 ? parseInt(value) : "NO";
+                console.log(value)
+                if(value == 'NO'){
+                  var validation_message = "Please enter RM Count";
+                  var label_html = "<label class='error'>"+validation_message+"</label>";
+                  $(this).parents(".modal-dialog").find(".required-input-route").after(label_html);
+                  return;
+                }else if(data_min > value){
+                  var validation_message = "RM Count should be greater than 0";
+                  var label_html = "<label class='error'>"+validation_message+"</label>";
+                  $(this).parents(".modal-dialog").find(".required-input-route").after(label_html);
+                  return;
+                }else if(data_max < value){
+                  var validation_message = "RM Count should be less than or equals to "+data_max;
+                  var label_html = "<label class='error'>"+validation_message+"</label>";
+                  $(this).parents(".modal-dialog").find(".required-input-route").after(label_html);
+                  return;
+                }
+            }
+
+            return
             var formData = new FormData($('.'+id)[0]);
 
             $.ajax({

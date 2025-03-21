@@ -598,7 +598,7 @@ $route['invoice_unlock'] = 'SalesController/invoice_unlock';
 $route['reuse_invoice'] = 'SalesController/reuse_invoice';
 $route['cancel_sale_invoice'] = 'SalesController/cancel_sale_invoice';
 $route['delete_sale_invoice'] = 'SalesController/delete_sale_invoice';
-$route['sales_report'] = 'SalesController/sales_report';
+$route['sales_report'] = 'TallyExportController/sales_report';
 $route['sales_report_export'] = 'SalesController/generateSalesReportPdf';
 $route['hsn_report'] = 'SalesController/hsn_report';
 $route['receivable_report'] = 'SalesController/receivable_report';
@@ -862,3 +862,6 @@ $route['global_import'] = 'exportImportController/global_import';
 // send monthly schedule
 $route['send_monthly_schedule_report'] = 'MagrationScript_Controller/send_monthly_schedule_report';
 
+$route['sales_category'] = 'SalesController/sales_category';
+$route['add_sales_category'] = 'SalesController/add_sales_category';
+$route['update_sales_category'] = 'SalesController/update_sales_category';

@@ -40,7 +40,7 @@
                         <div id="loading-spinner"></div>
                      </div>
                      <div class="row">
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                            <div class="form-group mb-3">
                               <label for="" class="form-label">Transport Mode<span class="text-danger">*</span></label>
                               <select name="mode" class="form-control" required>
@@ -52,7 +52,7 @@
                               </select>
                            </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                            <div class="form-group mb-3">
                               <label for=""  class="form-label">Transporter<span class="text-danger">*</span></label>
                               <select name="transporter" required id="transporter" class="form-control select2">
@@ -63,32 +63,43 @@
                               </select>
                            </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                            <div class="form-group mb-3">
                               <label for=""  class="form-label">Vehicle No.<span class="text-danger">*</span></label>
                               <input type="text" placeholder="Enter Vehicle No" name="vehicle_number" value="<%$new_sales[0]->vehicle_number%>" class="form-control"/>
                            </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                            <div class="form-group mb-3">
                               <label for=""  class="form-label">Distance<span class="text-danger">*</span></label>
                               <input type="text" placeholder="Enter Distance of Transportation" value="<%$new_sales[0]->distance%>" required name="distance" class="form-control">
                            </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                            <div class="form-group mb-3">
                               <label for=""  class="form-label">L.R No</label>
                               <input type="text" placeholder="Enter L.R No" name="lr_number" value="<%$new_sales[0]->lr_number%>" class="form-control">
                            </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                            <div class="form-group mb-3">
-                              <label for=""  class="form-label">PO Remark </label>
+                              <label for="" class="form-label">PO Remark </label>
                               <input type="text" placeholder="Enter Remark" value="<%$new_sales[0]->remark%>" name="remark" class="form-control">
                               <input type="hidden" value="<%$uri_segment_2%>" name="id" class="form-control">
                            </div>
                         </div>
-                        <div class="col-lg-4 mb-3">
+                        <div class="col-lg-3">
+                            <div class="form-group mb-3">
+                                <label for="" class="form-label">Tally Categories</label>
+                                <select name="tally_category" id="tallyCategorySelect" class="form-control">
+                                    <option value="-">Select</option>
+                                     <%foreach from=$tally_sales_category item=tr%>
+                                            <option value="<%$tr->sales_category_id%>" <%if $new_sales[0]->tally_category == $tr->sales_category_id%>selected<%/if%>><%$tr->category_name%></option>
+                                     <%/foreach%>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 mb-3">
                             <div class="form-group mb-3 ">
                                <label class="form-label">Apply Discount</label>
                                <br>
@@ -103,7 +114,7 @@
                                 
                             </div>
                         </div>
-                        <div class="col-lg-4" id="discountTypeSection">
+                        <div class="col-lg-3" id="discountTypeSection">
                           <div class="form-group mb-3">
                              <label class="form-label">Discount Type</label><span class="text-danger"><br></span>
                              <div class="form-check form-check-inline">
@@ -112,7 +123,7 @@
                               </div>
                           </div>
                         </div>
-                        <div class="col-lg-4" id="discountValueSection">
+                        <div class="col-lg-3" id="discountValueSection">
                            <div class="form-group mb-3">
                               <label class="form-label">Discount</label>
                               <input type="text" step="any" name="discount" id="discountId" value="<%$new_sales[0]->discount %>" class="form-control onlyNumericInput" placeholder="Discount" >

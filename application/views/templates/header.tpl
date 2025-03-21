@@ -667,6 +667,9 @@
                         <%if checkGroupAccess("sales_invoice_released","list","No") %>
                         <li><a href="<%base_url('sales_invoice_released')%>" class="dropdown-item">View sale Invoice</a></li>
                         <%/if%>
+                        <%if checkGroupAccess("sales_invoice_released","list","No") %>
+                        <li><a href="<%base_url('sales_category')%>" class="dropdown-item">Sales(Tally) Categories</a></li>
+                        <%/if%>
                         <%if checkGroupAccess("rejection_invoices","list","No") %>
                         <li><a href="<%base_url('rejection_invoices')%>" class="dropdown-item">CN-DN-PI</a></li>
                         <%/if%>
