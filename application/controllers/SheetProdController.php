@@ -307,7 +307,7 @@ class SheetProdController extends ProductionController
 	        $data['start_date'] = $date_filter[0];
 	        $data['end_date'] = $date_filter[1];
 		}else{
-			$date_filter = date("Y/m/d", strtotime("-8 days")) ." - ". date("Y/m/d");
+			$date_filter = date("d/m/Y", strtotime("-8 days")) ." - ". date("d/m/Y");
 	        $date_filter =  explode((" - "),$date_filter);
 	        $data['start_date'] = $date_filter[0];
 	        $data['end_date'] = $date_filter[1];
@@ -331,7 +331,8 @@ class SheetProdController extends ProductionController
 		$status_con = $status != "" ? "AND status = '$status'" : "";
 		
 
-	
+        $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+        $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
 		
 		$data['p_q'] = $this->Crud->customQuery('SELECT 
 					p.*, 
@@ -349,13 +350,12 @@ class SheetProdController extends ProductionController
 					shifts s ON p.shift_id = s.id
 				WHERE 
 					m.clientId = '.$clientId.'
-					AND STR_TO_DATE(p.created_date, "%d-%m-%Y") BETWEEN "'.$date_filter[0].'" AND "'.$date_filter[1].'"
+					AND STR_TO_DATE(p.date, "%Y-%m-%d") BETWEEN "'.$start_date.'" AND "'.$end_date.'"
 					'.$machin_name.' '.$part_condition.' '.$status_con.'
 				ORDER BY 
 					p.date DESC 
 				');
-		// pr($data['p_q'],1);
-
+		
 		$data['reject_remark'] = $this->Crud->read_data("reject_remark");
 		$CI =& get_instance();
 	   	// Load the model
@@ -693,7 +693,7 @@ class SheetProdController extends ProductionController
         $data["base_url"] = base_url();
         // $ajax_json['teacher_data'] = $this->session->userdata();
         // pr($ajax_json['designation'],1);
-        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -752,6 +752,7 @@ class SheetProdController extends ProductionController
 			$data[$key]['po_number'] = '<a href="'.base_url().'inwarding_invoice/'.$value['id'].'"  class="po-number">'.$value['po_number'].'</a>';
 			$data[$key]['download_po'] = '<a href="'.base_url().'download_my_pdf/'.$value['id'].'" class="btn btn-primary">Download</a>';
 			$data[$key]['action'] = '<a data-id="'.$value['id'].'" href="javascript:void(0)" class="btn btn-danger close-po">Close</a>';
+			$data[$key]['date_time'] = getDefaultDateTime($value['date_time']);
 		}
 		$data["data"] = $data;
         $total_record = $this->SupplierParts->get_sharing_issue_request_data_Count([], $post_data["search"]);

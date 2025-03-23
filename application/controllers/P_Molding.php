@@ -117,11 +117,11 @@ class P_Molding extends CommonController
 			$toUnit = $clientId;
 		}
 
-		$toStockType = $stock_up_type;
 
 		if(empty($toStockType)){
 			$toStockType = "production_qty";
 		}
+
 
 		
 		

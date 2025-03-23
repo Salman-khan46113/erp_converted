@@ -37,7 +37,7 @@ const page = {
             showDropdowns: true,
             autoApply: true,
             locale: {
-                format: 'YYYY/MM/DD' // Change this format as per your requirement
+                format: 'DD/MM/YYYY' // Change this format as per your requirement
             }
         });
 

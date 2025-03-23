@@ -194,6 +194,22 @@ const app = {
     });
   },
   allowNumber:function(){
+    $(document).on('keyup','.required-input-route', function(event) {
+      var charCode = (event.which) ? event.which : event.keyCode;
+
+      var value = $(this).val();
+      if (value.includes('.')  && charCode == 46 ) {
+          event.preventDefault();
+      }
+        // Allow only digits (0-9) and some specific control keys
+      if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 46) {
+              event.preventDefault();
+      }
+      value = this.value > 0 ? value : "";
+      $(this).val(value.replace(/[^0-9]/g, ''));
+      console.log(this.value.replace(/[^0-9]/g, ''));
+        
+    });
     $(document).on('keypress','.onlyNumericInput', function(event) {
       var charCode = (event.which) ? event.which : event.keyCode;
 

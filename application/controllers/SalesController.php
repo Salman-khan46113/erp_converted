@@ -161,6 +161,7 @@ class SalesController extends CommonController
 		$ship_addressType = $this->input->post('ship_addressType');
 		$consignee_id = $this->input->post('consignee');
 		$tally_category = $this->input->post('tally_category');
+		if($tally_category === '-'){ $tally_category = null;}
 		if(!empty($this->input->post('reused_sales_no'))){
 			$reused_sales_no = $this->input->post('reused_sales_no');
 		}
@@ -244,6 +245,7 @@ class SalesController extends CommonController
 		$lr_number = $this->input->post('lr_number');
 		$distance = $this->input->post('distance');
 		$tally_category = $this->input->post('tally_category');
+		if($tally_category === '-'){ $tally_category = null;}
 		
 		$final_basic_total = $this->input->post('final_basic_total');
 		$discountType = $this->input->post('discountType');
@@ -981,7 +983,7 @@ class SalesController extends CommonController
 	public function generateSalesReportPdf(){
 		// pr("ok",1);
 		$post_data = $this->input->get();
-		
+		$filter_date = $post_data["date"];
 		$date_filter =  explode((" - "),$post_data["date"]);
 		$start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
         $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
@@ -1044,8 +1046,7 @@ class SalesController extends CommonController
 	        	}
 	        	array_push($csv_output, $row_data);
 	        }
-	        
-	      	
+			
 	        // Set headers to force download
 	        header('Content-Type: text/csv');
 	        header('Content-Disposition: attachment; filename="'.$file_name.'.csv"');
@@ -1054,8 +1055,8 @@ class SalesController extends CommonController
 
 	        // Open PHP output stream for the CSV file
 	        $output = fopen('php://output', 'w');
-	        
-	        $extra_row = ['Date : '.$post_data['date']];  // Customize as needed
+	       
+	        $extra_row = ['Date : '.$filter_date];  // Customize as needed
 			fputcsv($output, $extra_row);
 	        // Optional: Add column headers to the CSV file
 	        fputcsv($output, $csv_column);

@@ -1586,6 +1586,218 @@ class ReportsController extends CommonController
         $data["total_balance_amount"] = number_format($total_balance_amount,2);
         echo json_encode($data);
     }
+
+    public function challan_table_4_out(){
+        checkGroupAccess("challan_table_out","list","Yes");
+         $column[] = [
+            "data" => "gst_number",
+            "title" => "GSTIN of Jobworker",
+            "width" => "8%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "challan_number",
+            "title" => "Challan no",
+            "width" => "8%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "created_date_val",
+            "title" => "Challan date",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        $column[] = [
+            "data" => "part_number",
+            "title" => "Part Number",
+            "width" => "10%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "part_description",
+            "title" => "Description of goods",
+            "width" => "10%",
+            "className" => "dt-left   ",
+        ];
+        $column[] = [
+            "data" => "qty",
+            "title" => "Quantity",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        $column[] = [
+            "data" => "value",
+            "title" => "Taxable value (in Rupees)",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        // $column[] = [
+        //     "data" => "operation_part_no",
+        //     "title" => "Operation Part No",
+        //     "width" => "20%",
+        //     "className" => "dt-left",
+
+        // ];
+        
+        
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
+        $data['supplier'] = $this->Crud->read_data("supplier");
+        $data["data"] = $column;
+        $data["is_searching_enable"] = true;
+        $data["is_paging_enable"] = true;
+        $data["is_serverSide"] = true;
+        $data["is_ordering"] = true;
+        $data["is_heading_color"] = "#a18f72";
+        $data["no_data_message"] =
+            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
+            base_url() .
+            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
+        $data["is_top_searching_enable"] = true;
+        $data["sorting_column"] = json_encode(); //[15, 'desc']
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
+        $data["admin_url"] = base_url();
+        $data["base_url"] = base_url();
+        $data['scrap_category'] =  $this->Crud->customQuery("SELECT s.* FROM scrap_category_master s");
+        $data['scrap_product'] = $this->Crud->customQuery("SELECT c.* FROM customer_parts_master c WHERE c.part_type = 'scrap'" );
+        // pr($data['scrap_product'],1);
+        $this->loadView('reports/challan_table_out',$data);
+    }
+    public function challanTableOutView(){
+        $post_data = $this->input->post();
+        $column_index = array_column($post_data["columns"], "data");
+        $order_by = "";
+        foreach ($post_data["order"] as $key => $val) {
+            if ($key == 0) {
+                $order_by .= $column_index[$val["column"]] . " " . $val["dir"];
+            } else {
+                $order_by .=
+                "," . $column_index[$val["column"]] . " " . $val["dir"];
+            }
+        }
+        
+        $condition_arr["order_by"] = $order_by;
+        $condition_arr["start"] = $post_data["start"];
+        $condition_arr["length"] = $post_data["length"];
+        $base_url = $this->config->item("base_url");
+        $data = $this->Reports_model->challanTableOut($condition_arr,$post_data["search"]);
+        // pr($data,1);
+        foreach ($data as $key => $val) {            
+            // $data[$key]['created_date_val'] = defaultDateFormat($val['created_date_val']);
+        } 
+
+        $data["data"] = $data;
+        $total_record = $this->Reports_model->challanTableOutCount([], $post_data["search"]);
+        $total_balance_amount = 0;
+        $data["recordsTotal"] = $total_record['total_records'];
+        $data["recordsFiltered"] = $total_record['total_records'];
+        echo json_encode($data);
+    }
+    public function challan_table_5a_in(){
+        checkGroupAccess("challan_table_in","list","Yes");
+         $column[] = [
+            "data" => "gst_number",
+            "title" => "GSTIN of Jobworker",
+            "width" => "8%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "challan_number",
+            "title" => "Original Challan No",
+            "width" => "8%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "created_date_val",
+            "title" => "Original Challan Date",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        $column[] = [
+            "data" => "part_number",
+            "title" => "Part Number",
+            "width" => "10%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "part_description",
+            "title" => "Description of goods",
+            "width" => "10%",
+            "className" => "dt-left   ",
+        ];
+        $column[] = [
+            "data" => "recevied_req_qty",
+            "title" => "Quantity",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        // $column[] = [
+        //     "data" => "operation_part_no",
+        //     "title" => "Operation Part No",
+        //     "width" => "20%",
+        //     "className" => "dt-left",
+
+        // ];
+        
+        
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
+        $data['supplier'] = $this->Crud->read_data("supplier");
+        $data["data"] = $column;
+        $data["is_searching_enable"] = true;
+        $data["is_paging_enable"] = true;
+        $data["is_serverSide"] = true;
+        $data["is_ordering"] = true;
+        $data["is_heading_color"] = "#a18f72";
+        $data["no_data_message"] =
+            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
+            base_url() .
+            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
+        $data["is_top_searching_enable"] = true;
+        $data["sorting_column"] = json_encode(); //[15, 'desc']
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
+        $data["admin_url"] = base_url();
+        $data["base_url"] = base_url();
+        $data['scrap_category'] =  $this->Crud->customQuery("SELECT s.* FROM scrap_category_master s");
+        $data['scrap_product'] = $this->Crud->customQuery("SELECT c.* FROM customer_parts_master c WHERE c.part_type = 'scrap'" );
+        // pr($data['scrap_product'],1);
+        $this->loadView('reports/challan_table_in',$data);
+    }
+    public function challanTableInView(){
+        $post_data = $this->input->post();
+        $column_index = array_column($post_data["columns"], "data");
+        $order_by = "";
+        foreach ($post_data["order"] as $key => $val) {
+            if ($key == 0) {
+                $order_by .= $column_index[$val["column"]] . " " . $val["dir"];
+            } else {
+                $order_by .=
+                "," . $column_index[$val["column"]] . " " . $val["dir"];
+            }
+        }
+        
+        $condition_arr["order_by"] = $order_by;
+        $condition_arr["start"] = $post_data["start"];
+        $condition_arr["length"] = $post_data["length"];
+        $base_url = $this->config->item("base_url");
+        $data = $this->Reports_model->challanTableIn($condition_arr,$post_data["search"]);
+        // pr($data,1);
+        foreach ($data as $key => $val) {            
+            // $data[$key]['created_date_val'] = defaultDateFormat($val['created_date_val']);
+        } 
+
+        $data["data"] = $data;
+        $total_record = $this->Reports_model->challanTableInCount([], $post_data["search"]);
+        // pr($total_record,1);
+        $total_balance_amount = 0;
+        $data["recordsTotal"] = $total_record['total_records'];
+        $data["recordsFiltered"] = $total_record['total_records'];
+        echo json_encode($data);
+    }
 }
 
 

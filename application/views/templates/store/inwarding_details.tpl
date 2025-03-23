@@ -467,7 +467,7 @@
                        <%/if%>
                        </td>
                     </tr>
-                    <%else if ($p->pending_qty > 0)%>
+                    <%else %>
                      
                     <tr>
                        <!-- <td><%$i %></td> -->
@@ -529,6 +529,19 @@
                        <%/if%>
                        <%/if%>
                        </td>
+                       <%if $configuration['RMCount'] eq 'Yes'%>
+                       <td>
+                       <%if $p->sub_category eq 'RM count'%>
+                       <%if ($data_present == "yes") %>
+                       <%$grn_details_data[0]->route_count %>
+                       <%else%>
+                           <input type="text" step="any" data-min="1" placeholder="RM Count" name="route_count" class="form-control onlyIntergerInput">
+                       <%/if%>
+                       <%else%>
+                       <%display_no_character()%>
+                       <%/if%>
+                       </td>
+                       <%/if%>
                        <td class="text-center">
                        <%if ($subcon_po_inwarding_master) %>
                        <a class="" type="button"

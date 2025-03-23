@@ -865,3 +865,7 @@ $route['send_monthly_schedule_report'] = 'MagrationScript_Controller/send_monthl
 $route['sales_category'] = 'SalesController/sales_category';
 $route['add_sales_category'] = 'SalesController/add_sales_category';
 $route['update_sales_category'] = 'SalesController/update_sales_category';
+
+$route['challan_table_out'] = 'ReportsController/challan_table_4_out';
+$route['challan_table_in'] = 'ReportsController/challan_table_5a_in';
+

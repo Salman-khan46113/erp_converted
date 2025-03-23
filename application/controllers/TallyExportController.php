@@ -301,7 +301,7 @@ class TallyExportController extends CommonController
             "className" => "dt-center",
         ];
 		
-		$date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+		$date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -325,7 +325,7 @@ class TallyExportController extends CommonController
         if(!((int) date("m",1) > 3)){
         	$current_year--;
         }
-		$date_filter = date("$current_year/04/01") ." - ". date("Y/m/d");
+		$date_filter = date("01/04/$current_year") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['export_start_date'] = $date_filter[0];
         $data['export_end_date'] = $date_filter[1];
