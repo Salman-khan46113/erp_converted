@@ -356,15 +356,27 @@ class ChallanController extends CommonController {
 
 		$ship_addressType = $this->input->post('ship_addressType');
 		$consignee_id = $this->input->post('consignee');
-
-		$latestSeqFormat = $this->Crud->customQuery("SELECT challan_number FROM challan WHERE challan_number like '" . $this->getChallanSerialNo() . "%' order by id desc LIMIT 1");
-		foreach ($latestSeqFormat as $p) {
-			$currentChallanNo = $p->challan_number;
+		$start_year = (int) date("Y");
+		$end_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+        	$start_year--;
+        }
+		
+		$latestSeqFormat = $this->Crud->customQuery("
+			SELECT challan_number 
+			FROM challan 
+			WHERE challan_number like '" . $this->getChallanSerialNo() . "%' AND((year = ".$start_year." AND month >= 4) OR (year = ".$end_year." AND month <= 3)) order by id desc LIMIT 1");
+		
+		$last_number = 0;
+		if(count($latestSeqFormat) > 0 && !empty($latestSeqFormat)){
+			foreach ($latestSeqFormat as $p) {
+				$currentChallanNo = $p->challan_number;
+			}
+			$last_number = substr($currentChallanNo, strlen($this->getChallanSerialNo()));
 		}
 
-		$challan_num = substr($currentChallanNo, strlen($this->getChallanSerialNo())) + 1;
+		$challan_num = $last_number + 1;
 		$challan_number = $this->getChallanSerialNo() . $challan_num;
-
 		$data = array(
 				"clientId" => $this->Unit->getSessionClientId(),
 				"challan_number" => $challan_number,
