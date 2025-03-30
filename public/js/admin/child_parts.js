@@ -84,7 +84,7 @@ $(document).ready(function() {
         let part_val = $('#part_id_selected').val();
         // Ensure that the table and column exist before applying the search
         if (table && part_val) {
-            table.column(1).search(part_val).draw();
+            table.column(0).search(part_val).draw();
         }
         $('.close-filter-btn').trigger('click');
     });

@@ -60,10 +60,10 @@
 
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
         <%if (checkGroupAccess("inhouse_parts_admin","export","No")) %>
-          <button type="button" class="btn btn-seconday " data-bs-toggle="modal" data-bs-target="#importChildPartStock" title="Import Stock Data"><i class="ti ti-upload"></i></button>
+          <button type="button" class="btn btn-seconday " data-bs-toggle="modal" data-bs-target="#importChildPartStock" title="Import Inhouse Stock Data"><i class="ti ti-upload"></i></button>
         <%/if%>
         <%if (checkGroupAccess("inhouse_parts_admin","export","No")) %>
-        <a class="btn btn-seconday" href="<%base_url('export_parts_stock/inhouse')%>" target="_blank" title="Export Child Parts"><i class="ti ti-download"></i></a>
+        <a class="btn btn-seconday" href="<%base_url('export_parts_stock/inhouse')%>" target="_blank" title="Export Inhouse Stock Data"><i class="ti ti-download"></i></a>
         <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
         <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
         <%/if%>

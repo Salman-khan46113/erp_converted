@@ -131,9 +131,9 @@ const page = {
                 var targetDateObj = new Date(formattedTargetDate);
                 var startDateObj = new Date(startDate);
                 var endDateObj = new Date(endDate);
-
+                
                 // Comparison
-                if (targetDateObj > startDateObj && targetDateObj < endDateObj) {
+                if (targetDateObj >= startDateObj && targetDateObj <= endDateObj) {
                   return true;
                 } else {
                   return false;

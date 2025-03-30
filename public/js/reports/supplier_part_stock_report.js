@@ -320,7 +320,6 @@ const page = {
                 }
             }
 
-            return
             var formData = new FormData($('.'+id)[0]);
 
             $.ajax({
