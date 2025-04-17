@@ -2,6 +2,7 @@
 <!-- Content -->
 <div class="container-xxl flex-grow-1 container-p-y">
    <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme filter-popup-block" style="width: 0px;">
+    <form class="search-" action="<%base_url('view_p_q')%>" id="seacrh-filter-block" method="post">
       <div class="app-brand demo justify-content-between">
         <a href="javascript:void(0)" class="app-brand-link">
           <span class="app-brand-text demo menu-text fw-bolder ms-2">Filter</span>
@@ -11,6 +12,7 @@
         </div>
       </div>
       <nav class="sidebar-nav scroll-sidebar filter-block" data-simplebar="init">
+        
         <div class="simplebar-content" >
           <ul class="menu-inner py-1">
             <!-- Dashboard -->
@@ -26,7 +28,7 @@
                          <%foreach from=$inhouse_parts item=i %>
                                           <option 
                                              
-                                             value="<%$i%>"><%$i%></option>
+                                             value="<%$i->id%>" <%if $i->id eq $selected_part_id%>selected<%/if%>><%$i->part_number%>/<%$i->part_description%></option>
                                           <%/foreach%>
                        </select>
                 </div>
@@ -39,13 +41,39 @@
               </li>
               <li class="sidebar-item">
                 <div class="input-group">
-                  <select name="part_id" class="form-control select2" id="search_machine_name">
-                          <option value="">Select Select Machine</option>
+                  <select name="search_machine_name" class="form-control select2" id="search_machine_name">
+                          <option value="">Select Machine</option>
                         <%foreach from=$machine_data item=i %>
                               <option 
-                                 value="<%$i->name %>"><%$i->name %></option>
+                                 value="<%$i->id %>"  <%if $i->id eq $selected_machin_name%>selected<%/if%>><%$i->name %></option>
                              <%/foreach%>
                        </select>
+                </div>
+              </li>
+            </div>
+            <div class="filter-row">
+              <li class="nav-small-cap">
+                <span class="hide-menu">Status</span>
+                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+              </li>
+              <li class="sidebar-item">
+                <div class="input-group">
+                  <select name="status" class="form-control select2" id="search_status">
+                        <option value="">Select Status</option>
+                        <option value="pending" <%if $status eq 'pending'%>selected<%/if%>>pending</option>
+                        <option value="completed" <%if $status eq 'completed'%>selected<%/if%>>completed</option>
+                       </select>
+                </div>
+              </li>
+            </div>
+            <div class="filter-row">
+              <li class="nav-small-cap">
+                <span class="hide-menu"> Date</span>
+                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+              </li>
+              <li class="sidebar-item">
+                <div class="input-group">
+                <input type="text" name="datetimes" class="dates form-control" id="date_range_filter" />
                 </div>
               </li>
             </div>
@@ -55,9 +83,10 @@
         </div>
       </nav>
       <div class="filter-popup-btn">
-        <button class="btn btn-outline-danger reset-filter">Reset</button>
-        <button class="btn btn-primary search-filter">Search</button>
+        <button class="btn btn-outline-danger reset-filter" id="reset-filter">Reset</button>
+        <button class="btn btn-primary search-filter" type="submit">Search</button>
       </div>
+      </form>
     </aside>
     <nav aria-label="breadcrumb">
       <div class="sub-header-left pull-left breadcrumb">
@@ -82,7 +111,7 @@
         <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
       <%/if%>
       <button class="btn btn-seconday filter-icon" type="button"><i class="ti ti-filter" ></i></i></button>
-        <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter"></i></button>
+        <button class="btn btn-seconday" type="button"><i class="ti ti-refresh reset-filter" id="reset-filter-top"></i></button>
    </div>
    <div class="w-100">
               <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
@@ -94,7 +123,7 @@
                      <table id="molding_production" class="table table-striped">
                         <thead>
                            <tr>
-                              <!-- <th>Sr No</th> -->
+                              <th style="display: none">Sr No</th>
                               <th>Output Part Number / Descriptions </th>
                               <th>Date</th>
                               <th>Shift</th>
@@ -115,10 +144,10 @@
                            <%assign var='i' value=1%>
                            <%foreach from=$p_q item=u %>
                            <tr>
-                              <!-- <td><%$i %></td> -->
+                              <td style="display: none"><%$u->id %></td>
                               <td><%$u->output_part_data[0]->part_number %>/<%$u->output_part_data[0]->part_description %>
                               </td>
-                              <td><%$u->date %></td>
+                              <td><%defaultDateFormat($u->date) %></td>
                               <td><%$u->shift_type %>/<%$u->shift_name %>
                               </td>
                               <td><%$u->machine_name %></td>
@@ -246,7 +275,7 @@
                                  </div>
                               </td>
                               <td><%$u->status %></td>
-                              <td>
+                              <td style="text-align: center;">
                                  <%if ($u->status == "pending") %>
                                    <%if checkGroupAccess("view_p_q","update","No")%>
                                         <button type="button" class="btn btn-danger float-left "
@@ -256,7 +285,7 @@
                                       <%display_no_character("")%>
                                     <%/if%>
                                  <%else %>
-                                 Completed
+                                 --
                                  <%/if%>
                                  <div class="modal fade" id="acceptReject<%$i %>" tabindex="-1"
                                     role="dialog" aria-labelledby="exampleModalLabel"
@@ -271,14 +300,14 @@
                                           </div>
                                           <div class="modal-body">
                                              <form action="<%base_url('update_p_q') %>"
-                                                method="POST" enctype='multipart/form-data' id="update_p_q<%$i %>" class="update_p_q update_p_q<%$i %> custom-form">
+                                                method="POST" enctype='multipart/form-data' id="update_p_q<%$i %>" class="update_p_q update_p_q<%$i %> custom-form" data-form="update_p_q">
                                                 <div class="row">
                                                    <div class="col-lg-12">
                                                       <div class="form-group">
                                                          <label for="">Qty</label>
                                                          <input type="text"
                                                             value="<%$u->qty %>"
-                                                            readonly class="form-control">
+                                                            readonly class="form-control qty_required">
                                                       </div>
                                                    </div>
                                                    <div class="col-lg-12">
@@ -288,7 +317,7 @@
                                                          </label>
                                                          <input type="text" step="any" value=""
                                                             data-max="<%$u->qty %>" dat-min="0"
-                                                            class="form-control required-input"
+                                                            class="form-control required-input accepted_qty onlyNumericInput"
                                                             name="accepted_qty"
                                                             placeholder="Enter Accepted Quantity"
                                                             >
@@ -301,7 +330,7 @@
                                                          </label>
                                                          <input type="text" step="any" value=""
                                                             data-max="<%$u->qty %>" data-min="0"
-                                                            class="form-control required-input onlyNumericInput"
+                                                            class="form-control required-input onlyNumericInput onhold_qty"
                                                             name="onhold_qty"
                                                             placeholder="Enter onhold" >
                                                       </div>
@@ -367,9 +396,13 @@
                                  </div>
                               </td>
                               <td>
+                                <%if ($u->status != "pending") %>
                                  <a class="btn btn-info"
                                     href="<%base_url('details_production_qty/') %><%$u->id %>">
                                  View Details</a>
+                                <%else%>
+                                  <%display_no_character("")%>
+                                <%/if%>
                               </td>
                            </tr>
                            <%assign var='i' value=$i+1%>
@@ -389,11 +422,18 @@
                </div>
    </section>
 </div>
-
+<style type="text/css">
+  .swal2-container.swal2-shown {
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 100000;
+}
+</style>
 <script type="text/javascript">
    var url = <%site_url("SheetProdController/production_qty_add")|@json_encode%>
 </script>
 <script type="text/javascript">
-   var base_url = <%$base_url|@json_encode%>
+   var base_url = <%$base_url|@json_encode%>;
+   var start_date = <%$start_date|json_encode%>;
+    var end_date = <%$end_date|json_encode%>;
 </script>
 <script src="<%$base_url%>public/js/production/p_q.js"></script>

@@ -14,7 +14,7 @@
             <em >Planning data</em></a>
         </h1>
         <br>
-        <span >Planning data</span>
+        <span >Planning data <%$month%> (FY <%$financial_year_value%>-<%$financial_year_value+1%>) </span>
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5 listing-btn">
@@ -33,6 +33,8 @@
             <a type="button" class="btn btn-seconday" data-bs-toggle="modal"
                                     data-bs-target="#importCustomerPartsOnly">
                                     Import Data</a>
+                                    <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
+        <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
         </div>
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
@@ -350,11 +352,19 @@
                                     </div>
                                     </form>
                                 </div>
+                                <div class="col-lg-2">
+                                </div>
+                                <div class="col-lg-3">
+                                    <label class="label-ext">Schedule Compliance</label><br>
+                                    <span class="span-ext compliance-value"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                
-                <div class="card p-0 mt-4">
+                <div class="w-100 mt-3">
+    <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
+  </div>
+                <div class="card p-0 mt-4 w-100">
                     <!-- /.card-header -->
                     <div class="">
                         <table id="example1" class="table table-striped">
@@ -387,6 +397,8 @@
                                 <%assign var="i" value=1%>
                                 <%assign var="total1" value=0%>
                                 <%assign var="total2" value=0%>
+                                <%assign var="total_dispatch_qty_val" value=0%>
+                                <%assign var="total_schedule_qty" value=0%>
                                 
                                 <%if $planing_data%>
                                     <%foreach from=$planing_data item=t%>
@@ -416,6 +428,8 @@
                                                 <%/foreach%>
                                             <%/if%>
                                             <%assign var="balance_s_qty" value= $planing_data_val[0]->schedule_qty - $total_dispatched_qty%>
+                                             <%assign var="total_schedule_qty" value=$total_schedule_qty+$planing_data_val[0]->schedule_qty%>
+                                              <%assign var="total_dispatch_qty_val" value=$total_dispatch_qty_val+$total_dispatched_qty%>
                                 <tr>
 
 
@@ -537,12 +551,116 @@
 </section>
 <!-- /.content -->
 </div>
+<style type="text/css">
+    .label-ext {
+            font-size: 18px !important;
+        margin-bottom: 0px;
+        color: #000;
+        font-size: 18px;
+        font-family: "gilroymedium" !important;
+        margin: 0;
+        font-weight: 500;
+    }
+    .span-ext {
+        font-weight: 500;
+    color: #000 !important;
+    max-width: 95%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #000;
+    font-size: 26px !important;
+    font-family: 'gilroymedium';
+    margin: 0;
+    display: inline-block;
+    line-height: 48px;
+    cursor: pointer;
+    }
+</style>
 <!-- /.content-wrapper -->
-
+<script type="text/javascript">
+    var total_schedule_qty = <%$total_schedule_qty|@json_encode%>;
+    var total_dispatch_qty = <%$total_dispatch_qty_val|@json_encode%>;
+</script>
 
 <script>
     $(document).ready(function() {
-
+        total_schedule_qty = total_schedule_qty > 0 ? total_schedule_qty : 0;
+        total_dispatch_qty = total_dispatch_qty > 0 ? total_dispatch_qty : 0;
+        console.log(total_schedule_qty,total_dispatch_qty)
+        var compliance = (total_dispatch_qty/total_schedule_qty)*100;
+        compliance = compliance > 0 ? compliance.toFixed(2): 0;
+        $(".compliance-value").html(compliance+"%");
+        var table = '';
+        var file_name = "planning_data";
+        var pdf_title = "Planning Data";
+        table = $("#example1").DataTable({
+        dom: "Bfrtilp",
+         buttons: [
+            {
+                extend: "csv",
+                text: '<i class="ti ti-file-type-csv"></i>',
+                init: function (api, node, config) {
+                    $(node).attr("title", "Download CSV");
+                },
+                customize: function (csv) {
+                        var lines = csv.split('\n');
+                        var modifiedLines = lines.map(function(line) {
+                            var values = line.split(',');
+                            values.splice(9, 2);
+                            return values.join(',');
+                        });
+                        return modifiedLines.join('\n');
+                    },
+                    filename : file_name
+                },
+          
+            {
+                extend: "pdf",
+                text: '<i class="ti ti-file-type-pdf"></i>',
+                init: function (api, node, config) {
+                    $(node).attr("title", "Download Pdf");
+                },
+                filename: file_name,
+                customize: function (doc) {
+                    doc.pageMargins = [15, 15, 15, 15];
+                    doc.content[0].text = pdf_title;
+                    doc.content[0].color = theme_color;
+                    // doc.content[1].table.widths = ["19%", "19%", "13%", "13%", "15%", "15%"];
+                    doc.content[1].table.body[0].forEach(function (cell) {
+                        cell.fillColor = theme_color;
+                    });
+                    doc.content[1].table.body.forEach(function (row, index) {
+                        row.splice(9, 2);
+                        row.forEach(function (cell) {
+                            // Set alignment for each cell
+                            cell.alignment = "center"; // Change to 'left' or 'right' as needed
+                        });
+                    });
+                },
+            },
+        ],
+        searching: true,
+        // scrollX: true,
+        scrollY: true,
+        bScrollCollapse: true,
+        // columnDefs: [{ sortable: false, targets: 7 }],
+        pagingType: "full_numbers",
+        lengthMenu: [[10,50,100,200,500,1000,25000], [10,50,100,200,500,1000,25000]]
+       
+        
+        });
+        $('#serarch-filter-input').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+        $('.dataTables_length').find('label').contents().filter(function() {
+                return this.nodeType === 3; // Filter out text nodes
+        }).remove();
+        setTimeout(function(){
+            $(".dataTables_length select").select2({
+                minimumResultsForSearch: Infinity
+            });
+        },1000)
     $('#planningForm').validate({
         // Define validation rules
         rules: {
@@ -593,13 +711,19 @@
                 type: 'POST',                // Set the request type
                 data: $(form).serialize(),   // Serialize the form data
                 success: function (response) {
-                    // Handle success response
-                    toastr.success('Planning data added successfully!');
-                    // Optionally, close the modal or perform other actions
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                    $('.modal').modal('hide');
+                        var responseObject = JSON.parse(response);
+                      var msg = responseObject.message;
+                      var success = responseObject.success;
+                      if (success == 1) {
+                        toastr.success(msg);
+                        $(this).parents(".modal").modal("hide")
+                        setTimeout(function(){
+                          window.location.reload();
+                        },1000);
+
+                      } else {
+                        toastr.error(msg);
+                      }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     // Handle error response

@@ -380,6 +380,7 @@ class GRNController extends CommonController
 
 			public function add_grn_qty()
 			{
+
 				$inwarding_id = $this->input->post('inwarding_id');
 				$po_number = $this->input->post('new_po_id');
 				$grn_number = $this->input->post('grn_number');
@@ -390,6 +391,7 @@ class GRNController extends CommonController
 				$part_rate = $this->input->post('part_rate');
 				$tax_id = $this->input->post('tax_id');
 				$pending_qty = $this->input->post('pending_qty');
+				$route_count = $this->input->post('route_count') > 0 ? $this->input->post('route_count') : 0;
 				$inwarding_price = ($part_rate * round($qty,2));
 				$new_po_data = $this->Crud->get_data_by_id("new_po", $po_number, "id");
 				if($new_po_data[0]->po_discount_type == "Part Level"){
@@ -433,6 +435,7 @@ class GRNController extends CommonController
 					"invoice_number" => $invoice_number,
 					"part_id" => $part_id,
 					"qty" => round($qty,2),
+					"route_count" => $route_count,
 					"po_part_id" => $po_part_id,
 					"inwarding_price" => round($inwarding_price,2),
 					"created_by" => $this->user_id,
@@ -554,6 +557,7 @@ class GRNController extends CommonController
 				$po_part_id = $this->input->post('po_part_id');
 				$part_rate = $this->input->post('part_rate');
 				$pending_qty = $this->input->post('pending_qty');
+				$route_count = $this->input->post('route_count') > 0 ? $this->input->post('route_count') : 0;
 
 				$inwarding_price = (float)($part_rate * $qty);
 
@@ -589,6 +593,7 @@ class GRNController extends CommonController
 						"invoice_number" => $invoice_number,
 						"part_id" => $part_id,
 						"qty" => $qty,
+						"route_count"=>$route_count,
 						"po_part_id" => $po_part_id,
 						"inwarding_price" => $inwarding_price,
 						"created_by" => $this->user_id,

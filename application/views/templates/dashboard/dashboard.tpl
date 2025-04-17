@@ -186,7 +186,7 @@
                         </div>
                      </div>
                      <div class="row stat-cards">
-                        <div class="col-md-6 col-xl-3">
+                        <div class="col-md-6 col-xl-3 hide ">
                            <article class="stat-cards-item widget-box" id="TOTAL_RECEIVABLES_PAID_BA_BLOCK" data-widget="TOTAL_RECEIVABLES_PAID_BA">
                               <div class="refresh-btn-block ">
                                  <i class="las la-sync cursor" title="Refresh"></i>
@@ -218,7 +218,7 @@
                                     <i class="las la-money-bill"></i>
                                  </div>
                                  <div class="stat-cards-info">
-                                    <p class="stat-cards-info__title">Total Receivables Due With GST</p>
+                                    <p class="stat-cards-info__title">Total Receivables Due (INR)</p>
                                     <p class="stat-cards-info__num timer count-title count-number" data-to="" data-speed="1500"></p>
                                  </div>
                               </a>
@@ -255,7 +255,7 @@
                                  <i class="las la-boxes"></i>
                               </div>
                               <div class="stat-cards-info">
-                                 <p class="stat-cards-info__title" >Payable Due (INR)</p>
+                                 <p class="stat-cards-info__title" >Total Payable Due (INR)</p>
                                  <p class="stat-cards-info__num timer count-title count-number" data-to="" data-speed="1500"></p>
                               </div>
                            </article>
@@ -543,7 +543,7 @@
                         </div>
                      </div>
                      <div class="row mt-4">
-                        <div class="col-lg-5">
+                        <div class="col-lg-4">
                            <div class="chart-box widget-box" id="CUSTOMER_SALES_AMOUNT_TABLE" data-widget="CUSTOMER_SALES_AMOUNT">
                               <div class="title-box">
                                  <div class="title-line">
@@ -582,7 +582,7 @@
                               </div>
                            </div>
                         </div>
-                        <div class="col-lg-5 ">
+                        <div class="col-lg-4 ">
                            <div class="chart-box widget-box" id="FY_PLAN_VS_SALES_DOUBLE_BAR_CHART" data-widget="FY_PLAN_VS_SALES">
                               <div class="title-box">
                                  <div class="title-line">
@@ -599,23 +599,30 @@
                               </div>
                            </div>
                         </div>
-                        <div class="col-lg-2">
-                           <div class="total-sales-today widget-box" id="CURRENT_MONTH_PLAN_IMAGE_BLOCK" data-widget="CURRENT_MONTH_PLAN">
+                        <div class="col-lg-4 ">
+                        <div class="chart-box widget-box" id="CURRENT_MONTH_PLAN_TABLE" data-widget="CURRENT_MONTH_PLAN">
                               <div class="title-box">
                                  <div class="title-line">
-                                    Current Month Plan (INR)
+                                     Current Month Plan (INR)
                                     <i class="las la-sync cursor" title="Refresh"></i>
+                                    
                                  </div>
                               </div>
                               <div class="value-box">
                                  <div class="loader-box">
                                     <div class="dot-elastic"></div>
                                  </div>
-                                 <div class="today_stock_qty">12,455 Unit(s)</div>
-                                 <div class="today_stock_value">₹ 50,000,000 </div>
+                                 <div class="center norecord no_data_msg_row" style="display: none;">No customer receivables due data found.</div>
+                                 <div id="CURRENT_MONTH_PLAN" class="chat-plot">
+                                    <div class="custom-table custom_midd scroll_default" style="max-height: 366px;">
+                                       <table class="dataTable w-100" id="top_10_moving_product_details_table">
+                                          <tbody class="tableview_body">
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
                               </div>
-                              <div class="image-box"><img src="dist/assets/images/today_stock.png" width="100%"></div>
-                           </div>
+                        </div>
                         </div>
                      </div>
                      <div class="row mt-4">
@@ -776,6 +783,23 @@
                               </div>
                               <div class="stat-cards-info">
                                  <p class="stat-cards-info__title">Total Payables Paid (INR)</p>
+                                 <p class="stat-cards-info__num timer count-title count-number" data-to="" data-speed="1500"></p>
+                              </div>
+                           </article>
+                        </div>
+                        <div class="col-md-6 col-xl-3 ">
+                           <article class="stat-cards-item widget-box" id="TOTAL_TDS_BLOCK" data-widget="TOTAL_TDS">
+                              <div class="refresh-btn-block ">
+                                 <i class="las la-sync cursor" title="Refresh"></i>
+                              </div>
+                              <div class="loader-box">
+                                 <div class="dot-elastic"></div>
+                              </div>
+                              <div class="stat-cards-icon primary">
+                                 <i class="las la-check-circle"></i>
+                              </div>
+                              <div class="stat-cards-info">
+                                 <p class="stat-cards-info__title">Total TDS (INR)</p>
                                  <p class="stat-cards-info__num timer count-title count-number" data-to="" data-speed="1500"></p>
                               </div>
                            </article>
@@ -1424,7 +1448,33 @@
                                  </div>
                               </div>
                            </div>
+                           <div class="col-lg-4">
+                                 <div class="chart-box widget-box" id="CURRENT_MONTH_PLAN_PRODUCTION_TABLE" data-widget="CURRENT_MONTH_PLAN_PRODUCTION">
+                                    <div class="title-box">
+                                       <div class="title-line">
+                                           Current Month Plan (INR)
+                                          <i class="las la-sync cursor" title="Refresh"></i>
+                                          
+                                       </div>
+                                    </div>
+                                    <div class="value-box">
+                                       <div class="loader-box">
+                                          <div class="dot-elastic"></div>
+                                       </div>
+                                       <div class="center norecord no_data_msg_row" style="display: none;">No customer receivables due data found.</div>
+                                       <div id="CURRENT_MONTH_PLAN_PRODUCTION" class="chat-plot">
+                                          <div class="custom-table custom_midd scroll_default" style="max-height: 366px;">
+                                             <table class="dataTable w-100" id="top_10_moving_product_details_table">
+                                                <tbody class="tableview_body">
+                                                </tbody>
+                                             </table>
+                                          </div>
+                                       </div>
+                                    </div>
+                              </div>
+                           </div>
                         </div>
+                        
                      </div>
                   <%/if%>
                   <%if checkGroupAccess("dashboard_quality","list",false)%>

@@ -1,4 +1,5 @@
 
+
 $(document).ready(function() {
     page.init();
 });
@@ -9,6 +10,7 @@ var pdf_title = "accept_reject_validation";
 
 const page = {
     init: function() {
+      
         this.dataTable();
         this.filter();
         this.formValidation();
@@ -30,6 +32,28 @@ const page = {
               }
           });
       });
+      $('#date_range_filter').daterangepicker({
+            singleDatePicker: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: 'DD/MM/YYYY' // Change this format as per your requirement
+            }
+        });
+
+        dateRangePicker = $('#date_range_filter').data('daterangepicker');
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
+
+
+        $(".accepted_qty").on("keyup",function(){
+          var parent_el = $(this).parents(".update_p_q");
+          var required_qty = parseFloat($(parent_el).find(".qty_required").val());
+          var accepted_qty = parseFloat($(this).val());
+          var onhold_qty = required_qty - accepted_qty;
+          $(parent_el).find(".onhold_qty").attr("data-max",onhold_qty);
+          console.log(required_qty,accepted_qty);
+        })
     },
     dataTable: function() {
         var data = {};
@@ -80,12 +104,12 @@ const page = {
             },
         ],
         searching: true,
-        // scrollX: true,
+        scrollX: true,
         scrollY: true,
         bScrollCollapse: true,
         columnDefs: [{ sortable: false, targets: 8 }],
         pagingType: "full_numbers",
-       	order: [[1, 'desc']]
+       	order: [[0, 'desc']]
         
         });
         $('.dataTables_length').find('label').contents().filter(function() {
@@ -105,45 +129,93 @@ const page = {
     },
     filter: function(){
         let that = this;
-        $(".search-filter").on("click",function(){
-            that.serachParams();
-            $(".close-filter-btn").trigger( "click" )
-        })
-        $(".reset-filter").on("click",function(){
+        // $(".search-filter").on("click",function(){
+        //     that.serachParams();
+        //     $(".close-filter-btn").trigger( "click" )
+        // })
+        $("#reset-filter,#reset-filter-top").on("click",function(){
+
             that.resetFilter();
         })
     },
     serachParams: function(){
-        let inhouse_part_name= $('#search_inhouse_part_name').val();
-         let machine_name= $('#search_machine_name').val();
-        // Ensure that the table and column exist before applying the search
-        if (table && inhouse_part_name) {
-            table.column(0).search(inhouse_part_name).draw();
-        }
-        if (table && machine_name) {
-            table.column(3).search(machine_name).draw();
-        }
+        // let inhouse_part_name= $('#search_inhouse_part_name').val();
+        //  let machine_name= $('#search_machine_name').val();
+        // // Ensure that the table and column exist before applying the search
+        // if (table && inhouse_part_name) {
+        //     table.column(0).search(inhouse_part_name).draw();
+        // }
+        // if (table && machine_name) {
+        //     table.column(3).search(machine_name).draw();
+        // }
     },
     resetFilter: function(){
         $('#search_inhouse_part_name').val('').trigger("change");
         $('#search_machine_name').val('').trigger("change");
-        table.column(0).search("").draw();
-        table.column(3).search("").draw();
+        $('#search_status').val('').trigger("change");
+        dateRangePicker.setStartDate(start_date);
+        dateRangePicker.setEndDate(end_date);
+        $('#seacrh-filter-block').trigger('submit');
     },
     formValidation: function(){
     	let that = this;
     	$(document).submit(".add_molding_production,.update_p_q,update_p_q_onhold",function(e){
-    		console.log(e.target)
+        var element_dat = $(this);
+        // console.log(e.target.id)
+        if(e.target.id == "seacrh-filter-block"){
+          return;
+        }
         e.preventDefault();
         var href = $(e.target).attr("action");
         var id = $(e.target).attr("id");
         let flag = that.formValidate(id);
 
         if(flag){
+          // console.log("uesu",$(e.target).attr("data-form"))
           return;
         }
-        // consle.log(flag);
-        // return ;
+
+        var accepted_qty = $('.'+id+" .accepted_qty").val();
+        var onhold_qty = $('.'+id+" .onhold_qty").val();
+        if($(e.target).attr("data-form") == "update_p_q" && accepted_qty == 0 && onhold_qty == 0){
+          swal({
+          title: "Are you sure?", 
+          text: "You are rejecting production quantity", 
+          type: "warning",
+          confirmButtonText: "Yes",
+          showCancelButton: true
+          })
+            .then((result) => {
+            if (result.value) {
+                var formData = new FormData($('.'+id)[0]);
+                $.ajax({
+                  type: "POST",
+                  url: href,
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  success: function (response) {
+                    var responseObject = JSON.parse(response);
+                    var msg = responseObject.messages;
+                    var success = responseObject.success;
+                    if (success == 1) {
+                      toastr.success(msg);
+                      $(this).parents(".modal").modal("hide")
+                      setTimeout(function(){
+                        window.location.reload();
+                      },1000);
+
+                    } else {
+                      toastr.error(msg);
+                    }
+                  },
+                  error: function (error) {
+                    console.error("Error:", error);
+                  },
+                });
+            }
+          })
+        }else{
         var formData = new FormData($('.'+id)[0]);
 
         $.ajax({
@@ -171,6 +243,7 @@ const page = {
             console.error("Error:", error);
           },
         });
+        }
       });
     },
     formValidate: function(form_class = ''){

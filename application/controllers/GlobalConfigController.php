@@ -166,7 +166,37 @@ class GlobalConfigController extends CommonController
 		        }else{
 		        	$value = $this->input->post("old_val");
 		        }
-		    }
+		}
+		if($this->input->post("config_name") == "PoPdfSignatureImg"){
+
+				if($_FILES['PoSignatureImage']['name'] != ""){
+		            $profileImageData =
+		                $_FILES["PoSignatureImage"]["name"] != ""
+		                    ? $_FILES["PoSignatureImage"]
+		                    : [];
+		            $config["upload_path"] = "dist/img/signature_image/";
+		            $config["allowed_types"] = "jpg|png|jpeg|png";
+		            $this->load->library("upload", $config);
+		            $upload_error_msg = "";
+		            if (!empty($profileImageData)) {
+		                if (!$this->upload->do_upload("PoSignatureImage")) {
+		                    $upload_error_msg = $error = [
+		                        "error" => $this->upload->display_errors(),
+		                    ];
+		                    $upload_error = 1;
+		                } else {
+		                    $upload_data = $this->upload->data();
+		                }
+		            }
+
+		        }
+
+		        if($upload_error == 0){
+		        	$value = $upload_data['file_name'];
+		        }else{
+		        	$value = $this->input->post("old_val");
+		        }
+		}
         	
         if($upload_error == 0){
 			if($forArom=='on' || $forArom==1) { $forArom = 1; } else { $forArom = 0;}
@@ -222,11 +252,12 @@ class GlobalConfigController extends CommonController
 		}
 		$menu_data = $this->GlobalConfigModel->getAllMenuData();
 		$data['groups_menu'] = [];
+
 		foreach ($menu_data as $key => $value) {
 			if(array_key_exists($value['menu_master_id'], $exist_menu_access_arr)){
-				$groups_menu[] = $exist_menu_access_arr[$value['menu_master_id']];
+				$groups_menu[$value['menu_category_id']][] = $exist_menu_access_arr[$value['menu_master_id']];
 			}else{
-				$groups_menu[] = [
+				$groups_menu[$value['menu_category_id']][] = [
 					"group_rights_id" => 0,
 					"group_master_id" => $group_id,
 					"menu_master_id" => $value['menu_master_id'],
@@ -236,15 +267,19 @@ class GlobalConfigController extends CommonController
 					"delete" => "No",
 					"export" => "No",
 					"import" => "No",
-					"diaplay_name" => $value['diaplay_name']
+					"diaplay_name" => $value['diaplay_name'],
+					"category_name" => $value['category_name'],
+					"menu_category_id" => $value['menu_category_id']
 				];
 			}
 		}
+		// pr($groups_menu,1);
 		$data['groups_menu'] = $groups_menu;
 		$this->loadView('admin/group_master_menu', $data);
 	}
 	public function updateGroupMenuRight(){
 		$post_data = $this->input->post();
+		// pr($post_data,1);
 		$menu_data = $post_data['menu'];
 		$group_id = $post_data['group_id'];
 		$access_data = ["list","add","update","export","delete",'import'];

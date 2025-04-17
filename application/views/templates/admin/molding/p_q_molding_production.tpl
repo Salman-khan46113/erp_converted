@@ -296,7 +296,7 @@
                      <%$u->part_description %>
                   </td>
                   <td><%$u->mold_name %></td>
-                  <td><%$u->date %></td>
+                  <td><%defaultDateFormat($u->date) %></td>
                   <td><%$u->shift_type %>/<%$u->name %>
                   </td>
                   <td><%$u->machine_name %></td>

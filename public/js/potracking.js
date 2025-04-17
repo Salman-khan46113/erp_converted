@@ -47,7 +47,12 @@ const page = {
                             var lines = csv.split('\n');
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
-                                values.splice(13, 1);
+                                if(order_acceptance_enable == "Yes"){
+                                    values.splice(8, 4);
+                                }else{
+                                    values.splice(6, 4);
+                                }
+                                
                                 return values.join(',');
                             });
                             return modifiedLines.join('\n');
@@ -66,7 +71,12 @@ const page = {
                       doc.pageMargins = [15, 15, 15, 15];
                       doc.content[0].text = pdf_title;
                       doc.content[0].color = theme_color;
-                        // doc.content[1].table.widths = ['15%', '19%', '13%', '13%','15%', '15%', '10%'];
+                        
+                        if(order_acceptance_enable == "Yes"){
+                                    doc.content[1].table.widths = ['15%', '13%','10%', '10%', '15%','10%', '10%', '13%'];
+                                }else{
+                                    doc.content[1].table.widths = ['15%', '15%', '15%', '15%','15%', '15%'];
+                                }
                         doc.content[1].table.body[0].forEach(function(cell) {
                             cell.fillColor = theme_color;
                         });
@@ -85,7 +95,11 @@ const page = {
                                 }
                                 cell.alignment = alignment;
                             });
-                            row.splice(14, 1);
+                            if(order_acceptance_enable == "Yes"){
+                                    row.splice(8, 4);
+                                }else{
+                                    row.splice(6, 4);
+                                }
                         });
                     }
                 },
@@ -113,9 +127,10 @@ const page = {
             autoWidth: true,
             lengthChange: true,
             fixedColumns: {
-                leftColumns: 2,
+                leftColumns: left_fix_column,
                 // end: 1
             },
+            columnDefs: order_acceptance_enable == "Yes" ? [{ sortable: false, targets: 7 },{ sortable: false, targets: 8 },{ sortable: false, targets: 9 }] : [{ sortable: false, targets: 6 },{ sortable: false, targets: 7 },{ sortable: false, targets: 8 }],
             ajax: {
                 data: {'search':data},    
                 url: "POTrackingController/customerPoTrackingAjax",
@@ -137,6 +152,34 @@ const page = {
     },
     formValidation: function(){
         let that = this;
+        $(document).on("click",".send-sales-order-email",function(e){
+          e.preventDefault();
+          // console.log("ok")
+          var href = $(this).attr("data-href");
+          $.ajax({
+            type: "GET",
+            url: href,
+            // url: "add_invoice_number",,
+            success: function (response) {
+              var responseObject = JSON.parse(response);
+              var msg = responseObject.messages;
+              var success = responseObject.success;
+              if (success == 1) {
+                toastr.success(msg);
+                $(this).parents(".modal").modal("hide")
+                setTimeout(function(){
+                  window.location.reload();
+                },1000);
+
+              } else {
+                toastr.error(msg);
+              }
+            },
+            error: function (error) {
+              console.error("Error:", error);
+            },
+          });
+        });
     },
     filter: function(){
         let that = this;
@@ -152,11 +195,13 @@ const page = {
     },
     serachParams: function(){
         var customer_id = $("#customer_name").val();
-        var params = {customer_id:customer_id};
+        var status = $("#status_val").val();
+        var params = {customer_id:customer_id,status};
         return params;
     },
     resetFilter: function(){
         $("#customer_name").val('');
+        $("#status_val").val('').trigger("change");
         table.destroy(); 
         this.dataTable();
     }

@@ -87,11 +87,22 @@ const page = {
         $('#serarch-filter-input').on('keyup', function() {
             table.search(this.value).draw();
         });
+        $(document).on("click","[data-bs-toggle='modal']",function(){
+          var id = $(this).attr("data-bs-target");
+          $(`${id}`).find("select").chosen({
+            width: "auto",
+            disable_search_threshold: 10, // You can adjust this threshold for no search bar
+            dropdownAutoWidth: true,
+            search_contains: true
+        });
+                                                                              
+        })
+
             // table = $('#example1').DataTable();
       },
       initiateValidate: function(){
       	let that = this;
-      	$(".update_production_qty").submit(function(e){
+      	$(document).on("submit",".update_production_qty",function(e){
 	      e.preventDefault();
 	      let id = $(this).attr("id");
 	      let flag = that.formValidate(id);
@@ -128,7 +139,7 @@ const page = {
 	        },
 	      });
 	    });
-	    $(".transfer_child_part_to_fg_stock_inhouse").submit(function(e){
+	    $(document).on("submit",".transfer_child_part_to_fg_stock_inhouse",function(e){
 	      e.preventDefault();
 	      let id = $(this).attr("id");
 	      let flag = that.formValidate(id);

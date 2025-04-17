@@ -17,7 +17,7 @@
       <div class="simplebar-content" >
         <ul class="menu-inner py-1">
             <!-- Dashboard -->
-            <div class="filter-row">
+            <div class="filter-row hide">
               <li class="nav-small-cap">
                 <span class="hide-menu">Customer</span>
                 <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
@@ -33,6 +33,23 @@
                 </div>
               </li>
             </div>
+            <div class="filter-row ">
+              <li class="nav-small-cap">
+                <span class="hide-menu">Customer Column</span>
+                <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+              </li>
+              <li class="sidebar-item">
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="Yes">
+                  <label class="form-check-label" for="inlineRadio1">Yes</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="No" checked>
+                  <label class="form-check-label" for="inlineRadio2">No</label>
+                </div>
+              </li>
+            </div>
+
             <div class="filter-row">
               <li class="nav-small-cap">
                 <span class="hide-menu">HSN Code</span>
@@ -44,7 +61,18 @@
 
               </div>
             </li>
-            </div>  
+            </div> 
+             <div class="filter-row">
+          <li class="nav-small-cap">
+            <span class="hide-menu">Date</span>
+            <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+          </li>
+          <li class="sidebar-item">
+            <div class="input-group">
+            <input type="text" name="datetimes" class="dates form-control" id="date_range_filter" />
+            </div>
+          </li>
+        </div> 
             
 
         </ul>
@@ -62,10 +90,10 @@
           Reports
           <a hijacked="yes" href="#stock/issue_request/index" class="backlisting-link" title="Back to Issue Request Listing" >
             <i class="ti ti-chevrons-right" ></i>
-            <em >HSN Reports</em></a>
+            <em >HSN Summary Reports</em></a>
         </h1>
         <br>
-        <span >HSN Reports</span>
+        <span >HSN Summary Reports</span>
       </div>
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
@@ -82,9 +110,22 @@
     <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
   </div>
     <div class="content-wrapper ">
-     
+        <div class=" p-0 ms-1">
+            <div class="card-header">
+                <div class="row">
+                    <div class="tgdp-rgt-tp-sect ms-2">
+                        <p class="tgdp-rgt-tp-ttl">Total Quantity</p>
+                        <p class="tgdp-rgt-tp-txt total_qty_block">0.00</p>
+                    </div>
+                    <div class="tgdp-rgt-tp-sect">
+                        <p class="tgdp-rgt-tp-ttl">Total Amount</p>
+                        <p class="tgdp-rgt-tp-txt total_rate_block">0.00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Main content -->
-        <section class="content">
+        <section class="content mt-4">
             <div class="">
                 <div class="row">
                     <div class="col-12">
@@ -167,6 +208,49 @@
     </div>
     <!-- /.content-wrapper -->
 </div>
+<style type="text/css">
+    tr.danger-row .due_days_block {
+    color: #000 !important;
+    background-color: red !important;
+    box-shadow: inset 0 0 0 9999px #e84343 !important;
+}
+.tgdp-rgt-tp-sect {
+    float: left;
+    width: 25%;
+    width: calc(25% - 19px);
+    border-radius: 10px;
+    background: #fff;
+    height: 105px;
+    margin-right: 17px;
+    padding: 20px;
+    display: inline-block;
+}
+.tgdp-rgt-tp-sect .tgdp-rgt-tp-ttl {
+
+    font-size: 16px !important;
+    margin-bottom: 0px;
+    color: #000;
+    font-size: 18px;
+    font-family: "gilroymedium" !important;
+    margin: 0;
+}
+.tgdp-rgt-tp-sect .tgdp-rgt-tp-txt {
+    font-weight: 500;
+    
+    color: #000 !important;
+    max-width: 95%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #000;
+    font-size: 26px !important;
+    font-family: 'gilroymedium';
+    margin: 0;
+    display: inline-block;
+    line-height: 48px;
+    cursor: pointer;
+}
+</style>
 <script>
     var column_details =  <%$data|json_encode%>;
     var page_length_arr = <%$page_length_arr|json_encode%>;
@@ -179,5 +263,7 @@
     var sorting_column = <%$sorting_column%>;
     var api_name =  <%$api_name|json_encode%>;
     var base_url = <%$base_url|json_encode%>;
+    var start_date = <%$start_date|json_encode%>;
+    var end_date = <%$end_date|json_encode%>;
 </script>
 <script src="<%$base_url%>/public/js/reports/hsn_repots.js"></script>

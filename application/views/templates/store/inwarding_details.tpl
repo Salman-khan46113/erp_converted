@@ -276,6 +276,9 @@
                        <th>Balance QTY</th>
                        <th>Price</th>
                        <th>Inwarding Qty</th>
+                       <%if $configuration['RMCount'] eq 'Yes'%>
+                       <th>RM Count</th>
+                       <%/if%>
                        <th class="text-center">Action </th>
                     </tr>
                  </thead>
@@ -284,7 +287,6 @@
                            <%assign var="i" value=1%>
                           <%assign var="final_po_amount" value=0%>
                            <%foreach from=$po_parts item=p %>
-
                                <%* //It will  select all matching child part master as we have multiple child part master for single child part id *%>
                                <%assign var="child_part_data" value=$p->child_part_data%>
                                <%*// $gst_structure_data = $this->Crud->get_data_by_id("gst_structure", $p->tax_id, "id"); *%>
@@ -368,6 +370,19 @@
                                 value="<%$invoice_number %>" class="form-control">
                             <%/if%>
                        </td>
+                       <%if $configuration['RMCount'] eq 'Yes'%>
+                       <td>
+                       <%if $p->sub_category eq 'RM count'%>
+                       <%if ($data_present == "yes") %>
+                       <%$grn_details_data[0]->route_count %>
+                       <%else%>
+                           <input type="text" step="any" data-min="1" placeholder="RM Count" name="route_count" class="form-control onlyIntergerInput">
+                       <%/if%>
+                       <%else%>
+                       <%display_no_character()%>
+                       <%/if%>
+                       </td>
+                       <%/if%>
                        <td  class="text-center">
                        <%if ($data_present == "yes" && $status != "verifed") %>
                        <a type="button" class=" " title="Update" data-bs-toggle="modal" data-bs-target="#exampleModa<%$i %>l">
@@ -423,6 +438,18 @@
                           name="tax_id"
                           value="<%$p->tax_id %>" class="form-control">
                        </div>
+                       <%if $configuration['RMCount'] eq 'Yes' && $p->sub_category eq 'RM count'%>
+                       <div class="col-lg-12">
+                       <div class="form-group">
+                       <label> RM Count </label>
+                       <input type="text"  step="any"
+                       data-min="1"
+                          name="route_count"
+                          value="<%$grn_details_data[0]->route_count %>"
+                          class="form-control onlyIntergerInput">
+                       </div>
+                       </div>
+                       <%/if%>
                        <div class="modal-footer">
                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                        <button type="submit" class="btn btn-primary">Save</button>
@@ -440,7 +467,7 @@
                        <%/if%>
                        </td>
                     </tr>
-                    <%else if ($p->pending_qty > 0)%>
+                    <%else %>
                      
                     <tr>
                        <!-- <td><%$i %></td> -->
@@ -502,6 +529,19 @@
                        <%/if%>
                        <%/if%>
                        </td>
+                       <%if $configuration['RMCount'] eq 'Yes'%>
+                       <td>
+                       <%if $p->sub_category eq 'RM count'%>
+                       <%if ($data_present == "yes") %>
+                       <%$grn_details_data[0]->route_count %>
+                       <%else%>
+                           <input type="text" step="any" data-min="1" placeholder="RM Count" name="route_count" class="form-control onlyIntergerInput">
+                       <%/if%>
+                       <%else%>
+                       <%display_no_character()%>
+                       <%/if%>
+                       </td>
+                       <%/if%>
                        <td class="text-center">
                        <%if ($subcon_po_inwarding_master) %>
                        <a class="" type="button"

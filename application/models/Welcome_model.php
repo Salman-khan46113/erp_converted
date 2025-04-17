@@ -373,9 +373,9 @@ class Welcome_model extends CI_Model
         }
         if(is_valid_array($search_params) && $search_params['date_range'] != ''){
             $date_filter =  explode((" - "),$search_params["date_range"]);
-            $data['start_date'] = $date_filter[0];
-            $data['end_date'] = $date_filter[1];
-           $this->db->where("STR_TO_DATE(chn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+            $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+            $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+            $this->db->where("STR_TO_DATE(chn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
         }
 
         if (!empty($search_params['value'])) {
@@ -448,9 +448,9 @@ class Welcome_model extends CI_Model
         }
         if(is_valid_array($search_params) && $search_params['date_range'] != ''){
             $date_filter =  explode((" - "),$search_params["date_range"]);
-            $data['start_date'] = $date_filter[0];
-            $data['end_date'] = $date_filter[1];
-            $this->db->where("STR_TO_DATE(chn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+            $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+            $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+            $this->db->where("STR_TO_DATE(chn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
         }
 
         if (!empty($search_params['value'])) {
@@ -496,7 +496,7 @@ class Welcome_model extends CI_Model
     }
 
     public function getDataForCustomerParts($condition_arr = [],$search_params = []){
-        $this->db->select('c.id ,c.part_number as part_number,c.part_description as part_description,c.old_fg_stock as fg_stock,c.fg_rate as fg_rate ,stock.fg_rate as stock_rate');
+        $this->db->select('c.id ,c.part_number as part_number,c.part_description as part_description,c.old_fg_stock as fg_stock,c.fg_rate as fg_rate ,stock.fg_rate as stock_rate,c.scrap_category_id');
         $this->db->from('customer_parts_master as c');
         $this->db->join('customer_parts_master_stock stock', 'c.id = stock.customer_parts_master_id AND stock.clientId = ' . $this->db->escape($this->Unit->getSessionClientId()), 'left');
         if(is_valid_array($search_params) && $search_params['part'] > 0){
@@ -586,11 +586,14 @@ class Welcome_model extends CI_Model
             }
         }
 
-        if ($search_params["date_range_filter"] != "") {
-                $date_filter =  explode((" - "),$search_params["date_range_filter"]);
-                $data['start_date'] = $date_filter[0];
-                $data['end_date'] = $date_filter[1];
-               $this->db->where("STR_TO_DATE(p.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        // if ($search_params["date_range_filter"] != "") {
+        //         $date_filter =  explode((" - "),$search_params["date_range_filter"]);
+        //         $data['start_date'] = $date_filter[0];
+        //         $data['end_date'] = $date_filter[1];
+        //        $this->db->where("STR_TO_DATE(p.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        // }
+        if ($search_params["supplier_id"] > 0) {
+            $this->db->where("s.id",$search_params["supplier_id"]);
         }
         if (is_array($search_params) && count($search_params) > 0) {
             if ($search_params["value"] != "") {
@@ -631,11 +634,14 @@ class Welcome_model extends CI_Model
                 $this->db->order_by($condition_arr["order_by"]);
             }
         }
-        if ($search_params["date_range_filter"] != "") {
-                $date_filter =  explode((" - "),$search_params["date_range_filter"]);
-                $data['start_date'] = $date_filter[0];
-                $data['end_date'] = $date_filter[1];
-               $this->db->where("STR_TO_DATE(p.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        // if ($search_params["date_range_filter"] != "") {
+        //         $date_filter =  explode((" - "),$search_params["date_range_filter"]);
+        //         $data['start_date'] = $date_filter[0];
+        //         $data['end_date'] = $date_filter[1];
+        //        $this->db->where("STR_TO_DATE(p.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+        // }
+        if ($search_params["supplier_id"] > 0) {
+            $this->db->where("s.id",$search_params["supplier_id"]);
         }
 
         if (is_array($search_params) && count($search_params) > 0) {

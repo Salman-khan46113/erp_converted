@@ -106,27 +106,7 @@
                             <div class="">
                             <div class=" text-nowrap">
                                 <table id="income_report" class="table  table-striped">
-                                    <thead>
-
-                                        <tr>
-                                            
-                                            <th>Supplier name</th>
-                                            <th>Part No</th>
-                                            <th>Part Description</th>
-                                            <th>GRN No</th>
-                                            <th>GRN Date</th>
-                                            <th>Received Qty</th>
-                                            <th>Validation QTY</th>
-                                            <th>Accepted QTY</th>
-                                            <th>Rejected QTY</th>
-                                            <th>Rejection Remark</th>
-
-                                        </tr>
-                                    </thead>
-                                  
-                                    <tbody>
-                                   
-                                    </tbody>
+                                    
 
                                 </table>
                                 </div>

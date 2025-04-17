@@ -166,8 +166,9 @@ const page = {
         return params;
     },
     resetFilter: function(){
-        $("#months").val('').trigger('change');
-        $("#year").val('');
+        $("#months").val(1).trigger('change');
+        var current_year = new Date().getFullYear();
+        $("#year").val(current_year).trigger('change');;
         table.destroy(); 
         this.dataTable();
     }

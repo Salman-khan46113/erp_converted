@@ -4,6 +4,13 @@ var pdf_title = "Item Master";
 
 $(document).ready(function() {
 
+    if(message != ""){
+        if(message == "Record updated successfully"){
+            toastr.success(message);
+        }else{
+            toastr.error(message);
+        }
+    }
     // Initialize the DataTable
     table = $("#child_parts").DataTable({
         dom: "Bfrtilp",
@@ -77,7 +84,7 @@ $(document).ready(function() {
         let part_val = $('#part_id_selected').val();
         // Ensure that the table and column exist before applying the search
         if (table && part_val) {
-            table.column(1).search(part_val).draw();
+            table.column(0).search(part_val).draw();
         }
         $('.close-filter-btn').trigger('click');
     });

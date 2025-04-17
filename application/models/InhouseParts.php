@@ -299,6 +299,30 @@ class InhouseParts extends CI_Model {
             }
             
         }
+        if (!empty($search_params['value'])) {
+                $keyword = $search_params['value'];
+                $this->db->group_start(); // Start a group of OR conditions
+                
+                $fields = [
+                    'parts.part_number',
+                    'parts.hsn_code',
+                    'parts.part_description',
+                    'store_rack_location',
+                    'parts.max_uom',
+                    'parts.store_stock_rate',
+                    'parts.weight',
+                    'parts.size',
+                    'parts.thickness',
+                    'stock.safty_buffer_stk'
+                    // Add more fields if needed
+                ];
+        
+                foreach ($fields as $field) {
+                    $this->db->or_like($field, $keyword);
+                }
+        
+                $this->db->group_end(); // End the group of OR conditions
+        }
 
         $result_obj = $this->db->get();
         $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
@@ -331,6 +355,30 @@ class InhouseParts extends CI_Model {
             }
             
         }
+        if (!empty($search_params['value'])) {
+                $keyword = $search_params['value'];
+                $this->db->group_start(); // Start a group of OR conditions
+                
+                $fields = [
+                    'parts.part_number',
+                    'parts.hsn_code',
+                    'parts.part_description',
+                    'store_rack_location',
+                    'parts.max_uom',
+                    'parts.store_stock_rate',
+                    'parts.weight',
+                    'parts.size',
+                    'parts.thickness',
+                    'stock.safty_buffer_stk'
+                    // Add more fields if needed
+                ];
+        
+                foreach ($fields as $field) {
+                    $this->db->or_like($field, $keyword);
+                }
+        
+                $this->db->group_end(); // End the group of OR conditions
+    }
         $result_obj = $this->db->get();
         $ret_data = is_object($result_obj) ? $result_obj->row_array() : [];
 

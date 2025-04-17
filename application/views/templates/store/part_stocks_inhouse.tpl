@@ -56,7 +56,7 @@
             <em >Stock</em></a>
           </h1>
           <br>
-          <span >Inhouse Parts (Item) Stock</span>
+          <span >Inhouse Parts Stock Transfer</span>
         </div>
       </nav>
       <!-- <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4> -->
@@ -86,22 +86,25 @@
                   <th>Part Number</th>
                   <th>Part Description</th>
                   <th>UOM</th>
-                  <th>Safety Buffer Stock</th>
+                  <th>INHOUSE PARTS PRODUCTION STOCK</th>
+                  <th>Transfer to Fg</th>
                   <th>Store Stock</th>
                   <th>Subcon Stock</th>
-                  <th>Stock Reserve against Job order</th>
+                  <th>Under Inspection Stock</th>
+                  <th>INHOUSE PARTS STOCK RATE</th>
+                  <th>Store Stock Value</th>
+
+
+
+                  <!-- <th>Safety Buffer Stock</th> -->
+                  <!-- <th>Stock Reserve against Job order</th> -->
                   <!-- <th>store_scrap</th> -->
                   <th>Store Rejection Stock</th>
                   <th>Production Rejection Stock</th>
-                  <th>Under Inspection Stock</th>
                   <th>GRN Rejection Stock</th>
                   <th>Store Rack Location</th>
-                  <th>Store Stock Rate</th>
-                  <th>Store Stock Value</th>
-                  <th>Production Stock</th>
                   <th>Production Scrap</th>
                   <th>Production Rejection</th>
-                  <th>Transfer to Fg</th>
                </tr>
             </thead>
             <%* <tfoot>
@@ -129,19 +132,7 @@
                           <td><%$po->part_number %></td>
                           <td><%$po->part_description %></td>
                           <td><%$uom_data[0]->uom_name %></td>
-                          <td><%$po->safty_buffer_stk %></td>
-                          <td class="<%if ($po->safty_buffer_stk <= $stock) %>text-success<%else %>text-danger <%/if%>"><%$stock %></td>
-                          <td><%$po->sub_con_stock %></td>
-                          <td><%$po->onhold_stock %></td>
-
-                          <td><%$po->rejection_stock %></td>
-                          <td><%$po->rejection_prodcution_qty %></td>
-                          <td><%$underinspection_stock %></td>
-                          <td><%$scrap_stock %></td>
-                          <td><%$po->store_rack_location %></td>
-                          <td><%$po->store_stock_rate %></td>
-                          <td><%($stock) * ($po->store_stock_rate) %></td>
-                          <td>
+                           <td>
                              <%if ($child_part_present == "yes") && checkGroupAccess("part_stocks_inhouse","update","No") %>
                                     <%if ($po->$prodQtyColName > 0) %>
                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
@@ -149,8 +140,7 @@
                                            <%$po->$prodQtyColName %>
                                            </button>
                                            <div class="modal fade" id="edit<%$i %>" tabindex="-1"
-                                              role="dialog" aria-labelledby="exampleModalLabel"
-                                              aria-hidden="true">
+                                              role="dialog" aria-labelledby="exampleModalLabel">
                                               <div class="modal-dialog modal-dialog-centered" role="document">
                                                  <div class="modal-content">
                                                     <div class="modal-header">
@@ -173,7 +163,7 @@
                                                                 </label>
                                                                 <input type="text" step="any" class="form-control onlyNumericInput required-input"
                                                                    value=""
-                                                                   data-max="	<%$po->$prodQtyColName %>"
+                                                                   data-max=" <%$po->$prodQtyColName %>"
                                                                    name="production_qty" data-min="1" 
                                                                    placeholder="Enter Transfer Qty">
                                                                 <input type="hidden" class="form-control"
@@ -201,8 +191,7 @@
                               <%/if%>
 
                           </td>
-                          <td><%$po->production_rejection %></td>
-                          <td><%$po->production_scrap %></td>
+
                           <td>
                             <%if ($po->$prodQtyColName > 0) && checkGroupAccess("part_stocks_inhouse","update","No")%>
                                     <%*if ($role == "Admin" || $role == "production") *%>
@@ -211,8 +200,7 @@
                                   Transfer to FG
                                   </button>
                                   <div class="modal fade" id="fgtransfer<%$i %>" tabindex="-1"
-                                     role="dialog" aria-labelledby="exampleModalLabel"
-                                     aria-hidden="true">
+                                     role="dialog" aria-labelledby="exampleModalLabel">
                                     <div class="modal-dialog modal-dialog-centered" role="document">
                                     <div class="modal-content">
                                     <div class="modal-header">
@@ -250,11 +238,12 @@
                                     </div>
                                     </div>
                                     <div class="col-lg-12">
-                                      <div class="form-group">
+                                      <div class="form-group" inerts>
                                     <label for=""><br>Select Customer Part Number /
                                     Customer Name </label>
+                                    <div class="w-100">
                                     <select name="customer_part_number" 
-                                       id="" class="form-control select2  required-input" style="width: 100%;">
+                                       class="form-control w-100   required-input" style="width: 100%;">
                                     <option value="">Select Part</option>
                                     <%if ($transfer_part_list) %>
                                            <%foreach from=$transfer_part_list item=t %>
@@ -264,6 +253,7 @@
                                         <%/foreach%>
                                     <%/if%>
                                     </select>
+                                  </div>  
                                   </div>
                                     </div>
                                     </div>
@@ -281,7 +271,25 @@
                             <%else %>
                                <%$po->$prodQtyColName %>
                             <%/if%>
-                          </td>
+                          </td>                                                                   
+                          <!-- <td><%$po->safty_buffer_stk %></td> -->
+                          <td class="<%if ($po->safty_buffer_stk <= $stock) %>text-success<%else %>text-danger <%/if%>"><%$stock %></td>
+                          <td><%$po->sub_con_stock %></td>
+                          <td><%$po->onhold_stock %></td>
+                          <td><%$underinspection_stock %></td>
+                           <td><%$po->store_stock_rate %></td>
+                          <!-- <td><%($stock) * ($po->store_stock_rate)  %></td> -->
+
+
+                          <td><%$po->rejection_stock %></td>
+                          <td><%$po->rejection_prodcution_qty %></td>
+                          
+                          <td><%$scrap_stock %></td>
+                          <td><%$po->store_rack_location %></td>
+                         
+                          <td><%$po->production_rejection %></td>
+                          <td><%$po->production_scrap %></td>
+                          
                       </tr>
                       <%assign var='i' value=$i+1 %>
                       <%/foreach%>
@@ -298,11 +306,45 @@
 
     <div class="content-backdrop fade"></div>
   </div>
+  <style type="text/css">
+    .chosen-container {
+    width: 100% !important;
+}
+.modal-body .row {
+    overflow-y: unset !important; 
+    
+}
+.chosen-container-single .chosen-single{
+    display: block !important;
+    padding-left: 8px !important;
+    padding-right: 20px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    height: 32px !important;
+    padding-top: 2px !important;
+    background: white !important;
+    font-size: 15px !important;
+}
+.chosen-container .chosen-results li.highlighted {
+    background-color: var(--bs-theme-color) !important;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(20%, var(--bs-theme-color)), color-stop(90%, var(--bs-theme-color)));
+    background-image: linear-gradient(var(--bs-theme-color) 20%, var(--bs-theme-color) 90%) !important;
+    color: #fff !important;
+}
+
+        /* Adjust Chosen Dropdown z-index for visibility */
+        .chosen-container {
+            z-index: 9999 !important; /* Make sure dropdown appears on top */
+        }
+  </style>
   <script>
      $(function() {
          $("#total_value_id").val(<%$total_value %>);
      });
   </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>
    <script src="<%$base_url%>public/js/store/view_part_stocks_inhouse.js"></script>
 
   

@@ -58,7 +58,10 @@
                 <div class="row">
                     <br>
                     <div class="col-lg-12">
-                        <div class="card">
+                        <div class="w-100">
+<input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
+</div>
+                        <div class="card w-100">
                             
                             <!-- /.card-header -->
                             <div class="">

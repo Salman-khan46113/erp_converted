@@ -60,10 +60,10 @@
 
       <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
         <%if (checkGroupAccess("inhouse_parts_admin","export","No")) %>
-          <button type="button" class="btn btn-seconday " data-bs-toggle="modal" data-bs-target="#importChildPartStock" title="Import Stock Data"><i class="ti ti-upload"></i></button>
+          <button type="button" class="btn btn-seconday " data-bs-toggle="modal" data-bs-target="#importChildPartStock" title="Import Inhouse Stock Data"><i class="ti ti-upload"></i></button>
         <%/if%>
         <%if (checkGroupAccess("inhouse_parts_admin","export","No")) %>
-        <a class="btn btn-seconday" href="<%base_url('export_parts_stock/inhouse')%>" target="_blank" title="Export Child Parts"><i class="ti ti-download"></i></a>
+        <a class="btn btn-seconday" href="<%base_url('export_parts_stock/inhouse')%>" target="_blank" title="Export Inhouse Stock Data"><i class="ti ti-download"></i></a>
         <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
         <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
         <%/if%>
@@ -158,7 +158,7 @@
                                          <form
                                             action="<%base_url('update_inhsoue_stock') %>"
                                             method="POST"
-                                            class="update_inhouse">
+                                            class="update_inhouse<%$i %> update_inhouse custom-form" id="update_inhouse<%$i %>">
                                             <div class="row">
                                                <div class="col-lg-12">
                                                   <div class="form-group">
@@ -167,8 +167,8 @@
                                                         class="text-danger">*</span>
                                                      <input readonly type="text"
                                                         value="<%$po->part_number %>"
-                                                        name="part_number" required
-                                                        class="form-control"
+                                                        name="part_number" 
+                                                        class="form-control required-input"
                                                         id="exampleInputEmail1"
                                                         aria-describedby="emailHelp"
                                                         placeholder="Part Number">
@@ -181,8 +181,8 @@
                                                         class="text-danger">*</span>
                                                      <input type="text"
                                                         value="<%$po->part_description  %>"
-                                                        name="part_description" required
-                                                        class="form-control"
+                                                        name="part_description" 
+                                                        class="form-control required-input"
                                                         id="exampleInputEmail1"
                                                         aria-describedby="emailHelp"
                                                         placeholder="Part Description">
@@ -192,9 +192,10 @@
                                                         class="text-danger">*</span>
                                                      <input type="text"
                                                         value="<%$po->production_qty  %>"
-                                                        name="stock" required
-                                                        class="form-control onlyNumericInput  "
+                                                        name="stock" 
+                                                        class="form-control onlyNumericInput  required-input"
                                                         id="exampleInputEmail1"
+                                                        data-min="0"
                                                         aria-describedby="emailHelp"
                                                         placeholder="Part Specification">
                                                   </div>

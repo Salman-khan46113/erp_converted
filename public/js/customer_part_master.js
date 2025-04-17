@@ -10,10 +10,12 @@ const page = {
         $(document).on("click",".edit-part",function(){
             var data = $(this).attr("data-value");
             data = JSON.parse(atob(data)); 
-            
+            console.log(data);
            $('#edit-part-des').val(data['part_description']);
            $('#part-rate').val(data['stock_rate']);
            $('#part_id').val(data['id']);
+           var scrap_category_id = data['scrap_category_id'] > 0 ? data['scrap_category_id'] : "";
+           $("#scrap_category_id").val(scrap_category_id).trigger("change");
             // myModal.show();
         })
         // $(document).on('click','[type="submit"]',function(){
@@ -34,7 +36,8 @@ const page = {
                   required: true
                },
                part_description: {
-                  required: true
+                  required: true,
+                  maxlength:75
                },
                fg_rate: {
                   required: true,
@@ -43,10 +46,11 @@ const page = {
             },
             messages: {
                part_number: {
-                  required: "Please enter the part number"
+                  required: "Please enter part number"
                },
                part_description: {
-                  required: "Please enter the part description"
+                  required: "Please enter part description",
+                  maxlength:"Enter part description is less than 75 characters.",
                },
                fg_rate: {
                   required: "Please enter a rate",
@@ -83,7 +87,8 @@ const page = {
         $('#updateCustomerPartsForm').validate({
             rules: {
                part_description: {
-                  required: true
+                  required: true,
+                   maxlength:75
                },
                fg_rate: {
                   required: true,
@@ -92,7 +97,8 @@ const page = {
             },
             messages: {
                part_description: {
-                  required: "Please enter the part description"
+                  required: "Please enter the part description",
+                   maxlength:"Enter part description is less than 75 characters.",
                },
                fg_rate: {
                   required: "Please enter a rate",

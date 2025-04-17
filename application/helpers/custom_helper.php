@@ -244,5 +244,8 @@ function numberToWords(float $number)
         return $wholeNumberInWords . $fractionInWords;
     }
 
-
+   function roundUpNumber($number = 0){
+		$number = number_format($number,2,".","");
+		return $number;
+	}
 ?>

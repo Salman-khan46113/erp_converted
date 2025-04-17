@@ -59,53 +59,75 @@
 		            <form id="updateGroupMenuRight" class="mb-3" action="javascript:void(0)" method="POST" enctype="multipart/form-data" novalidate="novalidate">
 		               <div class="row edit-block-contain">
 		               	<input type="hidden" name="group_id" value="<%$group_id%>">
-		               	<%foreach from=$groups_menu key='key' item='menu'%>
-		                  <div class="col-lg-12 ">
-		                    <div class="menu-form-row">
-		                    	<input type="hidden" name="menu[access<%$key%>][group_master_id]" value="<%$menu['group_master_id']%>">
-		                    	<input type="hidden" name="menu[access<%$key%>][menu_master_id]" value="<%$menu['menu_master_id']%>">
+		               	<%assign var='key' value=0%>
+		               	<%foreach from=$groups_menu key='key_val' item='menu_category'%>
+		               		<div class="menu-form-row category-row-block">
+							   <div class="w-50 float-start">
+							      <label class="form-label ">
+							         <lable for="iAdminMenuId_" class="right-label-inline">
+							            <input type="checkbox" class="regular-checkbox common-check-category-box" value="Yes" >
+							            <%$menu_category[0]['category_name']%>
+							         </lable>
+							      </label>
+							   </div>
+							   <div class="w-50 float-start">
+							      <i class="ti ti-circle-arrow-up expand-category-icon active"></i>
+							   </div>
+							   <div class="menu-form-row row m-2 category-wise-menu" style="display: none;">
+				               	<%foreach from=$menu_category key='key_value' item='menu'%>
+				                  <div class="col-lg-12 ">
+				                    <div class="menu-form-row sub-menu-block" >
+				                    	<input type="hidden" name="menu[access<%$key%>][group_master_id]" value="<%$menu['group_master_id']%>">
+				                    	<input type="hidden" name="menu[access<%$key%>][menu_master_id]" value="<%$menu['menu_master_id']%>">
 
-			            			<div class="w-50 float-start"><label class="form-label ">
-			                        <lable for="iAdminMenuId_" class="right-label-inline"><%$menu['diaplay_name']%> 
-			                        	<input type="checkbox"  class="regular-checkbox common-check-box" value="Yes"  
-			                        	 <%if $menu['list'] eq 'Yes' && $menu['add'] eq 'Yes' && $menu['update'] eq 'Yes' && $menu['delete'] eq 'Yes' && $menu['export'] eq 'Yes' && $menu['import'] eq 'Yes'%>checked="true"<%/if%>>
+					            			<div class="w-75 float-start"><label class="form-label ">
+					                        <lable for="iAdminMenuId_" class="right-label-inline"> 
+					                        	<input type="checkbox"  class="regular-checkbox common-check-box" value="Yes"  
+					                        	 <%if $menu['list'] eq 'Yes' && $menu['add'] eq 'Yes' && $menu['update'] eq 'Yes' && $menu['delete'] eq 'Yes' && $menu['export'] eq 'Yes' && $menu['import'] eq 'Yes'%>checked="true"<%/if%>>
+					                        	 <%$menu['diaplay_name']%>
 
-			                        </lable>
-			                        </div>
-			                        <div class="w-50 float-start">
-			                        	<i class="ti ti-circle-arrow-up expand-icon active"></i>
-			                        </div>
-			                        
-			            		</label> 
-					            <div class="form-right-div" style="display: none;">
-					                <div class="margin-equilize">
-					                	<input type="checkbox" name="menu[access<%$key%>][access][list]" class="regular-checkbox" value="Yes" <%if $menu['list'] eq 'Yes'%>checked="true"<%/if%> >
-					                    <label class="right-label-inline" for="eList_1">List</label>
-					                </div>
-					                <div class="margin-equilize">
-					                	<input type="checkbox" name="menu[access<%$key%>][access][add]" class="regular-checkbox" value="Yes" <%if $menu['add'] eq 'Yes'%>checked="true"<%/if%> >
-					                    <label class="right-label-inline" for="eList_1">Add</label>
-					                </div>
-					                <div class="margin-equilize">
-					                	<input type="checkbox" name="menu[access<%$key%>][access][update]" class="regular-checkbox" value="Yes" <%if $menu['update'] eq 'Yes'%>checked="true"<%/if%> >
-					                    <label class="right-label-inline" for="eList_1">Update</label>
-					                </div>
-					                <div class="margin-equilize">
-					                	<input type="checkbox" name="menu[access<%$key%>][access][delete]" class="regular-checkbox" value="Yes" <%if $menu['delete'] eq 'Yes'%>checked="true"<%/if%> >
-					                    <label class="right-label-inline" for="eList_1">Delete</label>
-					                </div>
-					                <div class="margin-equilize">
-					                	<input type="checkbox" name="menu[access<%$key%>][access][export]" class="regular-checkbox"  value="Yes" <%if $menu['export'] eq 'Yes'%>checked="true"<%/if%> >
-					                    <label class="right-label-inline" for="eList_1">Export</label>
-					                </div>
-					                 <div class="margin-equilize">
-					                	<input type="checkbox" name="menu[access<%$key%>][access][import]" class="regular-checkbox"  value="Yes" <%if $menu['import'] eq 'Yes'%>checked="true"<%/if%> >
-					                    <label class="right-label-inline" for="eList_1">Import</label>
-					                </div>
-					            </div>
-					        </div>
-					       </div>
-					       <%/foreach%>
+					                        </lable>
+					                        </div>
+					                        <div class="w-25 float-start">
+					                        	<i class="ti ti-circle-arrow-up expand-icon active"></i>
+					                        </div>
+					                        
+					            		</label> 
+							            <div class="form-right-div m-4 mb-2 mt-2" style="display: none;">
+							                <div class="margin-equilize">
+							                	<input type="checkbox" name="menu[access<%$key%>][access][list]" class="regular-checkbox main-item-check-box" value="Yes" <%if $menu['list'] eq 'Yes'%>checked="true"<%/if%> >
+							                    <label class="right-label-inline" for="eList_1">List</label>
+							                </div>
+							                <div class="margin-equilize">
+							                	<input type="checkbox" name="menu[access<%$key%>][access][add]" class="regular-checkbox main-item-check-box" value="Yes" <%if $menu['add'] eq 'Yes'%>checked="true"<%/if%> >
+							                    <label class="right-label-inline" for="eList_1">Add</label>
+							                </div>
+							                <div class="margin-equilize">
+							                	<input type="checkbox" name="menu[access<%$key%>][access][update]" class="regular-checkbox main-item-check-box" value="Yes" <%if $menu['update'] eq 'Yes'%>checked="true"<%/if%> >
+							                    <label class="right-label-inline" for="eList_1">Update</label>
+							                </div>
+							                <div class="margin-equilize">
+							                	<input type="checkbox" name="menu[access<%$key%>][access][delete]" class="regular-checkbox main-item-check-box" value="Yes" <%if $menu['delete'] eq 'Yes'%>checked="true"<%/if%> >
+							                    <label class="right-label-inline" for="eList_1">Delete</label>
+							                </div>
+							                <div class="margin-equilize">
+							                	<input type="checkbox" name="menu[access<%$key%>][access][export]" class="regular-checkbox main-item-check-box"  value="Yes" <%if $menu['export'] eq 'Yes'%>checked="true"<%/if%> >
+							                    <label class="right-label-inline" for="eList_1">Export</label>
+							                </div>
+							                 <div class="margin-equilize">
+							                	<input type="checkbox" name="menu[access<%$key%>][access][import]" class="regular-checkbox main-item-check-box"  value="Yes" <%if $menu['import'] eq 'Yes'%>checked="true"<%/if%> >
+							                    <label class="right-label-inline" for="eList_1">Import</label>
+							                </div>
+							            </div>
+							        </div>
+							       </div>
+							       <%assign var='key' value=$key+1%>
+							    <%/foreach%>
+							</div>
+
+							</div>
+		               		
+					    <%/foreach%>
 					    </div>
 					    <div class="mt-5 m-auto text-center">
 					    	<a type="button" href="<%base_url('group_master')%>" class="btn btn-info me-2">Cancel</a>
@@ -142,7 +164,7 @@
 	    font-size: 17px;
 	    color: #919396;
 	    font-family: 'GilroySemibold', sans-serif !important;
-	    width: 50%;
+	    width: 100%;
     float: left;
 	}
 	.menu-form-row .form-right-div {
@@ -152,7 +174,7 @@
 	}
 	.menu-form-row .margin-equilize {
 		float: left;
-    	width: 16.65%;
+    	width: 31.65%;
 	}
 	.menu-form-row .margin-equilize label{
     	font-size: 17px;
@@ -164,6 +186,12 @@
     	height: 15px;
     	cursor: pointer;
 	}
+	.form-label {
+    margin-bottom: 0px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #566a7f;
+}
 	.menu-list-block .edit-block-contain{
 		overflow-y: auto;
 	    padding: 0 17px;
@@ -184,16 +212,35 @@
 		transition: 0.9s;
 		    transform: rotate(0deg);
 	}
-	.common-check-box{
+	.expand-category-icon{
+		    float: right;
+    font-size: 29px;
+    cursor: pointer;
+	}
+	.expand-category-icon.active {
+		transition: 0.9s;
+		    transform: rotate(180deg);
+	}
+	.expand-category-icon {
+		transition: 0.9s;
+		    transform: rotate(0deg);
+	}
+	.common-check-box,.common-check-category-box{
 		    width: 17px;
     height: 15px;
     cursor: pointer;
-    line-height: 14 !important;
     margin-left: 8px;
+    margin-right: 6px;
     /* padding-top: 2606px !important; */
-    position: absolute;
+    /*position: absolute;*/
     top: 12px;
 	}
+	.menu-form-row.category-row-block {
+    width: 24%;
+    border: 1px solid var(--bs-theme-color);
+    margin: 5px;
+    border-radius: 7px;
+}
 </style>
     <script type="text/javascript">
     var base_url = <%$base_url|@json_encode%>

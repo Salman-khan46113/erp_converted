@@ -40,7 +40,7 @@
                         <div id="loading-spinner"></div>
                      </div>
                      <div class="row">
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                            <div class="form-group mb-3">
                               <label for="" class="form-label">Transport Mode<span class="text-danger">*</span></label>
                               <select name="mode" class="form-control" required>
@@ -52,7 +52,7 @@
                               </select>
                            </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                            <div class="form-group mb-3">
                               <label for=""  class="form-label">Transporter<span class="text-danger">*</span></label>
                               <select name="transporter" required id="transporter" class="form-control select2">
@@ -63,32 +63,43 @@
                               </select>
                            </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                            <div class="form-group mb-3">
                               <label for=""  class="form-label">Vehicle No.<span class="text-danger">*</span></label>
                               <input type="text" placeholder="Enter Vehicle No" name="vehicle_number" value="<%$new_sales[0]->vehicle_number%>" class="form-control"/>
                            </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                            <div class="form-group mb-3">
                               <label for=""  class="form-label">Distance<span class="text-danger">*</span></label>
                               <input type="text" placeholder="Enter Distance of Transportation" value="<%$new_sales[0]->distance%>" required name="distance" class="form-control">
                            </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                            <div class="form-group mb-3">
                               <label for=""  class="form-label">L.R No</label>
                               <input type="text" placeholder="Enter L.R No" name="lr_number" value="<%$new_sales[0]->lr_number%>" class="form-control">
                            </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                            <div class="form-group mb-3">
-                              <label for=""  class="form-label">PO Remark </label>
+                              <label for="" class="form-label">PO Remark </label>
                               <input type="text" placeholder="Enter Remark" value="<%$new_sales[0]->remark%>" name="remark" class="form-control">
                               <input type="hidden" value="<%$uri_segment_2%>" name="id" class="form-control">
                            </div>
                         </div>
-                        <div class="col-lg-4 mb-3">
+                        <div class="col-lg-3">
+                            <div class="form-group mb-3">
+                                <label for="" class="form-label">Tally Categories</label>
+                                <select name="tally_category" id="tallyCategorySelect" class="form-control">
+                                    <option value="-">Select</option>
+                                     <%foreach from=$tally_sales_category item=tr%>
+                                            <option value="<%$tr->sales_category_id%>" <%if $new_sales[0]->tally_category == $tr->sales_category_id%>selected<%/if%>><%$tr->category_name%></option>
+                                     <%/foreach%>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 mb-3">
                             <div class="form-group mb-3 ">
                                <label class="form-label">Apply Discount</label>
                                <br>
@@ -103,7 +114,7 @@
                                 
                             </div>
                         </div>
-                        <div class="col-lg-4" id="discountTypeSection">
+                        <div class="col-lg-3" id="discountTypeSection">
                           <div class="form-group mb-3">
                              <label class="form-label">Discount Type</label><span class="text-danger"><br></span>
                              <div class="form-check form-check-inline">
@@ -112,7 +123,7 @@
                               </div>
                           </div>
                         </div>
-                        <div class="col-lg-4" id="discountValueSection">
+                        <div class="col-lg-3" id="discountValueSection">
                            <div class="form-group mb-3">
                               <label class="form-label">Discount</label>
                               <input type="text" step="any" name="discount" id="discountId" value="<%$new_sales[0]->discount %>" class="form-control onlyNumericInput" placeholder="Discount" >
@@ -256,7 +267,7 @@
                </div>
             </div>
             <%/if%>
-            <%if $new_sales[0]->status == "lock" || $new_sales[0]->status == "pending" || $new_sales[0]->status == "unlocked"%>
+            <%if ($new_sales[0]->status == "lock" || $new_sales[0]->status == "pending" || $new_sales[0]->status == "unlocked" )%>
             <div class="card mt-3">
                <div class="card-header pdf-btn-block">
                     <div class="row">
@@ -291,9 +302,9 @@
                         </div>
                     </div>
                     <%/if%>
-                    <%if $new_sales[0]->status == "pending" || $new_sales[0]->status == "unlocked"%>
+                    <%if ($new_sales[0]->status == "pending" || $new_sales[0]->status == "unlocked" )  && checkGroupAccess("sales_invoice_released","list","No")%>
                       <%if $po_parts%>
-                            <%if $session_type == 'admin' || $session_type == 'Admin' || $session_type == 'Sales'%>
+                            <%if $session_type == 'admin' || $session_type == 'Admin' || $session_type == 'Sales' || checkGroupAccess("sales_invoice_released","update","No")%>
                                     <%assign var="flag" value=0%>
                                     <%assign var="final_po_amount" value=0%>
                                     <%assign var="i" value=1%>
@@ -378,19 +389,20 @@
                             <a class="btn btn-success" href="<%$base_url%>generate_sales_invoice/<%$uri_segment_2%>/EXTRA_COPY">Extra Invoice</a>
                         </div>
                     </div>
-                    <%if empty($einvoice_res_data[0]->Status)%>
-                        <%if empty($einvoice_res_data[0]->Irn)%>
+                    <%if empty($einvoice_res_data[0]->Status) || true%>
+
+                        <%if empty($einvoice_res_data[0]->Irn) && empty($einvoice_res_data[0]->Status)%>
                           <div class="col-lg-1 extra-copy" >
                               <div class="form-group">
                                    <a class="btn btn-info "  href="<%base_url('generate_E_invoice/')%><%$uri_segment_2%>/EINVOICE" target="_blank">E-Invoice </a>
                               </div>
                           </div>
                         <%else%>
-                          <div class="col-lg-1 extra-copy" >
+                          <!-- <div class="col-lg-1 extra-copy" >
                               <div class="form-group">
-                                   <a class="btn btn-info"  href="<%base_url('get_E_invoice/')%><%$uri_segment_2%>">Get E-Invoice Details</a>
+                                   <a class="btn btn-info"  href="<%base_url('view_E_invoice/')%><%$uri_segment_2%>">Get E-Invoice Details</a>
                               </div>
-                          </div>
+                          </div> -->
                         <%/if%>
                          <%if empty($einvoice_res_data[0]->EwbStatus) || $einvoice_res_data[0]->EwbStatus=="CANCELLED" %>
                               <div class="col-lg-1 extra-copy">
@@ -398,6 +410,7 @@
                                     <button type="button" style="width: 90%;" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#createEBill<%$uri_segment_2%>" target="_blank">Eway Bill</button>
                                  </div>
                               </div>
+
                               <!-- Modal for create way bill -->
                                  <div class="modal fade" id="createEBill<%$uri_segment_2%>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -449,6 +462,12 @@
                                        </div>
                                     </div>
                                  </div>
+                                 <%else%>
+                        <div class="col-lg-1 packaging-sticker" >
+                              <div class="form-group">
+                                   <a class="btn btn-info" target="_blank"  href="<%base_url('view_EwayBill/')%><%$uri_segment_2%>"> Eway Bill Details</a>
+                              </div>
+                          </div>
                         <%/if%>
                     <%/if%>
 
@@ -540,7 +559,7 @@
                            </div>
                            <div class="col-lg-4">
                               <div class="form-group">
-                                 <label for="">Select Part NO // Description // FG Stock // Rate // Packing QTY <span class="text-danger">*</span> </label>
+                                 <label for="">Select Part NO // Description // SO QTY // FG Stock // Rate // Packing QTY <span class="text-danger">*</span> </label>
                                  <input type="hidden" readonly id="customer_tracking_id" name="customer_tracking_id" class="form-control">
                                  <select name="part_id" id="part_id"  class="form-control select2">
                                     <option value=''>Please select</option>
@@ -569,7 +588,8 @@
                      </form>
                 <%/if%>
                  <div class="row pdf-btn-block">
-                <%if ((empty($new_sales[0]->Status) && empty($new_sales[0]->EwbStatus))) %>
+                 
+                <%if ((empty($new_sales[0]->Status)) && empty($e_invoice_status)) %>
                         <%if ( $new_sales[0]->status == "lock")  %>
                                     <div class="col-lg-1 extra-copy">
                                           <button type="button" class="btn btn-danger " data-bs-toggle="modal" data-bs-target="#unlock">Unlock</button>
@@ -598,6 +618,11 @@
                     <button type="button" disabled class="btn btn-success ml-1 col-lg-2 " data-bs-toggle="modal">
                     Invoice already Cancelled
                     </button>
+                    <div class="col-lg-1 view-original" >
+                        <div class="form-group ">
+                            <a class="btn btn-success" href="<%$base_url%>view_original_sales_invoice/<%$uri_segment_2%>" target="_blank">View Original</a>
+                        </div>
+                    </div>
                     <%/if%>
                   <%/if%>
                   
@@ -709,7 +734,7 @@
                                        <div class="col-lg-12">
                                           <div class="form-group">
                                              <label for=""><b>Are you sure to remove all the sales details and reuse this invoice ? 
-                                                <br><br>NOTE: This will remove all the sales details including customer, parts, address and other details from "<?php echo $new_sales[0]->sales_number; ?>".
+                                                <br><br>NOTE: This will remove all the sales details including customer, parts, address and other details from "<%$new_sales[0]->sales_number%>".
                                              </b> </label>
                                              <input type="hidden" name="sales_id" value="<%$new_sales[0]->id %>" required class="form-control"/>
                                              <input type="hidden" name="sales_number" value="<%$new_sales[0]->sales_number%>" required class="form-control">

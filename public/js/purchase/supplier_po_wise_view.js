@@ -93,7 +93,7 @@ const page = {
     },
     serachParams: function(){
         var supplier_search = $("#supplier_search").val();
-        table.column(0).search(supplier_search).draw();
+        table.column(1).search(supplier_search).draw();
         // var admin_approve_search = $("#admin_approve_search").val();
         // table.column(0).search(supplier_search).draw(); 
     },

@@ -18,7 +18,7 @@ table tr td{
           <em >Customer Scheduling</em></a>
       </h1>
       <br>
-      <span >Planing Month      </span>
+      <span >Planning Month (FY <%$financial_year_value%>-<%$financial_year_value+1%>)     </span>
     </div>
   </nav>
 

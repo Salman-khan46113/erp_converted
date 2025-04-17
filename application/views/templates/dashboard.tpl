@@ -199,7 +199,7 @@
                                     <i class="las la-coins"></i>
                                  </div>
                                  <div class="stat-cards-info">
-                                    <p class="stat-cards-info__title">Receivables Received With GST (INR)</p>
+                                    <p class="stat-cards-info__title">Receivables Received With GST (INR)2</p>
                                     <p class="stat-cards-info__num timer count-title count-number" data-to="" data-speed="1500"></p>
                                  </div>
                               </a>

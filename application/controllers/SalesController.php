@@ -12,6 +12,10 @@ class SalesController extends CommonController
 		parent::__construct();
 		$this->load->model('CustomerPart');
 		$this->load->model('SalesModel');
+		require_once APPPATH . 'libraries/Pdf1.php';
+		ini_set('max_execution_time', 0); // Set unlimited execution time
+		set_time_limit(0);
+		ini_set('memory_limit', '-1');
 	}
 
 	private function getViewPath()
@@ -137,6 +141,7 @@ class SalesController extends CommonController
 		//$data['new_po'] = $child_part_list->result();
 		$data['distanceCol'] = $this->Unit->getClientToCustomerDistanceTbColName();
 		$data['consignee_list'] = $this->Crud->read_data_acc("consignee");
+		$data['tally_sales_category'] = $this->Crud->read_data_acc("sales_category");
 		$this->loadView('sales/new_sales', $data);
 	}
 
@@ -155,6 +160,8 @@ class SalesController extends CommonController
 
 		$ship_addressType = $this->input->post('ship_addressType');
 		$consignee_id = $this->input->post('consignee');
+		$tally_category = $this->input->post('tally_category');
+		if($tally_category === '-'){ $tally_category = null;}
 		if(!empty($this->input->post('reused_sales_no'))){
 			$reused_sales_no = $this->input->post('reused_sales_no');
 		}
@@ -190,6 +197,7 @@ class SalesController extends CommonController
 			"discount" => $customer_data[0]->discount,
 			"discountType" => $customer_data[0]->discountType,
 			"lr_number" => $lr_number,
+			"tally_category" => $tally_category,
 			"created_by" => $this->user_id,
 			"created_date" => $cretd_dt,
 			"created_time" => $this->current_time,
@@ -236,6 +244,8 @@ class SalesController extends CommonController
 		$vehicle_number = $this->input->post('vehicle_number');
 		$lr_number = $this->input->post('lr_number');
 		$distance = $this->input->post('distance');
+		$tally_category = $this->input->post('tally_category');
+		if($tally_category === '-'){ $tally_category = null;}
 		
 		$final_basic_total = $this->input->post('final_basic_total');
 		$discountType = $this->input->post('discountType');
@@ -266,6 +276,7 @@ class SalesController extends CommonController
 			"discount" => $discount,
 			"discount_amount" => $discountValue,
 			"lr_number" => $lr_number,
+			"tally_category" => $tally_category,
 			"distance" => $distance,
 		);
 
@@ -352,8 +363,10 @@ class SalesController extends CommonController
 		//$data['uom'] = $this->Crud->read_data("uom");
 		$data['customer_tracking'] = $this->Crud->customQuery('SELECT po.* FROM customer_po_tracking as po, 
 		parts_customer_trackings as po_parts 
-		WHERE po.status = "pending" AND po.customer_id =' . $data['new_sales'][0]->customer_id . '
+		WHERE po.po_end_date >= CURDATE() AND po.status = "pending" AND po.customer_id =' . $data['new_sales'][0]->customer_id . '
 		 AND po.id = po_parts.customer_po_tracking_id AND po_parts.part_id = ' . $data['new_sales'][0]->customer_part_id);
+
+
 		// pr($data['customer_tracking'],1);
 		//old -> $data['customer_tracking'] = $this->Crud->get_data_by_id("customer_po_tracking", $data['new_sales'][0]->customer_id, 'customer_id');
 
@@ -363,6 +376,7 @@ class SalesController extends CommonController
 		
 		$data['child_part'] = $this->Crud->get_data_by_id("customer_part", $data['new_sales'][0]->customer_id, "customer_id");
 		$data['transporter'] = $this->Crud->read_data("transporter");
+		$data['tally_sales_category'] = $this->Crud->read_data_acc("sales_category");																																																																																	
 		// $child_part_list = $this->db->query('SELECT DISTINCT part_number,supplier_id FROM `customer_part` where supplier_id = ' . $data['supplier'][0]->id . '');
 		// $data['child_part'] = $child_part_list->result();
 		$data['e_invoice_status'] = $this->Crud->get_data_by_id("einvoice_res", $this->uri->segment('2'), "new_sales_id");
@@ -391,7 +405,7 @@ class SalesController extends CommonController
 		$qty = $this->input->post('qty');
 		$discountType = $this->input->post('discountType');
 		$discount = $this->input->post('discount');
-		$salesdata = $this->db->query('SELECT sales_id FROM `sales_parts` where sales_id = ' . $sales_id . ' ');
+		$salesdata = $this->db->query('SELECT * FROM `sales_parts` where sales_id = ' . $sales_id . ' ');
 		$salesdata_result = $salesdata->result();
 		$added_saled_count = count($salesdata_result);
 		$ret_arr = [];
@@ -401,6 +415,18 @@ class SalesController extends CommonController
 			$msg = "Already 7 Parts Added.";
 			// echo "<script>alert('Already 7 Parts Added.');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
 		}
+		$config_data = $this->Crud->read_data("global_configuration");
+		$config_data = array_column($config_data,"config_value","config_name");
+		if(isset($config_data['salesPdfSetup'])){
+			if($config_data['salesPdfSetup'] == "Single" && $added_saled_count >= 5){
+				$msg = "Already 5 Parts Added.";
+				$ret_arr['msg'] = $msg;
+				$ret_arr['sucess'] = $sucess;
+				echo json_encode($ret_arr);
+				exit();
+			}
+		}
+		// pr($config_data,1);
 		
 		$data = array(
 			"part_id" => $part_id,
@@ -415,6 +441,19 @@ class SalesController extends CommonController
 			} else {
 			
 			$customer_part = $this->Crud->get_data_by_id("customer_part", $part_id, "id");
+			if($added_saled_count > 0){
+				$tax_val = $salesdata_result[0]->tax_id;
+				if($customer_part[0]->gst_id != $tax_val){
+					$msg = "Part tax structure should be same.";
+					$sucess = 0;
+					$ret_arr['msg'] = $msg;
+					$ret_arr['sucess'] = $sucess;
+					
+					echo json_encode($ret_arr);
+					exit();
+				}
+				// pr($tax_val,1);
+			}
 			$customer_parts_master_data = $this->CustomerPart->getCustomerPartByPartNumber($customer_part[0]->part_number);
 			$job_card_data = $this->Crud->get_data_by_id("job_card", $part_id, "customer_part_id");
 
@@ -438,7 +477,7 @@ class SalesController extends CommonController
 			$total_available_qty = $po_part_details[0]->qty - $used_qty;
 			$falg = 0;
 			if ($qty > $total_available_qty) {
-				$msg = "Insufficient PO Part balance qty. PO Part balance qty is " . $total_available_qty;
+				$msg = "Insufficient Sales Order balance qty. Sales Order balance qty is " . $total_available_qty;
 				// $this->addErrorMessage("Insufficient PO Part balance qty. PO Part balance qty is " . $po_part_details[0]->qty);
 				// $this->redirectMessage();
 				// exit();
@@ -801,7 +840,8 @@ class SalesController extends CommonController
 		);
 
 		$cancel_parts = $this->Crud->update_data_column("sales_parts", $sales_part_data, $sales_id,"sales_id");
-
+		$messages = "Something went wrong.";
+		$success = 0;
 		if($cancel_parts){
 			$cancel_data = array(
 				"status" => 'Cancelled',
@@ -814,17 +854,29 @@ class SalesController extends CommonController
 			//check if transaction status TRUE or FALSE
 			if ($result) {
 				if ($status == 'lock') {
-					$this->addSuccessMessage('Sales invoice ' . $sales_number . ' cancelled. <br> Note: Please update FG Stock manually.');
+					$success = 1;
+					$messages = 'Sales invoice ' . $sales_number . ' cancelled. <br> Note: Please update FG Stock manually.';
+					// $this->addSuccessMessage('Sales invoice ' . $sales_number . ' cancelled. <br> Note: Please update FG Stock manually.');
 				} else {
-					$this->addSuccessMessage('Sales invoice ' . $sales_number . ' cancelled.');
+					$success = 1;
+					$messages = 'Sales invoice ' . $sales_number . ' cancelled.';
+					// $this->addSuccessMessage('Sales invoice ' . $sales_number . ' cancelled.');
 				}
 			} else {
-				$this->addErrorMessage('Failed to cancel Sales invoice ' . $sales_number);
+				$messages = 'Failed to cancel Sales invoice ' . $sales_number;
+				// $this->addErrorMessage('Failed to cancel Sales invoice ' . $sales_number);
 			}
 		} else {
-			$this->addErrorMessage('Failed to cancel Sales invoice ' . $sales_number);
+			$messages = 'Failed to cancel Sales invoice ' . $sales_number;
+			// $this->addErrorMessage('Failed to cancel Sales invoice ' . $sales_number);
 		}	
-		$this->redirectMessage('sales_invoice_released');
+		// $this->redirectMessage('sales_invoice_released');
+		$ret_arr['messages'] = $messages;
+		$ret_arr['success'] = $success;
+		$ret_arr['redirect_url'] = base_url("sales_invoice_released");
+		
+		echo json_encode($ret_arr);
+		exit();
 	}
 
 
@@ -874,306 +926,6 @@ class SalesController extends CommonController
 		echo json_encode($ret_arr);
 	}
 
-	public function sales_report()
-	{
-		checkGroupAccess("sales_report","list","Yes");
-		if (isset($_POST['export'])) {
-			$success = 0;
-	        $message = '';
-
-			$searchYear = $this->input->post('search_year');
-			$searchMonth = $this->input->post('search_month');
-			$sales_ids = $this->input->post('sale_numbers');
-			$where_condition = "AND sales.clientId = ".$this->Unit->getSessionClientId()."  ";
-
-			if(!empty($searchYear)) {
-					$where_condition = $where_condition."
-					AND ((sales.created_year = ".$searchYear." AND sales.created_month >= 4)
-					OR
-					(sales.created_year = ".($searchYear + 1)." AND sales.created_month <= 3)) ";
-			}
-
-			if(empty($sales_ids) && !empty($searchMonth)) {
-				$where_condition = $where_condition." AND sales.created_month = ".$searchMonth." ";
-			}
-
-
-			if(!empty($sales_ids)) {
-				if(strpos($sales_ids, '-')!== false) { //range selection
-					//echo "<br>range selection";
-					$serial_range = explode("-", $sales_ids);
-					$saleNo_condition = " AND sales.actualSalesNo between ".$serial_range[0]." AND ".$serial_range[1];
-				} else if(strpos($sales_ids, ',')!== false) { //specific search
-					//echo "<br>list search";
-					$serial_list = explode("-", $sales_ids);
-					$saleNo_condition = " AND sales.actualSalesNo in ( ".$sales_ids." )";
-					/*foreach($serial_list as $list){
-						$list_in = $list.",";	
-					}*/
-					//$where_condition = $where_condition.$list_in.")";
-				} else if (strpos($sales_ids, '-')!== false && strpos($sales_ids, ',')!== false ){
-					$message = "Incorrect sales number criteria. Can't have both list and range.";
-					// echo "<script>alert('Incorrect sales number criteria. Can't have both list and range.');</script>";
-					// exit();
-	
-				} else { //individual sales no
-					$saleNo_condition = " AND sales.actualSalesNo = ".$sales_ids;
-				}
-			}
-
-			
-			//combine all the conditions
-			$where_condition = $where_condition.$saleNo_condition;
-		
-			$xmlstr = "<ENVELOPE xmlns:UDF='TallyUDF'></ENVELOPE>";
-            // optionally you can specify a xml-stylesheet for presenting the results. just uncoment the following line and change the stylesheet name.
-            /* "<?xml-stylesheet type='text/xsl' href='xml_style.xsl' ?>\n". */
-			$xml = new SimpleXMLElement($xmlstr);
-			// Add the HEADER section
-			$header = $xml->addChild('HEADER');
-			
-			$header->addChild('TALLYREQUEST', 'Export Data');
-			//$header->addChild('TYPE', 'Data');
-			//$header->addChild('ID', 'YourID'); // Replace with your ID
-
-			// Add the BODY section
-			$body = $xml->addChild('BODY');
-			$data = $body->addChild('EXPORTDATA');
-			$data1 = $data->addChild('REQUESTDESC');
-			$data1->addChild('REPORTNAME', 'Vouchers');
-			$data2 = $data1->addChild("STATICVARIABLES");
-			$data2->addChild('SVCURRENTCOMPANY', "TESTING");	//$this->getCustomerNameDetails()
-			$request = $data->addChild('REQUESTDATA');
-
-			$sales_details = $this->Crud->customQuery('SELECT parts.sales_id, parts.sales_number, sales.created_date, customer_name,
-			ROUND(sum(total_rate),2) as Total, ROUND(sum(cgst_amount),2) as CGST_AMT, ROUND(sum(sgst_amount),2) as SGST_AMT,
-			ROUND(sum(igst_amount),2) as IGST_AMT ,ROUND(sum(tcs_amount),2) as TCS_AMT, ROUND(sum(gst_amount),2) as GST_AMT,
-			tax.cgst, tax.sgst, tax.igst, tax.tcs, tax.tcs_on_tax, sales.status,sales.discount_amount,sales.discount
-            FROM  sales_parts as parts, new_sales as sales, gst_structure tax, customer
-            WHERE sales.status in ("lock")
-			AND parts.sales_id =  sales.id
-			AND parts.tax_id = tax.id
-			AND customer.id = parts.customer_id ' .
-                $where_condition .
-                ' GROUP BY parts.sales_id '
-            );
-			// pr($this->db->last_query(),1);
-			if(empty($sales_details)){
-				$message = "No records found for this export criteria.";
-			}
-			if ($sales_details) {
-					foreach ($sales_details as $sale_details) {
-						$this->requestSalesXML($request, $sale_details);
-					}
-			}
-
-			if($message != ""){
-
-				$return_arr = array(
-			        'message' => $message,
-			        'success' => 0
-			    );
-
-			    echo json_encode($return_arr);
-			    exit();
-			}
-		
-			// Set the Content-Type header to specify XML
-			//header('Content-Type: text/xml');
-			
-			// Convert the XML to a string
-			//$xmlString = $xml->asXML();
-			// Remove the XML declaration manually
-			
-
-			$dom = dom_import_simplexml($xml)->ownerDocument;
-			// Format the output with indentation and newlines
-			$dom->preserveWhiteSpace = false;
-			$dom->formatOutput = true;
-			//$dom->loadXML($dom->saveXML(), LIBXML_NOXMLDECL);
-			$xmlString = $dom->saveXML();	
-			$xmlStringWithoutDeclaration = preg_replace('/<\?xml version="1.0"\?>/', '', $xmlString);
-			
-
-			// Get the formatted XML as a string
-			//$formattedXml = $dom->saveXML();
-			
-			$filename = $filename = 'dist/uploads/sales_export_tally/tally_sales_'.date(d_m_Y).'.xml';
-
-			file_put_contents($filename, $xmlStringWithoutDeclaration);
-			
-			$return_arr = array(
-			        'pdf_utl' => $this->config->item("base_url").$filename,
-			        'message' => "Export successfully.",
-			        'success' => 1
-			);
-
-			echo json_encode($return_arr);
-			exit();
-			
-			// Output the XML
-			//echo $xml->asXML();
-			// Define the file path where you want to save the XML
-			//echo "XML file has been saved as $filename";
-			exit(); 
-		}else{
-
-		$created_month  = $this->input->post("created_month");
-		$created_year  = $this->input->post("created_year");
-
-		if (empty($created_year)) {
-			$created_year = $this->year;
-		}
-		if (empty($created_month)) {
-			$created_month = $this->month;
-		}
-
-		$data['created_year'] = $created_year;
-		$data['created_month'] = $created_month;
-		$data['fincYears'] = $this->Common_admin_model->getFinancialYears();
-		for ($i = 1; $i <= 12; $i++) {
-			$data['month_data'][$i] = $this->Common_admin_model->get_month($i);
-			$data['month_number'][$i] = $this->Common_admin_model->get_month_number($data['month_data'][$i]);
-		}
-		
-		$column[] = [
-            "data" => "customer_name",
-            "title" => "CUSTOMER NAME",
-            "width" => "14%",
-            "className" => "dt-left",
-        ];
-        $column[] = [
-            "data" => "po_number",
-            "title" => "Customer PO No",
-            "width" => "16%",
-            "className" => "dt-left",
-        ];
-        $column[] = [
-            "data" => "salesNumber",
-            "title" => "SALES INV NO",
-            "width" => "17%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "sales_date",
-            "title" => "SALES INV DATE",
-            "width" => "10%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "status",
-            "title" => "SALES STATUS",
-            "width" => "17%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "part_number",
-            "title" => "PART NO",
-            "width" => "17%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "part_description",
-            "title" => "PART NAME",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "hsn_code",
-            "title" => "HSN",
-            "width" => "7%",
-            "className" => "dt-center status-row",
-        ];
-        $column[] = [
-            "data" => "qty",
-            "title" => "QTY",
-            "width" => "17%",
-            "className" => "dt-center",
-        ];
-       
-        $column[] = [
-            "data" => "uom_id",
-            "title" => "UOM",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "rate",
-            "title" => "Part Price",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "sales_discount",
-            "title" => "Discount",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "subtotal",
-            "title" => "Taxable Amount",
-            "width" => "7%",
-            "className" => "dt-center",
-            'orderable' => false
-        ];
-        
-        $column[] = [
-            "data" => "sgst_amount",
-            "title" => "SGST",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "cgst_amount",
-            "title" => "CGST",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-		$column[] = [
-            "data" => "igst_amount",
-            "title" => "IGST",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-		
-		$column[] = [
-            "data" => "tcs_amount",
-            "title" => "TCS",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-		$column[] = [
-            "data" => "gst_amount",
-            "title" => "TOTAL GST",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-		$column[] = [
-            "data" => "row_total",
-            "title" => "TOTAL WITH GS",
-            "width" => "7%",
-            "className" => "dt-center",
-        ];
-		
-		
-        $data["data"] = $column;
-        $data["is_searching_enable"] = true;
-        $data["is_paging_enable"] = true;
-        $data["is_serverSide"] = true;
-        $data["is_ordering"] = true;
-        $data["is_heading_color"] = "#a18f72";
-        $data["no_data_message"] =
-            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
-            base_url() .
-            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
-        $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([[2, 'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
-        $data["admin_url"] = base_url();
-        $data["base_url"] = base_url();
-		$this->loadView('reports/sales_reports', $data);
-		}
-	}
 
 	public function salesReportsAjax()
 	{
@@ -1209,6 +961,9 @@ class SalesController extends CommonController
 			} else {
 				$rate = round($subtotal / $val['qty'], 2);
 			}
+			if($val['status'] == "Cancelled"){
+				$data[$key]['qty'] = 0;
+			}
 			$row_total =  round($val['total_rate'], 2) + round($val['tcs_amount'], 2);
 			$data[$key]['subtotal'] = $subtotal;
 			$data[$key]['rate'] =  $rate;
@@ -1222,8 +977,1119 @@ class SalesController extends CommonController
         $data["recordsTotal"] = $total_record['total_record'];
         $data["recordsFiltered"] = $total_record['total_record'];
         echo json_encode($data);
-        exit();
-		
+        exit();	
+	}
+
+	public function generateSalesReportPdf(){
+		// pr("ok",1);
+		$post_data = $this->input->get();
+		$filter_date = $post_data["date"];
+		$date_filter =  explode((" - "),$post_data["date"]);
+		$start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+        $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+		$post_data['date'] = $start_date." - ".$end_date;
+		// pr($post_data,1);
+		$export_data = $this->export_column($post_data);
+		$sales_data = $export_data['result_data'];
+		$column = $export_data['column'];
+		$file_name = $export_data['file_name'];
+		$title = $data['title'] = $export_data['title'];
+		$data['sales_data'] = $sales_data;
+        if($post_data['type'] == 'pdf'){
+	        $data['column'] = $column;
+	        $data['date'] = $post_data['date'];
+	        // pr($data['column'],1);
+	        $html_content = $this->smarty->fetch('sales/sales_report_export.tpl', $data, TRUE);
+	         // pr($html_content,1);
+	        $pdf = new Pdf1('P', 'mm', 'A4', true, 'UTF-8', false);
+
+	        // Set margins (adjust as needed)
+	        $pdf->SetMargins(7, 7, 7, 7);
+
+	        // Set document information
+	        $pdf->SetCreator(PDF_CREATOR);
+
+	        // Disable header and footer
+	        $pdf->setPrintHeader(false);
+	        $pdf->setPrintFooter(false);
+
+	        // Set default monospaced font
+	        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+	        // Enable auto page breaks (optional)
+	        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+	        // Set image scale factor
+	        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+	        // Add a page
+	        $pdf->AddPage();
+
+	        // set some text to print
+	        // $html = file_get_contents('path_to_html_file.html'); // Load your HTML content
+
+	        // output the HTML content
+	        $pdf->writeHTML($html_content, true, false, true, false, '');
+
+	        $pdf->Output("$file_name.pdf", 'D');
+	        ob_end_flush();
+	    }else{
+	        $csv_column = [];
+	        foreach ($column as $key => $value) {
+	        	array_push($csv_column, $value['title']);
+	        }
+	        $csv_output = [];
+	        foreach ($sales_data as $key => $value) {
+	        	$row_data = [];
+	        	foreach ($column as $key_val => $val) {
+	        		array_push($row_data, $value[$val['data']]);
+	        	}
+	        	array_push($csv_output, $row_data);
+	        }
+			
+	        // Set headers to force download
+	        header('Content-Type: text/csv');
+	        header('Content-Disposition: attachment; filename="'.$file_name.'.csv"');
+	        header('Pragma: no-cache');
+	        header('Expires: 0');
+
+	        // Open PHP output stream for the CSV file
+	        $output = fopen('php://output', 'w');
+	       
+	        $extra_row = ['Date : '.$filter_date];  // Customize as needed
+			fputcsv($output, $extra_row);
+	        // Optional: Add column headers to the CSV file
+	        fputcsv($output, $csv_column);
+
+	        // Loop through the data and write to the CSV file
+	        foreach ($csv_output as $row) {
+	            fputcsv($output, $row);  // Each $row should be an array
+	        }
+
+	        // Close the output stream
+	        fclose($output);
+        }
+	}
+
+	public function export_column($post_data = []){
+		$return_arr = [];
+		$type = $post_data['report_type'];
+		if($type == "sales"){
+			$return_arr['column'] = [
+				[
+		            "data" => "client_name",
+		            "title" => "Unit",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+				[
+		            "data" => "customer_name",
+		            "title" => "CUSTOMER NAME",
+		            "width" => "14%",
+		            "className" => "dt-left",
+		        ],
+		        [
+		            "data" => "po_number",
+		            "title" => "Customer PO No",
+		            "width" => "16%",
+		            "className" => "dt-left",
+		        ],
+		        [
+		            "data" => "salesNumber",
+		            "title" => "SALES INV NO",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "sales_date",
+		            "title" => "SALES INV DATE",
+		            "width" => "10%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "status",
+		            "title" => "SALES STATUS",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "part_number",
+		            "title" => "PART NO",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "part_description",
+		            "title" => "PART NAME",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "hsn_code",
+		            "title" => "HSN",
+		            "width" => "7%",
+		            "className" => "dt-center status-row",
+		        ],
+		        [
+		            "data" => "qty",
+		            "title" => "QTY",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "uom_id",
+		            "title" => "UOM",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "rate",
+		            "title" => "Part Price",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "sales_discount",
+		            "title" => "Discount",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "subtotal",
+		            "title" => "Taxable Amount",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		            'orderable' => false
+		        ],
+		        [
+		            "data" => "sgst_amount",
+		            "title" => "SGST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "cgst_amount",
+		            "title" => "CGST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "igst_amount",
+		            "title" => "IGST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "tcs_amount",
+		            "title" => "TCS",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "gst_amount",
+		            "title" => "TOTAL GST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "row_total",
+		            "title" => "TOTAL WITH GS",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ]
+	        ];
+	        $sales_data = $this->SalesModel->getSalesReportExportData($post_data);
+	        foreach ($sales_data as $key => $val) {
+				if ($val['basic_total'] > 0) {
+					$subtotal = $val['basic_total'];
+				} else {
+					$subtotal = round($val['total_rate'] - $val['gst_amount'], 2);
+				}
+				$total_balance_amount += $subtotal;
+				
+				if ($val['part_price'] > 0) {
+					$rate = $val['part_price'];
+				} else {
+					$rate = round($subtotal / $val['qty'], 2);
+				}
+				if($val['status'] == "Cancelled"){
+					$sales_data[$key]['qty'] = 0;
+				}
+				$row_total =  round($val['total_rate'], 2) + round($val['tcs_amount'], 2);
+				$sales_data[$key]['subtotal'] = $subtotal;
+				$sales_data[$key]['rate'] =  $rate;
+				$sales_data[$key]['sales_discount'] =  ($val['sales_discount'] > 0) ? $val['sales_discount']." %": display_no_character();
+				$sales_data[$key]['row_total'] = $row_total;	
+			}
+			$return_arr['result_data'] = $sales_data;
+			$return_arr['file_name'] = "sales_report";
+			$return_arr['title'] = "Sales Report";
+
+	    }else if($type == "grn"){
+	    	$return_arr['column'] = [
+	    		[
+		            "data" => "client_name",
+		            "title" => "Unit",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+				[
+		            "data" => "supplier_name",
+		            "title" => "Supplier name",
+		            "width" => "14%",
+		            "className" => "dt-left",
+		        ],
+		        [
+		            "data" => "part_number",
+		            "title" => "Part No",
+		            "width" => "16%",
+		            "className" => "dt-left",
+		        ],
+		        [
+		            "data" => "part_description",
+		            "title" => "Part Description",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "rate",
+		            "title" => "Part Rate",
+		            "width" => "10%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "hsn_code",
+		            "title" => "HSN",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "uom_name",
+		            "title" => "UOM",
+		            "width" => "17%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "poNumber",
+		            "title" => "PO No",
+		            "width" => "7%",
+		            "className" => "dt-center text-nowrap",
+		        ],
+		        [
+		            "data" => "po_date",
+		            "title" => "PO Date",
+		            "width" => "7%",
+		            "className" => "dt-center text-nowrap",
+		        ],
+		        [
+		            "data" => "grn_number",
+		            "title" => "GRN No",
+		            "width" => "17%",
+		            "className" => "dt-center text-nowrap",
+					
+		        ],
+		        [
+		            "data" => "grn_created_date",
+		            "title" => "GRN Date",
+		            "width" => "7%",
+		            "className" => "dt-center text-nowrap",
+		        ],
+		        [
+		            "data" => "invoice_number",
+		            "title" => "Invoice Number",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "invoice_date",
+		            "title" => "Invoice Date",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "po_qty",
+		            "title" => "PO Qty",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "total_accept_qty",
+		            "title" => "Accepted QTY",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "base_amount",
+		            "title" => "Basic Amount",
+		            "width" => "7%",
+		            "className" => "dt-center status-row",
+		        ],
+		        [
+		            "data" => "sgst_amount",
+		            "title" => "SGST",
+		            "width" => "17%",
+		            "className" => "dt-center",
+					
+		        ],
+		        [
+		            "data" => "cgst_amount",
+		            "title" => "CGST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+		        ],
+		        [
+		            "data" => "igst_amount",
+		            "title" => "IGST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "tcs_amount",
+		            "title" => "TCS",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "gst_amount",
+		            "title" => "GST Total",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ],
+		        [
+		            "data" => "total_with_gst",
+		            "title" => "Total Amount With GST",
+		            "width" => "7%",
+		            "className" => "dt-center",
+					'orderable' => false
+		        ]
+		    ];
+		    $data = $this->SalesModel->getGNRepotExportData($post_data);
+			foreach($data as $k=>$v){
+				$data[$k]['po_date']= defaultDateFormat($v['po_date']);
+				$data[$k]['invoice_date'] = defaultDateFormat($v['invoice_date']);
+				$data[$k]['grn_created_date'] = defaultDateFormat($v['grn_created_date']);
+				$gst_amount = $v['sgst_amount'] + $v['cgst_amount'] + $v['igst_amount'] + $v['tcs_amount'];
+				// Calculate total_with_gst
+				$total_with_gst = $gst_amount + $v['base_amount'];
+				// Initialize tcs_amount
+				$tcs_amount = 0;
+				// Check if tcs_amount is not empty and assign its value
+				if (!empty($v['tcs_amount'])) {
+					$tcs_amount = $g->tcs_amount;
+				}
+				$data[$k]['gst_amount'] = $gst_amount;
+				$data[$k]['total_with_gst'] = number_format($total_with_gst,2,".","");
+				$data[$k]['tcs_amount'] = $tcs_amount;
+			}
+			$return_arr['result_data'] = $data;
+			$return_arr['file_name'] = "grn_report";
+			$return_arr['title'] = "GRN Report";
+
+	    }else if($type == "sales_summary"){
+	    	$return_arr['column'] = [
+	    		[
+		            "data" => "client_name",
+		            "title" => "Unit",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+			    [
+			        "data" => "customer_name",
+			        "title" => "Customer Name",
+			        "width" => "25%",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "po_number",
+			        "title" => "Customer PO NO",
+			        "width" => "25%",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "salesNumber",
+			        "title" => "Sales Inv No",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "sales_date",
+			        "title" => "Sales Invoice Date",
+			        "width" => "25%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "status",
+			        "title" => "Sales Status",
+			        "width" => "25%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "vehicle_number",
+			        "title" => "Vehicle Number",
+			        "width" => "25%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "qty",
+			        "title" => "Total Qty",
+			        "width" => "25%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "subtotal",
+			        "title" => "Taxable Value",
+			        "width" => "7%",
+			        "className" => "dt-center status-row",
+			    ],
+			    [
+			        "data" => "total_discount_amount",
+			        "title" => "Discount(₹)",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "sgst_amount",
+			        "title" => "SGST",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "cgst_amount",
+			        "title" => "CGST",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "igst_amount",
+			        "title" => "IGST",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "tcs_amount",
+			        "title" => "TCS",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "total_gst_amount",
+			        "title" => "TOTAL GST",
+			        "width" => "17%",
+			        "className" => "dt-center due_days_block",
+			    ],
+			    [
+			        "data" => "row_total",
+			        "title" => "Total With GST",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			    ]
+			];
+
+		    $data = $this->SalesModel->getSalesSummaryRepotExportData($post_data);
+			foreach ($data as $key => $po) {
+	            if($po['basic_total'] > 0 ) {
+	                $subtotal = $po['basic_total'];
+	            }else{
+	                $subtotal =  $po['total_rate'] - $po['gst_amount'];
+	            }
+	            
+	            $data[$key]['subtotal'] = $subtotal;
+	            if ($po['part_price'] > 0) {
+	                $rate = $po['part_price'];
+	            }else{
+	                $rate = round((float) $subtotal / (float) $po['qty'], 2);
+	            }
+	            $data[$key]['rate'] = $rate;
+	            $row_total = $po['total_sales_amount'];
+	            $data[$key]['row_total'] = $row_total;
+
+	            $gst_structure = $this->Crud->get_data_by_id("gst_structure", $po['taxid'], "id");
+	            $sales_total = $this->Crud->tax_calcuation($gst_structure[0], $subtotal, $po['total_discount_amount']);
+	            $data[$key]['sgst_amount']  = $sales_total["sales_sgst"];
+	            $data[$key]['cgst_amount'] = $sales_total["sales_cgst"];
+	            $data[$key]['igst_amount']  = $sales_total["sales_igst"];
+	            $data[$key]['tcs_amount'] = $sales_total["sales_tcs"];
+	        } 
+
+			$return_arr['result_data'] = $data;
+			$return_arr['file_name'] = "sales_summary_report";
+			$return_arr['title'] = "GRN Report";
+
+	    }else if($type == "grn_summary"){
+	    	$return_arr['column'] = [
+	    		[
+		            "data" => "client_name",
+		            "title" => "Unit",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+			    [
+			        "data" => "supplier_name",
+			        "title" => "Supplier Name",
+			        "width" => "150px",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "poNumber",
+			        "title" => "PO No",
+			        "width" => "25%",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "po_date",
+			        "title" => "PO Date",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "grn_number",
+			        "title" => "GRN No",
+			        "width" => "80px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "grn_created_date",
+			        "title" => "GRN Date",
+			        "width" => "100px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "invoice_number",
+			        "title" => "Invoice Number",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "invoice_date",
+			        "title" => "Invoice Date",
+			        "width" => "120px",
+			        "className" => "dt-center status-row",
+			    ],
+			    [
+			        "data" => "po_qty",
+			        "title" => "PO Qty",
+			        "width" => "80px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "accept_qty",
+			        "title" => "Total QTY",
+			        "width" => "100px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "base_amount",
+			        "title" => "Basic Amount",
+			        "width" => "120px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "sgst_amount",
+			        "title" => "SGST",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "cgst_amount",
+			        "title" => "CGST",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "igst_amount",
+			        "title" => "IGST",
+			        "width" => "17%",
+			        "className" => "dt-center due_days_block",
+			    ],
+			    [
+			        "data" => "tcs_amount",
+			        "title" => "TCS",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "gst_amount",
+			        "title" => "GST Total",
+			        "width" => "90px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "total_with_gst",
+			        "title" => "Total Amount With GST",
+			        "width" => "160px",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ]
+			];
+
+
+		    $data = $this->SalesModel->getGrnSummaryReportExportData($post_data);
+			foreach ($data as $key => $g) {
+	            $gst_amount = (float)($g['sgst_amount'] + $g['cgst_amount'] + $g['igst_amount'] + $g['tcs_amount']);
+	            $total_with_gst = $gst_amount + $g['base_amount'];
+	            // $data[$key]['gst_amount'] = $gst_amount;
+	            $data[$key]['total_with_gst']  = $total_with_gst;
+	            $data[$key]['po_date']  = defaultDateFormat($g['po_date']);
+	            $data[$key]['grn_created_date']  = defaultDateFormat($g['grn_created_date']);
+	            $data[$key]['invoice_date']  = defaultDateFormat($g['invoice_date']);            
+	        }  
+
+			$return_arr['result_data'] = $data;
+			$return_arr['file_name'] = "grn_summary_report";
+			$return_arr['title'] = "GRN Report";
+
+	    }else if($type == "payable"){
+	    	$return_arr['column'] = [
+	    		[
+		            "data" => "client_name",
+		            "title" => "Unit",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+			    [
+			        "data" => "supplier_name",
+			        "title" => "Supplier name",
+			        "width" => "150px",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "grn_number",
+			        "title" => "GRN No",
+			        "width" => "100px",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "grn_created_date",
+			        "title" => "GRN Date",
+			        "width" => "100px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "invoice_number",
+			        "title" => "Invoice Number",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "invoice_date",
+			        "title" => "Invoice Date",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "base_amount",
+			        "title" => "Basic Amount",
+			        "width" => "120px",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "sgst_amount",
+			        "title" => "SGST",
+			        "width" => "3%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "cgst_amount",
+			        "title" => "CGST",
+			        "width" => "3%",
+			        "className" => "dt-center status-row",
+			    ],
+			    [
+			        "data" => "igst_amount",
+			        "title" => "IGST",
+			        "width" => "3%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "tcs_amount",
+			        "title" => "TCS",
+			        "width" => "3%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "gst_amount",
+			        "title" => "GST Total",
+			        "width" => "120px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "total_with_gst",
+			        "title" => "Total Amount With GST",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "payment_days",
+			        "title" => "Payment Terms in Days",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "due_date",
+			        "title" => "Due Date",
+			        "width" => "10%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "due_days",
+			        "title" => "Due Days",
+			        "width" => "10%",
+			        "className" => "dt-center due_days_block",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "amount_received",
+			        "title" => "Amount Paid",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "tds_amount",
+			        "title" => "TDS",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "bal_amnt",
+			        "title" => "Balance Amount to Pay",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "payment_receipt_date",
+			        "title" => "Payment Paid Date",
+			        "width" => "150px",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "transaction_details",
+			        "title" => "Transaction Details",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "remarks",
+			        "title" => "Remark",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ]
+			];
+
+
+
+		    $data = $this->SalesModel->getPayableReportExportData($post_data);
+			foreach ($data as $key => $objs) {
+	            $gst_amount = (float)($objs['sgst_amount'] + $objs['cgst_amount'] + $objs['igst_amount'] + $objs['tcs_amount']);
+	            $data[$key]['gst_amount'] = number_format($gst_amount,2,".","");
+	            $created_date_str = $objs['grn_created_date'];  
+	            $total_with_gst = $gst_amount + $objs['base_amount'];  
+	            $data[$key]['total_with_gst'] = $total_with_gst;
+	            $total_with_gst_val += $total_with_gst > 0 ? $total_with_gst : 0;
+	            $total_paid_amount += $value['amount_received'] > 0 ? $value['amount_received'] : 0;
+	            $total_balance_amount_to_pay += $value['bal_amnt'] > 0 ? $value['bal_amnt'] : 0;
+	            $total_tds_amount += $value['tds_amount'] > 0 ? $value['tds_amount'] : 0;
+	            $tcs_amount = 0;
+	            if(!empty($objs['tcs_amount'])){
+	                $tcs_amount = $objs['tcs_amount'];
+	            }   
+	            $data[$key]['tcs_amount'] = number_format($tcs_amount,2,".","");                          
+	            // Create a DateTime object by specifying the format
+	            $dateTime = DateTime::createFromFormat('d-m-Y', $created_date_str);
+	            $due_date = display_no_character("");
+	            if ($dateTime && is_numeric($objs['payment_days'])) {
+	                // Convert payment_terms to an integer for days
+	                $payment_terms_days = (int)$objs['payment_days'];
+	                // Add payment_terms (in days) to the created date
+	                $dateTime->add(new DateInterval('P' . $payment_terms_days . 'D'));
+	                // Get the formatted due date
+	                $due_date = $dateTime->format('d/m/Y');
+	                $due_date = defaultDateFormat($due_date);
+	            }
+	            $data[$key]['due_date'] = $due_date;
+
+	            $today = new DateTime();
+	            // Convert due date string to a DateTime object
+	            $due_days = display_no_character("");
+	            if($due_date != display_no_character("")){
+	                if(!empty($objs['payment_receipt_date'])){
+	                    $sales_date = $objs['grn_created_date'];
+
+	                    $sales_date = DateTime::createFromFormat("d-m-Y", $sales_date);
+	                    // Format to the desired output
+	                    $sales_date = $sales_date->format("Y-m-d");
+	                    $payment_receipt_date = $objs['payment_receipt_date'];
+	                    $sales_date = new DateTime($sales_date);
+	                    $payment_receipt_date = new DateTime($payment_receipt_date);
+	                    // Calculate the difference
+	                    $interval = $sales_date->diff($payment_receipt_date);
+
+	                    // Get the difference in days
+	                    $due_days = $interval->days;
+	                }else{
+	                    $dueDateObject = DateTime::createFromFormat('d/m/Y', $due_date);
+	                     // Calculate the interval between the due date and today's date
+	                    $interval = $today->diff($dueDateObject);
+	                    // Get the difference in days
+	                    $due_days = $interval->format('%r%a'); // This will give the difference in days with respect to today's date
+	                }
+	                
+	               
+	                $due_days_status = "normal";
+	                if($due_days <= 0 && empty($objs['payment_receipt_date']))
+	                {
+	                    $due_days_status = "danger";
+	                }
+	            }
+	            
+	            $data[$key]['due_days'] = $due_days;
+	            $data[$key]['due_days_status'] = $due_days_status;
+
+	            $bal_amnt = $total_with_gst - $objs['amount_received'] - $objs['tds_amount'];
+	            $data[$key]['bal_amnt'] = number_format($bal_amnt, 2, '.', '');    
+	            $data[$key]['action']= display_no_character("");
+	            if($objs['total_accept_qty'] > 0 && checkGroupAccess("payable_report","update","No")){
+	                $data[$key]['action'] = "<a href='javascript:void(0)' class='add-payable-report' data-grn-number='".$objs['grn_number']."' data-amount-paid='".$objs['amount_received']."' data-bal-amnt='".$bal_amnt."' data-transaction-details='".$objs['transaction_details']."' data-payment-receipt-date='".$objs['payment_receipt_date']."' data-tds='".$objs['tds_amount']."'><i class='ti ti-edit'></i></a>";
+	            }
+
+	            $data[$key]['grn_created_date'] = defaultDateFormat($objs['grn_created_date']);
+	            $data[$key]['invoice_date'] = defaultDateFormat($objs['invoice_date']);
+	            $data[$key]['payment_receipt_date'] = defaultDateFormat($objs['payment_receipt_date']);  
+	             $data[$key]['base_amount'] = number_format($objs['base_amount'],2,".","");
+	            $data[$key]['cgst_amount'] = number_format($objs['cgst_amount'],2,".","");
+	            $data[$key]['sgst_amount'] = number_format($objs['sgst_amount'],2,".","");
+	            $data[$key]['igst_amount'] = number_format($objs['igst_amount'],2,".","");                                
+	                                                                                
+	        }   
+	        // pr(count($data),1);
+			$return_arr['result_data'] = $data;
+			$return_arr['file_name'] = "payable_report";
+			$return_arr['title'] = "Payable Report";
+
+	    }else if($type == "receivable"){
+	    	$return_arr['column'] = [
+	    		[
+		            "data" => "client_name",
+		            "title" => "Unit",
+		            "width" => "17%",
+		            "className" => "dt-center",
+		        ],
+			    [
+			        "data" => "customer_name",
+			        "title" => "CUSTOMER NAME",
+			        "width" => "14%",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "sales_number",
+			        "title" => "Sales Inv No",
+			        "width" => "16%",
+			        "className" => "dt-left",
+			    ],
+			    [
+			        "data" => "created_date_val",
+			        "title" => "Sales Inv Date",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "subtotal",
+			        "title" => "Basic Amount Total",
+			        "width" => "10%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "gst",
+			        "title" => "GST Total Amount",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "row_total",
+			        "title" => "Total Amount With GST",
+			        "width" => "17%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "payment_terms",
+			        "title" => "Payment Terms in Days",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "due_date",
+			        "title" => "Due Date",
+			        "width" => "7%",
+			        "className" => "dt-center status-row",
+			    ],
+			    [
+			        "data" => "due_days",
+			        "title" => "Due Days",
+			        "width" => "17%",
+			        "className" => "dt-center due_days_block",
+			    ],
+			    [
+			        "data" => "amount_received",
+			        "title" => "Amount Received",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "tdsamnt",
+			        "title" => "TDS",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "debit_amount",
+			        "title" => "Debit Amount",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "bal_amnt",
+			        "title" => "Balance Amount to Receive",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "payment_receipt_date_formated",
+			        "title" => "Payment Receipt Date",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			    ],
+			    [
+			        "data" => "transaction_details",
+			        "title" => "Transaction Details",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "remark_val",
+			        "title" => "Remark",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ],
+			    [
+			        "data" => "action",
+			        "title" => "Action",
+			        "width" => "7%",
+			        "className" => "dt-center",
+			        "orderable" => false,
+			    ]
+			];
+
+
+
+
+		    $data = $this->SalesModel->getReceivableReportExportData($post_data);
+			// pr($data,1);
+			foreach ($data as $key => $objs) {
+				$date_convert = DateTime::createFromFormat('d-m-Y', $objs['created_date']);
+				// Format the date to d/m/Y
+				$objs['created_date'] = $date_convert->format('d/m/Y');
+
+				$created_date_str = $objs['created_date'];
+	            
+				$payment_receipt_date_formated  = '';
+				$subtotal = round($objs['ttlrt'] - $objs['gstamnt'], 2);
+				$row_total = round($objs['ttlrt'], 2) + round($objs['tcsamnt'], 2);
+				if (($objs['payment_receipt_date'] != '')) {
+					$payment_receipt_date_formated =  date("d/m/Y", strtotime($objs['payment_receipt_date']));
+				}
+				$data[$key]['subtotal'] = $subtotal;
+				$data[$key]['row_total'] = number_format($row_total,2,".","");
+				$data[$key]['payment_receipt_date_formated'] = $payment_receipt_date_formated;
+				// $tds_amount = $data[$key]['tdsamnt'] = $objs['tdsamnt'] > 0 ? $objs['tdsamnt'] : 0;
+
+				// $data[$key]['bal_amnt'] = $row_total - $val['amount_received'] - $tds_amount;
+
+				// Create a DateTime object by specifying the format
+				$dateTime = DateTime::createFromFormat('d/m/Y', $created_date_str);
+				$due_date = display_no_character("");
+				
+				if ($dateTime && is_numeric($objs['payment_terms'])) {
+					// Convert payment_terms to an integer for days
+					$payment_terms_days = (int)$objs['payment_terms'];
+			
+					// Add payment_terms (in days) to the created date
+					$dateTime->add(new DateInterval('P' . $payment_terms_days . 'D'));
+			
+					// Get the formatted due date
+					$due_date = $dateTime->format('d/m/Y');
+			
+					
+				}
+
+				$today = new DateTime();
+	        
+				$due_days_status = display_no_character("");
+
+	            if($due_date != display_no_character("")){
+	            	if(!empty($objs['payment_receipt_date']) && $objs['payment_receipt_date'] != "" && $objs['payment_receipt_date'] != NULL ){
+
+	            		$sales_date = $objs['created_date'];
+	            		$sales_date = DateTime::createFromFormat("d/m/Y", $sales_date);
+						// Format to the desired output
+						$sales_date = $sales_date->format("Y-m-d");
+	            		$payment_receipt_date = $objs['payment_receipt_date'];
+	            		$sales_date = new DateTime($sales_date);
+						$payment_receipt_date = new DateTime($payment_receipt_date);
+						// Calculate the difference
+						$interval = $sales_date->diff($payment_receipt_date);
+
+						// Get the difference in days
+						$due_days = $interval->days;
+
+	                }else{
+	                    $dueDateObject = DateTime::createFromFormat('d/m/Y', $due_date);
+	                    // Calculate the interval between the due date and today's date
+						$interval = $today->diff($dueDateObject);
+						
+						// Get the difference in days
+						$due_days = $interval->format('%r%a');
+	                }
+	            	
+
+					$due_days_status = "normal";
+	                if($due_days <= 0 && empty($objs['payment_receipt_date']))
+	                {
+	                    $due_days_status = "danger";
+	                }
+
+				}
+
+				$data[$key]['due_date'] = $due_date;
+				$data[$key]['due_days'] = $due_days;
+				$data[$key]['due_days_status'] = $due_days_status;
+			}   
+	        // pr(count($data),1);
+			$return_arr['result_data'] = $data;
+			$return_arr['file_name'] = "receivalbe_report";
+			$return_arr['title'] = "Receivable Report";
+
+	    }
+	    // pr($return_arr,1);
+	    return $return_arr;
 	}
 	public function hsn_report()
 	{
@@ -1260,6 +2126,7 @@ class SalesController extends CommonController
             "title" => "CUSTOMER NAME",
             "width" => "14%",
             "className" => "dt-left",
+            "visible" => false
         ];
         $column[] = [
             "data" => "qty",
@@ -1314,8 +2181,11 @@ class SalesController extends CommonController
             "width" => "7%",
             "className" => "dt-center",
         ];
-		
-		
+		// pr(date('Y-m-d', strtotime('last month')),1);
+		$date_filter = date('01/m/Y', strtotime('first day of last month')) . " - " . date('t/m/Y', strtotime('last day of last month'));
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
         $data["data"] = $column;
         $data["is_searching_enable"] = true;
         $data["is_paging_enable"] = true;
@@ -1328,7 +2198,7 @@ class SalesController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([[2, 'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		$this->loadView('reports/hsn_reports', $data);
@@ -1354,9 +2224,10 @@ class SalesController extends CommonController
         $condition_arr["length"] = $post_data["length"];
         $base_url = $this->config->item("base_url");
 		$data = $this->SalesModel->getHsnReportViewData($condition_arr,$post_data["search"]);
-
+		$unique_data = [];
 		$total_balance_amount = 0;
 		foreach ($data as $key => $val) {
+
 			if ($val['basic_total'] > 0) {
 				$subtotal = $val['basic_total'];
 			} else {
@@ -1373,15 +2244,53 @@ class SalesController extends CommonController
 			$data[$key]['subtotal'] = $subtotal;
 			$data[$key]['rate'] =  $rate;
 			$data[$key]['sales_discount'] =  ($val['sales_discount'] > 0) ? $val['sales_discount']." %": display_no_character();
-			$data[$key]['row_total'] = number_format($row_total, 2);
+			$data[$key]['row_total'] = $row_total;
+			$hsn_code = trim($val['hsn_code']);
+			if(!array_key_exists($hsn_code, $unique_data)){
+				$unique_data[$hsn_code] = [
+					"hsn_code" => $val['hsn_code'],
+					"customer_name" => $val['customer_name'],
+					"qty" => $val['qty'],
+					"subtotal" => $subtotal,
+					"sgst_amount" => $val['sgst_amount'],
+					"cgst_amount" => $val['cgst_amount'],
+					"igst_amount" => $val['igst_amount'],
+					"tcs_amount" => $val['tcs_amount'],
+					"gst_amount" => $val['gst_amount'],
+					"row_total" => number_format($row_total,2,".","")
+				];
+			}else{
+				$unique_data[$hsn_code]['qty'] += $val['qty'];
+				$unique_data[$hsn_code]['subtotal'] += $subtotal;
+				$unique_data[$hsn_code]['customer_name'] .= ",".$val['customer_name'];
+				$unique_data[$hsn_code]['sgst_amount'] += $val['sgst_amount'];
+				$unique_data[$hsn_code]['cgst_amount'] += $val['cgst_amount'];
+				$unique_data[$hsn_code]['igst_amount'] += $val['igst_amount'];
+				$unique_data[$hsn_code]['tcs_amount'] += $val['tcs_amount'];
+				$unique_data[$hsn_code]['gst_amount'] += $val['gst_amount'];
+				$unique_data[$hsn_code]['row_total'] += number_format($row_total,2,".","");
+			}
+			
+
 			
 		}
-		$data["data"] = $data;
+		$data["data"] = array_values($unique_data);
 		
         $total_record = $this->SalesModel->getHsnReportViewCount([], $post_data["search"]);
-        // pr($total_record,1);
-        $data["recordsTotal"] = count($total_record);
-        $data["recordsFiltered"] = count($total_record);
+        $unique_data = [];
+        foreach ($total_record as $key => $val) {
+			$hsn_code = trim($val['hsn_code']);
+			if(!array_key_exists($hsn_code, $unique_data)){
+				$unique_data[$hsn_code] = [
+					"hsn_code" => $val['hsn_code']
+				];
+			}			
+		}
+        $data["total_qty"] = number_format(array_sum(array_column($total_record, "qty")),2,".",",");
+        $data["total_rate"] = number_format(array_sum(array_column($total_record, "total_rate"))+array_sum(array_column($total_record, "tcs_amount")),2,".",",");
+        $data["recordsTotal"] = count($unique_data);
+        $data["recordsTotal"] = count($unique_data);
+        $data["recordsFiltered"] = count($unique_data);
         echo json_encode($data);
         exit();
 		
@@ -2116,676 +3025,6 @@ class SalesController extends CommonController
 	{
 		$this->load->view('xml_extension.php');
 	}
-
-	// Function to add sales data request
-	// Function to add sales data request
-    public function requestSalesXML($data, $sales_details)
-    {
-
-		$isWithInventory = false;
-		$isSalesExportWithInventory = $this->GlobalConfig->readConfiguration("isSalesExportWithInventory", "No");
-		if (strcasecmp($isSalesExportWithInventory, "Yes") == 0) {
-			$isWithInventory = true;
-		}
-		
-
-        $isCreate = true;
-        if ($sales_details->status == 'Cancelled') {
-            $isCreate = false;
-        }
-        $voucher = $data->addChild('TALLYMESSAGE');
-        // Encode special characters
-        $customer_name = htmlspecialchars($sales_details->customer_name, ENT_XML1 | ENT_COMPAT, 'UTF-8');
-
-        //$customer_name  = $sales_details->customer_name;
-        $sales_number = $sales_details->sales_number;
-
-		// Create a DateTime object using the input date and the specified format
-        $dateTimeObject = DateTime::createFromFormat('d/m/Y', $sales_details->created_date);
-        // Format the DateTime object to the desired output format "Ymd"
-        $sales_date = $dateTimeObject->format('Ymd');
-
-        //Get GUID and RANDOMID :
-        $guid = str_replace("-", "0", $sales_number);
-        $guid = str_replace("/", "0", $guid);
-
-        $voucher_child = $voucher->addChild('VOUCHER');
-        $voucher_child->addAttribute('REMOTEID', $guid); //Fixed pattern - with sales number etc as this can be used for cancel too.
-        $voucher_child->addAttribute('VCHTYPE', 'Sales'); //Hard-Coded
-        if ($isWithInventory) {
-			if($isCreate){
-				$voucher_child->addAttribute('ACTION', 'Create');
-			}
-			$voucher_child->addAttribute('OBJVIEW', 'Invoice Voucher View'); //Hard-Coded
-	    }
-
-        if ($isWithInventory && $isCreate) {
-
-            //get the address details
-            $addressDetails = $this->Crud->customQuery("SELECT 
-                            CASE 
-                                WHEN sales.shipping_addressType = 'customer' THEN cust.shifting_address
-                                WHEN sales.shipping_addressType = 'consignee' THEN adm.address
-                            END AS shippingAddress,
-                            CASE 
-                                WHEN sales.shipping_addressType = 'customer' THEN cust.customer_name
-                                WHEN sales.shipping_addressType = 'consignee' THEN cons.consignee_name
-                            END AS consigneeName,
-                            CASE 
-                                WHEN sales.shipping_addressType = 'customer' THEN cust.state
-                                WHEN sales.shipping_addressType = 'consignee' THEN adm.state
-                            END AS consignee_state,
-                            CASE 
-                                WHEN sales.shipping_addressType = 'customer' THEN cust.gst_number
-                                WHEN sales.shipping_addressType = 'consignee' THEN cons.gst_number
-                            END AS consignee_gst_number,
-                            cust.billing_address as billing_address,
-                            cust.gst_number as billing_GSTIN
-                        FROM 
-                            new_sales sales
-                        INNER JOIN 
-                            customer cust ON cust.id = sales.customer_id
-                        LEFT JOIN 
-                            consignee cons ON cons.id = sales.consignee_id
-                        LEFT JOIN 
-                            address_master adm ON adm.id = cons.address_id
-                        WHERE 
-                            sales.id = ".$sales_details->sales_id);
-
-            if ($sales_details) {
-               $shippingAddress = $addressDetails[0]->shippingAddress;
-               $billingAddress = $addressDetails[0]->billing_address;
-               $billing_GSTIN = $addressDetails[0]->billing_GSTIN;
-               $consigneeName = $addressDetails[0]->consigneeName;
-               $consignee_state = $addressDetails[0]->consignee_state;
-               $consignee_gst_number = $addressDetails[0]->consignee_gst_number;
-            }
-
-            $addr_type = $voucher_child->addChild('ADDRESS.LIST'); //bill to address
-            $addr_type->addAttribute('TYPE', 'String'); //Hard-Coded
-            $addr_type->addChild('ADDRESS',$billingAddress);
-
-            $basicbuyaddr_type = $voucher_child->addChild('BASICBUYERADDRESS.LIST');//ship to address
-            $basicbuyaddr_type->addAttribute('TYPE', 'String'); //Hard-Coded
-            $basicbuyaddr_type->addChild('ADDRESS', $shippingAddress);
-
-            /** <BASICORDERTERMS.LIST TYPE="String">
-             *  <BASICORDERTERMS>By Road</BASICORDERTERMS>
-             *  </BASICORDERTERMS.LIST> */
-
-            $voucher_child->addChild('DATE', $sales_date);
-			$voucher_child->addChild('VCHSTATUSDATE', $sales_date);		
-			$voucher_child->addChild('GUID', $guid);
-
-            $voucher_child->addChild('GSTREGISTRATIONTYPE', 'Regular'); //Hard-Coded ?
-            $voucher_child->addChild('VATDEALERTYPE', 'Regular'); //Hard-Coded ?
-            $voucher_child->addChild('STATENAME', 'Maharashtra'); //TO-DO		- Customer state ?
-            $voucher_child->addChild('ENTEREDBY', 'admin'); //TO-DO
-			$voucher_child->addChild('COUNTRYOFRESIDENCE', 'India'); //TO-DO	
-            $voucher_child->addChild('PARTYGSTIN', $billing_GSTIN);
-			$voucher_child->addChild('PLACEOFSUPPLY', 'Maharashtra'); //TO-DO		- Customer state ?
-			$voucher_child->addChild('PARTYNAME', $customer_name);
-            
-			$gst_registration = $voucher_child->addChild('GSTREGISTRATION','Maharashtra Registration'); //TO-DO
-			$gst_registration->addAttribute('TAXTYPE', 'GST');
-			$gst_registration->addAttribute('TAXREGISTRATION', '');
-			
-			$voucher_child->addChild('VOUCHERTYPENAME', 'Sales'); //Hard coded
-			$voucher_child->addChild('PARTYLEDGERNAME', $customer_name);
-
-			$voucher_child->addChild('VOUCHERNUMBER', $sales_details->sales_number); 
-            $voucher_child->addChild('BASICBUYERNAME',$consigneeName); //ship to buyer name
-            $voucher_child->addChild('CMPGSTREGISTRATIONTYPE', 'Regular'); 
-            $voucher_child->addChild('PARTYMAILINGNAME', $customer_name); 
-            $voucher_child->addChild('CONSIGNEEGSTIN', $consignee_gst_number);
-            $voucher_child->addChild('CONSIGNEEMAILINGNAME', $consigneeName);
-            $voucher_child->addChild('CONSIGNEESTATENAME',$consignee_state);
-            $voucher_child->addChild('CMPGSTSTATE', 'Maharashtra'); //TO-DO
-            $voucher_child->addChild('CONSIGNEECOUNTRYNAME', 'India'); //TO-DO
-            $voucher_child->addChild('BASICBASEPARTYNAME', $consigneeName);
-            $voucher_child->addChild('NUMBERINGSTYLE', 'Auto Retain'); //Hard Coded
-            $voucher_child->addChild('CSTFORMISSUETYPE', 'Not Applicable'); //Hard Coded
-            $voucher_child->addChild('CSTFORMRECVTYPE', 'Not Applicable'); //Hard Coded
-
-            $voucher_child->addChild('FBTPAYMENTTYPE', 'Default'); //Hard Coded
-            $voucher_child->addChild('PERSISTEDVIEW', 'Invoice Voucher View'); //Hard Coded
-            $voucher_child->addChild('VCHSTATUSTAXADJUSTMENT', 'Default'); //Hard Coded
-            $voucher_child->addChild('VCHSTATUSVOUCHERTYPE', 'Sales'); //Hard Coded
-            $voucher_child->addChild('VCHSTATUSTAXUNIT', 'Maharashtra Registration'); //TO-DO Maharashtra Registration
-            $voucher_child->addChild('VCHGSTCLASS', 'Not Applicable'); //Hard Coded
-            $voucher_child->addChild('VCHENTRYMODE', 'Item Invoice'); //Hard Coded
-			
-            $voucher_child->addChild('EFFECTIVEDATE', $sales_date); 
-            $voucher_child->addChild('DIFFACTUALQTY', 'No'); // Hard Coded
-            $voucher_child->addChild('ISMSTFROMSYNC', 'No'); // Hard Coded
-
-            $voucher_child->addChild('HASDISCOUNTS', ($sales_details->discount_amount >0) ? 'Yes' :'No');
-
-            $this->vocher_inventory_default_fields($voucher_child);
-        }else{
-			$voucher_child->addChild('ISOPTIONAL', 'No');
-			$voucher_child->addChild('USEFORGAINLOSS', 'No');
-			$voucher_child->addChild('USEFORCOMPOUND', 'No');
-			$voucher_child->addChild('VOUCHERTYPENAME', 'Sales');
-			$voucher_child->addChild('DATE', $sales_date);
-			$voucher_child->addChild('EFFECTIVEDATE', $sales_date);
-
-			$voucher_child->addChild('USETRACKINGNUMBER', 'No');
-			$voucher_child->addChild('ISPOSTDATED', 'No');
-			$voucher_child->addChild('ISINVOICE', 'No');
-
-		}
-        
-
-        if ($isCreate == true) {
-            //There would be multiple entries here for INVENTORYENTRIES
-                $inventory_details = $this->Crud->customQuery("select cp.part_number, part.uom_id, part.hsn_code, part.qty, part.part_price,
-												(part.total_rate - part.gst_amount) as part_amount, discounted_amount,
-												part.sales_number, part.tax_id, part.total_rate as Total, part.basic_total ,part.cgst_amount, part.sgst_amount, part.igst_amount, 
-												part.tcs_amount, part.gst_amount, tax.cgst, tax.sgst, tax.igst, tax.tcs, tax.tcs_on_tax
-												FROM sales_parts part
-												INNER JOIN customer_part cp ON cp.id = part.part_id
-												INNER JOIN gst_structure tax ON tax.id = part.tax_id
-												WHERE part.sales_id = " . $sales_details->sales_id);
-
-			//vocher without inventory details
-            if (!$isWithInventory) {			
-				$voucher_child->addAttribute('ACTION', 'Create'); //Hard Coded
-				$voucher_child->addChild('ISCANCELLED', 'No'); //Hard Coded
-				$voucher_child->addChild('DIFFACTUALQTY', 'Yes'); //Hard Coded
-				$voucher_child->addChild('VOUCHERNUMBER', $sales_details->sales_number);
-				$voucher_child->addChild('REFERENCE', $sales_details->sales_number);
-				$voucher_child->addChild('PARTYLEDGERNAME', $customer_name);
-				$voucher_child->addChild('NARRATION', 'Invoice No. ' . $sales_details->sales_number);
-				$voucher_child->addChild('ASPAYSLIP', 'No'); //Hard Coded
-				$voucher_child->addChild('GUID', $guid);
-				$voucher_child->addChild('ALTERID', '1'); //TO-D0 For isWithInventory ??
-
-				//What is this ? Need TO-DO action
-				$haryanavat_list = $voucher_child->addChild('HARYANAVAT.LIST'); //Hard Coded
-				$haryanavat_list->addAttribute('DESC', '`HARYANAVAT`'); //Hard Coded
-
-				$this->inoviceExportForCreate($voucher_child, $sales_details,$customer_name, $guid,$isWithInventory);
-
-				if ($inventory_details) {
-					foreach ($inventory_details as $inventory_part) {
-						$inventory = $voucher_child->addChild('INVENTORYENTRIES.LIST');
-
-						$inventory->addChild('STOCKITEMNAME', $inventory_part->part_number); 
-						$inventory->addChild('ISDEEMEDPOSITIVE', 'No'); //Hard Coded
-						$inventory->addChild('RATE', $inventory_part->part_price);
-						$inventory->addChild('DISCOUNT', $sales_details->discount); //DISCOUNT IS IN PERCENTAGE
-						$inventory->addChild('AMOUNT', $inventory_part->part_amount);
-						$inventory->addChild('ACTUALQTY', $inventory_part->qty);
-						$inventory->addChild('BILLEDQTY', $inventory_part->qty);
-						$inventory->addChild('UOM', $inventory_part->uom_id);
-					}
-				}
-			}else{
-				//vocher with inventory details
-                if ($inventory_details) {
-                    foreach ($inventory_details as $inventory_part) {
-                        $inventory = $voucher_child->addChild('ALLINVENTORYENTRIES.LIST');
-                        $inventory->addChild('STOCKITEMNAME', $inventory_part->part_number);					
-						$inventory->addChild('GSTOVRDNISREVCHARGEAPPL', 'Not Applicable'); //Hard Coded
-						$inventory->addChild('GSTOVRDNTAXABILITY', 'Taxable'); //Hard Coded
-						$inventory->addChild('GSTSOURCETYPE', 'Stock Item'); //Hard Coded
-						$inventory->addChild('GSTITEMSOURCE', $inventory_part->part_number);
-						$inventory->addChild('HSNSOURCETYPE', 'Stock Item'); //Hard Coded
-						$inventory->addChild('HSNITEMSOURCE', $inventory_part->part_number);
-						$inventory->addChild('GSTOVRDNSTOREDNATURE', ''); //Hard Coded
-
-						$inventory->addChild('GSTOVRDNTYPEOFSUPPLY', 'Goods'); //Hard Coded
-						$inventory->addChild('GSTRATEINFERAPPLICABILITY', 'As per Masters/Company'); //Hard Coded
-						$inventory->addChild('GSTHSNNAME', $inventory_part->hsn_code); //TO-DO
-						$inventory->addChild('GSTHSNINFERAPPLICABILITY', 'As per Masters/Company'); //Hard Coded
-						$inventory->addChild('ISDEEMEDPOSITIVE', 'No'); //Hard Coded
-						$inventory->addChild('ISGSTASSESSABLEVALUEOVERRIDDEN', 'No'); //Hard Coded
-						$inventory->addChild('STRDISGSTAPPLICABLE', 'No'); //Hard Coded
-						$inventory->addChild('CONTENTNEGISPOS', 'No'); //Hard Coded
-						$inventory->addChild('ISLASTDEEMEDPOSITIVE', 'No'); //Hard Coded
-						$inventory->addChild('ISAUTONEGATE', 'No'); //Hard Coded
-						$inventory->addChild('ISCUSTOMSCLEARANCE', 'No'); //Hard Coded
-						$inventory->addChild('ISTRACKCOMPONENT', 'No'); //Hard Coded
-						$inventory->addChild('ISTRACKPRODUCTION', 'No'); //Hard Coded
-						$inventory->addChild('ISPRIMARYITEM', 'No'); //Hard Coded
-						$inventory->addChild('ISSCRAP', 'No'); //Hard Coded
-
-
-                        $inventory->addChild('RATE', $inventory_part->part_price.'/'.$inventory_part->uom_id);
-						$inventory->addChild('AMOUNT', $inventory_part->part_amount);
-						$inventory->addChild('DISCOUNT', $sales_details->discount); //DISCOUNT IS IN PERCENTAGE
-						$inventory->addChild('ACTUALQTY', $inventory_part->qty.' '.$inventory_part->uom_id);
-						$inventory->addChild('BILLEDQTY', $inventory_part->qty.' '.$inventory_part->uom_id);
-                        $inventory->addChild('UOM', $inventory_part->uom_id);
-
-						$batchAllocations = $inventory->addChild('BATCHALLOCATIONS.LIST');
-						$batchAllocations->addChild('GODOWNNAME', 'Main Location'); //Hard Coded
-						$batchAllocations->addChild('BATCHNAME', 'Primary Batch'); //Hard Coded
-						$batchAllocations->addChild('INDENTNO', 'Not Applicable'); //Hard Coded
-						$batchAllocations->addChild('ORDERNO', 'Not Applicable'); //Hard Coded
-						$batchAllocations->addChild('TRACKINGNUMBER', 'Not Applicable'); //Hard Coded
-						$batchAllocations->addChild('DYNAMICCSTISCLEARED', 'No'); //Hard Coded
-						$batchAllocations->addChild('AMOUNT', $inventory_part->part_amount); //Hard Coded
-						$batchAllocations->addChild('DISCOUNT', $sales_details->discount); 
-						$batchAllocations->addChild('ACTUALQTY', $inventory_part->qty.' '.$inventory_part->uom_id); //Hard Coded
-						$batchAllocations->addChild('BILLEDQTY', $inventory_part->qty.' '.$inventory_part->uom_id); //Hard Coded
-						$batchAllocations->addChild('ADDITIONALDETAILS.LIST', ''); //Hard Coded
-						$batchAllocations->addChild('VOUCHERCOMPONENTLIST.LIST', ''); //Hard Coded
-
-
-						$acctingAllocations = $inventory->addChild('ACCOUNTINGALLOCATIONS.LIST');
-						$acctingAllocations->addChild('LEDGERNAME', 'Sales'); //Hard Coded
-						$acctingAllocations->addChild('GSTCLASS', 'Not Applicable'); //Hard Coded
-						$acctingAllocations->addChild('ISDEEMEDPOSITIVE', 'No'); //Hard Coded
-						$acctingAllocations->addChild('LEDGERFROMITEM', 'No'); //Hard Coded
-						$acctingAllocations->addChild('REMOVEZEROENTRIES', 'No'); //Hard Coded
-						$acctingAllocations->addChild('ISPARTYLEDGER', 'No'); //Hard Coded
-						$acctingAllocations->addChild('GSTOVERRIDDEN', 'No'); //Hard Coded
-						$acctingAllocations->addChild('ISGSTASSESSABLEVALUEOVERRIDDEN', 'No'); //Hard Coded
-						$acctingAllocations->addChild('STRDISGSTAPPLICABLE', 'No'); //Hard Coded
-						$acctingAllocations->addChild('STRDGSTISPARTYLEDGER', 'No'); //Hard Coded
-						$acctingAllocations->addChild('STRDGSTISDUTYLEDGER', 'No'); //Hard Coded
-						$acctingAllocations->addChild('CONTENTNEGISPOS', 'No'); //Hard Coded
-						$acctingAllocations->addChild('ISLASTDEEMEDPOSITIVE', 'No'); //Hard Coded
-						$acctingAllocations->addChild('ISCAPVATTAXALTERED', 'No'); //Hard Coded
-						$acctingAllocations->addChild('ISCAPVATNOTCLAIMED', 'No'); //Hard Coded
-						$acctingAllocations->addChild('AMOUNT', $inventory_part->part_amount);
-						
-						//RATEDETAILS
-						$this->inventoriesExportForCreate($inventory, $inventory_part, $customer_name, $guid,$isWithInventory);
-		
-				    }
-                }
-
-				//last part of vocher
-				$this->vocher_withInventories_after_inventories_defaults($voucher_child);
-
-				//ledger with Inventories
-				$this->ledgerWithInventories($voucher_child,$sales_details,$leger_arr,$customer_name);
-
-				$gst_list = $voucher_child->addChild('GST.LIST');
-				$gst_list->addChild('PURPOSETYPE', 'GST'); //Hard Coded
-				$stat_gst_list = $gst_list->addChild('STAT.LIST');
-				$stat_gst_list->addChild('PURPOSETYPE', 'GST'); //Hard Coded
-				$stat_gst_list->addChild('STATKEY', $sales_date.'Invoice'.$sales_number); //Hard Coded
-				$stat_gst_list->addChild('ISFETCHEDONLY', 'No'); //Hard Coded
-				$stat_gst_list->addChild('ISDELETED', 'No'); //Hard Coded
-				$stat_gst_list->addChild('TALLYCONTENTUSER', ''); //Hard Coded
-            }
-
-        } else {
-            $this->inoviceExportForCancel($voucher_child, $guid);
-        }
-    }
-
-	private function vocher_withInventories_after_inventories_defaults($voucher_child){
-		$voucher_child->addChild('CONTRITRANS.LIST', ''); //Hard Coded
-		$voucher_child->addChild('EWAYBILLERRORLIST.LIST', ''); //Hard Coded
-		$voucher_child->addChild('IRNERRORLIST.LIST', ''); //Hard Coded
-		$voucher_child->addChild('HARYANAVAT.LIST', ''); //Hard Coded
-		$voucher_child->addChild('SUPPLEMENTARYDUTYHEADDETAILS.LIST', ''); //Hard Coded
-		$voucher_child->addChild('INVOICEDELNOTES.LIST', ''); //Hard Coded
-		$voucher_child->addChild('INVOICEORDERLIST.LIST', ''); //Hard Coded
-		$voucher_child->addChild('INVOICEINDENTLIST.LIST', ''); //Hard Coded
-		$voucher_child->addChild('ATTENDANCEENTRIES.LIST', ''); //Hard Coded
-		$voucher_child->addChild('ORIGINVOICEDETAILS.LIST', ''); //Hard Coded
-		$voucher_child->addChild('INVOICEEXPORTLIST.LIST', ''); //Hard Coded
-
-	}
-    /**
-     * Cancel invoice specific fields
-     */
-    private function inoviceExportForCancel($voucher_child, $guid)
-    {
-        $voucher_child->addAttribute('ACTION', 'Cancel');
-        $voucher_child->addChild('ISCANCELLED', 'Yes');
-        $voucher_child->addChild('VOUCHERNUMBER');
-        $voucher_child->addChild('REFERENCE');
-        $voucher_child->addChild('ASPAYSLIP', 'No');
-        $voucher_child->addChild('GUID', $guid);
-        $voucher_child->addChild('ALTERID', '1');
-        $haryanavat_list = $voucher_child->addChild('HARYANAVAT.LIST');
-        $haryanavat_list->addAttribute('DESC', '`HARYANAVAT`');
-    }
-
-    /**
-     * Create invoice specific fields
-     */
-    private function inoviceExportForCreate($voucher_child, $sales_details, $customer_name, $guid, $isWithInventory)
-    {
-        $gst_percntg = $sales_details->cgst + $sales_details->sgst + $sales_details->igst + $sales_details->tcs;
-        $gst_all = $sales_details->CGST_AMT + $sales_details->SGST_AMT + $sales_details->IGST_AMT + $sales_details->TCS_AMT;
-        $gst_on_amount = ($sales_details->Total - $gst_all);
-
-		$leger_arr = array(
-				"Total" => $sales_details->Total, // Entire amount
-				"SALES GST @ " . $gst_percntg . "%" => $gst_on_amount, //<LEDGERNAME>SALES GST @ 28%</LEDGERNAME>
-				"OUTPUT CGST @ " . $sales_details->cgst . "%" => $sales_details->CGST_AMT, //<LEDGERNAME>OUTPUT CGST @ 14%</LEDGERNAME>
-				"OUTPUT SGST @ " . $sales_details->sgst . "%" => $sales_details->SGST_AMT, //<LEDGERNAME>OUTPUT SGST @ 14%</LEDGERNAME>
-				"OUTPUT TCS @ " . $sales_details->tcs . "%" => $sales_details->TCS_AMT, //<LEDGERNAME>OUTPUT TCS @ 0%</LEDGERNAME>
-				"OUTPUT IGST @ " . $sales_details->igst . "%" => $sales_details->IGST_AMT, //<LEDGERNAME>OUTPUT IGST @ 28%</LEDGERNAME>
-		);
-
-		//remove those items which are with 0 values.
-        foreach ($leger_arr as $key => $value) {
-            if ($value < 0.01) {
-                unset($leger_arr[$key]);
-            }
-        }
-
-        //There would be multiple entries here for ALLLEDGERENTRIES
-        // Add ledger details for vocher without inventories
-		$this->ledger_WithoutInventories($voucher_child, $sales_details, $leger_arr, $customer_name);
-    }
-
-	private function ledger_WithoutInventories($voucher_child,$sales_details,$leger_arr,$customer_name) {
-	   foreach ($leger_arr as $key => $value) {
-            $ledger_entries = $voucher_child->addChild('ALLLEDGERENTRIES.LIST');
-            //Hard Coded
-            $ledger_entries->addChild('REMOVEZEROENTRIES', 'No');
-
-            //Should be replaced with appr values
-            if ($key == "Total") {
-                $ledger_entries->addChild('ISDEEMEDPOSITIVE', 'Yes'); // <!-- Specifies whether the ledger entry is positive or negative (e.g., "Yes" for positive). -->
-                $ledger_entries->addChild('LEDGERFROMITEM', 'No');
-                $ledger_entries->addChild('LEDGERNAME', $customer_name); // Replace with the customer's ledger name
-                $ledger_entries->addChild('AMOUNT', "-" . $value);
-
-                $bill_allocations = $ledger_entries->addChild('BILLALLOCATIONS.LIST');
-                $bill_allocations->addChild('NAME', $sales_details->sales_number);
-                $bill_allocations->addChild('BILLTYPE', $key);
-                $bill_allocations->addChild('BILLCREDITPERIOD', '0'); //<!-- NO IDEA Hard Code ? -->
-                $bill_allocations->addChild('AMOUNT', "-" . $value);
-            } else {
-                $ledger_entries->addChild('ISDEEMEDPOSITIVE', 'No');
-                $ledger_entries->addChild('LEDGERFROMITEM', 'No');
-                $ledger_entries->addChild('LEDGERNAME', $key); // Replace with the customer's ledger name
-                $ledger_entries->addChild('AMOUNT', $value);
-            }
-        }
-	}
-	
-
-	private function inventoriesExportForCreate($inventory, $inventory_part, $customer_name, $guid)
-    {
-		$leger_arr = array(
-				"CGST" => $inventory_part->cgst, 
-				"SGST/UTGST" => $inventory_part->sgst,
-				"TCS" => $inventory_part->tcs, 
-				"IGST" => $inventory_part->igst
-			);
-	    
-		//remove those items which are with 0 values.
-        foreach ($leger_arr as $key => $value) {
-            if ($value < 0.01) {
-                unset($leger_arr[$key]);
-            }
-        }
-
-        $this->ledger_Inventories($inventory, $leger_arr);
-    }
-
-
-    private function ledger_Inventories($inventory, $leger_arr) {
-	   foreach ($leger_arr as $key => $value) {
-			$rateDetails = $inventory->addChild('RATEDETAILS.LIST');
-			$rateDetails->addChild('GSTRATEDUTYHEAD', $key); 
-			$rateDetails->addChild('GSTRATEVALUATIONTYPE', 'Based on Value'); 
-			$rateDetails->addChild('GSTRATE', $value);
-	     }
-	}
-
-	/**
-	 * Vocher with inventories ledger
-	 */
-	private function ledgerWithInventories($voucher_child,$sales_details,$leger_arr,$customer_name) {
-		$gst_percntg = $sales_details->cgst + $sales_details->sgst + $sales_details->igst + $sales_details->tcs;
-        $gst_all = $sales_details->CGST_AMT + $sales_details->SGST_AMT + $sales_details->IGST_AMT + $sales_details->TCS_AMT;
-        $gst_on_amount = ($sales_details->Total - $gst_all);
-
-		$leger_arr = array(
-				"Total" => $sales_details->Total,
-				"CGST"  => $sales_details->CGST_AMT,
-				"SGST"  => $sales_details->SGST_AMT,
-				"TCS"   => $sales_details->TCS_AMT, 
-				"IGST"  => $sales_details->IGST_AMT,
-		);
-
-		//remove those items which are with 0 values.
-        foreach ($leger_arr as $key => $value) {
-            if ($value < 0.01) {
-                unset($leger_arr[$key]);
-            }
-        }
-
-	   foreach ($leger_arr as $key => $value) {
-            $ledger_entries = $voucher_child->addChild('LEDGERENTRIES.LIST');
-            if ($key == "Total") {
-                $ledger_entries->addChild('LEDGERNAME', $customer_name); 
-				$this->legder_entries_defaults1($ledger_entries);
-
-				$ledger_entries->addChild('AMOUNT', "-" . $value);
-				$ledger_entries->addChild('SERVICETAXDETAILS.LIST', ''); //Hard Coded
-				$ledger_entries->addChild('BANKALLOCATIONS.LIST', ''); //Hard Coded
-              
-                $bill_allocations = $ledger_entries->addChild('BILLALLOCATIONS.LIST');
-                $bill_allocations->addChild('NAME', $sales_details->sales_number);
-                $bill_allocations->addChild('BILLTYPE', 'New Ref');	//New Ref
-				$bill_allocations->addChild('TDSDEDUCTEEISSPECIALRATE', 'No');
-				$bill_allocations->addChild('AMOUNT', "-" . $value);
-                $bill_allocations->addChild('INTERESTCOLLECTION.LIST', ''); //Hard Coded
-				$bill_allocations->addChild('STBILLCATEGORIES.LIST', ''); //Hard Coded
-
-				//$this->legder_entries_defaults2($ledger_entries);
-				                
-            } else {
-                $ledger_entries->addChild('APPROPRIATEFOR', 'Not Applicable');
-                $ledger_entries->addChild('LEDGERNAME', $key); // Replace with the customer's ledger name
-				$ledger_entries->addChild('AMOUNT', $value);
-				$ledger_entries->addChild('VATEXPAMOUNT', $value);
-
-				$ledger_entries->addChild('GSTCLASS', 'Not Applicable');
-				$ledger_entries->addChild('ISDEEMEDPOSITIVE', 'No');
-				$ledger_entries->addChild('LEDGERFROMITEM', 'No');
-				$ledger_entries->addChild('REMOVEZEROENTRIES', 'No');
-				$ledger_entries->addChild('ISPARTYLEDGER', 'No');
-				$ledger_entries->addChild('GSTOVERRIDDEN', 'No');
-				$ledger_entries->addChild('ISGSTASSESSABLEVALUEOVERRIDDEN', 'No');
-				$ledger_entries->addChild('STRDISGSTAPPLICABLE', 'No');
-				$ledger_entries->addChild('STRDGSTISPARTYLEDGER', 'No');
-				$ledger_entries->addChild('STRDGSTISDUTYLEDGER', 'No');
-				$ledger_entries->addChild('CONTENTNEGISPOS', 'No');
-				$ledger_entries->addChild('ISLASTDEEMEDPOSITIVE', 'No');
-				$ledger_entries->addChild('ISCAPVATTAXALTERED', 'No');
-				$ledger_entries->addChild('ISCAPVATNOTCLAIMED', 'No');
-                
-            }
-        }
-	}
-
-	private function legder_entries_defaults1($ledger_entries){
-			$ledger_entries->addChild('GSTCLASS', 'Not Applicable'); //Hard Coded
-			$ledger_entries->addChild('ISDEEMEDPOSITIVE', 'Yes'); // <!-- Specifies whether the ledger entry is positive or negative (e.g., "Yes" for positive). -->
-			$ledger_entries->addChild('LEDGERFROMITEM', 'No'); //Hard Coded
-			$ledger_entries->addChild('REMOVEZEROENTRIES', 'No'); //Hard Coded
-			$ledger_entries->addChild('ISPARTYLEDGER', 'Yes'); //TO-DO
-			$ledger_entries->addChild('GSTOVERRIDDEN', 'No'); //Hard Coded
-			$ledger_entries->addChild('ISGSTASSESSABLEVALUEOVERRIDDEN', 'No'); //Hard Coded
-			$ledger_entries->addChild('STRDISGSTAPPLICABLE', 'No'); //Hard Coded
-			$ledger_entries->addChild('STRDGSTISPARTYLEDGER', 'No'); //Hard Coded
-			$ledger_entries->addChild('STRDGSTISDUTYLEDGER', 'No'); //Hard Coded
-			$ledger_entries->addChild('CONTENTNEGISPOS', 'No'); //Hard Coded
-			$ledger_entries->addChild('ISLASTDEEMEDPOSITIVE', 'Yes'); //Hard Coded
-			$ledger_entries->addChild('ISCAPVATTAXALTERED', 'No'); //Hard Coded
-			$ledger_entries->addChild('ISCAPVATNOTCLAIMED', 'No'); //Hard Coded
-	}
-
-	private function legder_entries_defaults2($ledger_entries){
-		$ledger_entries->addChild('INTERESTCOLLECTION.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('OLDAUDITENTRIES.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('ACCOUNTAUDITENTRIES.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('AUDITENTRIES.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('INPUTCRALLOCS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('DUTYHEADDETAILS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('EXCISEDUTYHEADDETAILS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('RATEDETAILS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('SUMMARYALLOCS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('CENVATDUTYALLOCATIONS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('STPYMTDETAILS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('EXCISEPAYMENTALLOCATIONS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('TAXBILLALLOCATIONS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('TAXOBJECTALLOCATIONS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('TDSEXPENSEALLOCATIONS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('VATSTATUTORYDETAILS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('COSTTRACKALLOCATIONS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('REFVOUCHERDETAILS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('INVOICEWISEDETAILS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('VATITCDETAILS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('ADVANCETAXDETAILS.LIST', ''); //Hard Coded
-		$ledger_entries->addChild('TAXTYPEALLOCATIONS.LIST', ''); //Hard Coded
-	}
-
-    /**
-     * Inventory specific voucher child default fields
-     */
-    private function vocher_inventory_default_fields($voucher_child)
-    {
-        
-        $voucher_child->addChild('ISDELETED', 'No'); //Hard Coded
-        $voucher_child->addChild('ISSECURITYONWHENENTERED', 'No'); //Hard Coded
-        $voucher_child->addChild('ASORIGINAL', 'No');//Hard Coded
-        $voucher_child->addChild('AUDITED', 'No');//Hard Coded
-        $voucher_child->addChild('ISCOMMONPARTY', 'No');//Hard Coded
-        $voucher_child->addChild('FORJOBCOSTING', 'No');//Hard Coded
-		$voucher_child->addChild('ISOPTIONAL', 'No');//Hard Coded
-
-        $voucher_child->addChild('USEFOREXCISE', 'No');//Hard Coded
-        $voucher_child->addChild('ISFORJOBWORKIN', 'No');//Hard Coded
-        $voucher_child->addChild('ALLOWCONSUMPTION', 'No');//Hard Coded
-        $voucher_child->addChild('USEFORINTEREST', 'No');//Hard Coded
-		$voucher_child->addChild('USEFORGAINLOSS', 'No');//Hard Coded
-        $voucher_child->addChild('USEFORGODOWNTRANSFER', 'No');//Hard Coded
-		$voucher_child->addChild('USEFORCOMPOUND', 'No');//Hard Coded
-        $voucher_child->addChild('USEFORSERVICETAX', 'No');//Hard Coded
-        $voucher_child->addChild('ISREVERSECHARGEAPPLICABLE', 'No');//Hard Coded
-        $voucher_child->addChild('ISSYSTEM', 'No');//Hard Coded
-        $voucher_child->addChild('ISFETCHEDONLY', 'No');//Hard Coded
-        $voucher_child->addChild('ISGSTOVERRIDDEN', 'No');//Hard Coded
-		$voucher_child->addChild('ISCANCELLED', 'No');//Hard Coded
-        $voucher_child->addChild('ISONHOLD', 'No');//Hard Coded
-        $voucher_child->addChild('ISSUMMARY', 'No');//Hard Coded
-        $voucher_child->addChild('ISECOMMERCESUPPLY', 'No');//Hard Coded
-        $voucher_child->addChild('ISBOENOTAPPLICABLE', 'No');//Hard Coded
-        $voucher_child->addChild('ISGSTSECSEVENAPPLICABLE', 'No');//Hard Coded
-        $voucher_child->addChild('IGNOREEINVVALIDATION', 'No');//Hard Coded
-        $voucher_child->addChild('CMPGSTISOTHTERRITORYASSESSEE', 'No');//Hard Coded
-
-        $voucher_child->addChild('PARTYGSTISOTHTERRITORYASSESSEE', 'No');//Hard Coded
-        $voucher_child->addChild('IRNJSONEXPORTED', 'No');//Hard Coded
-		$voucher_child->addChild('IRNCANCELLED', 'No'); //Hard Coded
-        $voucher_child->addChild('IGNOREGSTCONFLICTINMIG', 'No');//Hard Coded
-        $voucher_child->addChild('ISOPBALTRANSACTION', 'No');//Hard Coded
-        $voucher_child->addChild('IGNOREGSTFORMATVALIDATION', 'No');//Hard Coded
-        $voucher_child->addChild('ISELIGIBLEFORITC', 'Yes'); //TO-DO
-
-        $voucher_child->addChild('UPDATESUMMARYVALUES', 'No');//Hard Coded
-		$voucher_child->addChild('ISEWAYBILLAPPLICABLE', 'No'); //Hard Coded
-
-		$voucher_child->addChild('ISDELETEDRETAINED', 'No'); //Hard Coded
-        $voucher_child->addChild('ISNULL', 'No'); //Hard Coded
-        $voucher_child->addChild('ISEXCISEVOUCHER', 'No'); //Hard Coded
-        $voucher_child->addChild('EXCISETAXOVERRIDE', 'No'); //Hard Coded
-        $voucher_child->addChild('USEFORTAXUNITTRANSFER', 'No'); //Hard Coded
-        $voucher_child->addChild('ISEXER1NOPOVERWRITE', 'No'); //Hard Coded
-        $voucher_child->addChild('ISEXF2NOPOVERWRITE', 'No'); //Hard Coded
-        $voucher_child->addChild('ISEXER3NOPOVERWRITE', 'No'); //Hard Coded
-        $voucher_child->addChild('IGNOREPOSVALIDATION', 'No'); //Hard Coded
-        $voucher_child->addChild('EXCISEOPENING', 'No'); //Hard Coded
-        $voucher_child->addChild('USEFORFINALPRODUCTION', 'No'); //Hard Coded
-        $voucher_child->addChild('ISTDSOVERRIDDEN', 'No'); //Hard Coded
-        $voucher_child->addChild('ISTCSOVERRIDDEN', 'No'); //Hard Coded
-        $voucher_child->addChild('ISTDSTCSCASHVCH', 'No'); //Hard Coded
-        $voucher_child->addChild('INCLUDEADVPYMTVCH', 'No'); //Hard Coded
-        $voucher_child->addChild('ISSUBWORKSCONTRACT', 'No'); //Hard Coded
-        $voucher_child->addChild('ISVATOVERRIDDEN', 'No'); //Hard Coded
-        $voucher_child->addChild('IGNOREORIGVCHDATE', 'No'); //Hard Coded
-        $voucher_child->addChild('ISVATPAIDATCUSTOMS', 'No'); //Hard Coded
-        $voucher_child->addChild('ISDECLAREDTOCUSTOMS', 'No'); //Hard Coded
-        $voucher_child->addChild('VATADVANCEPAYMENT', 'No'); //Hard Coded
-        $voucher_child->addChild('VATADVPAY', 'No'); //Hard Coded
-        $voucher_child->addChild('ISCSTDELCAREDGOODSSALES', 'No'); //Hard Coded
-        $voucher_child->addChild('ISVATRESTAXINV', 'No'); //Hard Coded
-        $voucher_child->addChild('ISSERVICETAXOVERRIDDEN', 'No'); //Hard Coded
-        $voucher_child->addChild('ISISDVOUCHER', 'No'); //Hard Coded
-        $voucher_child->addChild('ISEXCISEOVERRIDDEN', 'No'); //Hard Coded
-        $voucher_child->addChild('ISEXCISESUPPLYVCH', 'No'); //Hard Coded
-        $voucher_child->addChild('GSTNOTEXPORTED', 'No'); //Hard Coded
-        $voucher_child->addChild('IGNOREGSTINVALIDATION', 'No'); //Hard Coded
-        $voucher_child->addChild('ISGSTREFUND', 'No'); //Hard Coded
-        $voucher_child->addChild('OVRDNEWAYBILLAPPLICABILITY', 'No'); //Hard Coded
-        $voucher_child->addChild('ISVATPRINCIPALACCOUNT', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHSTATUSISVCHNUMUSED', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISINCLUDED', 'No'); //Hard Coded
-		$voucher_child->addChild('VCHGSTSTATUSISUNCERTAIN', 'Yes'); //TO-DO
-        $voucher_child->addChild('VCHGSTSTATUSISEXCLUDED', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISAPPLICABLE', 'Yes'); //TO-DO
-        $voucher_child->addChild('VCHGSTSTATUSISGSTR2BRECONCILED', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISGSTR2BONLYINPORTAL', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISGSTR2BONLYINBOOKS', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISGSTR2BMISMATCH', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISGSTR2BINDIFFPERIOD', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISRETEFFDATEOVERRDN', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISOVERRDN', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISSTATINDIFFDATE', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISRETINDIFFDATE', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSMAINSECTIONEXCLUDED', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISBRANCHTRANSFEROUT', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHGSTSTATUSISSYSTEMSUMMARY', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHSTATUSISUNREGISTEREDRCM', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHSTATUSISOPTIONAL', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHSTATUSISCANCELLED', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHSTATUSISDELETED', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHSTATUSISOPENINGBALANCE', 'No'); //Hard Coded
-        $voucher_child->addChild('VCHSTATUSISFETCHEDONLY', 'No'); //Hard Coded
-        $voucher_child->addChild('PAYMENTLINKHASMULTIREF', 'No'); //Hard Coded
-        $voucher_child->addChild('ISSHIPPINGWITHINSTATE', 'No'); //Hard Coded
-        $voucher_child->addChild('ISOVERSEASTOURISTTRANS', 'No'); //Hard Coded
-        $voucher_child->addChild('ISDESIGNATEDZONEPARTY', 'No'); //Hard Coded
-        $voucher_child->addChild('HASCASHFLOW', 'No'); //Hard Coded
-		
-		$voucher_child->addChild('ISPOSTDATED', 'No'); //Hard Coded
-		$voucher_child->addChild('USETRACKINGNUMBER', 'No'); //Hard Coded
-		$voucher_child->addChild('ISINVOICE', 'Yes'); //TO-DO
-
-        $voucher_child->addChild('MFGJOURNAL', 'No'); //Hard Coded
-        $voucher_child->addChild('HASDISCOUNTS', 'No');  //Hard Coded
-		$voucher_child->addChild('ASPAYSLIP', 'No'); //Hard Coded
-		$voucher_child->addChild('ISCOSTCENTRE', 'No');  //Hard Coded
-        $voucher_child->addChild('ISSTXNONREALIZEDVCH', 'No'); //Hard Coded
-        $voucher_child->addChild('ISEXCISEMANUFACTURERON', 'No');  //Hard Coded
-        $voucher_child->addChild('ISBLANKCHEQUE', 'No');  //Hard Coded
-        $voucher_child->addChild('ISVOID', 'No');  //Hard Coded
-        $voucher_child->addChild('ORDERLINESTATUS', 'No');  //Hard Coded
-        $voucher_child->addChild('VATISAGNSTCANCSALES', 'No');  //Hard Coded
-        $voucher_child->addChild('VATISPURCEXEMPTED', 'No');  //Hard Coded
-        $voucher_child->addChild('ISVATRESTAXINVOICE', 'No');  //Hard Coded
-        $voucher_child->addChild('VATISASSESABLECALCVCH', 'No');  //Hard Coded
-		$voucher_child->addChild('ISVATDUTYPAID', 'Yes'); //TO-DO
-        $voucher_child->addChild('ISDELIVERYSAMEASCONSIGNEE', 'No');  //Hard Coded
-        $voucher_child->addChild('ISDISPATCHSAMEASCONSIGNOR', 'No');  //Hard Coded
-        $voucher_child->addChild('ISDELETEDVCHRETAINED', 'No');  //Hard Coded
-        $voucher_child->addChild('CHANGEVCHMODE', 'No');  //Hard Coded
-        $voucher_child->addChild('RESETIRNQRCODE', 'No');  //Hard Coded
-
-		//$voucher_child->addChild('ALTERID', '5'); //TO-D0 For isWithInventory ??
-		//$voucher_child->addChild('MASTERID', '1'); //TO-DO
-		//$voucher_child->addChild('VOUCHERKEY', '194914205827080'); //TO-DO
-		//$voucher_child->addChild('VOUCHERRETAINKEY', '1'); //TO-DO
-		$voucher_child->addChild('VOUCHERNUMBERSERIES', 'Default'); //TO-DO
-
-    }
-
     
 	
 	/* public function getFactorsForSticker($requiredQty,$defaultQty) {
@@ -3229,7 +3468,13 @@ class SalesController extends CommonController
             "className" => "dt-center",
 			'orderable' => false
         ];
-       
+       	$column[] = [
+            "data" => "debit_amount",
+            "title" => "Debit Amount",
+            "width" => "7%",
+            "className" => "dt-center",
+			'orderable' => false
+        ];
        	$column[] = [
             "data" => "bal_amnt",
             "title" => "Balance Amount to Receive",
@@ -3278,7 +3523,7 @@ class SalesController extends CommonController
 			"visible" => false
         ];
 		
-		$date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+		$date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -3293,11 +3538,23 @@ class SalesController extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([[16,'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["sorting_column"] = json_encode([[17,'desc']]);
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,25000], [10,50,100,200,500,1000,25000]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
-		
+		$current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+            $current_year--;
+        }
+        $date_filter = date("01/04/$current_year") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['export_start_date'] = $date_filter[0];
+        $data['export_end_date'] = $date_filter[1];
+        $data['client_data'] = $this->Crud->read_data("client");
+        $config_data = $this->Crud->read_data("global_configuration");
+        $config_data = array_column($config_data,"config_value","config_name");
+        $data['selected_unit'] = $config_data['allUnitExport'] == "Yes" ? "" : $this->Unit->getSessionClientId();
+        $data['all_unit_export'] = $config_data['allUnitExport'];
 		$this->loadView('reports/receivable_report',$data);
 	}
 
@@ -3323,9 +3580,14 @@ class SalesController extends CommonController
         $base_url = $this->config->item("base_url");
 		
 		$data = $this->SalesModel->getReceivableReportView($condition_arr,$post_data["search"]);
-		// pr($data,1);
+		
 		// pr($this->db->last_query(),1);
 		foreach ($data as $key => $objs) {
+
+			$date_convert = DateTime::createFromFormat('d-m-Y', $objs['created_date']);
+			// Format the date to d/m/Y
+			$objs['created_date'] = $date_convert->format('d/m/Y');
+
 			$created_date_str = $objs['created_date'];
             
 			$payment_receipt_date_formated  = '';
@@ -3337,13 +3599,15 @@ class SalesController extends CommonController
 			$data[$key]['subtotal'] = $subtotal;
 			$data[$key]['row_total'] = number_format($row_total,2,".","");
 			$data[$key]['payment_receipt_date_formated'] = $payment_receipt_date_formated;
-			$tds_amount = $data[$key]['tds_amount'] = $objs['tds_amount'] > 0 ? $objs['tds_amount'] : 0;
-
-			// $data[$key]['bal_amnt'] = $row_total - $val['amount_received'] - $tds_amount;
+			$tds_amount = $data[$key]['tds_amount'] = $objs['tdsamnt'] > 0 ? number_format($objs['tdsamnt'],2,".","") : 0;
+			// $data[$key]['debit_amount'] = $objs['tds_amount'] > 0 ? $objs['tds_amount'] : 0;
+			
+			$data[$key]['bal_amnt'] = $objs['bal_amnt'] == -0 ? 0 : $objs['bal_amnt'];
 
 			// Create a DateTime object by specifying the format
 			$dateTime = DateTime::createFromFormat('d/m/Y', $created_date_str);
 			$due_date = display_no_character("");
+			
 			if ($dateTime && is_numeric($objs['payment_terms'])) {
 				// Convert payment_terms to an integer for days
 				$payment_terms_days = (int)$objs['payment_terms'];
@@ -3359,9 +3623,11 @@ class SalesController extends CommonController
 
 			$today = new DateTime();
         
-			$due_days = display_no_character("");
+			$due_days_status = display_no_character("");
+
             if($due_date != display_no_character("")){
             	if(!empty($objs['payment_receipt_date']) && $objs['payment_receipt_date'] != "" && $objs['payment_receipt_date'] != NULL ){
+
             		$sales_date = $objs['created_date'];
             		$sales_date = DateTime::createFromFormat("d/m/Y", $sales_date);
 					// Format to the desired output
@@ -3408,16 +3674,22 @@ class SalesController extends CommonController
 
 		$data["data"] = $data;
         $total_record = $this->SalesModel->getReceivableReportCount([], $post_data["search"]);
+        // pr($this->db->last_query(),1);
+        // pr($total_record,1);
         $total_with_gst_val = 0;
         $total_paid_amount = 0;
         $total_balance_amount_to_pay = 0;
         $total_tds_amount = 0;
+		$total_debit_amount = 0;
 		foreach ($total_record as $key => $value) {
 			$row_total = round($value['ttlrt'],2) + round($value['tcsamnt'],2);
 			$total_with_gst_val += $row_total;
 			$total_paid_amount += $value['amount_received'];
-			$total_tds_amount += $value['tds_amount'];
-			$total_balance_amount_to_pay += $value['bal_amnt'];
+			$total_tds_amount += $value['tdsamnt'] > 0 ? $value['tdsamnt'] : 0;
+			// if($value['bal_amnt'] > 0){
+				$total_balance_amount_to_pay += $value['bal_amnt'];
+			// }
+			$total_debit_amount += $value['debit_amount'];
 		}
         $data["recordsTotal"] = count($total_record);
         $data["recordsFiltered"] = count($total_record);
@@ -3425,15 +3697,16 @@ class SalesController extends CommonController
         $data["total_paid_amount"] = number_format($total_paid_amount,2);
         $data["total_balance_amount_to_pay"] = number_format($total_balance_amount_to_pay,2);
         $data["total_tds_amount"] = number_format($total_tds_amount,2);
+		$data["total_debit_amount"] = number_format($total_debit_amount,2);
         echo json_encode($data);
 	}
 
-	public function outstanding_reporta()
+	public function outstanding_report()
 	{
-		pr("ok",1);
-		checkGroupAccess("receivable_report","list","Yes");
+		
+		checkGroupAccess("outstanding_report","list","Yes");
 		$data['customers'] = $this->Crud->read_data("customer");
-		$data['selected_customer_part_id'] = $customer_part_id;
+		$data['supplier'] = $this->Crud->read_data("supplier");
 
 		$column[] = [
             "data" => "customer_name",
@@ -3442,20 +3715,25 @@ class SalesController extends CommonController
             "className" => "dt-left",
         ];
         $column[] = [
-            "data" => "sales_number",
-            "title" => "Receivable Amount Due<br>(With Gst)",
+            "data" => "receivable_amount",
+            "title" => "Receivable Amount Due<br>(With GST)",
             "width" => "16%",
             "className" => "dt-left",
         ];
         $column[] = [
-            "data" => "created_date_val",
-            "title" => "Payable Amount Due<br>(With Gst)",
+            "data" => "payable_amount",
+            "title" => "Payable Amount Due<br>(With GST)",
             "width" => "17%",
             "className" => "dt-center",
         ];
         
-		
-		$date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        
+        $current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+        	$current_year--;
+        }
+
+		$date_filter = date("01/04/$current_year") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -3470,13 +3748,287 @@ class SalesController extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode();
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["sorting_column"] = json_encode([[0, 'asc']]);
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500,5000], [10,50,100,200,500,1000,2500,5000]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
-		
-		$this->loadView('reports/receivable_report',$data);
+		$this->loadView('reports/outstanding_report',$data);
 	}
+	public function getOutstandingReportData(){
+		$customer_part_id  = $this->input->post("customer_part_id");
+		$post_data = $this->input->post();
+
+        $column_index = array_column($post_data["columns"], "data");
+        $order_by = "";
+        foreach ($post_data["order"] as $key => $val) {
+			if ($key == 0) {
+				$order_by .= $column_index[$val["column"]] . " " . $val["dir"];
+            } else {
+				$order_by .=
+				"," . $column_index[$val["column"]] . " " . $val["dir"];
+            }
+        }
+		
+        $condition_arr["order_by"] = $order_by;
+        $condition_arr["start"] = $post_data["start"];
+        $condition_arr["length"] = $post_data["length"];
+        $base_url = $this->config->item("base_url");
+		
+		$outstanding_data = [];
+		$recevivable_data = [];
+		$total_paid_amount = 0;
+		if(!($post_data["search"]['supplier_id'] > 0) || ($post_data["search"]['customer_id'] > 0)){
+		$data = $this->SalesModel->getOutstandingReportView($condition_arr,$post_data["search"]);
+		// pr($data,1);
+			foreach ($data as $key => $val) {
+				if(array_key_exists($val['customer_id'], $outstanding_data)){
+					$outstanding_data[$val['customer_id']]['receivable_amount'] +=round($val['bal_amnt'],2);
+				}else{
+					$outstanding_data[$val['customer_id']] = [
+						"customer_name" => $val['customer_name'],
+						"receivable_amount" => round($val['bal_amnt'],2),
+						"payable_amount" => ""
+					];
+				}
+				
+				
+			}
+			$recevivable_data =  array_values($outstanding_data);
+		}
+
+		$total_paid_amount = array_sum(array_column($outstanding_data, "receivable_amount"));
+
+	
+
+
+		$payable_data = [];
+		if(!($post_data["search"]['customer_id'] > 0)|| ($post_data["search"]['supplier_id'] > 0)){
+			$data = $this->SalesModel->getOutstandingPayableReportView($condition_arr,$post_data["search"]);
+			// pr($data);
+			foreach ($data as $key => $val) {
+				$gst_amount = (float)($val['sgst_amount'] + $val['cgst_amount'] + $val['igst_amount'] + $val['tcs_amount']);
+            	$total_with_gst = $gst_amount + $val['base_amount'];  
+            	$bal_amnt = $total_with_gst - $val['amount_received'] - $val['tds_amount'];
+            	if($val['bal_amnt'] > 0){
+					if(array_key_exists($val['supplier_id'], $payable_data)){
+						$payable_data[$val['supplier_id']]['payable_amount'] += round($bal_amnt,2);
+					}else{
+						$payable_data[$val['supplier_id']] = [
+							"customer_name" => $val['customer_name'],
+							"payable_amount" => round($bal_amnt,2),
+							"receivable_amount" => ""
+						];
+					}
+				}
+				
+			}
+			$payable_data =  array_values($payable_data);
+		}
+		$total_pay_amount = array_sum(array_column($payable_data, "payable_amount"));
+		$data = array_merge($recevivable_data,$payable_data);
+		$data = array_merge($recevivable_data,$payable_data);
+		foreach ($data as $key => $value) {
+			if($value['receivable_amount'] == 0 && 	$value['payable_amount'] == ""){
+					unset($data[$key]);
+			}
+		}
+		$data = array_values($data);
+		$chunk_number = $post_data["start"]/$post_data["length"];
+		$array_chunk = array_chunk($data,$post_data["length"]);
+		$data = $array_chunk[($chunk_number)];
+		// pr($data,1);
+		$data["data"] = is_valid_array($data) ? $data : [];
+	    
+	    $payable_count_data = [];
+	    $receivable_count_data = count($recevivable_data) + count($payable_data);
+		
+		
+		// pr($total_paid_amount,1);
+        $data["recordsTotal"] = count($outstanding_data);
+        $data["recordsFiltered"] = count($outstanding_data);
+        $data["total_paid_amount"] = number_format($total_paid_amount,2);
+        $data["total_pay_amount"] = number_format($total_pay_amount,2);
+        $data["total_diff"] = number_format($total_paid_amount - $total_pay_amount,2);
+        echo json_encode($data);
+	}
+
+	public function generateOutsandingPdf($html_content = "",$header="",$footer="",$type="",$pdf_download_type="",$extra_condition ="normal"){
+		$get_data = $this->input->get();
+
+		$date_filter =  $get_data['date'];
+		$date_filter =  explode((" - "),$date_filter);
+		$start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+        $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+		$date_filter = $start_date." - ".$end_date;
+		$pending_to_recived_data = $this->SalesModel->getOutstandingReportData($date_filter);
+		$customer_wise_data = [];
+		foreach ($pending_to_recived_data as $key => $objs) {
+			$objs['type'] = "recive";
+			$date = DateTime::createFromFormat('d-m-Y', $objs['created_date']);
+			$objs['created_date'] = $date->format('d/m/Y');
+			$created_date_str = $objs['created_date'];
+			$dateTime = DateTime::createFromFormat('d/m/Y', $objs['created_date']);
+			
+			$due_date = display_no_character("");
+			if ($dateTime && is_numeric($objs['payment_terms'])) {
+				// Convert payment_terms to an integer for days
+				$payment_terms_days = (int)$objs['payment_terms'];
+		
+				// Add payment_terms (in days) to the created date
+				$dateTime->add(new DateInterval('P' . $payment_terms_days . 'D'));
+		
+				// Get the formatted due date
+				$due_date = $dateTime->format('d/m/Y');
+		
+				
+			}
+			$due_days_status = display_no_character("");
+			$today = new DateTime();
+			$due_days = display_no_character("");
+            if($due_date != display_no_character("")){
+            	if(!empty($objs['payment_receipt_date']) && $objs['payment_receipt_date'] != "" && $objs['payment_receipt_date'] != NULL ){
+
+            		$sales_date = $objs['created_date'];
+            		$sales_date = DateTime::createFromFormat("d/m/Y", $sales_date);
+					// Format to the desired output
+					$sales_date = $sales_date->format("Y-m-d");
+            		$payment_receipt_date = $objs['payment_receipt_date'];
+            		$sales_date = new DateTime($sales_date);
+					$payment_receipt_date = new DateTime($payment_receipt_date);
+					// Calculate the difference
+					$interval = $sales_date->diff($payment_receipt_date);
+
+					// Get the difference in days
+					$due_days = $interval->days;
+
+                }else{
+                    $dueDateObject = DateTime::createFromFormat('d/m/Y', $due_date);
+
+                    // Calculate the interval between the due date and today's date
+					$interval = $today->diff($dueDateObject);
+					
+					// Get the difference in days
+					$due_days = $interval->format('%r%a');
+                }
+            	
+
+				$due_days_status = "normal";
+                if($due_days <= 0 && empty($objs['payment_receipt_date']))
+                {
+                    $due_days_status = "danger";
+                }
+
+			}
+			$objs['due_days'] = $due_days;
+			$objs['due_date'] = $due_date;
+			if($objs['bal_amnt'] > 0){
+				$customer_wise_data[$objs['customer_id']][] = $objs;
+			}
+		}
+		$customer_wise_data = array_values($customer_wise_data);
+		$formatted_date = $date->format('d-m-Y');
+		$pending_to_payable_data = $this->SalesModel->getOutstandingPayableReportData($date_filter);
+		
+		$supplier_wise_data = [];
+		foreach ($pending_to_payable_data as $key => $objs) {
+			$objs['type'] = "pay";
+			$dateTime = DateTime::createFromFormat('d-m-Y', $objs['created_date_val']);
+
+            $due_date = display_no_character("");
+            if ($dateTime && is_numeric($objs['payment_days'])) {
+                // Convert payment_terms to an integer for days
+                $payment_terms_days = (int)$objs['payment_days'];
+                // Add payment_terms (in days) to the created date
+                $dateTime->add(new DateInterval('P' . $payment_terms_days . 'D'));
+                // Get the formatted due date
+                $due_date = $dateTime->format('d/m/Y');
+                $due_date = defaultDateFormat($due_date);
+            }
+            
+           
+            $today = new DateTime();
+            // Convert due date string to a DateTime object
+            $due_days = display_no_character("");
+            if($due_date != display_no_character("")){
+                if(!empty($objs['payment_receipt_date'])){
+                    $sales_date = $objs['created_date_val'];
+
+                    $sales_date = DateTime::createFromFormat("d-m-Y", $sales_date);
+                    // Format to the desired output
+                    $sales_date = $sales_date->format("Y-m-d");
+                    $payment_receipt_date = $objs['payment_receipt_date'];
+                    $sales_date = new DateTime($sales_date);
+                    $payment_receipt_date = new DateTime($payment_receipt_date);
+                    // Calculate the difference
+                    $interval = $sales_date->diff($payment_receipt_date);
+
+                    // Get the difference in days
+                    $due_days = $interval->days;
+                }else{
+                    $dueDateObject = DateTime::createFromFormat('d/m/Y', $due_date);
+                     // Calculate the interval between the due date and today's date
+                    $interval = $today->diff($dueDateObject);
+                    // Get the difference in days
+                    $due_days = $interval->format('%r%a'); // This will give the difference in days with respect to today's date
+                }
+                
+               
+                $due_days_status = "normal";
+                if($due_days <= 0 && empty($objs['payment_receipt_date']))
+                {
+                    $due_days_status = "danger";
+                }
+            }
+            
+            $objs['due_days'] = $due_days;
+            $objs['due_date'] = $due_date;
+            $gst_amount = (float)($objs['sgst_amount'] + $objs['cgst_amount'] + $objs['igst_amount'] + $objs['tcs_amount']);
+ 			$total_with_gst = $gst_amount + $objs['base_amount']; 
+ 			$bal_amnt = $total_with_gst - $objs['amount_received'] - $objs['tds_amount'];
+ 			$objs['bal_paybele_amnt'] = number_format($bal_amnt, 2, '.', ''); 
+			$supplier_wise_data[$objs['id']][] = $objs;
+		}
+		
+		$supplier_wise_data = array_values($supplier_wise_data);
+		// pr($supplier_wise_data,1);
+		$data['date_filter'] = $date_filter;
+		$data['date'] = $get_data['date'];
+		$data['merge_arr'] = array_merge($customer_wise_data,$supplier_wise_data);
+		// pr($supplier_wise_data,1);
+        $html_content = $this->smarty->fetch('sales/outstanding_report.tpl', $data, TRUE);
+        $pdf = new Pdf1('P', 'mm', 'A4', true, 'UTF-8', false);
+
+        // Set margins (adjust as needed)
+        $pdf->SetMargins(7, 7, 7, 7);
+
+        // Set document information
+        $pdf->SetCreator(PDF_CREATOR);
+
+        // Disable header and footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // Set default monospaced font
+        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+        // Enable auto page breaks (optional)
+        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+        // Set image scale factor
+        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+        // Add a page
+        $pdf->AddPage();
+
+        // set some text to print
+        // $html = file_get_contents('path_to_html_file.html'); // Load your HTML content
+
+        // output the HTML content
+        $pdf->writeHTML($html_content, true, false, true, false, '');
+
+        $pdf->Output("outstanding_report.pdf", 'D');
+             ob_end_flush();
+    } 
 
 
 
@@ -3491,7 +4043,7 @@ class SalesController extends CommonController
 		$tds = $this->input->post('tds');
 		$remark = $this->input->post('remark');
 		$check = $this->Common_admin_model->get_data_by_id_count("receivable_report", $this->input->post('sales_number'), "sales_number");
-		
+		$debit_amount = $this->input->post("debit_amount");
 		if ($check == 0) 
 		{
 		    $data = array(
@@ -3500,6 +4052,7 @@ class SalesController extends CommonController
 						"amount_received" => $amount_received,
 						"transaction_details" => $transaction_details,
 						"tds_amount" => $tds,
+						"debit_amount" => $debit_amount,
 						"remark" => $remark
 					);
 					$result = $this->Crud->insert_data("receivable_report", $data);
@@ -3516,6 +4069,7 @@ class SalesController extends CommonController
 				"amount_received" => $amount_received,
 				"transaction_details" => $transaction_details,
 				"tds_amount" => $tds,
+				"debit_amount" => $debit_amount,
 				"remark" => $remark
 				
 			);
@@ -3533,4 +4087,117 @@ class SalesController extends CommonController
 	    echo json_encode($return_arr);
 	    exit();
 	}
+	public function sales_category(){
+
+        $data['sales_category'] = $this->Crud->read_data_acc("sales_category");
+
+         $this->loadView('sales/sales_category', $data);
+
+    }
+
+
+
+    public function add_sales_category()
+
+    {
+
+        $ret_arr = [];
+
+        $msg ='';
+
+        $success = 1;
+
+
+
+        $name = trim($this->input->post('category_name'));
+
+
+
+        $data = array(
+
+            "category_name" => $name,
+
+            "created_dttm" => $this->current_dttm,
+
+            "updated_user" => $this->user_name
+
+        );
+
+
+
+        $result = $this->Crud->insert_data("sales_category", $data, true);
+
+        if ($result) {
+
+            $msg = 'Sales Category added.';
+
+        }else{
+
+            $msg = 'Failed to add or similar data exists.';
+
+            $success = 0;
+
+        }
+
+        $ret_arr['messages'] = $msg;
+
+        $ret_arr['success'] = $success;
+
+        echo json_encode($ret_arr);
+
+
+
+    }
+
+
+
+    public function update_sales_category()
+
+    {
+
+        $ret_arr = [];
+
+        $msg ='';
+
+        $success = 1;
+
+        $name = trim($this->input->post('category_name'));
+
+        $id = trim($this->input->post('category_id'));
+
+
+
+        $data = array(
+
+            "category_name" => $name,
+
+            "updatedttm" => $this->current_dttm,
+
+            "updated_user" => $this->user_name
+
+        );
+
+
+
+        $result = $this->Crud->update_data_column("sales_category", $data, $id, "sales_category_id");
+
+        if ($result) {
+
+            $msg = 'Sales Category updated.';
+
+        } else {
+
+            $msg = 'Failed to update or similar data exists.';
+
+            $success = 0;
+
+        }
+
+        $ret_arr['messages'] = $msg;
+
+        $ret_arr['success'] = $success;
+
+        echo json_encode($ret_arr);
+
+    }
 }

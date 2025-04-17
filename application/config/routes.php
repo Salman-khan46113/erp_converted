@@ -233,7 +233,7 @@ $route['planing_data/(:any)/(:any)/(:any)'] = 'PlanningController/planing_data';
 $route['get_customer_parts_for_planning'] = 'PlanningController/get_customer_parts_for_planning';
 $route['add_planning_data'] = 'PlanningController/add_planning_data';
 $route['add_planning_fg_stock'] = 'PlanningController/add_planning_fg_stock';
-$route['view_planing_data/(:any)/(:any)'] = 'PlanningController/view_planing_data';
+$route['view_planing_data/(:any)'] = 'PlanningController/view_planing_data';
 $route['update_planning_data'] = 'PlanningController/update_planning_data';
 $route['view_all_child_parts_schedule/(:any)/(:any)'] = 'PlanningController/view_all_child_parts_schedule';
 $route['update_schedule_qty'] = 'PlanningController/update_schedule_qty'; //NOT used due to schedule_qty2 not in use...
@@ -291,6 +291,7 @@ $route['addrouting/(:any)'] = 'welcome/addrouting';
 $route['addrouting_customer_subcon/(:any)'] = 'welcome/addrouting_customer_subcon';
 $route['insert_challan_history'] = 'welcome/insert_challan_history';
 $route['addRoutingParts'] = 'welcome/addRoutingParts';
+$route['editRoutingParts'] = 'welcome/editRoutingParts';
 $route['addRoutingParts_subcon'] = 'welcome/addRoutingParts_subcon';
 
 $route['add_challan_parts_subcon'] = 'welcome/add_challan_parts_subcon';
@@ -550,6 +551,8 @@ $route['update_child_stock'] = 'SupplierPartsController/update_child_stock';
 $route['stock_down'] = 'SupplierPartsController/stock_down';
 $route['stock_up'] = 'SupplierPartsController/stock_up';
 $route['add_stock/(:any)'] = 'SupplierPartsController/add_stock';
+$route['stock_up_product_list'] = 'SupplierPartsController/stock_up_product_list';
+$route['delete_stock_up'] = 'SupplierPartsController/delete_stock_up';
 
 
 
@@ -558,6 +561,7 @@ $route['fw_stock'] = 'FGStockController/fg_stock';
 $route['transfer_fg_stock_to_inhouse_stock'] = 'FGStockController/transfer_fg_stock_to_inhouse_stock';
 $route['customer_parts_admin'] = 'FGStockController/customer_parts_admin';
 $route['update_customer_parts_master_fg_stock'] = 'FGStockController/update_customer_parts_master_fg_stock';
+$route['transfer_fg_stock_to_fg_stock'] = 'FGStockController/transfer_fg_stock_to_fg_stock';
 
 
 
@@ -594,10 +598,12 @@ $route['invoice_unlock'] = 'SalesController/invoice_unlock';
 $route['reuse_invoice'] = 'SalesController/reuse_invoice';
 $route['cancel_sale_invoice'] = 'SalesController/cancel_sale_invoice';
 $route['delete_sale_invoice'] = 'SalesController/delete_sale_invoice';
-$route['sales_report'] = 'SalesController/sales_report';
+$route['sales_report'] = 'TallyExportController/sales_report';
+$route['sales_report_export'] = 'SalesController/generateSalesReportPdf';
 $route['hsn_report'] = 'SalesController/hsn_report';
 $route['receivable_report'] = 'SalesController/receivable_report';
 $route['outstanding_report'] = 'SalesController/outstanding_report';
+$route['generate_outsanding_pdf'] = 'SalesController/generateOutsandingPdf';
 $route['update_receivable_report'] = 'SalesController/update_receivable_report';
 $route['view_original_sales_invoice/(:any)'] = 'PdfControllertulsi/view_original_sales_invoice';
 $route['print_packing_sticker'] = 'SalesController/print_packing_sticker';
@@ -647,6 +653,9 @@ $route['customer_po_tracking'] = 'POTrackingController/customer_po_tracking';
 $route['customer_po_tracking_all'] = 'POTrackingController/customer_po_tracking_all';
 $route['customer_po_tracking_all_closed'] = 'POTrackingController/customer_po_tracking_all_closed';
 
+$route['generateAOPdf/(:any)'] = 'POTrackingController/generateAOPdf';
+$route['sendAOEmail/(:any)'] = 'POTrackingController/sendAOEmail';
+
 #------------ PLM Integration ---------------
 #PLM- drawing
 $route['customer_part_drawing/(:any)'] = 'PLMIntegration/customer_part_drawing';
@@ -672,6 +681,9 @@ $route['grades'] = 'P_Molding/grades';
 $route['add_grades'] = 'P_Molding/add_grades';
 $route['add_stock_up'] = 'P_Molding/add_stock_up';
 $route['remove_stock/(:any)'] = 'P_Molding/remove_stock';
+$route['accept_material_request_qty'] = 'P_Molding/accept_material_request_qty';
+$route['delete_material_request'] = 'P_Molding/delete_material_request';
+$route['get_store_stock_material_request'] = 'P_Molding/get_store_stock_material_request';
 
 $route['get_filtered_clientUnit'] = 'P_Molding/get_filtered_clientUnit';
 
@@ -691,6 +703,7 @@ $route['update_downtime_details'] = 'P_Molding/update_downtime_details';
 $route['add_mold_maintenance'] = 'P_Molding/add_mold_maintenance';
 $route['add_machine_mold'] = 'P_Molding/add_machine_mold';
 $route['add_machine_request'] = 'P_Molding/add_machine_request';
+$route['update_machine_request'] = 'P_Molding/update_machine_request';
 $route['add_machine_request_details'] = 'P_Molding/add_machine_request_details';
 $route['add_molding_stock_transfer'] = 'P_Molding/add_molding_stock_transfer';
 $route['add_molding_final_inspection_location'] = 'P_Molding/add_molding_final_inspection_location';
@@ -830,3 +843,29 @@ $route['payment_days_dump_script'] = 'MagrationScript_Controller/payment_days_du
 
 #======================== Mail Notification =======================================
 $route['yesterdays_sales_for_mail'] = 'MagrationScript_Controller/yesterdays_sales_for_mail';
+
+$route['send_email'] = 'MagrationScript_Controller/email_sender_test';
+
+
+#=================================== phase 2 new route =======================
+$route['scrap_report'] = 'ReportsController/scrap_report';
+$route['production_scrap_report'] = 'ReportsController/production_scrap_report';
+$route['production_scrap_transfer_report'] = 'ReportsController/getProductionScrapTransfer';
+$route['transfer_scrap_stock'] = 'ReportsController/transfer_scrap_stock';
+$route['scrap_category'] = 'welcome/scrap_category';
+$route['add_update_scrap_category'] = 'welcome/add_update_scrap_category';
+
+// export,import
+$route['global_export'] = 'exportImportController/global_export';
+$route['global_import'] = 'exportImportController/global_import';
+
+// send monthly schedule
+$route['send_monthly_schedule_report'] = 'MagrationScript_Controller/send_monthly_schedule_report';
+
+$route['sales_category'] = 'SalesController/sales_category';
+$route['add_sales_category'] = 'SalesController/add_sales_category';
+$route['update_sales_category'] = 'SalesController/update_sales_category';
+
+$route['challan_table_out'] = 'ReportsController/challan_table_4_out';
+$route['challan_table_in'] = 'ReportsController/challan_table_5a_in';
+

@@ -10,6 +10,7 @@ const page = {
     init: function() {
         this.dataTable();
         this.initiateValidate();
+        this.imports();
     },
     dataTable: function() {
         var data = {};
@@ -26,7 +27,7 @@ const page = {
                         var lines = csv.split('\n');
                         var modifiedLines = lines.map(function(line) {
                             var values = line.split(',');
-                            values.splice(7, 1);
+                            values.splice(9, 1);
                             return values.join(',');
                         });
                         return modifiedLines.join('\n');
@@ -50,7 +51,7 @@ const page = {
                         cell.fillColor = theme_color;
                     });
                     doc.content[1].table.body.forEach(function (row, index) {
-                        row.splice(7, 1);
+                        row.splice(9, 1);
                         row.forEach(function (cell) {
                             // Set alignment for each cell
                             cell.alignment = "center"; // Change to 'left' or 'right' as needed
@@ -65,6 +66,7 @@ const page = {
         bScrollCollapse: true,
         columnDefs: [{ sortable: false, targets: 7 }],
         pagingType: "full_numbers",
+        order: []
        
         
         });
@@ -83,7 +85,48 @@ const page = {
         });
             // table = $('#example1').DataTable();
       },
-      initiateValidate: function(){
+      imports: function(){
+        let that = this;
+        $("#import_parts_stock,#import_inhouse_parts_stock,#import_customer_parts_stock").submit(function(e){
+        e.preventDefault();
+       
+        var href = $(this).attr("action");
+        var id = $(this).attr("id");
+        var formData = new FormData($('.'+id)[0]);
+        let flag = that.formValidate(id);
+
+        if(flag){
+          return;
+        }
+
+        $.ajax({
+          type: "POST",
+          url: href,
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            var responseObject = JSON.parse(response);
+            var msg = responseObject.messages;
+            var success = responseObject.success;
+            if (success == 1) {
+              toastr.success(msg);
+              $(this).parents(".modal").modal("hide")
+              setTimeout(function(){
+                window.location.reload();
+              },1000);
+
+            } else {
+              toastr.error(msg);
+            }
+          },
+          error: function (error) {
+            console.error("Error:", error);
+          },
+        });
+      });
+      },
+    initiateValidate: function(){
       	let that = this;
       	$("#add_stock_up").submit(function(e){
 	      e.preventDefault();
@@ -120,10 +163,10 @@ const page = {
 	          console.error("Error:", error);
 	        },
 	      });
-	    });
+	 });
 	    $(document).on("click",".transfer-stock-value",function(e){
 	      e.preventDefault();
-	      console.log("ok")
+	      // console.log("ok")
 	      var href = $(this).attr("data-href");
 	      $.ajax({
 	        type: "GET",
@@ -149,29 +192,121 @@ const page = {
 	        },
 	      });
 	    });
+      $(".delete_stock_up").submit(function(e){
+        e.preventDefault();
+        var href = $(this).attr("action");
+        var id = $(this).attr("id");
+        let flag = that.formValidate(id);
+
+        if(flag){
+          return;
+        }
+        
+        var formData = new FormData($('.'+id)[0]);
+
+        $.ajax({
+          type: "POST",
+          url: href,
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            var responseObject = JSON.parse(response);
+            var msg = responseObject.messages;
+            var success = responseObject.success;
+            if (success == 1) {
+              toastr.success(msg);
+              $(this).parents(".modal").modal("hide")
+              setTimeout(function(){
+                window.location.reload();
+              },1000);
+
+            } else {
+              toastr.error(msg);
+            }
+          },
+          error: function (error) {
+            console.error("Error:", error);
+          },
+        });
+      });
+	    $(document).on("change","#stock_up_type",function(e){
+	      e.preventDefault();
+	     	var stock_up_type = $(this).val();
+	      $.ajax({
+	        type: "POST",
+	        url: base_url+"stock_up_product_list",
+	        data: {type:stock_up_type},
+	        // url: "add_invoice_number",,
+	        success: function (response) {
+	          var responseObject = JSON.parse(response);
+	          $("#part_row").html(responseObject['part_arr']).trigger("change")
+	        },
+	        error: function (error) {
+	          console.error("Error:", error);
+	        },
+	      });
+	    });
+	    $('#part_row').on('change', function() {
+		    var selectedOption = $(this).find('option:selected');
+		    var dataInfo = selectedOption.attr('data-qty');
+		    $("#old_qty_stock").val(dataInfo);
+		});
       },
       formValidate : function(form_class = ''){
 	    let flag = false;
 	    $(".custom-form#"+form_class+" .required-input").each(function( index ) {
 	          var value = $(this).val();
-	          if(value == ''){
-	            flag = true;
-	            var label = $(this).parents(".form-group").find("label").contents().filter(function() {
-	              return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
-	            }).text().trim();
-	            var exit_ele = $(this).parents(".form-group").find("label.error");
-	            if(exit_ele.length == 0){
-	              var start ="Please enter ";
-	              if($(this).prop("localName") == "select"){
-	                var start ="Please select ";
-	              }
-	              label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
-	              var validation_message = start+(label.toLowerCase()).replace(/[^\w\s*]/gi, '');
-	              var label_html = "<label class='error'>"+validation_message+"</label>";
-	              $(this).parents(".form-group").append(label_html)
-	            }
-
-	          }
+          var dataMax = parseFloat($(this).attr('data-max'));
+          var dataMin = parseFloat($(this).attr('data-min'));
+          if(value == ''){
+            flag = true;
+            var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+              return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+            }).text().trim();
+            var exit_ele = $(this).parents(".form-group").find("label.error");
+            if(exit_ele.length == 0){
+              var start ="Please enter ";
+              if($(this).prop("localName") == "select"){
+                var start ="Please select ";
+              }
+              label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+              var validation_message = start+(label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+              var label_html = "<label class='error'>"+validation_message+"</label>";
+              $(this).parents(".form-group").append(label_html)
+            }
+          }
+          else if(dataMin !== undefined && dataMin > value){
+            flag = true;
+            var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+              return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+            }).text().trim();
+            var exit_ele = $(this).parents(".form-group").find("label.error");
+            if(exit_ele.length == 0){
+              var end =" must be greater than or equal to "+dataMin;
+              label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+              label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+              label = label.charAt(0).toUpperCase() + label.slice(1);
+              var validation_message =label +end;
+              var label_html = "<label class='error'>"+validation_message+"</label>";
+              $(this).parents(".form-group").append(label_html)
+            }
+            }else if(dataMax !== undefined && dataMax < value){
+              flag = true;
+              var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+                return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+              }).text().trim();
+              var exit_ele = $(this).parents(".form-group").find("label.error");
+              if(exit_ele.length == 0){
+                var end =" must be less than or equal to "+dataMax;
+                label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+                label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+                label = label.charAt(0).toUpperCase() + label.slice(1)
+                var validation_message =label +end;
+                var label_html = "<label class='error'>"+validation_message+"</label>";
+                $(this).parents(".form-group").append(label_html)
+              }
+          }
 	        });
 	        return flag;
 	    }

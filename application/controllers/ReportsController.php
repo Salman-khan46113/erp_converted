@@ -116,7 +116,7 @@ class ReportsController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 
@@ -166,8 +166,9 @@ class ReportsController extends CommonController
 	public function reports_grn()
 	{
         checkGroupAccess("reports_grn","list","Yes");
+
 		$created_month  = $this->input->post("created_month");
-		$created_year  = $this->input->post("created_y	ear");
+		$created_year  = $this->input->post("created_year");
 
 		if (empty($created_year)) {
 			$created_year = $this->year;
@@ -342,15 +343,34 @@ class ReportsController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([8, 'desc']);
-        $data["page_length_arr"] = [[10,50,100,200,500,1000], [10,50,100,200,500,1000]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
-        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
-		
 		$data['showDocRequestDetails'] = $this->showMaterialRequestDetails();
+
+        $error_message = "";
+        if($this->session->userdata("error_message") != ""){
+            $error_message = $this->session->userdata("error_message");
+             $this->session->set_userdata(['error_message' => '']);
+        }   
+        $data['error_message'] = $error_message;
+        $current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+            $current_year--;
+        }
+        $date_filter = date("01/04/$current_year") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['export_start_date'] = $date_filter[0];
+        $data['export_end_date'] = $date_filter[1];
+        $data['client_data'] = $this->Crud->read_data("client");
+        $config_data = $this->Crud->read_data("global_configuration");
+        $config_data = array_column($config_data,"config_value","config_name");
+        $data['selected_unit'] = $config_data['allUnitExport'] == "Yes" ? "" : $this->Unit->getSessionClientId();
+        $data['all_unit_export'] = $config_data['allUnitExport'];
 		$this->getPage('reports/reports_grn', $data);	
 	}
 
@@ -560,7 +580,7 @@ class ReportsController extends CommonController
 
        
        
-        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -577,10 +597,22 @@ class ReportsController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
-        
+        $current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+            $current_year--;
+        }
+        $date_filter = date("01/04/$current_year") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['export_start_date'] = $date_filter[0];
+        $data['export_end_date'] = $date_filter[1];
+        $data['client_data'] = $this->Crud->read_data("client");
+        $config_data = $this->Crud->read_data("global_configuration");
+        $config_data = array_column($config_data,"config_value","config_name");
+        $data['selected_unit'] = $config_data['allUnitExport'] == "Yes" ? "" : $this->Unit->getSessionClientId();
+        $data['all_unit_export'] = $config_data['allUnitExport'];
         $this->loadView('reports/payable_report',$data);
     }
 
@@ -605,11 +637,10 @@ class ReportsController extends CommonController
         $condition_arr["length"] = $post_data["length"];
         $base_url = $this->config->item("base_url");
         $data = $this->Reports_model->getPayableReportView($condition_arr,$post_data["search"]);
-        // pr($data,1); 
         
         foreach ($data as $key => $objs) {
             $gst_amount = (float)($objs['sgst_amount'] + $objs['cgst_amount'] + $objs['igst_amount'] + $objs['tcs_amount']);
-            $data[$key]['gst_amount'] = $gst_amount;
+            $data[$key]['gst_amount'] = number_format($gst_amount,2,".","");
             $created_date_str = $objs['grn_created_date'];  
             $total_with_gst = $gst_amount + $objs['base_amount'];  
             $data[$key]['total_with_gst'] = $total_with_gst;
@@ -621,7 +652,7 @@ class ReportsController extends CommonController
             if(!empty($objs['tcs_amount'])){
                 $tcs_amount = $objs['tcs_amount'];
             }   
-            $data[$key]['tcs_amount'] = $tcs_amount;                         
+            $data[$key]['tcs_amount'] = number_format($tcs_amount,2,".","");                          
             // Create a DateTime object by specifying the format
             $dateTime = DateTime::createFromFormat('d-m-Y', $created_date_str);
             $due_date = display_no_character("");
@@ -682,10 +713,14 @@ class ReportsController extends CommonController
 
             $data[$key]['grn_created_date'] = defaultDateFormat($objs['grn_created_date']);
             $data[$key]['invoice_date'] = defaultDateFormat($objs['invoice_date']);
-            $data[$key]['payment_receipt_date'] = defaultDateFormat($objs['payment_receipt_date']);                                    
+            $data[$key]['payment_receipt_date'] = defaultDateFormat($objs['payment_receipt_date']);  
+             $data[$key]['base_amount'] = number_format($objs['base_amount'],2,".","");
+            $data[$key]['cgst_amount'] = number_format($objs['cgst_amount'],2,".","");
+            $data[$key]['sgst_amount'] = number_format($objs['sgst_amount'],2,".","");
+            $data[$key]['igst_amount'] = number_format($objs['igst_amount'],2,".","");                                
                                                                                 
         }  
-
+        // pr($data,1);
         $data["data"] = $data;
         $total_record = $this->Reports_model->getReceivableReportCount([], $post_data["search"]);
         $total_with_gst_val = 0;
@@ -701,8 +736,10 @@ class ReportsController extends CommonController
             $total_with_gst_val += $total_with_gst > 0 ? $total_with_gst : 0;
             $total_paid_amount += $objs['amount_received'] > 0 ? $objs['amount_received'] : 0;
             $bal_amnt = $total_with_gst - $objs['amount_received'] - $objs['tds_amount'];
-            $data[$key]['bal_amnt'] = $bal_amnt;
-            $total_balance_amount_to_pay += $bal_amnt > 0 ? $bal_amnt : 0;
+            $data[$key]['bal_amnt'] = number_format($bal_amnt, 2, '.', '');
+            if($objs['bal_amnt'] > 0){
+                $total_balance_amount_to_pay += $bal_amnt;
+            }
             $total_tds_amount += $objs['tds_amount'] > 0 ? $objs['tds_amount'] : 0;
         }
         $data["recordsTotal"] = count($total_record);
@@ -803,6 +840,13 @@ class ReportsController extends CommonController
             
         ];
         $column[] = [
+            "data" => "vehicle_number",
+            "title" => "Vehicle Number",
+            "width" => "25%",
+            "className" => "dt-center",
+            
+        ];
+        $column[] = [
             "data" => "qty",
             "title" => "Total Qty",
             "width" => "25%",
@@ -878,7 +922,7 @@ class ReportsController extends CommonController
 
        
        
-        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -894,11 +938,24 @@ class ReportsController extends CommonController
             base_url() .
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
-        $data["sorting_column"] = json_encode([[14, 'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["sorting_column"] = json_encode([[15, 'desc']]);
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
-        
+
+        $current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+            $current_year--;
+        }
+        $date_filter = date("01/04/$current_year") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['export_start_date'] = $date_filter[0];
+        $data['export_end_date'] = $date_filter[1];
+        $data['client_data'] = $this->Crud->read_data("client");
+        $config_data = $this->Crud->read_data("global_configuration");
+        $config_data = array_column($config_data,"config_value","config_name");
+        $data['selected_unit'] = $config_data['allUnitExport'] == "Yes" ? "" : $this->Unit->getSessionClientId();
+        $data['all_unit_export'] = $config_data['allUnitExport'];
         $this->loadView('reports/sales_summary_report',$data);
     }
 
@@ -1089,7 +1146,7 @@ class ReportsController extends CommonController
 
        
        
-        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -1106,10 +1163,23 @@ class ReportsController extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
-        
+
+        $current_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+            $current_year--;
+        }
+        $date_filter = date("01/04/$current_year") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['export_start_date'] = $date_filter[0];
+        $data['export_end_date'] = $date_filter[1];
+        $data['client_data'] = $this->Crud->read_data("client");
+        $config_data = $this->Crud->read_data("global_configuration");
+        $config_data = array_column($config_data,"config_value","config_name");
+        $data['selected_unit'] = $config_data['allUnitExport'] == "Yes" ? "" : $this->Unit->getSessionClientId();
+        $data['all_unit_export'] = $config_data['allUnitExport'];
         $this->loadView('reports/grn_summary_report',$data);
     }
 
@@ -1224,4 +1294,511 @@ class ReportsController extends CommonController
         echo json_encode($response);
         exit();
     }
+
+
+    /* scrap report */
+    public function scrap_report(){
+        checkGroupAccess("scrap_report","list","Yes");
+        $scrap_transfer_data  =$this->Reports_model->getScrapTransferData();
+        $scrap_transfer_data = array_column($scrap_transfer_data,"scrap_stock","scrap_category_id");
+        $data['scrap_product'] = $this->Crud->customQuery("SELECT c.* FROM customer_parts_master c WHERE c.part_type = 'scrap'" );
+        $scrap_report_data  =$this->Reports_model->getScrapReportData();
+        foreach ($scrap_report_data as $key => $value) {
+            $stock_transfer_val = isset($scrap_transfer_data[$value['scrap_category_master_id']]) ? $scrap_transfer_data[$value['scrap_category_master_id']] : 0;
+            $scrap_report_data[$key]['scrap_stock'] = $value['scrap_stock'] - $stock_transfer_val;
+        }
+        $data['scrap_report_data'] = $scrap_report_data;
+        $this->loadView('reports/scrap_report',$data);
+        // pr($data,1);
+    }
+    public function transfer_scrap_stock()
+    {
+        $customer_part_id = $this->input->post('customer_part_id');
+        $scrap_category_id = $this->input->post('scrap_category_id');
+        $scrap_stock = $this->input->post('scrap_stock');
+        $success = 0;
+        $messages = "Something went wrong.";
+        $insert_data = [
+            "scrap_category_id" => $scrap_category_id,
+            "customer_part_id" => $customer_part_id,
+            "stock" => $scrap_stock,
+            "added_by" => $this->session->userdata('user_id'),
+            "added_date" => date("Y-m-d H:i:s"),
+            "remark" => $this->input->post("remark"),
+        ];
+        $insert_id = $this->Common_admin_model->insert('scrap_transfer_stock', $insert_data);
+        if($insert_id > 0){
+            $client_id = $this->session->userdata("clientUnit");
+            $customer_part_stock = $this->Crud->customQuery("SELECT c.* FROM customer_parts_master_stock c WHERE c.customer_parts_master_id = $customer_part_id AND c.clientId = $client_id" );
+            $customer_part_stock_val = isset($customer_part_stock[0]->fg_stock) && $customer_part_stock[0]->fg_stock > 0 ?  $customer_part_stock[0]->fg_stock : 0;
+            $customer_part_stock_val += $scrap_stock;
+            $customer_part_stock_id = $customer_part_stock[0]->customer_partStockId;
+            $update_arr = [
+                "fg_stock" => $customer_part_stock_val
+            ];
+            $updated_row = $this->Common_admin_model->update("customer_parts_master_stock", $update_arr, "customer_partStockId", $customer_part_stock_id);
+            if($updated_row > 0){
+                $messages = "Scrap stock transfer sucessfully";
+                $success = 1;
+            }
+        }
+        $result = [];
+        $result['messages'] = $messages;
+        $result['success'] = $success;
+        echo json_encode($result);
+        exit();
+    }
+
+
+    /* Production Scrap  report */
+    public function production_scrap_report()
+    {
+
+        checkGroupAccess("production_scrap_report","list","Yes");
+        $data['customers'] = $this->Crud->read_data("customer");
+        $column[] = [
+            "data" => "job_no",
+            "title" => "JO No",
+            "width" => "8%",
+            "className" => "dt-center",
+        ];
+        $column[] = [
+            "data" => "date",
+            "title" => "Date",
+            "width" => "10%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "shift",
+            "title" => "Shift",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        $column[] = [
+            "data" => "operation_part_no",
+            "title" => "Operation Part No",
+            "width" => "20%",
+            "className" => "dt-left",
+
+        ];
+        $column[] = [
+            "data" => "operation_part_name",
+            "title" => "Operation part name",
+            "width" => "20%",
+            "className" => "dt-left",
+            
+        ];
+        $column[] = [
+            "data" => "scrap_qty",
+            "title" => "Scrap QTY",
+            "width" => "15%",
+            "className" => "dt-center",
+            
+        ];
+        $column[] = [
+            "data" => "scrap_category",
+            "title" => "Scrap Category",
+            "width" => "10%",
+            "className" => "dt-center",
+        ];
+        $column[] = [
+            "data" => "uom_name",
+            "title" => "UOM",
+            "width" => "7%",
+            "className" => "dt-center status-row",
+            'orderable' => false
+        ];
+        
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
+        
+        $data["data"] = $column;
+        $data["is_searching_enable"] = true;
+        $data["is_paging_enable"] = true;
+        $data["is_serverSide"] = true;
+        $data["is_ordering"] = true;
+        $data["is_heading_color"] = "#a18f72";
+        $data["no_data_message"] =
+            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
+            base_url() .
+            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
+        $data["is_top_searching_enable"] = true;
+        $data["sorting_column"] = json_encode([]); //[15, 'desc']
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
+        $data["admin_url"] = base_url();
+        $data["base_url"] = base_url();
+        $data['scrap_category'] =  $this->Crud->customQuery("SELECT s.* FROM scrap_category_master s");
+        
+        $this->loadView('reports/production_scrap_report',$data);
+    }
+
+
+    public function getProductionScrapReportData  (){
+        $post_data = $this->input->post();
+
+        $column_index = array_column($post_data["columns"], "data");
+        $order_by = "";
+        foreach ($post_data["order"] as $key => $val) {
+            if ($key == 0) {
+                $order_by .= $column_index[$val["column"]] . " " . $val["dir"];
+            } else {
+                $order_by .=
+                "," . $column_index[$val["column"]] . " " . $val["dir"];
+            }
+        }
+        
+        $condition_arr["order_by"] = $order_by;
+        $condition_arr["start"] = $post_data["start"];
+        $condition_arr["length"] = $post_data["length"];
+        $base_url = $this->config->item("base_url");
+        $data = $this->Reports_model->getProductionScrapReportDataView($condition_arr,$post_data["search"]);
+        // pr($data,1);
+        
+        foreach ($data as $key => $val) {            
+            $data[$key]['date'] = defaultDateFormat($val['date']);
+        } 
+
+        $data["data"] = $data;
+        $total_record = $this->Reports_model->getProductionScrapReportDataCount([], $post_data["search"]);
+        $total_balance_amount = 0;
+        $total_gst_amount = 0;
+        $total_amount_with_gst_amount = 0;
+        // foreach ($total_record as $key => $po) {
+        //     if($po['basic_total'] > 0 ) {
+        //         $subtotal = $po['basic_total'];
+        //     }else{
+        //         $subtotal =  $po['total_rate'] - $po['gst_amount'];
+        //     }
+        //     $total_balance_amount += $subtotal;
+        //     $row_total = $po['total_sales_amount'];
+        //     $total_amount_with_gst_amount += $row_total;
+        //     $total_gst_amount += $po['total_gst_amount'];
+        // }
+        $data["recordsTotal"] = count($total_record);
+        $data["recordsFiltered"] = count($total_record);
+        $data["total_balance_amount"] = number_format($total_balance_amount,2);
+        $data["total_gst_amount"] = number_format($total_gst_amount,2);
+        $data["total_amount_with_gst_amount"] = number_format($total_amount_with_gst_amount,2);
+        echo json_encode($data);
+    }
+    public function getProductionScrapTransfer(){
+
+        checkGroupAccess("production_scrap_report","list","Yes");
+        $data['customers'] = $this->Crud->read_data("customer");
+         $column[] = [
+            "data" => "scrap_category",
+            "title" => "Scrap Category",
+            "width" => "8%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "customer_part",
+            "title" => "Scrap Part",
+            "width" => "8%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "stock",
+            "title" => "Transferred Scrap Qty",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        $column[] = [
+            "data" => "added_date",
+            "title" => "Date",
+            "width" => "10%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "remark",
+            "title" => "Remark",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        // $column[] = [
+        //     "data" => "operation_part_no",
+        //     "title" => "Operation Part No",
+        //     "width" => "20%",
+        //     "className" => "dt-left",
+
+        // ];
+        
+        
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
+        
+        $data["data"] = $column;
+        $data["is_searching_enable"] = true;
+        $data["is_paging_enable"] = true;
+        $data["is_serverSide"] = true;
+        $data["is_ordering"] = true;
+        $data["is_heading_color"] = "#a18f72";
+        $data["no_data_message"] =
+            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
+            base_url() .
+            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
+        $data["is_top_searching_enable"] = true;
+        $data["sorting_column"] = json_encode([3, 'desc']); //[15, 'desc']
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
+        $data["admin_url"] = base_url();
+        $data["base_url"] = base_url();
+        $data['scrap_category'] =  $this->Crud->customQuery("SELECT s.* FROM scrap_category_master s");
+        $data['scrap_product'] = $this->Crud->customQuery("SELECT c.* FROM customer_parts_master c WHERE c.part_type = 'scrap'" );
+        // pr($data['scrap_product'],1);
+        $this->loadView('reports/production_scrap_transfer',$data);
+    }
+
+
+    public function getProductionScrapTransferData  (){
+        $post_data = $this->input->post();
+
+        $column_index = array_column($post_data["columns"], "data");
+        $order_by = "";
+        foreach ($post_data["order"] as $key => $val) {
+            if ($key == 0) {
+                $order_by .= $column_index[$val["column"]] . " " . $val["dir"];
+            } else {
+                $order_by .=
+                "," . $column_index[$val["column"]] . " " . $val["dir"];
+            }
+        }
+        
+        $condition_arr["order_by"] = $order_by;
+        $condition_arr["start"] = $post_data["start"];
+        $condition_arr["length"] = $post_data["length"];
+        $base_url = $this->config->item("base_url");
+        $data = $this->Reports_model->getProductionScrapTransferDataView($condition_arr,$post_data["search"]);
+        foreach ($data as $key => $val) {            
+            $data[$key]['customer_part'] = $val['part_number']."/".$val['part_description'];
+            $data[$key]['added_date'] = defaultDateFormat(formateFormDate($val['added_date']));
+            $data[$key]['remark'] = display_no_character($val['remark']);
+        } 
+
+        $data["data"] = $data;
+        $total_record = $this->Reports_model->getProductionScrapTransferDataView([], $post_data["search"]);
+        $total_balance_amount = 0;
+        $data["recordsTotal"] = count($total_record);
+        $data["recordsFiltered"] = count($total_record);
+        $data["total_balance_amount"] = number_format($total_balance_amount,2);
+        echo json_encode($data);
+    }
+
+    public function challan_table_4_out(){
+        checkGroupAccess("challan_table_out","list","Yes");
+         $column[] = [
+            "data" => "gst_number",
+            "title" => "GSTIN of Jobworker",
+            "width" => "8%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "challan_number",
+            "title" => "Challan no",
+            "width" => "8%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "created_date_val",
+            "title" => "Challan date",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        $column[] = [
+            "data" => "part_number",
+            "title" => "Part Number",
+            "width" => "10%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "part_description",
+            "title" => "Description of goods",
+            "width" => "10%",
+            "className" => "dt-left   ",
+        ];
+        $column[] = [
+            "data" => "qty",
+            "title" => "Quantity",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        $column[] = [
+            "data" => "value",
+            "title" => "Taxable value (in Rupees)",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        // $column[] = [
+        //     "data" => "operation_part_no",
+        //     "title" => "Operation Part No",
+        //     "width" => "20%",
+        //     "className" => "dt-left",
+
+        // ];
+        
+        
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
+        $data['supplier'] = $this->Crud->read_data("supplier");
+        $data["data"] = $column;
+        $data["is_searching_enable"] = true;
+        $data["is_paging_enable"] = true;
+        $data["is_serverSide"] = true;
+        $data["is_ordering"] = true;
+        $data["is_heading_color"] = "#a18f72";
+        $data["no_data_message"] =
+            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
+            base_url() .
+            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
+        $data["is_top_searching_enable"] = true;
+        $data["sorting_column"] = json_encode(); //[15, 'desc']
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
+        $data["admin_url"] = base_url();
+        $data["base_url"] = base_url();
+        $data['scrap_category'] =  $this->Crud->customQuery("SELECT s.* FROM scrap_category_master s");
+        $data['scrap_product'] = $this->Crud->customQuery("SELECT c.* FROM customer_parts_master c WHERE c.part_type = 'scrap'" );
+        // pr($data['scrap_product'],1);
+        $this->loadView('reports/challan_table_out',$data);
+    }
+    public function challanTableOutView(){
+        $post_data = $this->input->post();
+        $column_index = array_column($post_data["columns"], "data");
+        $order_by = "";
+        foreach ($post_data["order"] as $key => $val) {
+            if ($key == 0) {
+                $order_by .= $column_index[$val["column"]] . " " . $val["dir"];
+            } else {
+                $order_by .=
+                "," . $column_index[$val["column"]] . " " . $val["dir"];
+            }
+        }
+        
+        $condition_arr["order_by"] = $order_by;
+        $condition_arr["start"] = $post_data["start"];
+        $condition_arr["length"] = $post_data["length"];
+        $base_url = $this->config->item("base_url");
+        $data = $this->Reports_model->challanTableOut($condition_arr,$post_data["search"]);
+        // pr($data,1);
+        foreach ($data as $key => $val) {            
+            // $data[$key]['created_date_val'] = defaultDateFormat($val['created_date_val']);
+        } 
+
+        $data["data"] = $data;
+        $total_record = $this->Reports_model->challanTableOutCount([], $post_data["search"]);
+        $total_balance_amount = 0;
+        $data["recordsTotal"] = $total_record['total_records'];
+        $data["recordsFiltered"] = $total_record['total_records'];
+        echo json_encode($data);
+    }
+    public function challan_table_5a_in(){
+        checkGroupAccess("challan_table_in","list","Yes");
+         $column[] = [
+            "data" => "gst_number",
+            "title" => "GSTIN of Jobworker",
+            "width" => "8%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "challan_number",
+            "title" => "Original Challan No",
+            "width" => "8%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "created_date_val",
+            "title" => "Original Challan Date",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        $column[] = [
+            "data" => "part_number",
+            "title" => "Part Number",
+            "width" => "10%",
+            "className" => "dt-left",
+        ];
+        $column[] = [
+            "data" => "part_description",
+            "title" => "Description of goods",
+            "width" => "10%",
+            "className" => "dt-left   ",
+        ];
+        $column[] = [
+            "data" => "recevied_req_qty",
+            "title" => "Quantity",
+            "width" => "10%",
+            "className" => "dt-center   ",
+        ];
+        // $column[] = [
+        //     "data" => "operation_part_no",
+        //     "title" => "Operation Part No",
+        //     "width" => "20%",
+        //     "className" => "dt-left",
+
+        // ];
+        
+        
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
+        $data['supplier'] = $this->Crud->read_data("supplier");
+        $data["data"] = $column;
+        $data["is_searching_enable"] = true;
+        $data["is_paging_enable"] = true;
+        $data["is_serverSide"] = true;
+        $data["is_ordering"] = true;
+        $data["is_heading_color"] = "#a18f72";
+        $data["no_data_message"] =
+            '<div class="p-3 no-data-found-block"><img class="p-2" src="' .
+            base_url() .
+            'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
+        $data["is_top_searching_enable"] = true;
+        $data["sorting_column"] = json_encode(); //[15, 'desc']
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
+        $data["admin_url"] = base_url();
+        $data["base_url"] = base_url();
+        $data['scrap_category'] =  $this->Crud->customQuery("SELECT s.* FROM scrap_category_master s");
+        $data['scrap_product'] = $this->Crud->customQuery("SELECT c.* FROM customer_parts_master c WHERE c.part_type = 'scrap'" );
+        // pr($data['scrap_product'],1);
+        $this->loadView('reports/challan_table_in',$data);
+    }
+    public function challanTableInView(){
+        $post_data = $this->input->post();
+        $column_index = array_column($post_data["columns"], "data");
+        $order_by = "";
+        foreach ($post_data["order"] as $key => $val) {
+            if ($key == 0) {
+                $order_by .= $column_index[$val["column"]] . " " . $val["dir"];
+            } else {
+                $order_by .=
+                "," . $column_index[$val["column"]] . " " . $val["dir"];
+            }
+        }
+        
+        $condition_arr["order_by"] = $order_by;
+        $condition_arr["start"] = $post_data["start"];
+        $condition_arr["length"] = $post_data["length"];
+        $base_url = $this->config->item("base_url");
+        $data = $this->Reports_model->challanTableIn($condition_arr,$post_data["search"]);
+        // pr($data,1);
+        foreach ($data as $key => $val) {            
+            // $data[$key]['created_date_val'] = defaultDateFormat($val['created_date_val']);
+        } 
+
+        $data["data"] = $data;
+        $total_record = $this->Reports_model->challanTableInCount([], $post_data["search"]);
+        // pr($total_record,1);
+        $total_balance_amount = 0;
+        $data["recordsTotal"] = $total_record['total_records'];
+        $data["recordsFiltered"] = $total_record['total_records'];
+        echo json_encode($data);
+    }
 }
+
+
+

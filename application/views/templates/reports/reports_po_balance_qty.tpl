@@ -94,42 +94,7 @@
                             <div class="">
                             <div class="table-responsive text-nowrap">
                                 <table id="reports_po_balance" class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            
-                                            <th>Supplier name</th>
-                                            <th>Part No</th>
-                                            <th>Part Description</th>
-                                            <th>PO Number</th>
-                                            <th>Date</th>
-                                            <th>Expiry Date</th>
-                                            <th>Status</th>
-                                            <th>Qty</th>
-                                            <th>Received QTY</th>
-                                            <th>Balance QTY</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <%assign var="i" value=1%>
-                                        <%if $po_data%>
-                                            <%foreach from=$po_data item=po%>
-                                                <tr>
-                                                    <td><%$i%></td>
-                                                    <td><%$po->supplier_name%></td>
-                                                    <td><%$po->part_number%></td>
-                                                    <td><%$po->part_description%></td>
-                                                    <td><%$po->po_number%></td>
-                                                    <td><%$po->created_date%></td>
-                                                    <td><%$po->expiry_po_date%></td>
-                                                    <td><%$po->status%></td>
-                                                    <td><%$po->qty%></td>
-                                                    <td><%$po->qty - $po->pending_qty%></td>
-                                                    <td><%$po->pending_qty%></td>
-                                                </tr>
-                                                <%assign var="i" value=$i+1%>
-                                            <%/foreach%>
-                                        <%/if%>
-                                    </tbody>
+                                    
                                 </table>
                                 </div>
                             </div>

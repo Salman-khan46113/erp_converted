@@ -135,7 +135,7 @@ class InhousePartsController extends CommonController
 			$data['month_number'][$i] = $this->Common_admin_model->get_month_number($data['month_data'][$i]);
 		}
 		$data["data"] = $column;
-        $data["is_searching_enable"] = false;
+        $data["is_searching_enable"] = true;
         $data["is_paging_enable"] = true;
         $data["is_serverSide"] = true;
         $data["is_ordering"] = true;
@@ -404,7 +404,7 @@ class InhousePartsController extends CommonController
 		}
 		// $this->inhouse_parts_admin($id);
 		$ret_arr['success'] = $success;
-		$ret_arr['msg'] = $msg;
+		$ret_arr['messages'] = $msg;
 		echo json_encode($ret_arr);
 	}
 

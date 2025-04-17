@@ -98,10 +98,10 @@
                      </div>
                      <div class="col-lg-6 ">
                         <div class="form-group mb-3">
-                           <label for="machine_name" class="form-label">Supplier Mobile Number</label>
+                           <label for="machine_name" class="form-label">Contact Details  </label>
                            <input type="text" name="supplierMnumber" value="<%$mobile_no%>"
-                              class="form-control onlyNumericInput" 
-                              placeholder="Enter Supplier Mobile Number">
+                              class="form-control " 
+                              placeholder="Enter Contact Details ">
                         </div>
                      </div>
                      <div class="col-lg-6 ">

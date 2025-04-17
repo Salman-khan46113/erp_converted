@@ -106,7 +106,7 @@
                                 <table id="challan_inward" class="table table-striped">
                                     <thead>
                                         <tr>
-                                            <!-- <th>Sr No</th> -->
+                                            <th style="display: none;">Sr No</th>
                                             <th>CR NO</th>
                                             <th>Customer</th>
                                             <th>Reference Challan Number</th>
@@ -120,7 +120,7 @@
                                         <%assign var='i' value=1 %>
                                         <%foreach from=$customer_challan_part_return item=u %>
                                                   <tr>
-                                                    <!-- <td><%$i%></td> -->
+                                                    <td style="display: none;"><%$u->customer_challan_part_return_id%></td>
                                                     <td><%$u->grn_code %></td>
                                                     <td><%$u->customer_name %></td>
                                                     <td><%display_no_character($u->customer_challan_no)%></td>

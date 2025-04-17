@@ -31,6 +31,8 @@ class PlanningController extends CommonController
 
 		$data['financial_year'] = $this->uri->segment('2');
 		$financial_year = $this->uri->segment('2');
+		$data['financial_year_value'] = explode("-",$financial_year);
+		$data['financial_year_value'] = $data['financial_year_value'][1];
 		// $this->load->view('header');
 		$this->loadView('customer/planing_data_month', $data);
 		// $this->load->view('footer');
@@ -52,6 +54,9 @@ class PlanningController extends CommonController
 		$financial_year = $this->uri->segment('2');
 		$month = $this->uri->segment('3');
 		$data['financial_year'] = $financial_year;
+		$data['financial_year_value'] = explode("-",$financial_year);
+		$data['financial_year_value'] = $data['financial_year_value'][1];
+		
 		$data['month'] = $month;
 		$data['customer'] = $this->Crud->read_data("customer");
 		if($customer_id === "ALL") {
@@ -83,16 +88,34 @@ class PlanningController extends CommonController
 					// pr($planing_data_val[count($planing_data_val)-1]);
 					$data['planing_data'][$key]->planing_data[0] = $planing_data_val[0];
 					$month_number = $this->Common_admin_model->get_month_number($month);
-					$year_number = substr($financial_year, 3, strlen($financial_year));
-					$data['sales_invoice'][$t->customer_part_id] = $this->Crud->customQuery('SELECT sum(p.qty) as dispatched_qty FROM new_sales s, sales_parts p
-							WHERE s.clientId = '.$this->Unit->getSessionClientId().'
-							AND s.created_year = "' . $year_number . '"
-							AND s.created_month = "'.$month_number.'" 
+					$year_number = (int) substr($financial_year, 3, strlen($financial_year));
+					
+					// $data['sales_invoice'][$t->customer_part_id] = $this->Crud->customQuery('SELECT sum(p.qty) as dispatched_qty FROM new_sales s, sales_parts p
+					// 		WHERE s.clientId = '.$this->Unit->getSessionClientId().' 
+					// 		 AND ((s.created_year = "'.$year_number.'" AND s.created_month > "4") 
+     //     					OR (s.created_year = "'.$year_number.'" AND s.created_month < "3"))
+					// 		AND s.status = "lock"
+					// 		AND p.part_id = '.$t->customer_part_id.'
+					// 		AND s.id = p.sales_id
+					// 		GROUP BY s.customer_part_id');
+						$sales_invoice_data = $this->Crud->customQuery('SELECT s.*,p.qty as dispatched_qty FROM new_sales s, sales_parts p
+							WHERE s.clientId = '.$this->Unit->getSessionClientId().' 
+							 AND ((s.created_year = "'.$year_number.'" AND s.created_month >= "4") 
+         					OR (s.created_year = "'.($year_number+1).'" AND s.created_month <= "3"))
 							AND s.status = "lock"
 							AND p.part_id = '.$t->customer_part_id.'
 							AND s.id = p.sales_id
-							GROUP BY s.customer_part_id');
+							');
+						foreach ($sales_invoice_data as $key => $value) {
+							if($value->created_month == $month_number){
+								$data['sales_invoice'][$t->customer_part_id][] = $value;
+							}
+						}
+
 					}
+
+					
+
 				
 			}
 		}
@@ -111,6 +134,7 @@ class PlanningController extends CommonController
 		$customer_id = $this->input->post('id');
 		$customer_parts = $this->Crud->get_data_by_id("customer_part", $customer_id, 'customer_id');
 		echo '<select>Select Part Number / Description';
+		echo "<option value=''>Select Part Number / Description</option>";
 		if ($customer_parts) {
 			foreach ($customer_parts as $value) {
 					echo '<option value="' . $value->id . '">' . $value->part_number. ' / ' . $value->part_description . '</option>';
@@ -133,11 +157,12 @@ class PlanningController extends CommonController
 			"customer_part_id" => $customer_part_id,
 			"clientId" => $this->Unit->getSessionClientId()
 		);
-
+		$success = 0;
+		$message = 'Something went wrong.';
 		$planing_data = $this->Crud->get_data_by_id_multiple("planing", $data1);
 		if ($planing_data) {
-			$this->addWarningMessage('<br>Plan already added for this month and year, please try with another part.');
-			$this->redirectMessage();
+			$message = 'Plan already added for this month and year, please try with another part.';
+			// $this->redirectMessage();
 		} else {
 			$data222 = array(
 				"financial_year" => $financial_year,
@@ -174,15 +199,23 @@ class PlanningController extends CommonController
 					$result = $this->Crud->insert_data("planing_data", $data);
 				}
 				if ($result) {
-					$this->addSuccessMessage('Plan sucessfully added.');
+					$success = 1;
+					$message = 'Plan sucessfully added.';
 				} else {
-					$this->addErrorMessage('<br>Unable to Add,please check bom and price data');
+					$message = 'Unable to Add,please check bom and price data';
 				}
 			} else {
-				$this->addErrorMessage('<br>Unable to Add, please check bom and price data');
+				$message = 'Unable to Add, please check bom and price data';
 			}
-			$this->redirectMessage();
+			// $this->redirectMessage();
 		}
+		$return_arr = array(
+	        'message' => $message,
+	        'success' => $success
+	    );
+
+	    echo json_encode($return_arr);
+	    exit();
 	}
 	
 	public function add_planning_fg_stock()
@@ -230,7 +263,7 @@ class PlanningController extends CommonController
 		$month_id = $this->input->post('month_id');
 		$schedule_qty = $this->input->post('schedule_qty');
 		$financial_year = $this->input->post('financial_year');
-		$planing_id = $this->input->post('planing_id');
+		$planing_id = $this->input->post('planning_id');
 		$data1 = array(
 			"financial_year" => $financial_year,
 			"month" => $month_id,
@@ -238,6 +271,12 @@ class PlanningController extends CommonController
 			"clientId" =>  $this->Unit->getSessionClientId()
 		);
 		$planing_data = $this->Crud->get_data_by_id_multiple("planing", $data1);
+		$data1 = array(
+			"planing_id" => $planing_id
+		);
+		$planing_part_data = $this->Crud->get_data_by_id_multiple("planing_data", $data1);
+		$planing_part_id_data = array_column($planing_part_data, "id","child_part_id");
+		$planing_part_data = array_column($planing_part_data, "child_part_id");
 		$success = 0;
         $messages = "Something went wrong.";
 		if ($planing_data) {
@@ -246,25 +285,42 @@ class PlanningController extends CommonController
 			);
 
 			$bom_data = $this->Crud->get_data_by_id_multiple("bom", $arr);
+			// pr($bom_data,1);
 			if ($bom_data) {
+				// pr($bom_data,1);
 				foreach ($bom_data as $b) {
 					$child_part_data = $this->SupplierParts->getSupplierPartById($b->child_part_id);
 					$actual_stock = $child_part_data[0]->stock;
 					$bom_qty = $b->quantity;
+
 					$required_qty = $schedule_qty * $bom_qty;
 					$shortage_qty = $required_qty - $actual_stock;
-					$data = array(
-						"planing_id" => $planing_data[0]->id,
-						"child_part_id" => $b->child_part_id,
-						"bom_qty" => $bom_qty,
-						"schedule_qty" => $schedule_qty,
-						"required_qty" => $required_qty,
-						"shortage_qty" => $shortage_qty,
-						"actual_stock" => $actual_stock,
-						"financial_year" => $financial_year,
-						"month" => $month_id,
-					);
-					$result = $this->Crud->update_data("planing_data", $data, $planing_id);
+					
+					if(!in_array($b->child_part_id, $planing_part_data)){
+						$data = array(
+							"planing_id" => $planing_data[0]->id,
+							"child_part_id" => $b->child_part_id,
+							"bom_qty" => $bom_qty,
+							"schedule_qty" => $schedule_qty,
+							"required_qty" => $required_qty,
+							"shortage_qty" => $shortage_qty,
+							"actual_stock" => $actual_stock,
+							"financial_year" => $financial_year,
+							"month" => $month_id,
+						);
+						$result = $this->Crud->insert_data("planing_data", $data);
+					}else{
+						$data = array(
+							"bom_qty" => $bom_qty,
+							"schedule_qty" => $schedule_qty,
+							"required_qty" => $required_qty,
+							"shortage_qty" => $shortage_qty,
+							"actual_stock" => $actual_stock,
+							"financial_year" => $financial_year,
+							"month" => $month_id,
+						);
+						$result = $this->Crud->update_data("planing_data", $data, $planing_part_id_data[$b->child_part_id]);
+					}
 					
 				}
 				if ($result) {
@@ -672,9 +728,11 @@ class PlanningController extends CommonController
 					AND cp.customer_id = c.id
 					AND p.clientId = ".$this->Unit->getSessionClientId()." 
 					AND EXTRACT(MONTH FROM shop_date) = ".$filter_month."
-					AND EXTRACT(YEAR FROM shop_date) = ".$filter_year);
+					AND ((EXTRACT(YEAR FROM shop_date) = '".$filter_year."' AND EXTRACT(MONTH FROM shop_date) >= '4') 
+         					OR (EXTRACT(YEAR FROM shop_date) = '".($filter_year+1)."' AND EXTRACT(MONTH FROM shop_date) <= '3'))");
 
 			} else {
+
 				$data['planing_data'] = $this->Crud->customQuery("SELECT c.customer_name, cp.part_number, cp.part_description, p.*, EXTRACT(MONTH FROM shop_date) as shop_month, 
 				EXTRACT(YEAR FROM shop_date) as shop_year
 				FROM planning_shop_order p, 
@@ -683,10 +741,15 @@ class PlanningController extends CommonController
 					AND cp.id = p.customer_part_id
 					AND cp.customer_id = c.id
 					AND p.clientId = ".$this->Unit->getSessionClientId()." 
-					AND EXTRACT(MONTH FROM shop_date) = ".$filter_month."
-					AND EXTRACT(YEAR FROM shop_date) = ".$filter_year);
+					AND p.shop_month = ".$filter_month."
+					AND ((p.shop_year = '".$filter_year."' AND p.shop_month >= '4') 
+         					OR (p.shop_year = '".($filter_year+1)."' AND p.shop_month <= '3'))");
 			}
+			// ((EXTRACT(YEAR FROM shop_date) = '".$year_number."' AND EXTRACT(MONTH FROM shop_date) >= '4') 
+   //       					OR (EXTRACT(YEAR FROM shop_date) = '".($year_number+1)."' AND EXTRACT(MONTH FROM shop_date) <= '3'))
 		}
+
+		// pr($this->db->last_query(),1);
 
 		for ($i = 1; $i <= 12; $i++) {
 			$data['month_data'][$i] = $this->Common_admin_model->get_month($i);
@@ -700,6 +763,8 @@ class PlanningController extends CommonController
 		// $this->load->view('header');
 		// $this->load->view('planning_shop_order_list', $data);
 		// $this->load->view('footer');
+		$data['min_date'] =  date("Y-m-d", strtotime("+ 1 day")); 
+		$data['max_date'] =  date("Y-m-d", strtotime("+ 3 day")); 
 		$this->loadView('customer/planning_shop_order_list',$data);
 	}
 
@@ -708,28 +773,33 @@ class PlanningController extends CommonController
 		$customer_part_id = $this->input->post('customerPartId');
 		$schQty = $this->input->post('scheduleQty');
 		$shopDate = $this->input->post('shop_date');
-		
+		$year = explode("-",$shopDate);
+		$year_value = $year[0];
+		if((int) $year[1] <= 3){
+			$year[0]--;
+		}
 		//Get the total quantity for shop order month,year to cross check it.
 		$total_consumed_qty = $this->Crud->customQuery("SELECT sum(scheduleQty) as total FROM 
 			`planning_shop_order`
 			WHERE customer_part_id = ".$customer_part_id."
 			AND shop_month = date_format('".$shopDate."','%c')
-			AND shop_year = EXTRACT(YEAR FROM '".$shopDate."')
+			AND shop_year = ".$year_value."
 			GROUP BY customer_part_id");
-
 		//Get the planned schedule qty for specific year-month
 		$month_planned_qty = $this->Crud->customQuery("SELECT pd.schedule_qty 
 		FROM planing_data pd, planing p
 		WHERE p.customer_part_id = ".$customer_part_id."
 		AND pd.planing_id = p.id
 		AND pd.month = UPPER(date_format('".$shopDate."','%b'))
-		AND pd.financial_year = CONCAT('FY-',EXTRACT(YEAR FROM '".$shopDate."'))
+		AND pd.financial_year = CONCAT('FY-',".$year[0].")
 		GROUP BY p.customer_part_id");
 		
 		$pending_qty = $month_planned_qty[0]->schedule_qty - $total_consumed_qty[0]->total;
-		
+		$success = 0;
+        $messages = "Something went wrong";
 		if($schQty > $pending_qty) {
-			$this->addErrorMessage('Shop order quantity can not be more than months schedule quantity. Pending quantity is '.$pending_qty);
+			// $this->addErrorMessage('Shop order quantity can not be more than months schedule quantity. Pending quantity is '.$pending_qty);
+			$messages = 'Shop order quantity can not be more than months schedule quantity. Pending quantity is '.$pending_qty;
 		}else{
 			$sql = "SELECT shop_no FROM planning_shop_order WHERE shop_no like '" . $this->getShopOrderSerialNo() . "%' order by id desc LIMIT 1";
 			$latestSeqFormat = $this->Crud->customQuery($sql);
@@ -759,14 +829,19 @@ class PlanningController extends CommonController
 		
 			$result = $this->Crud->insert_data("planning_shop_order", $insert_data);
 			if ($result) {
-				$this->addSuccessMessage('Shop order added sucessfully.');
+				$success = 1;
+				$messages = "Shop order added sucessfully.";
+				// $this->addSuccessMessage('Shop order added sucessfully.');
 			} else {
-				$this->addErrorMessage('Failed to add Shop order. Please try again.');
+				$messages = "Failed to add Shop order. Please try again.";
+				// $this->addErrorMessage('Failed to add Shop order. Please try again.');
 			}
 		}
 
-		
-		$this->redirectMessage();
+		$return_arr['success']=$success;
+        $return_arr['messages']=$messages;
+        echo json_encode($return_arr);
+        exit;
 	}
 
 

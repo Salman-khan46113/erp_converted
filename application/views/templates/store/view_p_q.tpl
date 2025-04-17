@@ -45,7 +45,7 @@
                         </div>
                         <div class="col-lg-4">
                         <div class="form-group">
-                        <label for="">Select Machine</label>
+                        <label for="">Machine</label>
                         <select name="machine_id" id="" class="form-control select2">
                         <option value="">SELECT</option>
                         <%if ($machine_data) %>

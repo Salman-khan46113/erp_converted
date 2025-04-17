@@ -72,7 +72,7 @@
                                     <div class="col-lg-4">
                                         <div class="form-group mb-3">
                                             <label for="" class="form-label">Transporter<span class="text-danger">*</span></label>
-                                            <select name="transporter"  class="form-control select2">
+                                            <select name="transporter"  class="form-control select2" id="transporter_drop">
                                                 <option value="">Select Transporter</option>
                                                 <%if !empty($transporter)%>
                                                     <%foreach from=$transporter item=tr%>
@@ -89,7 +89,7 @@
                                                    placeholder="Enter Vehicle No" 
                                                    value="" 
                                                    name="vehicle_number" 
-                                                    class="form-control"/>
+                                                    class="form-control" id="vehicle_number" />
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
@@ -117,7 +117,7 @@
                                             <div class="col-lg-5">
                                                 <div class="form-group mb-3 mt-2">   
                                                     <input type="radio" name="ship_addressType" value="consignee" onchange="toggleConsigneeSelection()" id="customerAddress">
-                                                    &nbsp;<label >Select Consignee Address</label><br>
+                                                    &nbsp;<label >Consignee Address</label><br>
                                                 </div>
                                                 <div class="form-group" id="consigneeSelect">
                                                     <select name="consignee"   disabled class="form-control select2" id="consigneeSelectInput">
@@ -132,7 +132,20 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <label class="form-label">Tally Categories</label>
+                                            <select name="tally_category" id="tallyCategorySelect" class="form-control">
+                                                <option value="-">Select</option>
+                                                <%foreach from=$tally_sales_category item=t%>
+                                                <option value="<%$t->sales_category_id%>">
+                                                    <%$t->category_name%>
+                                                </option>
+                                                <%/foreach%>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="col-lg-2">
                                         <div class="form-group">
                                             <label for="" class="form-label">Remark</label>
@@ -277,6 +290,9 @@
                         required: function() {
                             return $("input[name='ship_addressType']:checked").val() === "consignee";
                         }
+                    },
+                    remark: {
+                        maxlength :100
                     }
                 },
                 messages: {
@@ -300,6 +316,9 @@
                     },
                     consignee: {
                         required: "Please select a consignee address."
+                    },
+                    remark: {
+                        maxlength :"Enter remark is less than 100 characters."
                     }
                 },
                 errorPlacement: function(error, element) {
@@ -378,6 +397,29 @@
             }
           } 
         });
+        $('#transporter_drop').change(function() {
+            var transporter_id  = $(this).val();
+            if(transporter_id > 0){
+                $.ajax({
+                    url: '<%$site_url%>Welcome/get_transportor_data',
+                    type: "POST",
+                    data: {
+                        id: transporter_id
+                    },
+                    success: function(response) {
+                         let res = JSON.parse(response);
+                         $("#vehicle_number").val(res.vehicle_number)
+                    },
+                    complete: function() {
+                        // Hide the loading icon
+                        // $("#loading-overlay").hide();
+                    }        
+                });
+            }else{
+                $("#vehicle_number").val("")
+            }
+        });
+        transporter_drop
 
 
     });

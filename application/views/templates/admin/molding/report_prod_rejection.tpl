@@ -229,6 +229,7 @@ var pdf_title = "Rejection Report";
             searching: true,
     // scrollX: true,
     scrollY: true,
+     lengthMenu: [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]],
     bScrollCollapse: true,
     pagingType: "full_numbers",
     });

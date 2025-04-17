@@ -162,6 +162,24 @@ const page = {
         if(flag){
           return;
         }
+        if($(this).parents(".modal-dialog").find(".required-input-route").length > 0){
+          var data_max = parseFloat($(this).parents(".modal-dialog").find(".required-input-route").data('max'));
+          var data_min = parseFloat($(this).parents(".modal-dialog").find(".required-input-route").data('min'));
+          var value = parseFloat($(this).parents(".modal-dialog").find(".required-input-route").val());
+          console.log(data_max,data_min,value)
+          $(this).parents(".modal-dialog").find(".rm-count-row .error").remove();
+          if(data_min > value){
+            var validation_message = "RM Count should be greater than 0";
+            var label_html = "<label class='error'>"+validation_message+"</label>";
+            $(this).parents(".modal-dialog").find(".required-input-route").after(label_html);
+            return;
+          }else if(data_max < value){
+            var validation_message = "RM Count should be less than or equals to "+data_max;
+            var label_html = "<label class='error'>"+validation_message+"</label>";
+            $(this).parents(".modal-dialog").find(".required-input-route").after(label_html);
+            return;
+          }
+      }
         var formData = new FormData($('.'+id)[0]);
 
         $.ajax({
@@ -197,6 +215,32 @@ const page = {
       let flag = that.formValidate("update_grn_qty_form_"+data_id);
       if(flag){
         return;
+      }
+      var element_parent = $(this).parents(".item-row");
+      console.log($(this).parents(".item-row").find(".required-input-route"))
+      if($(this).parents(".item-row").find(".required-input-route").length > 0){
+          var data_max = parseFloat($(this).parents(".item-row").find(".required-input-route").data('max'));
+          var data_min = parseFloat($(this).parents(".item-row").find(".required-input-route").data('min'));
+          var value = parseFloat($(this).parents(".item-row").find(".required-input-route").val());
+          value = value > -1 ? parseInt(value) : "NO";
+          
+          $(this).parents(".item-row").find(".rm-count-row .error").remove();
+          if(value == 'NO'){
+            var validation_message = "Please enter RM Count";
+            var label_html = "<label class='error'>"+validation_message+"</label>";
+            $(this).parents(".item-row").find(".required-input-route").after(label_html);
+            return;
+          }else if(data_min > value){
+            var validation_message = "RM Count should be greater than 0";
+            var label_html = "<label class='error'>"+validation_message+"</label>";
+            $(this).parents(".item-row").find(".required-input-route").after(label_html);
+            return;
+          }else if(data_max < value){
+            var validation_message = "RM Count should be less than or equals to "+data_max;
+            var label_html = "<label class='error'>"+validation_message+"</label>";
+            $(this).parents(".item-row").find(".required-input-route").after(label_html);
+            return;
+          }
       }
       var formData = new FormData($('.update_grn_qty_form_'+data_id)[0]);
       $.ajax({

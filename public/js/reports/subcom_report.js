@@ -140,8 +140,10 @@ const page = {
         $('#serarch-filter-input').on('keyup', function() {
             table.search(this.value).draw();
         });
-        $(".dataTables_length select").select2({
-            minimumResultsForSearch: Infinity
+        table.on('init.dt', function() {
+            $(".dataTables_length select").select2({
+                minimumResultsForSearch: Infinity
+            });
         });
     },
     formValidation: function(){
@@ -156,7 +158,7 @@ const page = {
             showDropdowns: true,
             autoApply: true,
             locale: {
-                format: 'YYYY/MM/DD' // Change this format as per your requirement
+                format: 'DD/MM/YYYY' // Change this format as per your requirement
             }
         });
         dateRangePicker = $('#date_range_filter').data('daterangepicker');

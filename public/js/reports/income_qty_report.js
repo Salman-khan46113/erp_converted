@@ -142,8 +142,11 @@ const page = {
         return params;
     },
     resetFilter: function(){
-        $("#month_number").val('').trigger('change');
-        $("#year").val('');
+        var current_month = new Date().getMonth();
+        $("#month_number").val(current_month+1).trigger('change');
+        var current_year = new Date().getFullYear();
+        $("#year").val(current_year).trigger('change');;
+
         table.destroy(); 
         this.dataTable();
     }

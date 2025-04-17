@@ -76,21 +76,28 @@
                 <div class="row">
                     <div class="col-12">
                         <!-- /.card -->
-                        <div class="w-100 hide">
+                        <div class="w-100 ">
                         <input type="text" name="reason" placeholder="Filter Search" class="form-control serarch-filter-input m-3 me-0" id="serarch-filter-input" fdprocessedid="bxkoib">
                     </div>
                         <div class="card w-100">
+                           <p class="ps-2 pt-2" style="color: red;">Note: <br>
+                            1.If price for purchase parts is not defined, MRP requirement will not be generated.<br>
+                            2.If the BOM is updated, edit the scheduled quantity to update the gross MRP requirement.<br>
+                            3.After refresh the page,details will be updated.</p>  
+                        </div>
+                        <div class="card w-100 mt-4">
                             <!-- /.card-header -->
+                           
                             <div class="">
                                 <table id="example1" class="table  table-striped">
                                    <thead>
                                         <tr>
                                             <th>Sr. No.</th>
                                             <th>Item part Number</th>
-                                            <th>Item part Description</th>                                         
+                                            <th>Item part Description</th>
+                                            <th>Gross MRP Req </th>                                         
                                             <th>Actual Stock</th>
                                             <th>Net MRP Req</th>
-                                            <th>Required Qty </th>
                                             <th>Part Rate</th>
                                             <th>Subtotal</th>
                                         </tr>
@@ -101,27 +108,29 @@
                                      
                                         <%if ($child_part_master) %>
                                             <%foreach from=$child_part_master item=t %>
+                                            <%if $t->req_qty > 0%>
                                             <%assign var="total" value=$total+($t->total)%>
                                                 <tr>
                                                     <td><%$i%></td>
                                                     <td><%$t->part_number %></td>
                                                     <td><%$t->part_description %></td>
+                                                    <td><%$t->req_qty %></td>
                                                     <td><%$t->stock %></td>
                                                     <td class="<%if ($t->net_mrp_req > 0) %>text-danger<%else %>text-success<%/if%>"><%$t->net_mrp_req %></td>
-                                                    <td><%$t->req_qty %></td>
                                                     <td><%$t->part_rate %></td>
                                                     <td><%$t->subtotal %></td>
                                                 </tr>
                                                <%assign var="i" value=$i+1%>
+                                            <%/if%>
                                             <%/foreach%>
                                         <%/if%>
                                     </tbody>
-                                    <tfoot>
+                                    <!-- <tfoot>
                                         <tr style="text-align:right">
                                             <th colspan="7">Total Purchase Value</th>
                                             <th><%$total%></th>
                                         </tr>
-                                    </tfoot>
+                                    </tfoot> -->
                                 </table>
                             </div>
                             <!-- /.card-body -->

@@ -133,7 +133,7 @@
                   </div> -->
                   <div class="form-group">
                     <label for="payment_terms">Phone Number</label><span class="text-danger">*</span>
-                    <input type="number" min="0" name="phone_no"  class="form-control"  aria-describedby="emailHelp" placeholder="Payment Terms">
+                    <input type="text"  name="phone_no"  class="form-control onlyNumericInput"  aria-describedby="emailHelp" placeholder="Payment Terms">
                   </div>
                   <div class="form-group">
                     <label for="payment_terms">Bank Details</label><span class="text-danger">*</span>
@@ -287,7 +287,7 @@
                               </div>
                               <div class="form-group col-6">
                                 <label for="payment_terms">Phone Number</label><span class="text-danger">*</span>
-                                <input type="number" value="<%$t->phone_no  %>" min="0" name="uphone_no" required class="form-control" id="phone_no" aria-describedby="emailHelp" placeholder="Payment Terms">
+                                <input type="text" value="<%$t->phone_no  %>" min="0" name="uphone_no" required class="form-control onlyNumericInput" id="phone_no" aria-describedby="emailHelp" placeholder="Payment Terms">
                                 <input type="hidden" name="id" value="<%$t->id %>" id="t-id">
                               </div>
                               <div class="form-group col-6">

@@ -26,6 +26,19 @@
                   </div>
                </li>
             </div>
+            <div class="filter-row">
+               <li class="nav-small-cap">
+                  <span class="hide-menu">Status</span>
+                  <span class="search-show-hide float-right"><i class="ti ti-minus"></i></span>
+               </li>
+               <li class="sidebar-item">
+                  <select name="clientUnitFrom" id="search_Status"   class="form-control select2 required-input" >
+                    <option value="">Select Status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+               </li>
+            </div>
         </ul>
       </div>
    </nav>
@@ -88,7 +101,7 @@
                               / Stock 
                             <%/if%>
                             </label><span class="text-danger">*</span>
-                            <select name="part_id"  class="from-control select2 required-input" style="width: 100%;">
+                            <select name="part_id"  class="from-control select2 required-input" style="width: 100%;" id="material_request_part_id">
                               <option value="">Select</option>
                               <%if ($child_part) %>
                                     <%foreach from=$child_part item=c %>
@@ -137,16 +150,25 @@
                             <input type="file" name="uploading_document"
                               class="form-control">
                           </div>
-                          <div class="form-group">
-                            <label for="po_num">Enter Qty <span
+                          <div class="form-group" >
+                            <label for="po_num" style="    float: left;">Enter Qty <span
                               class="text-danger">*</span></label>
+                              <p id="material_transfer_request_qty"></p>
                             <input type="text" name="qty" step="any"
                               placeholder="Enter Qty" name="qty" 
-                              class="form-control required-input onlyNumericInput">
+                              class="form-control required-input onlyNumericInput" data-min='1'  >
                             <input type="hidden" name="type" value="minus" step="any"
                               placeholder="Enter Qty" name="qty" required
                               class="form-control">
                           </div>
+                          <%if $configuration['RMCount'] eq 'Yes'%>
+                          <div class="form-group rm-count-row"  style="display: none;">
+                            <label for="route_count" style="    float: left;">RM Count <span></span></label>
+                            <input type="text" name="route_count" step="any"
+                              placeholder="Enter RM Count" name="route_count" 
+                              class="form-control required-input-route onlyNumericInput" data-min='1' data-max="" >
+                          </div>
+                          <%/if%>
                         </div>
                       </div>
                   </div>
@@ -166,12 +188,21 @@
                     <th>Sr. No.</th>
                     <th>Request Number</th>
                     <th>Part Number / Description</th>
-                    <th>Request Qty</th>
+                    <th width="15%">Request Qty</th>
+                    <%if $configuration['RMCount'] eq 'Yes'%>
+                    <th width="15%">RM Count</th>
+                    <%/if%>
+                    <th  width="15%">Accept Qty</th>
+                    <%if $configuration['RMCount'] eq 'Yes'%>
+                    <th width="15%">Accept RM Count</th>
+                    <%/if%>
+                    <th>Submit</th>
                     <th>UOM</th>
                     <th>Reason</th>
                     <th>Document</th>
                     <th>Request Date</th>
                     <th>Action</th>
+                    <th >status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -179,11 +210,55 @@
                     <%if ($stock_changes) %>
                         <%foreach from=$stock_changes item=c %>
 	                            <%if ($c->type == "minus") %>
-					                  <tr>
+					                  <tr class="item-row">
 						                    <td><%$i %></td>
 						                    <td><%$c->id %></td>
 						                    <td><%$c->part_number %>/<%$c->part_description %></td>
 						                    <td><%$c->qty %></td>
+                                <%if $configuration['RMCount'] eq 'Yes'%>
+                                  <td><%$c->route_count %></td>
+                                <%/if%>
+                                <td>
+                                  <%if checkGroupAccess("stock_down","update","No") %>
+                                  <%if ($c->status == "pending") %>
+                                    <form action="<%base_url('accept_material_request_qty')%>" class="accept_material_request_qty accept_material_request_qty<%$i %> custom-form" method="post" id="accept_material_request_qty<%$i %>">
+                                              <div class="form-group">
+                                                <label style="display: none;">Accept Qty</label>
+                                                <input name="accepted_qty" data-max="<%$c->stock%>" data-req-max="<%$c->qty%>" data-min="1"  type="text" step="any" class="form-control onlyNumericInput required-input">
+                                            </div>
+                                                <input name="id_val" value="<%$c->id %>" type="hidden" required="" class="form-control">
+                                  <%else if ($c->status != "pending") %>
+                                    <%$c->accepted_qty %> 
+                                  <%/if%>
+                                  <%else%>
+                                      <%display_no_character()%> 
+                                  <%/if%>
+                                </td>
+                                <%if $configuration['RMCount'] eq 'Yes'%>
+                                  <td>
+                                  <%if checkGroupAccess("stock_down","update","No") %>
+                                  <%if ($c->status == "pending") %>
+                                  <div class="form-group rm-count-row">
+                                                <label style="display: none;">Accept RM Count</label>
+                                                <input name="accepted_route_qty" data-max="<%$c->route_count%>"  data-min="1"  type="text" step="any" class="form-control required-input-route required-input">
+                                            </div>
+                                  <%else if ($c->status != "pending") %>
+                                    <%$c->accepted_route_qty %> 
+                                  <%/if%>
+                                  <%else%>
+                                      <%display_no_character()%> 
+                                  <%/if%>
+                                  </td>
+                                <%/if%>
+                                <td>
+
+                                  <%if ($c->status == "pending") && checkGroupAccess("stock_down","update","No") %>
+                                      <button type="submit" class="btn btn-danger">Submit</button>
+                                    </form>
+                                  <%else if ($c->status != "pending") %>
+                                    <%display_no_character()%> 
+                                  <%/if%>
+                                </td>
 						                    <td><%$c->uom_name %></td>
 						                    <td><%$c->reason %></td>
 						                    <td>
@@ -196,17 +271,58 @@
 						                    </td>
 						                    <td><%$c->created_date %></td>
 						                    <td>
-						                      <%if ($c->status == "pending") %>
-                                    <%if (checkGroupAccess("stock_down","update","No")) %> 
-  							                       <a class="btn btn-warning transfer-stock-value"
-  							                        href="javascript:void(0)" data-href="<%base_url('remove_stock/') %><%$c->id %>">Click To Transfer Stock</a>
-                                    <%else%>
-                                      <%display_no_character("")%>
+                                  <%if (checkGroupAccess("stock_down","update","No")) %> 
+                                    <%if ($c->status == "pending") %>
+
+                                       <button type="button" data-bs-toggle="modal" class="btn btn-danger " data-bs-target="#deleteInvoice<%$srNo%>">Delete</button>
+                                          <div class="modal fade" id="deleteInvoice<%$srNo%>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                                  <div class="modal-dialog modal-dialog-centered">
+                                                                      <div class="modal-content">
+                                                                          <div class="modal-header">
+                                                                              <h5 class="modal-title" id="exampleModalLabel">Delete Material Transfer Requests</h5>
+                                                                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                                                                  <span aria-hidden="true">&times;</span>
+                                                                              </button>
+                                                                          </div>
+                                                                          <div class="modal-body">
+                                                                              <div class="row">
+                                                                                  <form action="<%base_url('delete_material_request')%>" method="POST" class="custom-form delete_material_request<%$srNo%> delete_material_request" id="delete_material_request<%$srNo%>">
+                                                                                      <div class="col-lg-12">
+                                                                                          <div class="form-group">
+                                                                                              <label for=""><b>Are you sure want to Delete this Material Transfer Requests?</b> </label>
+                                                                                              <input name="id_val" value="<%$c->id %>" type="hidden" required="" class="form-control">
+                                                                                          </div>
+                                                                                      </div>
+                                                                              </div>
+                                                                          </div>
+                                                                          <div class="modal-footer">
+                                                                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                              <button type="submit" class="btn btn-primary">Delete</button>
+                                                                          </div>
+                                                                      </div>
+                                                                      </form>
+                                                                  </div>
+                                                              </div>
                                     <%/if%>
-						                      <%else %>
-						                          stock transferred
-						                      <%/if%>
+  						                      <%if ($c->status == "accepted") && false%>
+    							                       <a class="btn btn-warning transfer-stock-value"
+    							                        href="javascript:void(0)" data-href="<%base_url('remove_stock/') %><%$c->id %>">Click To Transfer Stock</a>
+  						                      <%else if ($c->status == "stock_transfered")%>
+  						                          stock transferred
+  						                      <%/if%>
+                                  <%else if ($c->status == "stock_transfered")%>
+                                   stock transferred
+                                  <%else %>
+                                      <%display_no_character("")%>
+                                  <%/if%>
 						                    </td>
+                                <td>
+                                  <%if $c->status == "stock_transfered"%>
+                                      Completed
+                                  <%else%>
+                                      Pending
+                                  <%/if%>
+                                </td>
 					                  </tr>
 			                  	<%assign var='i' value=$i+1 %>
 			                    <%/if%>
@@ -282,8 +398,8 @@
                         var lines = csv.split('\n');
                         var modifiedLines = lines.map(function(line) {
                             var values = line.split(',');
-                            values.splice(6, 1);
-                            values.splice(4, 1);
+                            values.splice(10, 1);
+                            values.splice(5, 1);
                             return values.join(',');
                         });
                         return modifiedLines.join('\n');
@@ -307,8 +423,8 @@
                         cell.fillColor = theme_color;
                     });
                     doc.content[1].table.body.forEach(function (row, index) {
-                        row.splice(6, 1);
-                        row.splice(4, 1);
+                        row.splice(10, 1);
+                        row.splice(5, 1);
                         row.forEach(function (cell) {
                             // Set alignment for each cell
                             cell.alignment = "center"; // Change to 'left' or 'right' as needed
@@ -336,6 +452,7 @@
         },1000)
   
         $(".search-filter").on("click",function(){
+
             var date_range_filter = $("#date_range_filter").val();
             date_range_filter = date_range_filter.split(" - ");  // Split into start and end dates
 
@@ -355,23 +472,34 @@
         })
   });
   $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+
         var date_range_filter = $("#date_range_filter").val();
         date_range_filter = date_range_filter.split(" - ");
+
+        var search_status  = $("#search_Status").val();
         
         var startDate = ((date_range_filter[0]).replaceAll("/","-")).split("-");
         startDate = startDate[1]+"-"+startDate[0]+"-"+startDate[2];
         var endDate = (date_range_filter[1]).replaceAll("/","-");
-        var date = data[7]; // Date is in the second column (index 1)
+        var date = data[9]; // Date is in the second column (index 1)
         // Convert date strings to date objects for comparison
         var start = startDate ? new Date(startDate) : null;
         var end = endDate ? new Date(formatDate(endDate)) : null;
         var rowDate = new Date(formatDate(date));
         // Check if the row's date is within the range
+
         if (
             (start && rowDate < start) ||
             (end && rowDate > end)
         ) {
             return false;
+        }
+
+        if (search_status != "") {
+            if(data[11] != search_status){
+                return false;
+            }
+            
         }
         return true;
     });
@@ -386,6 +514,25 @@
       if(flag){
         return;
       }
+      if($(this).parents(".modal-dialog").find(".required-input-route").length > 0){
+          var data_max = parseFloat($(this).parents(".modal-dialog").find(".required-input-route").data('max'));
+          var data_min = parseFloat($(this).parents(".modal-dialog").find(".required-input-route").data('min'));
+          var value = parseFloat($(this).parents(".modal-dialog").find(".required-input-route").val());
+          console.log(data_max,data_min,value)
+          $(this).parents(".modal-dialog").find(".rm-count-row .error").remove();
+          if(data_min > value){
+            var validation_message = "RM Count should be greater than 0";
+            var label_html = "<label class='error'>"+validation_message+"</label>";
+            $(this).parents(".modal-dialog").find(".required-input-route").after(label_html);
+            return;
+          }else if(data_max < value){
+            var validation_message = "RM Count should be less than or equals to "+data_max;
+            var label_html = "<label class='error'>"+validation_message+"</label>";
+            $(this).parents(".modal-dialog").find(".required-input-route").after(label_html);
+            return;
+          }
+      }
+
       var formData = new FormData($('#add_stock_up')[0]);
 
       $.ajax({
@@ -417,7 +564,6 @@
     });
   $(document).on("click",".transfer-stock-value",function(e){
       e.preventDefault();
-      console.log("ok")
       var href = $(this).attr("data-href");
       $.ajax({
         type: "GET",
@@ -446,26 +592,272 @@
   function formValidate(form_class = ''){
     let flag = false;
     $(".custom-form#"+form_class+" .required-input").each(function( index ) {
-      var value = $(this).val();
-      if(value == ''){
-        flag = true;
-        var label = $(this).parents(".form-group").find("label").contents().filter(function() {
-          return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
-        }).text().trim();
-        var exit_ele = $(this).parents(".form-group").find("label.error");
-        if(exit_ele.length == 0){
-          var start ="Please enter ";
-          if($(this).prop("localName") == "select"){
-            var start ="Please select ";
+     var value = $(this).val();
+          var dataMax = parseFloat($(this).attr('data-max'));
+          var dataMin = parseFloat($(this).attr('data-min'));
+          if(value == ''){
+            flag = true;
+            var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+              return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+            }).text().trim();
+            var exit_ele = $(this).parents(".form-group").find("label.error");
+            if(exit_ele.length == 0){
+              var start ="Please enter ";
+              if($(this).prop("localName") == "select"){
+                var start ="Please select ";
+              }
+              label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+              var validation_message = start+(label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+              var label_html = "<label class='error'>"+validation_message+"</label>";
+              $(this).parents(".form-group").append(label_html)
+            }
           }
-          label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
-          var validation_message = start+(label.toLowerCase()).replace(/[^\w\s*]/gi, '');
-          var label_html = "<label class='error'>"+validation_message+"</label>";
-          $(this).parents(".form-group").append(label_html)
-        }
-
-      }
-    });
-    return flag;
+          else if(dataMin !== undefined && dataMin > value){
+            flag = true;
+            var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+              return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+            }).text().trim();
+            var exit_ele = $(this).parents(".form-group").find("label.error");
+            if(exit_ele.length == 0){
+              var end =" must be greater than or equal to "+dataMin;
+              label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+              label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+              label = label.charAt(0).toUpperCase() + label.slice(1);
+              var validation_message =label +end;
+              var label_html = "<label class='error'>"+validation_message+"</label>";
+              $(this).parents(".form-group").append(label_html)
+            }
+            }else if(dataMax !== undefined && dataMax < value){
+              flag = true;
+              var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+                return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+              }).text().trim();
+              var exit_ele = $(this).parents(".form-group").find("label.error");
+              if(exit_ele.length == 0){
+                var end =" must be less than or equal to "+dataMax;
+                if(label == 'Accept qty'){
+                    var end =" must be less than or equal to store stock "+dataMax;
+                }
+                
+                label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+                label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+                label = label.charAt(0).toUpperCase() + label.slice(1)
+                var validation_message =label +end;
+                var label_html = "<label class='error'>"+validation_message+"</label>";
+                $(this).parents(".form-group").append(label_html)
+              }
+          }
+        });
+       
+        return flag;
   }
+
+  $(document).on("submit",".accept_material_request_qty",function(e){
+            e.preventDefault();
+           
+            var href = $(this).attr("action");
+            var id = $(this).attr("id");
+            let flag = that.formValidate1(id);
+
+            if(flag){
+              return;
+            }
+
+            if($(this).parents(".item-row").find(".required-input-route").length > 0){
+                var data_max = parseFloat($(this).parents(".item-row").find(".required-input-route").data('max'));
+                var data_min = parseFloat($(this).parents(".item-row").find(".required-input-route").data('min'));
+                var value = parseFloat($(this).parents(".item-row").find(".required-input-route").val());
+                $(this).parents(".item-row").find(".rm-count-row .error").remove();
+                if(data_min > value){
+                  var validation_message = "RM Count should be greater than 0";
+                  var label_html = "<label class='error'>"+validation_message+"</label>";
+                  $(this).parents(".item-row").find(".required-input-route").after(label_html);
+                  return;
+                }else if(data_max < value){
+                  var validation_message = "RM Count should be less than or equals to "+data_max;
+                  var label_html = "<label class='error'>"+validation_message+"</label>";
+                  $(this).parents(".item-row").find(".required-input-route").after(label_html);
+                  return;
+                }
+            }
+            var formData = new FormData($('.'+id)[0]);
+
+            $.ajax({
+              type: "POST",
+              url: href,
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (response) {
+                var responseObject = JSON.parse(response);
+                var msg = responseObject.messages;
+                var success = responseObject.success;
+                if (success == 1) {
+                  toastr.success(msg);
+                  $(this).parents(".modal").modal("hide")
+                  setTimeout(function(){
+                    window.location.reload();
+                  },1000);
+
+                } else {
+                  toastr.error(msg);
+                }
+              },
+              error: function (error) {
+                console.error("Error:", error);
+              },
+            });
+          });
+
+  $(document).on("submit",".delete_material_request",function(e){
+            e.preventDefault();
+           
+            var href = $(this).attr("action");
+            var id = $(this).attr("id");
+            let flag = that.formValidate1(id);
+
+            if(flag){
+              return;
+            }
+            // return;
+            var formData = new FormData($('.'+id)[0]);
+
+            $.ajax({
+              type: "POST",
+              url: href,
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (response) {
+                var responseObject = JSON.parse(response);
+                var msg = responseObject.messages;
+                var success = responseObject.success;
+                if (success == 1) {
+                  toastr.success(msg);
+                  $(this).parents(".modal").modal("hide")
+                  setTimeout(function(){
+                    window.location.reload();
+                  },1000);
+
+                } else {
+                  toastr.error(msg);
+                }
+              },
+              error: function (error) {
+                console.error("Error:", error);
+              },
+            });
+          });
+
+  function formValidate1(form_class = ''){
+        let flag = false;
+        $(".custom-form."+form_class+" .required-input").each(function( index ) {
+          var value = $(this).val();
+          var dataMax = parseFloat($(this).attr('data-max'));
+          var dataReqMax = parseFloat($(this).attr('data-req-max'));
+          var dataMin = parseFloat($(this).attr('data-min'));
+          if(value == ''){
+            flag = true;
+            var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+              return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+            }).text().trim();
+            var exit_ele = $(this).parents(".form-group").find("label.error");
+            if(exit_ele.length == 0){
+              var start ="Please enter ";
+              if($(this).prop("localName") == "select"){
+                var start ="Please select ";
+              }
+              label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+              var validation_message = start+(label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+              var label_html = "<label class='error'>"+validation_message+"</label>";
+              $(this).parents(".form-group").append(label_html)
+            }
+          }
+          else if(dataMin !== undefined && dataMin > value){
+            flag = true;
+            var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+              return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+            }).text().trim();
+            var exit_ele = $(this).parents(".form-group").find("label.error");
+            if(exit_ele.length == 0){
+              var end =" must be greater than or equal to "+dataMin;
+              label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+              label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+              label = label.charAt(0).toUpperCase() + label.slice(1);
+              var validation_message =label +end;
+              var label_html = "<label class='error'>"+validation_message+"</label>";
+              $(this).parents(".form-group").append(label_html)
+            }
+            }else if(dataMax !== undefined && dataMax < value){
+              flag = true;
+              var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+                return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+              }).text().trim();
+              var exit_ele = $(this).parents(".form-group").find("label.error");
+              if(exit_ele.length == 0){
+                var end =" must be less than or equal to "+dataMax;
+                var end =" must be less than or equal to "+dataMax;
+                if(label == 'Accept Qty'){
+                    var end =" must be less than or equal to store stock "+dataMax;
+                }
+                label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+                label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+                label = label.charAt(0).toUpperCase() + label.slice(1)
+                var validation_message =label +end;
+                var label_html = "<label class='error'>"+validation_message+"</label>";
+                $(this).parents(".form-group").append(label_html)
+              }
+          }else if(dataReqMax !== undefined && dataReqMax < value){
+              flag = true;
+              var label = $(this).parents(".form-group").find("label").contents().filter(function() {
+                return this.nodeType === 3; // Filter out non-text nodes (nodeType 3 is Text node)
+              }).text().trim();
+              var exit_ele = $(this).parents(".form-group").find("label.error");
+              if(exit_ele.length == 0){
+                var end =" must be less than or equal to "+dataReqMax;
+                var end =" must be less than or equal to "+dataReqMax;
+                if(label == 'Accept Qty'){
+                    var end =" must be less than or equal to request qty "+dataReqMax;
+                }
+                label = ((label.toLowerCase()).replace("enter", "")).replace("select", "");
+                label = (label.toLowerCase()).replace(/[^\w\s*]/gi, '');
+                label = label.charAt(0).toUpperCase() + label.slice(1)
+                var validation_message =label +end;
+                var label_html = "<label class='error'>"+validation_message+"</label>";
+                $(this).parents(".form-group").append(label_html)
+              }
+          }
+        });
+       
+        return flag;
+    }
+
+
+    $(document).on("change","#material_request_part_id",function(e){
+      e.preventDefault();
+      var part_id = $(this).val();
+      $.ajax({
+        type: "POST",
+        url: base_url+"get_store_stock_material_request",
+        data : {part_id:part_id},
+        success: function (response) {
+          var responseObject = JSON.parse(response);
+          $("#add_stock_up #material_transfer_request_qty").html("(Stock : "+responseObject.stock+")");
+          if(responseObject.sub_category != "RM count" || parseInt(responseObject.route_count) <= 0){
+            responseObject.sub_category = 0;
+            $(".rm-count-row").hide();
+          }else{
+            $(".rm-count-row").show();
+            console.log("ok")
+            $(".rm-count-row label span").html(`(${responseObject.route_count})`)
+          }
+          $("#add_stock_up .required-input-route").attr("data-max",responseObject.route_count);
+        },
+        error: function (error) {
+          console.error("Error:", error);
+        },
+      });
+    });
+
+
 </script>

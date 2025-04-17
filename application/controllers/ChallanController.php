@@ -195,93 +195,93 @@ class ChallanController extends CommonController {
 
 	public function add_challan_parts()
 	{
-		
+		error_reporting(-1);
+		ini_set('display_errors', 1);	
 		$challan_id = $this->input->post('challan_id');
 		$client_id = $this->Unit->getSessionClientId();
 		$challanPartCount = $this->db->query('SELECT COUNT(*) as count FROM `challan_parts` where challan_id = ' . $challan_id)->row();
-		if($challanPartCount->count >= 7) {
-			$this->addWarningMessage("Already 7 parts added. No more parts are allowed.");
-			$this->redirectMessage();
-			exit();
-		}
-
-		$qty = $this->input->post('qty');
-		$part_id = $this->input->post('part_id');
-		$process = $this->input->post('process');
-
-		$uniqueCheck = array(
-			'challan_id' => $challan_id,
-			'part_id' => $this->input->post('part_id'),
-
-		);
-
-		$challan_parts = $this->Crud->get_data_by_id_multiple_condition("challan_parts", $uniqueCheck);
 		$success = 0;
 		$messages = "Somthing went Wrong";
-		if ($challan_parts) {
-			$messages = "Part already present.";
-			// $this->addWarningMessage("Part already present.");
-			// $this->redirectMessage();
-		} else {
-			$child_part_data = $this->SupplierParts->getSupplierPartById($this->input->post('part_id'));
-			$data = array(
+		if($challanPartCount->count >= 7) {
+			$success = 0;
+			$messages = "Already 7 parts added. No more parts are allowed.";
+		}else{
+			$qty = $this->input->post('qty');
+			$part_id = $this->input->post('part_id');
+			$process = $this->input->post('process');
+
+			$uniqueCheck = array(
 				'challan_id' => $challan_id,
 				'part_id' => $this->input->post('part_id'),
-				'qty' => $this->input->post('qty'),
-				'remaning_qty' => $this->input->post('qty'),
-				'process' => $process,
-				'value' => $child_part_data[0]->store_stock_rate * $qty,
-				'hsn' => $child_part_data[0]->hsn_code,
-				"created_date" => $this->current_date,
-				"created_time" => $this->current_time,
-				"day" => $this->date,
-				"month" => $this->month,
-				"year" => $this->year,
+
 			);
 
-			$current_stock = $child_part_data[0]->stock;
-
-			if ((float)$qty > (float)$current_stock) {
-				$messages = "Store stock quantity is less than entered quantity.";
-				// $this->addWarningMessage("Store stock quantity is less than entered quantity.");
+			$challan_parts = $this->Crud->get_data_by_id_multiple_condition("challan_parts", $uniqueCheck);
+			if ($challan_parts) {
+				$messages = "Part already present.";
+				// $this->addWarningMessage("Part already present.");
 				// $this->redirectMessage();
 			} else {
-				$inser_query = $this->Crud->insert_data("challan_parts", $data);
-				if ($inser_query) {
-					$updateResult = $this->db->query("update child_part_stock set stock = COALESCE(stock, 0) - ".$qty.", sub_con_stock = COALESCE(sub_con_stock, 0) + ".$qty."
-					where childPartId =".$part_id." AND clientId=".$client_id);
-					if($updateResult){
-						$messages = "Part added.";
-						$success = 1;
-						// $this->addSuccessMessage("Part added.");
-					}else{
-						$messages = "Error while adding quantity to stock.";
-						// $this->addErrorMessage("Error while adding quantity to stock.");
-					}
+				$child_part_data = $this->SupplierParts->getSupplierPartById($this->input->post('part_id'));
+				$data = array(
+					'challan_id' => $challan_id,
+					'part_id' => $this->input->post('part_id'),
+					'qty' => $this->input->post('qty'),
+					'remaning_qty' => $this->input->post('qty'),
+					'process' => $process,
+					'value' => $child_part_data[0]->store_stock_rate * $qty,
+					'hsn' => $child_part_data[0]->hsn_code,
+					"created_date" => $this->current_date,
+					"created_time" => $this->current_time,
+					"day" => $this->date,
+					"month" => $this->month,
+					"year" => $this->year,
+				);
+
+				$current_stock = $child_part_data[0]->stock;
+
+				if ((float)$qty > (float)$current_stock) {
+					$messages = "Store stock quantity is less than entered quantity.";
+					// $this->addWarningMessage("Store stock quantity is less than entered quantity.");
 					// $this->redirectMessage();
-
-						/*
-						$current_stock = $child_part_data[0]->stock;
-						old code $new_stock = $current_stock - $qty;
-						$oldSubcon = $child_part_data[0]->sub_con_stock;
-						$newsubcon = $oldSubcon + $qty;
-
-						$stockUpdate = array(
-							'stock' => $new_stock,
-							'sub_con_stock' => $newsubcon,
-						);
-
-						$update = $this->Crud->update_data("child_part", $stockUpdate, $part_id);
-						if ($update) {
-							$this->addSuccessMessage("Part added successfully");
-						} else {
-							$this->addErrorMessage("Error while updating Qty to stock");
-						}*/
-
 				} else {
-					$messages = "Error while adding quantity.";
-					// $this->addErrorMessage("Error while adding quantity.");
-					// $this->redirectMessage();
+					$inser_query = $this->Crud->insert_data("challan_parts", $data);
+					if ($inser_query) {
+						$updateResult = $this->db->query("update child_part_stock set stock = COALESCE(stock, 0) - ".$qty.", sub_con_stock = COALESCE(sub_con_stock, 0) + ".$qty."
+						where childPartId =".$part_id." AND clientId=".$client_id);
+						if($updateResult){
+							$messages = "Part added.";
+							$success = 1;
+							// $this->addSuccessMessage("Part added.");
+						}else{
+							$messages = "Error while adding quantity to stock.";
+							// $this->addErrorMessage("Error while adding quantity to stock.");
+						}
+						// $this->redirectMessage();
+
+							/*
+							$current_stock = $child_part_data[0]->stock;
+							old code $new_stock = $current_stock - $qty;
+							$oldSubcon = $child_part_data[0]->sub_con_stock;
+							$newsubcon = $oldSubcon + $qty;
+
+							$stockUpdate = array(
+								'stock' => $new_stock,
+								'sub_con_stock' => $newsubcon,
+							);
+
+							$update = $this->Crud->update_data("child_part", $stockUpdate, $part_id);
+							if ($update) {
+								$this->addSuccessMessage("Part added successfully");
+							} else {
+								$this->addErrorMessage("Error while updating Qty to stock");
+							}*/
+
+					} else {
+						$messages = "Error while adding quantity.";
+						// $this->addErrorMessage("Error while adding quantity.");
+						// $this->redirectMessage();
+					}
 				}
 			}
 		}
@@ -356,15 +356,27 @@ class ChallanController extends CommonController {
 
 		$ship_addressType = $this->input->post('ship_addressType');
 		$consignee_id = $this->input->post('consignee');
-
-		$latestSeqFormat = $this->Crud->customQuery("SELECT challan_number FROM challan WHERE challan_number like '" . $this->getChallanSerialNo() . "%' order by id desc LIMIT 1");
-		foreach ($latestSeqFormat as $p) {
-			$currentChallanNo = $p->challan_number;
+		$start_year = (int) date("Y");
+		$end_year = (int) date("Y");
+        if(!((int) date("m",1) > 3)){
+        	$start_year--;
+        }
+		
+		$latestSeqFormat = $this->Crud->customQuery("
+			SELECT challan_number 
+			FROM challan 
+			WHERE challan_number like '" . $this->getChallanSerialNo() . "%' AND((year = ".$start_year." AND month >= 4) OR (year = ".$end_year." AND month <= 3)) order by id desc LIMIT 1");
+		
+		$last_number = 0;
+		if(count($latestSeqFormat) > 0 && !empty($latestSeqFormat)){
+			foreach ($latestSeqFormat as $p) {
+				$currentChallanNo = $p->challan_number;
+			}
+			$last_number = substr($currentChallanNo, strlen($this->getChallanSerialNo()));
 		}
 
-		$challan_num = substr($currentChallanNo, strlen($this->getChallanSerialNo())) + 1;
+		$challan_num = $last_number + 1;
 		$challan_number = $this->getChallanSerialNo() . $challan_num;
-
 		$data = array(
 				"clientId" => $this->Unit->getSessionClientId(),
 				"challan_number" => $challan_number,
@@ -717,9 +729,9 @@ class ChallanController extends CommonController {
 		$data['customer'] = $this->Crud->read_data("customer");
 		// $data['rejection_sales_invoice'] = $this->Crud->read_data("rejection_sales_invoice");
 		$sql = "
-			SELECT ch.*,c.customer_name as customer_name
+			SELECT ch.*,c.customer_name as customer_name,DATE(ch.created_date) as created_date
 			FROM customer_challan_part_return as ch
-			LEFT JOIN customer as c On c.id = ch.customer_id ORDER BY ch.created_date DESC ";
+			LEFT JOIN customer as c On c.id = ch.customer_id ORDER BY ch.customer_challan_part_return_id DESC ";
 		$data['customer_challan_part_return'] = $this->Crud->customQuery($sql);
 		// pr($data['customer_challan_return'],1);
 		$data['transporter'] = $this->Crud->read_data("transporter");
@@ -832,23 +844,25 @@ class ChallanController extends CommonController {
 					}
 					$total_rate = $total_amount + $gst_amount;	
 
-					$return_part_data[] = array(
-						"customer_id" => $customer_id,
-						"customer_challan_part_return_id" => $insert_id,
-						"part_id" => $part_id,
-						"qty" => $qty,
-						"created_by" => $this->user_id,
-						"created_date" => date("Y-m-d H:i:s"),
-						'part_price' => $value['rate'],
-						"basic_total" => $basic_total,
-						'total_rate' =>$total_rate,
-						'cgst_amount' =>$cgst_amount,
-						'sgst_amount' =>$sgst_amount ,
-						'igst_amount' => $igst_amount,
-						'tcs_amount' =>$tcs_amount,
-						'gst_amount'=>$gst_amount
-				
-					);
+					if($qty > 0){
+						$return_part_data[] = array(
+							"customer_id" => $customer_id,
+							"customer_challan_part_return_id" => $insert_id,
+							"part_id" => $part_id,
+							"qty" => $qty,
+							"created_by" => $this->user_id,
+							"created_date" => date("Y-m-d H:i:s"),
+							'part_price' => $value['rate'],
+							"basic_total" => $basic_total,
+							'total_rate' =>$total_rate,
+							'cgst_amount' =>$cgst_amount,
+							'sgst_amount' =>$sgst_amount ,
+							'igst_amount' => $igst_amount,
+							'tcs_amount' =>$tcs_amount,
+							'gst_amount'=>$gst_amount
+					
+						);
+					}
 				}
 
 				$part_insert_id = $this->SupplierParts->saveCustomerChallanPartReturnPart($return_part_data);
@@ -1132,18 +1146,21 @@ class ChallanController extends CommonController {
                $signatureImageUrl = base_url("dist/img/signature_image/").$configuration['SignatureImage'];
             }
         }
+
+        /* added because its not aplicable */
+        $digitalSignature = "No";
+
         $data['signatureImageEnable'] =$signatureImageEnable;
         $data['signatureImageUrl'] =$signatureImageUrl;
         $data['digitalSignature'] =$digitalSignature;
         $data['copies'] = $copies;
         
 		$html_content = $this->smarty->fetch('store/return_challan_miltiple_pdf.tpl', $data, TRUE);
-		// pr($html_content,1);
+		
 		$this->pdf->loadHtml($html_content);
         $this->pdf->render();
         $pdfName = $customer_challan_part_return_id.'-Delivery-Challan-'. $type . '.pdf';
-        if($digitalSignature== "Yes" ){
-        	   
+        if($digitalSignature== "Yes"){
                 $output = $this->pdf->output();
                 $fileName = "dist/uploads/challan_return_part_print/".$pdfName;
                 $fileAbsolutePath = FCPATH.$fileName;

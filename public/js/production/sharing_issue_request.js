@@ -96,7 +96,7 @@ const page = {
             info: true,
             autoWidth: true,
             lengthChange: true,
-            // order: sorting_column,
+            order: sorting_column,
             ajax: {
                 data: {'search':data},    
                 url: "sheetProdController/get_sharing_issue_request_data",

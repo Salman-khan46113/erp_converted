@@ -105,7 +105,7 @@
                      <table id="sharing_p_q" class="table  table-striped">
                         <thead>
                            <tr>
-                              <!-- <th>Sr No</th> -->
+                              <th style="display: none;">id</th>
                               <th width="21%">Date</th>
                               <th width="21%">Shift</th>
                               <th width="21%">Machine</th>
@@ -114,12 +114,13 @@
                            </tr>
                         </thead>
                         <tbody>
+
                            <%if ($sharing_p_q) %>
                                 <%assign var='i' value=1 %>
                                 <%foreach from=$sharing_p_q item=u %>
 			                           <tr>
-			                              <!-- <td><%$i %></td> -->
-			                              <td><%$u->date %></td>
+			                              <td  style="display: none;"><%$u->id %></td>
+			                              <td><%defaultDateFormat($u->date) %></td>
 			                              <td><%$u->shift_type %></td>
 			                              <td><%$u->machine_name %></td>
 			                              <td><%$u->op_name %></td>

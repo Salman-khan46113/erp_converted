@@ -3,6 +3,33 @@ var pdf_title = "Customer Master";
 var table = '';
 const datatable = {
     init:function(){
+
+        if(export_message != "" && export_message != null){
+              toastr.options = {
+                  'closeButton': true,
+                  'debug': false,
+                  'newestOnTop': false,
+                  'progressBar': false,
+                  'positionClass': 'toast-top-right',
+                  'preventDuplicates': false,
+                  'showDuration': '1000',
+                  'hideDuration': '1000',
+                  'timeOut': '15000',
+                  'extendedTimeOut': '1000',
+                  'showEasing': 'swing',
+                  'hideEasing': 'linear',
+                  'showMethod': 'fadeIn',
+                  'hideMethod': 'fadeOut',
+              }
+          toastr.error(export_message);
+        }
+
+
+        $('#importCustomerPartsPriceOnly').on('hide.bs.modal', function () {
+           $('#global_import')[0].reset();
+                $("#customer_name_import").val("").trigger("change");
+        });
+
         let that = this;
         that.dataTable();
         $(document).on('click','.search-filter',function(e){
@@ -63,6 +90,75 @@ const datatable = {
               },
             });
           });
+        $(".global_import").submit(function(e){
+            e.preventDefault();
+           
+            var href = $(this).attr("action");
+            var id = $(this).attr("id");
+            let flag = that.formValidate(id);
+
+            if(flag){
+              return;
+            }
+
+            var formData = new FormData($('.'+id)[0]);
+
+            $.ajax({
+              type: "POST",
+              url: href,
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (response) {
+                var responseObject = JSON.parse(response);
+                var msg = responseObject.messages;
+                var success = responseObject.success;
+                $('#importCustomerPartsPriceOnly').modal('hide');
+                $('#global_import')[0].reset();
+                $("#customer_name_import").val("").trigger("change");
+                toastr.options = {
+                    'closeButton': true,
+                    'debug': false,
+                    'newestOnTop': false,
+                    'progressBar': false,
+                    'positionClass': 'toast-top-right',
+                    'preventDuplicates': false,
+                    'showDuration': '1000',
+                    'hideDuration': '1000',
+                    'timeOut': '15000',
+                    'extendedTimeOut': '1000',
+                    'showEasing': 'swing',
+                    'hideEasing': 'linear',
+                    'showMethod': 'fadeIn',
+                    'hideMethod': 'fadeOut',
+                }
+                if (success == 1) {
+                  toastr.success(msg);
+                  $(this).parents(".modal").modal("hide")
+
+                } else {
+                  toastr.error(msg);
+                }
+
+              },
+              error: function (error) {
+                console.error("Error:", error);
+              },
+            });
+          });
+        $(".global_export").submit(function(e){
+           
+            var href = $(this).attr("action");
+            var id = $(this).attr("id");
+            let flag = that.formValidate(id);
+
+            if(flag){
+              e.preventDefault();
+              return;
+            }
+
+          });
+
     },
     dataTable:function(){
         let order_disable = [{ sortable: false, targets: 2 },{ sortable: false, targets: 3 },{ sortable: false, targets: 4 },{ sortable: false, targets: 5 }];

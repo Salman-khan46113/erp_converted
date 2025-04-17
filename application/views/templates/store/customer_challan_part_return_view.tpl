@@ -162,7 +162,7 @@
                         <%if ($challan_part_return_details) %>
 
 	                        <%if ($challan_part_return_details['status'] == "Pending") %>
-	                           	<%if ($user_type == 'admin' || $user_type == 'Admin') %>
+	                           	<%if ($user_type == 'admin' || $user_type == 'Admin' || checkGroupAccess("challan_part_return","update","No")) %>
 			                        <button type="button" class="btn btn-danger ml-1" data-bs-toggle="modal" data-bs-target="#lock" <%if 	 (!$challan_part_return_part_details)%>disabled <%/if%>>
 			                        Lock Customer Parts Return
 			                        </button>

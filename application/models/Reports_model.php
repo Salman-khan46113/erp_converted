@@ -77,17 +77,17 @@ class Reports_model extends CI_Model {
                 $this->db->where("s.id", $search_params["supplier_part_id"]);
             }
             if ($search_params["status"] != "") {
-            	if($search_params["status"] == "Pending"){
+            	if($search_params["status"] == "Received"){
             		$this->db->having('bal_amnt', 0);
             	}else{
             		$this->db->having('bal_amnt >', 0);
             	}
             }
             if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
@@ -188,17 +188,17 @@ class Reports_model extends CI_Model {
                 $this->db->where("s.id", $search_params["supplier_part_id"]);
             }
             if ($search_params["status"] != "") {
-            	if($search_params["status"] == "Pending"){
-            		$this->db->having('bal_amnt', 0);
+            	if($search_params["status"] == "Received"){
+            		$this->db->having('bal_amnt ', 0);
             	}else{
             		$this->db->having('bal_amnt >', 0);
             	}
             }
             if ($search_params["date_range"] != "") {
 	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
@@ -256,7 +256,8 @@ class Reports_model extends CI_Model {
 			parts.tax_id as taxid,
 			parts.po_number,
 			parts.hsn_code,
-			sales.id as sales_id
+			sales.id as sales_id,
+			sales.vehicle_number
 			");
 
 		$this->db->from('new_sales AS sales');
@@ -283,10 +284,10 @@ class Reports_model extends CI_Model {
             }
    
             if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
@@ -300,6 +301,7 @@ class Reports_model extends CI_Model {
 	                'sales.status',
 	                'parts.qty',
 	                'sales.discount_amount',
+	                'sales.vehicle_number'
 	                // Add other fields to search as needed
 	            ];
 	            
@@ -360,16 +362,11 @@ class Reports_model extends CI_Model {
             }
             if ($search_params["date_range"] != "") {
 	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
-   			if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(sales.created_date, '%d/%m/%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
-			}
+   			
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
 	            $keyword = $search_params["value"];
@@ -382,6 +379,7 @@ class Reports_model extends CI_Model {
 	                'sales.status',
 	                'parts.qty',
 	                'sales.discount_amount',
+	                'sales.vehicle_number'
 	                // Add other fields to search as needed
 	            ];
 	            
@@ -467,10 +465,10 @@ class Reports_model extends CI_Model {
             }
    
             if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
@@ -562,10 +560,10 @@ class Reports_model extends CI_Model {
             }
    
             if ($search_params["date_range"] != "") {
-	            $date_filter =  explode((" - "),$search_params["date_range"]);
-				$data['start_date'] = $date_filter[0];
-				$data['end_date'] = $date_filter[1];
-				$this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
 			}
             
             if (isset($search_params["value"]) && $search_params["value"] != "") {
@@ -614,7 +612,373 @@ class Reports_model extends CI_Model {
         return $ret_data;
 
     }
+
+    /* scrap report data */
+    public function getScrapReportData(){
+        $this->db->select("SUM(pq.scrap_factor) as scrap_stock,sc.scrap_category,sc.scrap_category_master_id");
+        $this->db->from("p_q as pq");
+        $this->db->join('operations_bom ob', 'ob.output_part_id = pq.output_part_id AND ob.output_part_table_name = "inhouse_parts"','inner');
+        $this->db->join('customer_parts_master  cp', 'cp.part_number = ob.customer_part_number AND cp.scrap_category_id >0','inner');
+        $this->db->join('scrap_category_master sc', 'sc.scrap_category_master_id = cp.scrap_category_id
+WHERE pq.output_part_table_name = "inhouse_parts"','inner');
+        $this->db->where("pq.output_part_table_name", "inhouse_parts");
+        $this->db->group_by("cp.scrap_category_id");
+        $result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        return $ret_data;
+
+    }
    
+   	public function getScrapTransferData(){
+        $this->db->select("SUM(s.stock) as scrap_stock,s.scrap_category_id");
+        $this->db->from("scrap_transfer_stock as s");
+        $this->db->group_by("s.scrap_category_id");
+        $result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        return $ret_data;
+
+    }
+
+
+    public function getProductionScrapReportDataView($condition_arr = [],$search_params = ""){
+    	$this->db->select('pq.scrap_factor AS scrap_qty, sc.scrap_category, pq.date, in.part_number as operation_part_no, in.part_description as operation_part_name, CONCAT(s.shift_type,"/",s.name,"/",s.start_time,"/",s.end_time) AS shift,CONCAT("JO-",pq.id) as job_no,u.uom_name as uom_name');
+		$this->db->from('p_q AS pq');
+		$this->db->join('operations_bom AS ob', 'ob.output_part_id = pq.output_part_id AND ob.output_part_table_name = "inhouse_parts"', 'inner');
+		$this->db->join('inhouse_parts AS in', 'in.id = pq.output_part_id', 'inner');
+		$this->db->join('uom AS u', 'u.id = in.uom_id', 'inner');
+		$this->db->join('shifts AS s', 's.id = pq.shift_id', 'inner');
+		$this->db->join('customer_parts_master AS cp', 'cp.part_number = ob.customer_part_number AND cp.scrap_category_id > 0', 'inner');
+		$this->db->join('scrap_category_master AS sc', 'sc.scrap_category_master_id = cp.scrap_category_id', 'inner');
+		$this->db->where('pq.output_part_table_name', 'inhouse_parts');
+		// $this->db->where('po.clientId', $this->Unit->getSessionClientId());
+		if (count($condition_arr) > 0) {
+            $this->db->limit($condition_arr["length"], $condition_arr["start"]);
+            if ($condition_arr["order_by"] != "") {
+                $this->db->order_by($condition_arr["order_by"]);
+            }
+        }
+        if (is_array($search_params) && count($search_params) > 0) {
+            if ($search_params["scrap_category"] != "") {
+                $this->db->where("cp.scrap_category_id", $search_params["scrap_category"]);
+            }
+   
+            if ($search_params["date_range"] != "") {
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(pq.date, '%Y-%m-%d') BETWEEN '".$start_date."' AND '".$end_date."'");
+			}
+            
+            if (isset($search_params["value"]) && $search_params["value"] != "") {
+	            $keyword = $search_params["value"];
+	            $this->db->group_start();
+	            $fields = [
+	                'pq.scrap_factor',
+	                'sc.scrap_category',
+	                'pq.date',
+	                'in.part_number',
+	                'in.part_description ',
+	                's.shift_type',
+	                's.start_time',
+	                's.end_time',
+	                'pq.id',
+	                'u.uom_name'
+	                // Add other fields to search as needed
+	            ];
+	            
+	            foreach ($fields as $field) {
+	                $this->db->or_like($field, $keyword);
+	            }
+	            $this->db->group_end(); // End the group of OR conditions
+	        }
+        }
+
+		$result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        // pr($this->db->last_query(),1);
+        return $ret_data;
+    }
+    public function getProductionScrapReportDataCount($condition_arr = [],$search_params = ""){
+    	$this->db->select('pq.id as job_no');
+		$this->db->from('p_q AS pq');
+		$this->db->join('operations_bom AS ob', 'ob.output_part_id = pq.output_part_id AND ob.output_part_table_name = "inhouse_parts"', 'inner');
+		$this->db->join('inhouse_parts AS in', 'in.id = pq.output_part_id', 'inner');
+		$this->db->join('uom AS u', 'u.id = in.uom_id', 'inner');
+		$this->db->join('shifts AS s', 's.id = pq.shift_id', 'inner');
+		$this->db->join('customer_parts_master AS cp', 'cp.part_number = ob.customer_part_number AND cp.scrap_category_id > 0', 'inner');
+		$this->db->join('scrap_category_master AS sc', 'sc.scrap_category_master_id = cp.scrap_category_id', 'inner');
+		$this->db->where('pq.output_part_table_name', 'inhouse_parts');
+		// $this->db->where('po.clientId', $this->Unit->getSessionClientId());
+		
+        if (is_array($search_params) && count($search_params) > 0) {
+            if ($search_params["scrap_category"] != "") {
+                $this->db->where("cp.scrap_category_id", $search_params["scrap_category"]);
+            }
+   			if ($search_params["date_range"] != "") {
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(pq.date, '%Y-%m-%d') BETWEEN '".$start_date."' AND '".$end_date."'");
+			}
+            
+   			if (isset($search_params["value"]) && $search_params["value"] != "") {
+	            $keyword = $search_params["value"];
+	            $this->db->group_start();
+	            $fields = [
+	                'pq.scrap_factor',
+	                'sc.scrap_category',
+	                'pq.date',
+	                'in.part_number',
+	                'in.part_description ',
+	                's.shift_type',
+	                's.start_time',
+	                's.end_time',
+	                'pq.id',
+	                'u.uom_name'
+	                // Add other fields to search as needed
+	            ];
+	            
+	            foreach ($fields as $field) {
+	                $this->db->or_like($field, $keyword);
+	            }
+	            $this->db->group_end(); // End the group of OR conditions
+	        }
+        }
+
+		$result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        return $ret_data;
+    }
+
+    public function getProductionScrapTransferDataView($condition_arr = [],$search_params = ""){
+    	$this->db->select('st.*,cp.part_number,cp.part_description,sm.scrap_category');
+		$this->db->from('scrap_transfer_stock AS st');
+		$this->db->join('customer_parts_master AS cp', 'cp.id = st.customer_part_id', 'inner');
+		$this->db->join('scrap_category_master AS sm', 'sm.scrap_category_master_id = st.scrap_category_id', 'inner');
+		if (count($condition_arr) > 0) {
+            $this->db->limit($condition_arr["length"], $condition_arr["start"]);
+            if ($condition_arr["order_by"] != "") {
+                $this->db->order_by($condition_arr["order_by"]);
+            }
+        }
+        if (is_array($search_params) && count($search_params) > 0) {
+           if ($search_params["supplier"] > 0 ) {
+                $this->db->where("c.supplier_id", $search_params["supplier"]);
+            }
+   
+            if ($search_params["date_range"] != "") {
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(st.added_date, '%Y-%m-%d') BETWEEN '".$start_date."' AND '".$end_date."'");
+			}
+            
+            if (isset($search_params["value"]) && $search_params["value"] != "") {
+	            $keyword = $search_params["value"];
+	            $this->db->group_start();
+	            $fields = [
+	                'cp.part_number',
+	                'cp.part_description',
+	                // Add other fields to search as needed
+	            ];
+	            
+	            foreach ($fields as $field) {
+	                $this->db->or_like($field, $keyword);
+	            }
+	            $this->db->group_end(); // End the group of OR conditions
+	        }
+        }
+
+		$result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        // pr($this->db->last_query(),1);
+        return $ret_data;
+    }
+	public function challanTableOut($condition_arr = [],$search_params = ""){
+    	$this->db->select('cp.*,c.challan_number,s.gst_number,ch.part_number,ch.part_description,c.created_date as created_date_val');
+		$this->db->from('challan AS c');
+		$this->db->join('challan_parts AS cp', 'cp.challan_id = c.id', 'inner');
+		$this->db->join('supplier AS s', 's.id = c.supplier_id', 'inner');
+		$this->db->join('child_part AS ch', 'ch.id = cp.part_id', 'inner');
+		$this->db->where("c.status","completed");
+		if (count($condition_arr) > 0) {
+            $this->db->limit($condition_arr["length"], $condition_arr["start"]);
+            if ($condition_arr["order_by"] != "") {
+                $this->db->order_by($condition_arr["order_by"]);
+            }else{
+				$this->db->order_by("c.id","DESC");
+			}
+        }
+        if (is_array($search_params) && count($search_params) > 0) {
+            if ($search_params["supplier"] > 0 ) {
+                $this->db->where("c.supplier_id", $search_params["supplier"]);
+            }
+   
+            if ($search_params["date_range"] != "") {
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(c.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
+			}
+            
+            if (isset($search_params["value"]) && $search_params["value"] != "") {
+	            $keyword = $search_params["value"];
+	            $this->db->group_start();
+	            $fields = [
+	                'ch.part_number',
+	                'ch.part_description',
+					'c.challan_number',
+					's.gst_number',
+					'cp.qty',
+					'cp.value'
+	                // Add other fields to search as needed
+	            ];
+	            
+	            foreach ($fields as $field) {
+	                $this->db->or_like($field, $keyword);
+	            }
+	            $this->db->group_end(); // End the group of OR conditions
+	        }
+        }
+		$result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+        // pr($this->db->last_query(),1);
+        return $ret_data;
+    }
+	public function challanTableOutCount($condition_arr = [],$search_params = ""){
+    	$this->db->select('count(c.id) as total_records');
+		$this->db->from('challan AS c');
+		$this->db->join('challan_parts AS cp', 'cp.challan_id = c.id', 'inner');
+		$this->db->join('supplier AS s', 's.id = c.supplier_id', 'inner');
+		$this->db->join('child_part AS ch', 'ch.id = cp.part_id', 'inner');
+		$this->db->where("c.status","completed");
+        if (is_array($search_params) && count($search_params) > 0) {
+            if ($search_params["supplier"] > 0 ) {
+                $this->db->where("c.supplier_id", $search_params["supplier"]);
+            }
+   
+            if ($search_params["date_range"] != "") {
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(c.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
+			}
+            
+            if (isset($search_params["value"]) && $search_params["value"] != "") {
+	            $keyword = $search_params["value"];
+	            $this->db->group_start();
+	            $fields = [
+	                'ch.part_number',
+	                'ch.part_description',
+					'c.challan_number',
+					's.gst_number',
+					'cp.qty',
+					'cp.value'
+	                // Add other fields to search as needed
+	            ];
+	            
+	            foreach ($fields as $field) {
+	                $this->db->or_like($field, $keyword);
+	            }
+	            $this->db->group_end(); // End the group of OR conditions
+	        }
+        }
+		$result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->row_array() : [];
+        // pr($this->db->last_query(),1);
+        return $ret_data;
+    }
+	public function challanTableIn($condition_arr = [],$search_params = ""){
+    	$this->db->select('c.challan_number,s.gst_number,ch.part_number,ch.part_description,sip.recevied_req_qty,c.created_date as created_date_val');
+		$this->db->from('subcon_po_inwarding_parts AS sip');
+		$this->db->join('subcon_po_inwarding_history AS sih', 'sih.subcon_po_inwarding_parts_id = sip.id', 'inner');
+		$this->db->join('challan AS c', 'c.id = sih.challan_id', 'inner');
+		$this->db->join('supplier AS s', 's.id = c.supplier_id', 'inner');
+		$this->db->join('child_part AS ch', 'ch.id = sip.input_part_id', 'inner');
+		if (count($condition_arr) > 0) {
+            $this->db->limit($condition_arr["length"], $condition_arr["start"]);
+            if ($condition_arr["order_by"] != "") {
+                $this->db->order_by($condition_arr["order_by"]);
+            }else{
+				$this->db->order_by("c.id","DESC");
+			}
+        }
+        if (is_array($search_params) && count($search_params) > 0) {
+            if ($search_params["supplier"] > 0 ) {
+                $this->db->where("c.supplier_id", $search_params["supplier"]);
+            }
+   
+            if ($search_params["date_range"] != "") {
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(c.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
+			}
+            
+            if (isset($search_params["value"]) && $search_params["value"] != "") {
+	            $keyword = $search_params["value"];
+	            $this->db->group_start();
+	            $fields = [
+	                'ch.part_number',
+	                'ch.part_description',
+					'c.challan_number',
+					's.gst_number',
+					'sip.recevied_req_qty'
+	                // Add other fields to search as needed
+	            ];
+	            
+	            foreach ($fields as $field) {
+	                $this->db->or_like($field, $keyword);
+	            }
+	            $this->db->group_end(); // End the group of OR conditions
+	        }
+        }
+		$result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->result_array() : [];
+		// pr($this->db->last_query(),1);
+        return $ret_data;
+    }
+	public function challanTableInCount($condition_arr = [],$search_params = ""){
+    	$this->db->select('count(sip.id) as total_records');
+		$this->db->from('subcon_po_inwarding_parts AS sip');
+		$this->db->join('subcon_po_inwarding_history AS sih', 'sih.subcon_po_inwarding_parts_id = sip.id', 'inner');
+		$this->db->join('challan AS c', 'c.id = sih.challan_id', 'inner');
+		$this->db->join('supplier AS s', 's.id = c.supplier_id', 'inner');
+		$this->db->join('child_part AS ch', 'ch.id = sip.input_part_id', 'inner');
+        if (is_array($search_params) && count($search_params) > 0) {
+            if ($search_params["supplier"] > 0 ) {
+                $this->db->where("c.supplier_id", $search_params["supplier"]);
+            }
+   
+			if ($search_params["date_range"] != "") {
+				$date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(c.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
+			}
+            
+            if (isset($search_params["value"]) && $search_params["value"] != "") {
+	            $keyword = $search_params["value"];
+	            $this->db->group_start();
+	            $fields = [
+	                'ch.part_number',
+	                'ch.part_description',
+					'c.challan_number',
+					's.gst_number',
+					'sip.recevied_req_qty'
+	                // Add other fields to search as needed
+	            ];
+	            
+	            foreach ($fields as $field) {
+	                $this->db->or_like($field, $keyword);
+	            }
+	            $this->db->group_end(); // End the group of OR conditions
+	        }
+        }
+		$result_obj = $this->db->get();
+        $ret_data = is_object($result_obj) ? $result_obj->row_array() : [];
+        return $ret_data;
+    }
 
 
 

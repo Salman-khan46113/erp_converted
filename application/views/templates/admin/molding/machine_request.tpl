@@ -45,10 +45,10 @@
           Production
           <a hijacked="yes" href="javascript:void(0)" class="backlisting-link" title="Back to Issue Request Listing" >
             <i class="ti ti-chevrons-right" ></i>
-            <em >Material Request</em></a>
+            <em >Shop Order</em></a>
           </h1>
           <br>
-          <span >Material Request</span>
+          <span >Shop Order</span>
         </div>
       </nav>
 
@@ -72,7 +72,7 @@
          <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                <div class="modal-header">
-                  <h5 class="modal-title" id="exampleModalLabel">Add Machine Request
+                  <h5 class="modal-title" id="exampleModalLabel">Add Shop Order
                      <span style="font-style:normal;color:blue;">
                      <%if ($isMultiClient == "true") %> - <%$this->session->userdata['clientUnitName'] %><%/if%></span>
                   </h5>
@@ -130,6 +130,14 @@
                           </select>
                       </div>
                     </div>
+                    <div class="col-lg-12">
+                      <div class="form-group">
+                          <label for="on click url">Enter Qty <span
+                            class="text-danger">*</span></label>
+                          <input type="text" step="any"  placeholder="Enter Qty"
+                            class="form-control onlyNumericInput  required-input" name="qty" data-min="1">
+                    </div>
+                  </div>
                   </div>
                 </div>
                <div class="modal-footer">
@@ -171,7 +179,90 @@
       <!--/ Responsive Table -->
     </div>
     <!-- /.col -->
+    <div class="modal fade" id="editPromo" tabindex="-1" role="dialog"
+    aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+       <div class="modal-content">
+          <div class="modal-header">
+             <h5 class="modal-title" id="exampleModalLabel">Edit Machine Request
+                <span style="font-style:normal;color:blue;">
+               </span>
+             </h5>
+             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
 
+             </button>
+          </div>
+          <form action="javascript:void(0)" class="custom-form update_machine_request" method="POST"
+          enctype="multipart/form-data">
+          <div class="modal-body">
+             <div class="row">
+               <div class="col-lg-12">
+               <input type="hidden" value="" name="id" id="id_val" />
+                 <div class="form-group">
+                     <label for="on click url">Operator<span
+                       class="text-danger">*</span></label>
+                     <select name="u_operator_id"  id="u_operator_id"  class="form-control select2 required-input"  style="width: 100%;">
+                       <%if ($operator) %>
+                       <%foreach from=$operator item=c %>
+                       <option value="<%$c->id %>"><%$c->name %>
+                       </option>
+                       <%/foreach%>
+                       <%/if%>
+                     </select>
+                 </div>
+               </div>
+               <div class="col-lg-12">
+                 <div class="form-group">
+                     <label for="on click url">Machine<span
+                       class="text-danger">*</span></label>
+                     <select name="u_machine_id" id="u_machine_id"  class="form-control select2 required-input"  style="width: 100%;">
+                       <%if ($machine) %>
+                       <%foreach from=$machine item=c %>
+                       <option value="<%$c->id %>">
+                           <%$c->name %>
+                       </option>
+                       <%/foreach%>
+                       <%/if%>
+                     </select>
+                 </div>
+               </div>
+               <div class="col-lg-12">
+                 <div class="form-group">
+                     <label for="on click url">Customer/Part Number/Part Description<span
+                       class="text-danger">*</span></label>
+                     <br><span style="font-style:italic;color:blue;">Note: This is list of parts which are defined in BOM</span>
+                     <select name="u_customer_part_id" id="u_customer_part_id"  class="form-control select2 required-input"  style="width: 100%;">
+                       <option value="">Select</option>
+                       <%if ($customer_part) %>
+                       <%foreach from=$customer_part item=c %>
+                       <option value="<%$c->id %>">
+                           <%$c->customer_name %>/<%$c->part_number %>/<%$c->part_description %>
+                       </option>
+                       <%/foreach%>
+                       <%/if%>
+                     </select>
+                 </div>
+               </div>
+               <div class="col-lg-12">
+                 <div class="form-group">
+                     <label for="on click url">Enter Qty <span
+                       class="text-danger">*</span></label>
+                     <input type="text" step="any"  placeholder="Enter Qty"
+                       class="form-control onlyNumericInput  required-input" name="u_qty" id="u_qty" data-min="1">
+               </div>
+             </div>
+             </div>
+           </div>
+          <div class="modal-footer">
+          <button type="button" class="btn btn-secondary"
+             data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+          
+          </div>
+          </form>
+       </div>
+    </div>
+ </div>
 
     <div class="content-backdrop fade"></div>
   </div>

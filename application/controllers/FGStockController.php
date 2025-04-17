@@ -24,6 +24,9 @@ class FGStockController extends CommonController
 	public function fg_stock()
 	{
 		checkGroupAccess("fw_stock","list","Yes");
+        $entitlements = $this->session->userdata("entitlements");
+        $isSheetMetal = isset($entitlements['isSheetMetal']) && $entitlements['isSheetMetal'] != null ? "Yes" : "No";
+
 		$part_id = $this->input->post("part_id");
 		$data['inhouse_parts'] = $this->InhouseParts->getUniquePartNumber();
 		$data['customer_parts'] = $this->CustomerPart->readCustomerParts();
@@ -49,19 +52,37 @@ class FGStockController extends CommonController
         ];
         $column[] = [
             "data" => "fg_stock",
-            "title" => "Stock",
+            "title" => "FG STOCK",
             "width" => "10%",
             "className" => "dt-center",
         ];
+        // if($isSheetMetal == "Yes"){
+            $column[] = [
+                "data" => "transfer_to_inhouse_part",
+                "title" => "FG Stock Transfer",
+                "width" => "20%",
+                "className" => "dt-center status-row",
+                'orderable' => false
+            ];
+        // }
+
+        if($isSheetMetal != "Yes"){
+            $column[] = [
+                "data" => "molding_production_qty",
+                "title" => "Molding Production Qty",
+                "width" => "10%",
+                "className" => "dt-center",
+            ];
+            $column[] = [
+                "data" => "production_rejection",
+                "title" => "Production Rejection",
+                "width" => "10%",
+                "className" => "dt-center",
+            ];
+        }
         $column[] = [
-            "data" => "molding_production_qty",
-            "title" => "Molding Production Qty",
-            "width" => "10%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "production_rejection",
-            "title" => "Production Rejection",
+            "data" => "final_inspection_location",
+            "title" => "Final Inspection Location",
             "width" => "10%",
             "className" => "dt-center",
         ];
@@ -71,18 +92,8 @@ class FGStockController extends CommonController
             "width" => "10%",
             "className" => "dt-center",
         ];
-        $column[] = [
-            "data" => "final_inspection_location",
-            "title" => "Final Inspection Location",
-            "width" => "10%",
-            "className" => "dt-center",
-        ];
-        $column[] = [
-            "data" => "transfer_to_inhouse_part",
-            "title" => "Transfer To Inhouse Part",
-            "width" => "7%",
-            "className" => "dt-center status-row",
-        ];
+        
+        
         
         $data["data"] = $column;
         $data["is_searching_enable"] = true;
@@ -99,6 +110,7 @@ class FGStockController extends CommonController
         $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
+        $data['isSheetMetal'] = $isSheetMetal;
         // $ajax_json['teacher_data'] = $this->session->userdata();
         // pr($ajax_json['designation'],1);
 		$this->loadView('store/fw_stock', $data,"Yes","Yes");
@@ -129,11 +141,18 @@ class FGStockController extends CommonController
             $post_data["search"]
         );
 		// pr($data,1);
+        $entitlements = $this->session->userdata("entitlements");
+        $isSheetMetal = isset($entitlements['isSheetMetal']) && $entitlements['isSheetMetal'] != null ? "Yes" : "No";
 		foreach ($data as $key => $value) {
 			
-            if(checkGroupAccess("fw_stock","update","No")){
-            	$data[$key]['transfer_to_inhouse_part'] = "<button type='button' class='btn btn-primary fg-transfer'  data-stock='".$value['fg_stock']."' data-customer-part-id='".$value['customer_parts_master_id']."' data-part-number='".$value['part_number']."'>
+            if(checkGroupAccess("fw_stock","update","No") && $value['fg_stock'] > 0){
+                if($isSheetMetal == "Yes"){
+            	$data[$key]['transfer_to_inhouse_part'] = "<button type='button' class='btn btn-primary fg-transfer me-2'  data-stock='".$value['fg_stock']."' data-customer-part-id='".$value['customer_parts_master_id']."' data-part-number='".$value['part_number']."'>
                     Transfer To Inhouse
+                  </button>";
+                }
+                $data[$key]['transfer_to_inhouse_part'] .= "<button type='button' class='btn btn-primary fg-to-fg-transfer'  data-stock='".$value['fg_stock']."' data-customer-part-id='".$value['customer_parts_master_id']."' data-part-number='".$value['part_number']."'>
+                    Transfer To FG
                   </button>";
             }else{
             	$data[$key]['transfer_to_inhouse_part'] = display_no_character();
@@ -194,6 +213,55 @@ class FGStockController extends CommonController
 		exit;
 	}
 
+    public function transfer_fg_stock_to_fg_stock()
+    {
+
+        
+        $to_transfer_part_id  = $this->input->post('fg_part_id');
+        $part_number  = $this->input->post('part_number');
+        $customer_parts_master_id  = $this->input->post('customer_parts_master_id');
+        $stock  = (float)$this->input->post('stock');
+
+        $customer_parts_master_data = $this->CustomerPart->getCustomerPartById($customer_parts_master_id);
+        $to_transfer_part_data = $this->CustomerPart->getCustomerPartById($to_transfer_part_id);
+
+
+        $customer_parts_master_data_old_fg_stock = (float)$customer_parts_master_data[0]->fg_stock;
+        $new_stock = $customer_parts_master_data_old_fg_stock - $stock;
+        $new_stock_fg_part = (float)$to_transfer_part_data[0]->fg_stock + $stock;
+
+        $data_update_child_part = array(
+            "fg_stock" => $new_stock_fg_part,
+        );
+        $data_update_new_stock_customer_partt = array(
+            "fg_stock" => $new_stock
+        );
+
+        $query = $this->CustomerPart->updateStockById($data_update_child_part, $to_transfer_part_id);
+        $query = $this->CustomerPart->updateStockById($data_update_new_stock_customer_partt, $customer_parts_master_id);
+
+        // if ($query) {
+        //  $this->Crud->stock_report($customer_parts_master_data[0]->part_number, $inhouse_part_number, "fg_stock", "inhouse_parts", $customer_parts_master_data_old_fg_stock, $stock);
+        //  $this->addSuccessMessage('Stock transferred successfully.');
+        // } else {
+        //  $this->addErrorMessage('Unable to transfer stock');
+        // }
+        // $this->redirectMessage();
+        if ($query) {
+            $this->Crud->stock_report($customer_parts_master_data[0]->part_number, $to_transfer_part_data[0]->part_number, "fg_stock", "fg_stock", $customer_parts_master_data_old_fg_stock, $new_stock);
+            $success = 1;
+            $messages = "Stock transferred successfully.";
+        } else {
+            $success = 0;
+            $messages = "Unable to transfer stock";
+        }
+
+        $return_arr['success']=$success;
+        $return_arr['messages']=$messages;
+        echo json_encode($return_arr);
+        exit;
+    }
+
 	public function customer_parts_admin($part_id_selected = null)
 	{
         checkGroupAccess("customer_parts_admin","list","Yes");
@@ -228,7 +296,7 @@ class FGStockController extends CommonController
 			// $this->addErrorMessage('Unable to update stock. Please try again.');
 		}
 		$result = [];
-        $result['messages'] = $messages;
+        $result['msg'] = $messages;
         $result['success'] = $success;
         echo json_encode($result);
         exit();

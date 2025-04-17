@@ -107,7 +107,7 @@
 
         <button type="button" class="btn btn-seconday float-left" data-bs-toggle="modal" data-bs-target="#exampleModal" title="Add Downtime">
           <i class="ti ti-plus"></i></button>
-          <a class="btn btn-seconday" href="<$base_url($base_url) %>"><i class="ti ti-arrow-left"></i> </a>
+          <a class="btn btn-seconday" href="<%base_url('p_q_molding_production') %>"><i class="ti ti-arrow-left"></i> </a>
         </div>
 
         <div class="modal fade" id="exampleModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

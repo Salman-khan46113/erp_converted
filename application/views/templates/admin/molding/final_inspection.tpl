@@ -58,8 +58,10 @@
                            <select  name="customer_part_id" class="form-control select2 required-input" style="width: 100%;">
                            <%if ($customer_parts_master) %>
                                 <%foreach from=$customer_parts_master item=c %>
+                                <%if $c->final_inspection_location gt 0%>
 	                           <option value="<%$c->id %>">
 	                           <%$c->part_number %> / <%$c->part_description %> / <%$c->final_inspection_location %>
+                             <%/if%>
 	                           </option>
 	                           <%/foreach%>
                             <%/if%>
@@ -210,6 +212,7 @@ const datatable = {
         scrollY: true,
         bScrollCollapse: true,
         pagingType: "full_numbers",
+        order:[]
        
         
         });

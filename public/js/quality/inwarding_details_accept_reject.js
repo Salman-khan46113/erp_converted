@@ -22,17 +22,77 @@ const page = {
       let that = this;
 
      
-      $(".update_grn_qty_accept_reject,.add_rejection_flow,.update_rm_batch_mtc_report").submit(function(e){
+      $(".add_rejection_flow,.update_rm_batch_mtc_report").submit(function(e){
         e.preventDefault();
        
         var href = $(this).attr("action");
         var id = $(this).attr("id");
         let flag = that.formValidate(id);
-        console.log("ok")
         if(flag){
           return;
         }
 
+        var formData = new FormData($('.'+id)[0]);
+
+        $.ajax({
+          type: "POST",
+          url: href,
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            var responseObject = JSON.parse(response);
+            var msg = responseObject.messages;
+            var success = responseObject.success;
+            if (success == 1) {
+              toastr.success(msg);
+              $(this).parents(".modal").modal("hide")
+              setTimeout(function(){
+                window.location.reload();
+              },1000);
+
+            } else {
+              toastr.error(msg);
+            }
+          },
+          error: function (error) {
+            console.error("Error:", error);
+          },
+        });
+      });
+      $(".update_grn_qty_accept_reject").submit(function(e){
+        e.preventDefault();
+       
+        var href = $(this).attr("action");
+        var id = $(this).attr("id");
+        let flag = that.formValidate(id);
+        if(flag){
+          return;
+        }
+        
+        if($(this).parents(".item-row").find(".required-input-route").length > 0){
+          var data_max = parseFloat($(this).parents(".item-row").find(".required-input-route").data('max'));
+          var data_min = parseFloat($(this).parents(".item-row").find(".required-input-route").data('min'));
+          var value = parseFloat($(this).parents(".item-row").find(".required-input-route").val());
+          $(this).parents(".item-row").find(".rm-count-row .error").remove();
+          value = value > -1 ? parseInt(value) : "NO";
+          if(value == 'NO'){
+            var validation_message = "Please enter RM Count";
+            var label_html = "<label class='error'>"+validation_message+"</label>";
+            $(this).parents(".item-row").find(".required-input-route").after(label_html);
+            return;
+          }else if(data_min > value){
+            var validation_message = "RM Count should be greater than 0";
+            var label_html = "<label class='error'>"+validation_message+"</label>";
+            $(this).parents(".item-row").find(".required-input-route").after(label_html);
+            return;
+          }else if(data_max < value){
+            var validation_message = "RM Count should be less than or equals to "+data_max;
+            var label_html = "<label class='error'>"+validation_message+"</label>";
+            $(this).parents(".item-row").find(".required-input-route").after(label_html);
+            return;
+          }
+      }
         var formData = new FormData($('.'+id)[0]);
 
         $.ajax({

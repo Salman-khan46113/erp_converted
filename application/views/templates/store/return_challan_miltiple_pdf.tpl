@@ -129,7 +129,6 @@
 	         </th>
          <%else if ($digitalSignature == "Yes") %>
          	<th colspan="4" style="text-align:center;font-size:12px;height: 130px;">
-            
             <br><br>
             <br><br>
             <br><br>

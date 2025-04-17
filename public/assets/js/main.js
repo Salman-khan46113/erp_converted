@@ -2,9 +2,26 @@ $( document ).ready(function() {
     app.init();
 });
 var table_data ;
+var active_form_ele = '';
 if($("body .dashboard-block").length == 0){
-  // console.log("k")
-$(document).ajaxStart(function() {
+$(document).ajaxStart(function(e) {
+  if($(e.target.activeElement).parents(".modal").length || $(e.target.activeElement).parents(".filter-popup-block").length == 0 && ($(e.target.activeElement).parents("form").length || $(e.target.activeElement).attr("href") != "")){
+    if($(e.target.activeElement).attr("href") != "" && $(e.target.activeElement).attr("href") != undefined && $(e.target.activeElement).attr("href") != null){
+        $(e.target.activeElement).addClass("disable-btn")
+    }
+    
+    if(!$(e.target.activeElement.localName).hasClass("serarch-filter-input") || $(e.target.activeElement).parents(".modal").length){
+      active_form_ele = e.target.activeElement;
+      $(active_form_ele).prop('disabled', true);
+      setTimeout(function(){
+        $(active_form_ele).prop('disabled', false);
+        if($(e.target.activeElement).attr("href") != "" ){
+            $(active_form_ele).removeClass("disable-btn")
+        }
+      },5000)
+    }
+  }
+
   if($("body").hasClass("modal-open")){
      setTimeout(function(){
        $(".main-loader-box").show();
@@ -26,6 +43,37 @@ $(document).ajaxStop(function() {
       $("body").removeClass("loader-show");
   }
    
+});
+var ajaxResponses = [];
+$(document).ajaxComplete(function(event, xhr, settings) {
+  // console.log(event)
+  $(event.target.activeElement).prop('disabled', false); 
+  // console.log(event.target.activeElement)
+    // Store the response from the request
+    ajaxResponses.push(xhr.responseJSON || xhr.responseText);
+    var res = xhr.responseJSON || xhr.responseText;
+
+// if(res.indexOf("success") != -1){
+  try {
+      var response = JSON.parse(xhr.responseJSON || xhr.responseText);
+      if(response.success == 0){
+          setTimeout(function(){
+               $(event.target.activeElement).prop('disabled', false);
+          },5000);
+      }else{
+        $(event.target.activeElement).prop('disabled', false); 
+      }
+      if($(e.target.activeElement).attr("href") != "" ){
+            $(active_form_ele).removeClass("disable-btn")
+        }
+  } catch (error) {
+      // console.error("Error parsing JSON response:", error);
+      // responseData = { error: "Invalid JSON response", raw: xhr.responseText };
+  }
+    
+    
+// }
+    
 });
 }
 const app = {
@@ -120,9 +168,49 @@ const app = {
         }
         
       })
+      $('.dropdown-submenu > a').on('click', function (e) {
+        if ($(window).width() <= 768) {
+        e.preventDefault();
+                e.stopPropagation();
+        if($(this).parents(".dropdown-submenu").find(".dropdown-menu").hasClass("show")){
+            var nextMenu = $(this).next('.dropdown-menu').removeClass("show");
+            var nextMenu = $(this).next('.dropdown-menu');
+            $(this).parents(".dropdown-menu").addClass("show222");
+            nextMenu.addClass('hide');
+        }else{
+            // Only for mobile view
+                
+               
+                var nextMenu = $(this).next('.dropdown-menu');
+                nextMenu.removeClass('hide');
+                if (nextMenu.length) {
+                    // Toggle the clicked submenu
+                    nextMenu.toggleClass('show');
+                }
+           
+        }
+    }
+        
+    });
   },
   allowNumber:function(){
-    $('.onlyNumericInput').on('keypress', function(event) {
+    $(document).on('keyup','.required-input-route', function(event) {
+      var charCode = (event.which) ? event.which : event.keyCode;
+
+      var value = $(this).val();
+      if (value.includes('.')  && charCode == 46 ) {
+          event.preventDefault();
+      }
+        // Allow only digits (0-9) and some specific control keys
+      if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 46) {
+              event.preventDefault();
+      }
+      value = this.value > 0 ? value : "";
+      $(this).val(value.replace(/[^0-9]/g, ''));
+      console.log(this.value.replace(/[^0-9]/g, ''));
+        
+    });
+    $(document).on('keypress','.onlyNumericInput', function(event) {
       var charCode = (event.which) ? event.which : event.keyCode;
 
       var value = $(this).val();
@@ -137,7 +225,7 @@ const app = {
       console.log(this.value.replace(/[^0-9.]/g, ''));
         
     });
-    $('.onlyNumericInput').on('input', function(event) {
+    $(document).on('input','.onlyNumericInput', function(event) {
       var charCode = (event.which) ? event.which : event.keyCode;
 
       var value = $(this).val();

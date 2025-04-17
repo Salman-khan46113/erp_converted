@@ -66,7 +66,8 @@ class CustomerPart extends CI_Model {
             FROM  customer_parts_master parts
             LEFT JOIN customer_parts_master_stock stock
             ON parts.id = stock.customer_parts_master_id 
-            AND stock.clientId = ".$this->Unit->getSessionClientId()." 
+            AND stock.clientId = ".$this->Unit->getSessionClientId()."
+            WHERE parts.part_type = 'non_scrap'
             ORDER BY parts.id desc");
         return $part_details;
     }
@@ -164,14 +165,16 @@ class CustomerPart extends CI_Model {
      * Create Customer Part Master entry including stock
      */
    public function createCustomerPart($data) {
-    $data = array(
+    $insert_data = array(
 				"part_number" => $data["part_number"],
 				"part_description" => $data["part_description"],
+                "part_type" => isset($data['part_type']) ? $data['part_type'] : "non_scrap",
+                "scrap_category_id" => isset($data['scrap_category_id']) ? $data['scrap_category_id'] : 0,
 			    "created_id" => $this->user_id,
 				"date" => $this->current_date,
 				"time" => $this->current_time,
 			);
-			$newRecordId = $this->Crud->insert_data("customer_parts_master", $data);
+			$newRecordId = $this->Crud->insert_data("customer_parts_master", $insert_data);
            
             if($newRecordId > 0) {
                 return $this->createStockRecord($newRecordId, $data);
@@ -185,6 +188,7 @@ class CustomerPart extends CI_Model {
      * Insert new stock record
      */
     public function createStockRecord($partId, $data){
+
              $stockData = array(
                     "customer_parts_master_id" => $partId,
                     "clientId"  =>  $this->Unit->getSessionClientId(),
@@ -244,7 +248,7 @@ class CustomerPart extends CI_Model {
         $this->db->select(
             'm_req.id as request_no,m_req.id as id, m.name as machine_name, o.name as operator_name, 
 		CONCAT(part.part_number ,"<br>(",part.part_description,")") as customer_part,CONCAT(m_req.created_date," ",m_req.created_time) as created_date, m_req.created_time, m_req.status, req_parts.id as req_parts,
-		m_req.customer_parts_master_id'
+		m_req.customer_parts_master_id,m_req.qty,m_req.operator_id,m_req.machine_id,m_req.customer_part_id'
         );
         $this->db->from(" machine_request m_req");
         $this->db->join("operator as o", "m_req.operator_id = o.id",'left');
@@ -537,6 +541,18 @@ class CustomerPart extends CI_Model {
         if(is_valid_array($search_params) && $search_params['customer_id'] > 0){
             $this->db->where('cpt.customer_id', $search_params['customer_id']);
         }
+        if(is_valid_array($search_params) && $search_params['status'] != ""){
+            if($search_params['status'] == "expired"){
+                $this->db->where('cpt.po_end_date < CURDATE()');
+                $this->db->where('cpt.status != "closed"');
+            }else if($search_params['status'] == "pending"){
+                $this->db->where('cpt.po_end_date >= CURDATE()');
+                $this->db->where('cpt.status', $search_params['status']);
+            }else{
+                $this->db->where('cpt.status', $search_params['status']);
+            }
+            
+        }
         // pr($condition_arr,1);
         if($condition_arr["order_by"] == ''){    
             $this->db->order_by('cpt.id', 'DESC');
@@ -580,7 +596,18 @@ class CustomerPart extends CI_Model {
         if(is_valid_array($search_params) && $search_params['customer_id'] > 0){
             $this->db->where('cpt.customer_id', $search_params['customer_id']);
         }
-
+        if(is_valid_array($search_params) && $search_params['status'] != ""){
+            if($search_params['status'] == "expired"){
+                $this->db->where('cpt.po_end_date < CURDATE()');
+                $this->db->where('cpt.status != "closed"');
+            }else if($search_params['status'] == "pending"){
+                $this->db->where('cpt.po_end_date >= CURDATE()');
+                $this->db->where('cpt.status', $search_params['status']);
+            }else{
+                $this->db->where('cpt.status', $search_params['status']);
+            }
+            
+        }
         if (!empty($search_params['value'])) {
             $keyword = $search_params['value'];
             $this->db->group_start(); // Start a group of OR conditions

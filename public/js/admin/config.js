@@ -9,7 +9,7 @@ $(document).ready(function() {
         var data = $(this).attr("data-value");
         configData = JSON.parse(atob(data)); 
       
-        $(".companyLogo,.signatureLogo,.regularValue").hide();
+        $(".companyLogo,.signatureLogo,.regularValue,.poSignatureLogo").hide();
         $('#updateConfigForm input[name="display_label"]').val(configData.displayLabel);
         $('#updateConfigForm input[name="config_name"]').val(configData.config_name);
         $('#updateConfigForm input[name="configID"]').val(configData.id);
@@ -22,6 +22,9 @@ $(document).ready(function() {
         }else if (configData.config_name === "SignatureImage") {
             $(".signatureLogo").show();
             $('#updateConfigForm input[name="SignatureImage"]').val(configData.config_value);
+        }else if (configData.config_name === "PoPdfSignatureImg") {
+            $(".poSignatureLogo").show();
+            $('#updateConfigForm input[name="PoSignatureImage"]').val(configData.config_value);
         } else {
             $(".regularValue").show();
             $('#updateConfigForm input[name="config_value"]').val(configData.config_value);

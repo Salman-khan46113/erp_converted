@@ -87,6 +87,8 @@
     </nav>
     <div class="dt-top-btn d-grid gap-2 d-md-flex justify-content-md-end mb-5">
      <%if checkGroupAccess("receivable_report","export","No") %>
+      <button class="btn btn-seconday" type="button" id="downloadOustandingReport"  data-bs-toggle="modal"
+           data-bs-target="#addPromo" title="Download Sales Report"><i class="ti ti-download"></i></button>
       <button class="btn btn-seconday" type="button" id="downloadCSVBtn" title="Download CSV"><i class="ti ti-file-type-csv"></i></button>
       <button class="btn btn-seconday" type="button" id="downloadPDFBtn" title="Download PDF"><i class="ti ti-file-type-pdf"></i></button>
      <%/if%>
@@ -99,6 +101,73 @@
   </div>
 
     <div class="content-wrapper">
+        <div class="modal fade global-export" id="addPromo" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel" aria-hidden="true">
+         <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Download Receivable Report</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+
+                  </button>
+               </div>
+               <div class="modal-body">
+                  <div class="form-group ps-2">
+                     <form action="javascript:void(0)" method="POST"
+                        enctype="multipart/form-data" id="export_oustanding_report" class="global-export">
+                            
+                            <div class="form-group mb-4 hide">
+                              <label for="on click url " class="float-start mt-2 me-2">Export To :</label>
+                               <div class="row w-50 " style="    overflow-y: unset;">
+                                    <div class="form-check " style="width:36%">
+                                      <div class="ms-2 mt-2">
+                                          <input class="form-check-input me-2" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="csv" checked>
+                                      </div>
+                                      <label class="form-check-label " for="inlineRadio1">
+                                        <i class="ti ti-file-type-csv"></i>
+                                      </label>
+                                    </div>
+                                    <div class="form-check "style="width:36%">
+                                      <div class="ms-2 mt-2">
+                                            <input class="form-check-input me-2" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="pdf" >
+                                         </div>
+                                        <label class="form-check-label " for="inlineRadio2">
+                                            <i class="ti ti-file-type-pdf"></i>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <%if $all_unit_export eq 'Yes'%>
+                               <div class="form-group mt-2" >
+                                <label for="on click url" class="float-start me-3" style="width: 17%;">Client Unit <span class="text-danger">*</span>:</label>
+                                <select name="client" class="form-control select2 w-50" id="client_name">
+                                  <option value="">All</option>
+                                 <%foreach $client_data as $key => $val%>
+                                    <option <%if $selected_unit eq $val->id%>selected<%/if%>
+                                        value="<%$val->id%>"><%$val->client_unit%></option>
+                                <%/foreach%>
+                                  </select>
+                                </div>
+                            <%else%>
+                               <input  type="hidden" name="client" placeholder="Enter Name"
+                             class="form-control w-75" value="<%$selected_unit%>" id="client_name">
+                            <%/if%>
+                          <div class="form-group mt-2" >
+                          <label for="on click url" class="float-start me-3" style="width: 17%;">Date <span class="text-danger">*</span>:</label>
+                          <input  type="text" name="report_date" placeholder="Enter Name"
+                             class="form-control w-75" id="report_date">
+                          </div>
+                       </div>
+                       <div class="modal-footer">
+                       <button type="button" class="btn btn-secondary"
+                          data-bs-dismiss="modal">Close</button>
+                       <button type="submit" class="btn btn-primary">Save changes</button>
+                    </form>
+               </div>
+            </div>
+         </div>
+         </div>
+      </div>
         <!-- Content Header (Page header) -->
         <div class=" p-0 ms-1">
             <div class="card-header">
@@ -112,12 +181,16 @@
                         <p class="tgdp-rgt-tp-txt total_amount_paid">0.00</p>
                     </div>
                     <div class="tgdp-rgt-tp-sect">
-                        <p class="tgdp-rgt-tp-ttl">Total Balance Amount to Received</p>
+                        <p class="tgdp-rgt-tp-ttl">Total Balance Amount to Receive</p>
                         <p class="tgdp-rgt-tp-txt total_balance_amount_to_pay" title="12">0.00</p>
                     </div>
                     <div class="tgdp-rgt-tp-sect">
                         <p class="tgdp-rgt-tp-ttl">Total TDS Amount</p>
                         <p class="tgdp-rgt-tp-txt total_tds_amount" title="12">0.00</p>
+                    </div>
+                    <div class="tgdp-rgt-tp-sect">
+                        <p class="tgdp-rgt-tp-ttl">Total Debit Amount</p>
+                        <p class="tgdp-rgt-tp-txt total_debit_amount" title="12">0.00</p>
                     </div>
                 </div>
             </div>
@@ -170,7 +243,12 @@
 
                                     <form id="updateReceivableForm" method="POST" class="custom-form updateReceivableForm">
                                         <input type="hidden" name="sales_number" id="sales_number" value="<%$po->sales_number%>">
+                                        <input type="hidden" name="total_amount" id="total_amount_value" value="">
                                         <div class="row">
+                                            <div class="col-lg-12" style="text-align: -webkit-center;">
+                                                <span style="text-align: center;background: red;width: 100%;margin-bottom: 12px;    border-radius: 4px;display:block;padding: 4px;color: white;font-weight: 900;" id="error-message-block">
+                                                </span>
+                                            </div>
                                             <div class="col-lg-12">
                                                 <div class="form-group">
                                                     <label for="payment_receipt_date">Payment Receipt Date</label><span
@@ -204,13 +282,24 @@
                                                         placeholder="Transaction Details" value="">
                                                 </div>
                                                 <div class="form-group">
-                                                                                <label for="amount_received">TDS</label>
+                                                <label for="amount_received">TDS Calculate Amount : <span class="tds_calculate"></span></label>
+                                                </div>
+                                                <div class="form-group">
+                                                                                <label for="amount_received">TDS Amount</label>
                                                                                 <input type="text"
                                                                                     name="tds" id="tds_val" 
                                                                                     class="form-control onlyNumericInput"
                                                                                     aria-describedby="emailHelp"
                                                                                     placeholder="TDS" value="" >
                                                                             </div>
+                                                                            <div class="form-group">
+                                                                            <label for="amount_received">Debit Amount</label>
+                                                                            <input type="text"
+                                                                                name="debit_amount" id="debit_amount_val" 
+                                                                                class="form-control onlyNumericInput"
+                                                                                aria-describedby="emailHelp"
+                                                                                placeholder="Debit Amount" value="" >
+                                                                        </div>
                                                                             <div class="form-group">
                                                                                 <label for="amount_received">Remark</label>
                                                                                 <input type="text"
@@ -257,7 +346,7 @@
 .tgdp-rgt-tp-sect {
     float: left;
     width: 25%;
-    width: calc(25% - 19px);
+    width: calc(20% - 19px);
     border-radius: 10px;
     background: #fff;
     height: 105px;
@@ -305,5 +394,7 @@
     var base_url = <%$base_url|json_encode%>;
     var start_date = <%$start_date|json_encode%>;
     var end_date = <%$end_date|json_encode%>;
+    var export_start_date = <%$export_start_date|json_encode%>;
+    var export_end_date = <%$export_end_date|json_encode%>;
 </script>
 <script src="<%$base_url%>/public/js/reports/receivable_report.js"></script>

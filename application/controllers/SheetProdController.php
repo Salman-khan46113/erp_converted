@@ -144,7 +144,6 @@ class SheetProdController extends ProductionController
 		ORDER BY 
 			bom.id DESC");
 
-		
 		$this->load->view('child_pages/sheet_productionQty_add', $data);	//this page is same as that of final inspection qty except machine data filter
 	}
 
@@ -295,7 +294,46 @@ class SheetProdController extends ProductionController
 	public function view_p_q()
 	{
 		checkGroupAccess("view_p_q","list","Yes");
+
+		// pr($_POST,1);	
+		$post_data = $_POST;
 		$clientId = $this->Unit->getSessionClientId();
+		$machin_name = $post_data['search_machine_name'] > 0 ? "AND m.id = ".$post_data['search_machine_name'] : "";
+		$selected_machin_name = $post_data['search_machine_name'];
+
+		if($post_data['datetimes'] != ""){
+			$date_filter = $post_data['datetimes'];
+	        $date_filter =  explode((" - "),$date_filter);
+	        $data['start_date'] = $date_filter[0];
+	        $data['end_date'] = $date_filter[1];
+		}else{
+			$date_filter = date("d/m/Y", strtotime("-8 days")) ." - ". date("d/m/Y");
+	        $date_filter =  explode((" - "),$date_filter);
+	        $data['start_date'] = $date_filter[0];
+	        $data['end_date'] = $date_filter[1];
+		}
+		
+		$part_id_val = explode("|", $post_data['part_id']);
+		$part_condition = "";
+		if($post_data['part_id'] != null){
+			if($part_id_val[1] == "custom_part"){
+				$part_condition = " AND p.output_part_table_name ='customer_part' AND p.output_part_id = ".$part_id_val[0];
+			}else{
+				$part_condition = " AND p.output_part_table_name ='inhouse_parts' AND p.output_part_id = ".$part_id_val[0];
+			}
+		}
+
+		$status = "pending";
+		if(isset($post_data['status'])){
+			$status = $post_data['status'];
+		}
+		
+		$status_con = $status != "" ? "AND status = '$status'" : "";
+		
+
+        $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+        $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+		
 		$data['p_q'] = $this->Crud->customQuery('SELECT 
 					p.*, 
 					o.name AS op_name, 
@@ -312,6 +350,8 @@ class SheetProdController extends ProductionController
 					shifts s ON p.shift_id = s.id
 				WHERE 
 					m.clientId = '.$clientId.'
+					AND STR_TO_DATE(p.date, "%Y-%m-%d") BETWEEN "'.$start_date.'" AND "'.$end_date.'"
+					'.$machin_name.' '.$part_condition.' '.$status_con.'
 				ORDER BY 
 					p.date DESC 
 				');
@@ -327,16 +367,22 @@ class SheetProdController extends ProductionController
             	$output_part_data = $this->Crud->get_data_by_id("customer_part", $u->output_part_id, "id");
             }
             $data['p_q'][$key]->output_part_data = $output_part_data;
+		}
+		// pr($data['p_q'],1);
 
+		$inhouse_parts = $this->InhouseParts->readInhousePartsOnly();
+		$customer_part = $this->Crud->read_data("customer_part");
+		foreach ($customer_part as $key => $value) {
+			$value->id = $value->id."|custom_part";
+			$inhouse_parts[] = $value;
 		}
-		$inhouse_parts = [];
-		foreach ($data['p_q'] as $key => $value) {
-			$output_part_data = $value->output_part_data;
-			if(!in_array($output_part_data[0]->part_number."/".$output_part_data[0]->part_description, $inhouse_parts)){
-				$inhouse_parts[] = $output_part_data[0]->part_number."/".$output_part_data[0]->part_description;
-			}
-		}
+		// pr($inhouse_parts,1);
+		$data['status'] = $status;
+		$data['reject_remark'] = $this->Crud->read_data("reject_remark");
 		$data['inhouse_parts'] = $inhouse_parts;
+		$data['inhouse_parts'] = $inhouse_parts;
+		$data['selected_machin_name'] = $selected_machin_name;
+		$data['selected_part_id'] = $post_data['part_id'];
 		$data['machine_data'] = $this->Crud->read_data("machine", true);
 		$this->loadView('store/p_q', $data);
 	}
@@ -506,8 +552,11 @@ class SheetProdController extends ProductionController
 				JOIN 
 					shifts s ON pq.shift_id = s.id 
 				WHERE EXISTS ( SELECT 1 FROM machine m WHERE clientId = ".$clientId." AND m.id = pq.machine_id )
+				ORDER BY pq.date desc
+
 		
 		");
+		
 		$data['shifts'] = $this->Crud->read_data("shifts",true);
 		$data['operator'] = $this->Crud->read_data("operator",true);
 		$data['machine'] = $this->Crud->read_data("machine",true);
@@ -644,7 +693,7 @@ class SheetProdController extends ProductionController
         $data["base_url"] = base_url();
         // $ajax_json['teacher_data'] = $this->session->userdata();
         // pr($ajax_json['designation'],1);
-        $date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -703,6 +752,7 @@ class SheetProdController extends ProductionController
 			$data[$key]['po_number'] = '<a href="'.base_url().'inwarding_invoice/'.$value['id'].'"  class="po-number">'.$value['po_number'].'</a>';
 			$data[$key]['download_po'] = '<a href="'.base_url().'download_my_pdf/'.$value['id'].'" class="btn btn-primary">Download</a>';
 			$data[$key]['action'] = '<a data-id="'.$value['id'].'" href="javascript:void(0)" class="btn btn-danger close-po">Close</a>';
+			$data[$key]['date_time'] = getDefaultDateTime($value['date_time']);
 		}
 		$data["data"] = $data;
         $total_record = $this->SupplierParts->get_sharing_issue_request_data_Count([], $post_data["search"]);
@@ -765,24 +815,34 @@ class SheetProdController extends ProductionController
 			"status" => "completed"
 		);
 
-		$update = $this->Crud->update_data("sharing_issue_request", $data23333, $id);
-		if ($update) {
-			$new_stock = $actual_stock - $accepted_qty;
-			$new_sharing_qty = $sharing_qty + $accepted_qty;
-			$stockColName = $this->Unit->getStockColNmForClientUnit();
-			$sharingQtyColName = $this->Unit->getSharingQtyColNmForClientUnit();
+		$sharing_p_q = $this->Crud->customQuery("SELECT pq.id FROM sharing_issue_request pq WHERE pq.status = 'completed' AND pq.id = ".$id);
+		if(empty($sharing_p_q)){
+			$unit_id = $this->Unit->getSessionClientId();
+			$get_previous_qty = $this->Crud->customQuery("SELECT *FROM child_part_stock WHERE childPartId = ".$child_part_id." AND clientId = $unit_id");
+			$get_previous_qty = isset($get_previous_qty[0]->sharing_qty) && $get_previous_qty[0]->sharing_qty > 0 ? $get_previous_qty[0]->sharing_qty : 0;
+			
+			$update = $this->Crud->update_data("sharing_issue_request", $data23333, $id);
+			if ($update) {
+				$new_stock = $actual_stock - $accepted_qty;
+				$new_sharing_qty = $get_previous_qty + $accepted_qty;
+				$stockColName = $this->Unit->getStockColNmForClientUnit();
+				$sharingQtyColName = $this->Unit->getSharingQtyColNmForClientUnit();
 
-			$data2 = array(
-				$stockColName => $new_stock,
-				$sharingQtyColName => $new_sharing_qty,
-			);
-			$result2 = $this->SupplierParts->updateStockById($data2, $child_part_id);
-			// echo "<script>alert('Updated Successfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
-			$messages = "Updated Successfully";
-			$success  =1;
-		} else {
-			$messages = "Error While Updating";
-			// echo "<script>alert('Error While Updating ');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+				$data2 = array(
+					$stockColName => $new_stock,
+					$sharingQtyColName => $new_sharing_qty,
+				);
+
+				$result2 = $this->SupplierParts->updateStockById($data2, $child_part_id);
+				// echo "<script>alert('Updated Successfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+				$messages = "Updated Successfully";
+				$success  =1;
+			} else {
+				$messages = "Error While Updating";
+				// echo "<script>alert('Error While Updating ');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+			}
+		}else{
+			$messages = "Request already accepted.<br>Please refresh page.";
 		}
 		$result = [];
 		$result['messages'] = $messages;
@@ -893,7 +953,8 @@ class SheetProdController extends ProductionController
 		FROM sharing_p_q_history h 
 			JOIN child_part c ON c.id = h.output_part_id 
 			JOIN child_part cp ON cp.id = h.input_part_id 
-			WHERE h.sharing_p_q_id = ".$sharing_p_q_id);
+			WHERE h.sharing_p_q_id = ".$sharing_p_q_id."
+			ORDER BY h.id DESC");
 		
 		$data['reject_remark'] = $this->Crud->read_data("reject_remark");
 

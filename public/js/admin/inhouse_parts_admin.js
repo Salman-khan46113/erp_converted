@@ -92,69 +92,47 @@ $(document).ready(function() {
     $('#serarch-filter-input').on('keyup', function() {
             table.search(this.value).draw();
         });
-   
+    
+    $(document).on("submit",".update_inhouse",function(e){
+        e.preventDefault();
+        var href = $(this).attr("action");
+        var id = $(this).attr("id");
+        let flag = formValidate(id);
 
-    // Form validation and submission
-    $('.update_inhouse').validate({
-        rules: {
-            part_number: {
-                required: true
-            },
-            part_description: {
-                required: true
-            },
-            stock: {
-                required: true,
-                number: true // Ensures that the stock field is a number
-            },
-            id: {
-                required: true
-            }
-        },
-        messages: {
-            part_number: {
-                required: "Please enter Part Number"
-            },
-            part_description: {
-                required: "Please enter Part Description"
-            },
-            stock: {
-                required: "Please enter Stock",
-                number: "Please enter a valid number"
-            },
-            id: {
-                required: "ID is required"
-            }
-        },
-        submitHandler: function(form) {
-            $.ajax({
-                url: $(form).attr('action'),
-                type: 'POST',
-                data: new FormData(form),
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if (response) {
-                        let res = JSON.parse(response);
-                        if (res.success == 1) {
-                            toastr.success(res.msg);
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1000);
-                        } else {
-                            toastr.error(res.msg);
-                        }
-                    }
-                    $(form)[0].reset();
-                    $('.modal').modal('hide');
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    alert('An error occurred: ' + errorThrown);
-                }
-            });
-            return false; // Prevent default form submit
+        if(flag){
+          return;
         }
+        
+        var formData = new FormData($('.'+id)[0]);
+
+        $.ajax({
+          type: "POST",
+          url: href,
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            var responseObject = JSON.parse(response);
+            var msg = responseObject.messages;
+            var success = responseObject.success;
+            if (success == 1) {
+              toastr.success(msg);
+              $(this).parents(".modal").modal("hide")
+              setTimeout(function(){
+                window.location.reload();
+              },1000);
+
+            } else {
+              toastr.error(msg);
+            }
+          },
+          error: function (error) {
+            console.error("Error:", error);
+          },
+        });
     });
+
+    
     $("#import_parts_stock").submit(function(e){
         e.preventDefault();
        

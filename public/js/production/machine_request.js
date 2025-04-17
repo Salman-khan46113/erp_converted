@@ -5,7 +5,7 @@ $(document).ready(function() {
 var table = '';
 var file_name = "machine_request";
 var pdf_title = "Machine Request";
-
+var myFgModal = new bootstrap.Modal(document.getElementById('editPromo'))
 const page = {
     init: function() {
         $('#date_range_filter').daterangepicker({
@@ -18,6 +18,17 @@ const page = {
         this.dataTable();
         this.filter();
         this.initiateForm();
+
+        $(document).on("click",".edit-request",function(){
+          var data_details = JSON.parse(atob($(this).data("details")));
+          $("#editPromo #u_operator_id").val(data_details.operator_id).trigger("change");
+          $("#editPromo #u_machine_id").val(data_details.machine_id).trigger("change");
+          $("#editPromo #u_customer_part_id").val(data_details.customer_part_id).trigger("change");
+          $("#editPromo #u_qty").val(data_details.qty)
+          $("#editPromo #id_val").val(data_details.id)
+          myFgModal.show();
+          console.log(data_details)
+        })
     },
     dataTable: function(){
         var data = this.serachParams();
@@ -103,6 +114,7 @@ const page = {
             //     leftColumns: 2,
             //     // end: 1
             // },
+            order:sorting_column,
             ajax: {
                 data: {'search':data},    
                 url: "P_Molding/get_machine_request_view",
@@ -162,6 +174,40 @@ const page = {
           $.ajax({
             type: "POST",
             url: base_url+"add_machine_request",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+              var responseObject = JSON.parse(response);
+              var msg = responseObject.messages;
+              var success = responseObject.success;
+              if (success == 1) {
+                toastr.success(msg);
+                $(this).parents(".modal").modal("hide")
+                setTimeout(function(){
+                  window.location.reload();
+                },1000);
+    
+              } else {
+                toastr.error(msg);
+              }
+            },
+            error: function (error) {
+              console.error("Error:", error);
+            },
+          });
+        });
+        $(".update_machine_request").submit(function(e){
+          e.preventDefault();
+          let flag = that.formValidate("update_machine_request");
+          if(flag){
+            return;
+          }
+          var formData = new FormData($('.update_machine_request')[0]);
+    
+          $.ajax({
+            type: "POST",
+            url: base_url+"update_machine_request",
             data: formData,
             processData: false,
             contentType: false,

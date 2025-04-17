@@ -10,16 +10,44 @@ const page = {
         this.formValidation();
         let that = this;
         $(document).on("click",".edit-part",function(){
+            $("#update_report_data").find(":input").prop("disabled", false);
+            $("#update_report_data").find(":button").prop("disabled", false);
+            
+            $("#error-message-block").hide();
             var data = $(this).attr("data-value");
             data = JSON.parse(atob(data)); 
+            console.log(data);
             $('#sales_number').val(data.sales_number);
             $("#payment_date_modal").val(data.payment_receipt_date);
             $("#receivable_amount_modal").val(data.amount_received);
             $("#transection_detail_modal").val(data.transaction_details);
-            $("#tds_val").val(data.tds_amount);
+            $("#tds_val").val(data.tdsamnt);
+            $("#debit_amount_val").val(data.debit_amount);
             $("#remark").val(data.remark_val);
+            $("#total_amount_value").val(data.row_total); // bal_amnt
+            $(".tds_calculate").html(data.tds_calculate_amnt)
+            if(data.transaction_details == "" || data.transaction_details == null){
+                console.log("ij")
+                $("#tds_val").val(data.tds_calculate_amnt);
+            }
             myModal.show();
         })
+        $('#receivable_amount_modal').on('keyup', function(e){
+            var total_amount_value = parseFloat($("#total_amount_value").val());
+            var receivable_amount_modal = parseFloat($("#receivable_amount_modal").val());
+            $("#error-message-block").hide();
+            if(total_amount_value > receivable_amount_modal){
+                $("#error-message-block").show();
+                $("#error-message-block").html("Amount received less than total amount to receive.");
+            }else if(total_amount_value < receivable_amount_modal){
+                $("#error-message-block").show();
+                $("#error-message-block").html("Amount received greater than total amount to receive.");
+            }else{
+                $("#error-message-block").hide();
+            }
+            console.log(total_amount_value,receivable_amount_modal);
+            return;
+        });
         $('#updateReceivableForm').on('submit', function(e){
             e.preventDefault(); // Prevent the default form submission
             var form = $(this);
@@ -29,6 +57,7 @@ const page = {
                 event.preventDefault();
                     return;
             }
+            
             $.ajax({
                 url: base_url+'update_receivable_report',
                 type: 'POST',
@@ -55,6 +84,25 @@ const page = {
                     alert('An error occurred. Please try again.');
                 }
             });
+        });
+        $('#report_date').daterangepicker({
+            singleDatePicker: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: 'DD/MM/YYYY' // Change this format as per your requirement
+            }
+        });
+        var dateRangePicker1 = $('#report_date').data('daterangepicker');
+        dateRangePicker1.setStartDate(export_start_date);
+        dateRangePicker1.setEndDate(export_end_date);
+
+        $('#export_oustanding_report').on('submit', function(e){
+            var report_date = $("#report_date").val();
+            var type = $("[name='inlineRadioOptions']:checked").val();
+            var client = $("#client_name").val();
+            window.location.href = base_url+'sales_report_export?date='+report_date+"&type="+type+"&report_type=receivable"+"&client="+client;
+            
         });
 
     },
@@ -99,7 +147,7 @@ const page = {
                             var lines = csv.split('\n');
                             var modifiedLines = lines.map(function(line) {
                                 var values = line.split(',');
-                                values.splice(13, 1);
+                                values.splice(16, 2);
                                 return values.join(',');
                             });
                             return modifiedLines.join('\n');
@@ -137,7 +185,7 @@ const page = {
                                 }
                                 cell.alignment = alignment;
                             });
-                            row.splice(14, 1);
+                            row.splice(16,2);
                         });
                     }
                 },
@@ -174,11 +222,12 @@ const page = {
                 type: "POST",
                 dataSrc: function(json) {
                     // Log the entire response to see what extra data is included
-                    console.log('Full Response:', json);
-                    $(".total_amount_with_gst").html(json.total_with_gst_val)
-                    $(".total_tds_amount").html(json.total_tds_amount)
-                    $(".total_amount_paid").html(json.total_paid_amount)
-                    $(".total_balance_amount_to_pay").html(json.total_balance_amount_to_pay)
+                    // console.log('Full Response:', json);
+                    $(".total_amount_with_gst").html(json.total_with_gst_val).attr("title",json.total_with_gst_val);
+                    $(".total_tds_amount").html(json.total_tds_amount).attr("title",json.total_tds_amount)
+                    $(".total_amount_paid").html(json.total_paid_amount).attr("title",json.total_paid_amount)
+                    $(".total_balance_amount_to_pay").html(json.total_balance_amount_to_pay).attr("title",json.total_balance_amount_to_pay);
+                    $(".total_debit_amount").html(json.total_debit_amount).attr("title",json.total_debit_amount)
                     return json.data; // This is what populates the DataTable
                 }
             },
@@ -191,8 +240,10 @@ const page = {
         $('.dataTables_length').find('label').contents().filter(function() {
             return this.nodeType === 3; // Filter out text nodes
         }).remove();
-        $(".dataTables_length select").select2({
-            minimumResultsForSearch: Infinity
+         table.on('init.dt', function() {
+            $(".dataTables_length select").select2({
+                minimumResultsForSearch: Infinity
+            });
         });
         $('#serarch-filter-input').on('keyup', function() {
             table.search(this.value).draw();
@@ -209,7 +260,7 @@ const page = {
             showDropdowns: true,
             autoApply: true,
             locale: {
-                format: 'YYYY/MM/DD' // Change this format as per your requirement
+                format: 'DD/MM/YYYY' // Change this format as per your requirement
             }
         });
         dateRangePicker = $('#date_range_filter').data('daterangepicker');

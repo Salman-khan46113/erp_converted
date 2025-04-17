@@ -233,6 +233,12 @@
                                                 </div>
                                               </div>
                                               </div>
+                                              <div class="col-lg-6">
+                                                <div class="form-group">
+                                                  <label>TDS(%)</label><span class="text-danger"></span>
+                                                    <input type="text" step="any" value="0" name="tds" class="form-control onlyNumericInput" aria-describedby="emailHelp" placeholder="Discount">
+                                                </div>
+                                              </div>
                                                              
                                             </div>
                                             <div class="modal-footer">
@@ -269,6 +275,7 @@
                                    
                                     <tbody>
                                         <%assign var="i" value=1%>
+                                        
                                         <%if $customers%>
                                             <%foreach from=$customers item=t%>
                                                 <tr>
@@ -417,7 +424,7 @@
                     <div class="col-lg-6">
                         <div class="form-group">
                             <label for="location">Pin</label><span class="text-danger">*</span>
-                            <input type="text" value="<%$t->pin%>" name="upin"  class="form-control" aria-describedby="emailHelp" placeholder="Enter Pin" id = "pin">
+                            <input type="text" value="<%$t->pin%>" name="pin"  class="form-control" aria-describedby="emailHelp" placeholder="Enter Pin" id = "pin">
                         </div>
                     </div>
                     <div class="col-lg-6">
@@ -461,6 +468,12 @@
                                                   <label  class="form-check-label" for="discountType">Percentage</label>
                                                 </div>
                                               </div>
+                                              </div>
+                                               <div class="col-lg-6">
+                                                <div class="form-group">
+                                                  <label>TDS(%)</label><span class="text-danger"></span>
+                                                    <input type="text" step="any" value="0" name="tds" class="form-control onlyNumericInput" aria-describedby="emailHelp" id="update_tds" placeholder="Discount">
+                                                </div>
                                               </div>
                 </div>
                 <div class="modal-footer">

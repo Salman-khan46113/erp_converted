@@ -761,10 +761,10 @@ class SupplierParts extends CI_Model {
         //     $this->db->where('grn.created_year', $search_params['year']);
         // }
         if ($search_params["date_range"] != "") {
-                $date_filter =  explode((" - "),$search_params["date_range"]);
-                $data['start_date'] = $date_filter[0];
-                $data['end_date'] = $date_filter[1];
-               $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+            $date_filter =  explode((" - "),$search_params["date_range"]);
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+                $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
         }
         if ($search_params["supplier_search"] > 0) {
              $this->db->where('po.supplier_id', $search_params["supplier_search"]);
@@ -827,10 +827,10 @@ class SupplierParts extends CI_Model {
         //     $this->db->where('grn.created_year', $search_params['year']);
         // }
         if ($search_params["date_range"] != "") {
-                $date_filter =  explode((" - "),$search_params["date_range"]);
-                $data['start_date'] = $date_filter[0];
-                $data['end_date'] = $date_filter[1];
-               $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+            $date_filter =  explode((" - "),$search_params["date_range"]);
+            $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+            $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+            $this->db->where("STR_TO_DATE(grn.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
         }
         if ($search_params["supplier_search"] > 0) {
              $this->db->where('po.supplier_id', $search_params["supplier_search"]);
@@ -1380,9 +1380,9 @@ class SupplierParts extends CI_Model {
         }
         if ($search_params["date_range"] != "") {
                 $date_filter =  explode((" - "),$search_params["date_range"]);
-                $data['start_date'] = $date_filter[0];
-                $data['end_date'] = $date_filter[1];
-               $this->db->where("STR_TO_DATE(s.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+                $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+                $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+               $this->db->where("STR_TO_DATE(s.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
         }
         if (is_array($search_params) && count($search_params) > 0) {
             if ($search_params["created_year"] != "") {
@@ -1415,10 +1415,10 @@ class SupplierParts extends CI_Model {
         $this->db->join("child_part as c", "c.id = s.child_part_id",'left');
         $this->db->where("s.clientId",$clientId);
         if ($search_params["date_range"] != "") {
-                $date_filter =  explode((" - "),$search_params["date_range"]);
-                $data['start_date'] = $date_filter[0];
-                $data['end_date'] = $date_filter[1];
-               $this->db->where("STR_TO_DATE(s.created_date, '%d-%m-%Y') BETWEEN '".$date_filter[0]."' AND '".$date_filter[1]."'");
+            $date_filter =  explode((" - "),$search_params["date_range"]);
+            $start_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[0])));
+            $end_date = date("Y/m/d", strtotime(str_replace('/', '-', $date_filter[1])));
+           $this->db->where("STR_TO_DATE(s.created_date, '%d-%m-%Y') BETWEEN '".$start_date."' AND '".$end_date."'");
         }
         if (is_array($search_params) && count($search_params) > 0) {
             if ($search_params["created_year"] != "") {

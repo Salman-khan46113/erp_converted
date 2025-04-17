@@ -150,7 +150,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([[10, 'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		// $this->load->view('header.php',$data);
@@ -310,7 +310,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		$data['created_year'] = $created_year;
@@ -533,7 +533,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([[10, 'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 
@@ -905,7 +905,13 @@ class Welcome extends CommonController
 	{
         checkGroupAccess("customer_master","list","Yes");
 		$data['customers'] = $this->Crud->read_data("customer");
-        // pr($data,1);
+
+        $data['export_message'] = "";
+        if($this->session->userdata('export_message') != "" && $this->session->userdata('export_message') != null){
+            $data['export_message'] = $this->session->userdata('export_message');
+            $this->session->set_userdata('export_message',"");
+        }
+        
 		$data['entitlements'] = $this->session->userdata('entitlements');
 		$this->loadView('customer/customer_master', $data);
 	}
@@ -975,6 +981,7 @@ class Welcome extends CommonController
             "width" => "100px",
             "className" => "dt-center",
         ];
+        $data['supplier_list'] = $this->Crud->read_data("supplier");
         $data["data"] = $column;
         $data["is_searching_enable"] = true;
         $data["is_paging_enable"] = true;
@@ -1186,7 +1193,7 @@ class Welcome extends CommonController
 			LEFT JOIN supplier as s ON  s.id  = np.supplier_id
 			WHERE i.delivery_unit = '".$this->Unit->getSessionClientUnitName()."'"." 
             ORDER BY i.id DESC");
-        
+        // pr($data['inwarding_data'],1);
         // pr($this->db->last_query());
 		$data['isMultiClient'] = $this->session->userdata['isMultipleClientUnits'];
 		// $this->load->view('header');
@@ -1229,6 +1236,11 @@ class Welcome extends CommonController
 				"child_part_id" => $p->part_id,
 				"supplier_id" =>  $data['supplier'][0]->id );
 			$child_part_data = $this->Crud->get_data_by_id_multiple_condition("child_part_master", $data_where);
+			$data_where = array(
+				"id" => $p->part_id,
+			);
+			$child_part = $this->Crud->get_data_by_id_multiple_condition("child_part", $data_where);
+			$data['po_parts'][$key]->sub_category = $child_part[0]->sub_category;
 			$data['po_parts'][$key]->child_part_data = $child_part_data;
 			// $gst_structure_data = $this->Crud->get_data_by_id("gst_structure", $p->tax_id, "id");
 			$uom_data = $this->Crud->get_data_by_id("uom", $p->uom_id, "id");
@@ -1336,6 +1348,10 @@ class Welcome extends CommonController
           // pr($data['po_parts'],1);
 	   // pr($status,1);
 		// $this->load->view('header');
+
+		$configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
+        $data['configuration'] = array_column($configuration, "config_value","config_name");
+		// pr($data['configuration'],1);
 		$this->loadView('store/inwarding_details', $data);
 		// $this->load->view('footer');
 	}
@@ -1701,8 +1717,10 @@ class Welcome extends CommonController
 		);
 
 		$data['po_parts'] = $this->Crud->get_data_by_id("po_parts", $new_po_id, "po_id");
+        $part_added = "Yes";
 
 		foreach ($data['po_parts'] as $key => $p) {
+
 			$child_part = $this->Crud->get_data_by_id("child_part", $p->part_id, "id");
 			$data['po_parts'][$key]->child_part = $child_part;
 			$child_part_data = $this->Crud->get_data_by_id("child_part_master", $p->part_id, "child_part_id");
@@ -1719,6 +1737,9 @@ class Welcome extends CommonController
                 //         'grn_number' => $inwarding_data[0]->grn_number,
            	);
            	$grn_details_data = $this->Crud->get_data_by_id_multiple("grn_details", $arr1);
+            if(count($grn_details_data) > 0 && !($grn_details_data[0]->verified_qty > 0)){
+                $part_added = "No";
+            }
            	$data['po_parts'][$key]->grn_details_data = $grn_details_data;
 
            	$arr2 = array(
@@ -1731,6 +1752,7 @@ class Welcome extends CommonController
             $rejection_flow_data = $this->Crud->get_data_by_id_multiple("rejection_flow", $arr2);
             $data['po_parts'][$key]->rejection_flow_data = $rejection_flow_data;
 		}
+       
 
 		$arr = array(
             'inwarding_id' => $inwarding_data[0]->id,
@@ -1768,8 +1790,11 @@ class Welcome extends CommonController
         $data['minus_price'] = $minus_price;
         $data['plus_price'] = $plus_price;
         $data['status'] = $status;
+        $data['part_added'] = $part_added;
         // pr($data,1);
 		// $this->load->view('header');
+		$configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
+        $data['configuration'] = array_column($configuration, "config_value","config_name");
 		$this->loadView('store/inwarding_details_validation', $data);
 		// $this->load->view('footer');
 	}
@@ -1805,14 +1830,17 @@ class Welcome extends CommonController
 
 		$invoice_number = $inwarding_data[0]->invoice_number;
 		$supplier_id = $data['supplier'][0]->id;
-		$data['po_parts'] = $this->Crud->customQuery("SELECT p.*,u.uom_name as uom_name,gd.qty as grn_qty,gd.verified_qty as verified_qty,gd.accept_qty as accept_qty,gd.reject_qty as reject_qty,gd.remark as remark,gd.rm_batch_no as rm_batch_no,gd.mtc_report as mtc_report,gd.id as grn_details_id
+		$data['po_parts'] = $this->Crud->customQuery("SELECT p.*,u.uom_name as uom_name,gd.qty as grn_qty,gd.verified_qty as verified_qty,gd.accept_route_count as accept_route_count,gd.verified_route_count as verified_route_count,gd.accept_qty as accept_qty,gd.reject_qty as reject_qty,gd.remark as remark,gd.rm_batch_no as rm_batch_no,gd.mtc_report as mtc_report,gd.id as grn_details_id
 			FROM po_parts as p
 			LEFT JOIN uom as u ON u.id = p.uom_id
 			LEFT JOIN grn_details as gd ON gd.part_id = p.part_id AND gd.inwarding_id = $inwarding_id AND gd.po_number = $new_po_id AND gd.invoice_number = '$invoice_number'
 			WHERE p.po_id = $new_po_id
 			ORDER BY p.id DESC
 		");
+		
 		foreach ($data['po_parts'] as $key => $p) {
+			$child_part = $this->Crud->get_data_by_id("child_part", $p->part_id, "id");
+			$data['po_parts'][$key]->sub_category = $child_part[0]->sub_category;
 			$data_con = array(
 				'supplier_id' => $supplier_id,
                 "child_part_id" => $p->part_id,
@@ -1828,6 +1856,7 @@ class Welcome extends CommonController
             $rejection_flow_data = $this->Crud->get_data_by_id_multiple("rejection_flow", $arr2);
             $data['po_parts'][$key]->rejection_flow_data = $rejection_flow_data[0];
 		}
+		// pr(            $data['po_parts'],1);
 
 
 		/* extra query */
@@ -1874,6 +1903,8 @@ class Welcome extends CommonController
             $is_accept_inwarding = true;
         }
         $data['is_accept_inwarding'] = $is_accept_inwarding;
+		$configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
+        $data['configuration'] = array_column($configuration, "config_value","config_name");
 		// $this->load->view('header');
 		$this->loadView('quality/inwarding_details_accept_reject', $data);
 		// $this->load->view('footer');
@@ -2190,6 +2221,7 @@ class Welcome extends CommonController
 		$data = array(
 			'name' => $this->input->post('namess'),
 			'transporter_id' => $this->input->post('transporter_id'),
+            'vehicle_number' => $this->input->post('vehicle_number'),
 			'created_by' => $this->user_id,
 			'created_date' => $this->current_date,
 			'created_time' => $this->current_time
@@ -2221,21 +2253,22 @@ class Welcome extends CommonController
 		$id = $this->input->post('id');
 
 		$data = array(
-			'name' => $this->input->post('name'),
+			'name' => $this->input->post('namess'),
 			'transporter_id' => $this->input->post('transporter_id'),
-			'created_by' => $this->user_id
+            'vehicle_number' => $this->input->post('vehicle_number')
 		);
 
 		$update = $this->Crud->update_data('transporter', $data, $id);
-
 		if ($update) {
-			$this->addSuccessMessage('Transporter updated successfully.');
+            $success = 1;
+            $msg = 'Transporter updated successfully.';
 		} else {
-			if ($this->checkNoDuplicateEntryError()) {
-				$this->addErrorMessage('Unable to update transporter details. Please try again.');
-			}
+			$msg = 'Unable to update transporter details. Please try again.';
+                $success = 0;
 		}
-		$this->redirectMessage();
+		$ret_arr['msg'] = $msg;
+        $ret_arr['success'] = $success;
+        echo json_encode($ret_arr);
 	}
 
 
@@ -3079,8 +3112,17 @@ class Welcome extends CommonController
 	public function report_stock_transfer()
 	{
         checkGroupAccess("report_stock_transfer","list","Yes");
-		$child_part_list = $this->db->query("SELECT * FROM `stock_report` WHERE clientId =".$this->Unit->getSessionClientId());
+		$child_part_list = $this->db->query("
+            SELECT s.* ,u.user_name
+            FROM `stock_report` as s
+            LEFT JOIN userinfo as u ON u.id = s.updated_by
+            WHERE s.clientId =".$this->Unit->getSessionClientId()
+        );
 		$data['stock_report'] = $child_part_list->result();
+        $date_filter = date("01/m/Y") ." - ". date("d/m/Y");
+        $date_filter =  explode((" - "),$date_filter);
+        $data['start_date'] = $date_filter[0];
+        $data['end_date'] = $date_filter[1];
 		$this->loadView('reports/report_stock_transfer', $data);
 	}
 
@@ -3241,7 +3283,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Supplier data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([[17, 'desc']]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
         // $ajax_json['teacher_data'] = $this->session->userdata();
@@ -3530,13 +3572,14 @@ class Welcome extends CommonController
 		$data['part_id'] = $this->uri->segment('2');
 		$data['child_part_master'] = $this->Crud->customQuery('SELECT DISTINCT part_number, id FROM `child_part` WHERE sub_type !="Subcon grn"');
 		$data['routing'] = $this->Crud->customQuery("
-			SELECT r.id, r.qty, o.part_number as out_partNumber, o.part_description as out_partDesc, i.part_number as in_partNumber, i.part_description as in_partDesc
+			SELECT  r.qty, o.part_number as out_partNumber, o.part_description as out_partDesc, i.part_number as in_partNumber, i.part_description as in_partDesc,r.id as id_val
 			FROM `routing` r
 			INNER JOIN child_part o ON o.id = r.part_id
 			INNER JOIN child_part i ON i.id = r.routing_part_id
 			WHERE r.part_id = ".$data['part_id']);
 
 		// $this->load->view('header');
+        // pr($data,1);
 		$this->loadView('purchase/addrouting', $data);
 		// $this->load->view('footer');
 	}
@@ -3896,7 +3939,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		$this->loadView('reports/child_part_supplier_report',$data);
@@ -4230,8 +4273,37 @@ class Welcome extends CommonController
 		// $this->load->view('header');
 		// $this->load->view('planning_year_page', $data);
 		// $this->load->view('footer');
+        $current_year = date("Y");
+        if(date("m") > 3 ){
+            $current_year++;
+        }
+
+        $month = ["APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC","JAN","FEB","MAR"];
+        $year_arr = [];
+        $month_arr = [];
+        for ($i=2021; $i < $current_year ; $i++) { 
+            $year_arr[] = [
+                "key" => $i,
+                "val" => "FY ".$i."-".($i+1)
+            ];
+            foreach ($month as $key => $value) {
+                $month_arr[] = [
+                    "Key" => $i,
+                    "value" => "FY ".$i."-".($i+1)." ".$value,
+                    "url" => "FY-".$i."/".$value."/0"
+                ];
+            }
+            
+        }
+
+        // pr($month_arr,1);
+        $data['selected_year'] = date("m") < 4 ? date("Y")-1 : date("Y");
+        $data['year_arr'] = $month_arr;
+        $data['year_array'] = $year_arr;
 		$this->loadView('customer/planning_year_page',$data);
 	}
+
+    
 
 	public function planing_data_report_view()
 	{
@@ -4468,7 +4540,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
         $data["current_year"] = date("Y");
@@ -4690,6 +4762,7 @@ class Welcome extends CommonController
         $messages = "Something went wrong.";
 		$query = $this->InhouseParts->updateStockById($data_update_child_part_inhouse, $inhouse_parts_data[0]->id);
 		if ($query) {
+            $this->Crud->stock_report($child_part[0]->part_number,$child_part[0]->part_number, "production_qty", "store_stock", $old_stock, $new_stock);
             $messages = "Updated Successfully";
             $success = 1;
 			// echo "<script>alert('Updated Successfully');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
@@ -4836,7 +4909,7 @@ class Welcome extends CommonController
 					AND m.name = "FINAL INSPECTION"
 				ORDER BY
 					p.id DESC
-				LIMIT 10');
+				');
 		foreach ($data['p_q'] as $key => $u) {
 
 			if ($u->output_part_table_name == "inhouse_parts1") {
@@ -4865,10 +4938,12 @@ class Welcome extends CommonController
             ');
 		$data['customer_parts_master'] = $role_management_data->result();
 		$data['final_inspection_request'] = $this->Crud->customQuery("
-			SELECT fi.*,cp.part_number as part_number,cp.part_description as part_description,cp.final_inspection_location as final_inspection_location
+			SELECT fi.*,cp.part_number as part_number,cp.part_description as part_description,cpm.final_inspection_location as final_inspection_location
 			FROM final_inspection_request as fi
 			LEFT JOIN customer_parts_master as cp ON cp.id = fi.customer_part_id
+             LEFT JOIN customer_parts_master_stock as cpm ON cp.id = cpm.customer_parts_master_id
 			WHERE fi.clientId = '".$this->Unit->getSessionClientId()."'
+            GROUP BY fi.id
 			ORDER BY fi.id DESC
 		");
 		// $this->load->view('header');
@@ -4963,7 +5038,7 @@ class Welcome extends CommonController
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
 		$data['part_drop_data'] = $this->welcome_model->getCustomerPartNumber();
-		
+		$data['scrap_category'] =  $this->Crud->customQuery("SELECT s.* FROM scrap_category_master s");
 		$this->getPage('customer/customer_parts_master', $data);
 	}
 
@@ -5239,6 +5314,31 @@ class Welcome extends CommonController
         echo json_encode($return_arr);
         exit;
 	}
+    public function editRoutingParts()
+    {
+        $post_data = $this->input->post();
+        $success = 0;
+        $message = "Something went wrong!";
+        $update_data = array(
+            'qty' => $post_data['qty']
+        );
+        $update = $this->Crud->update_data("routing", $update_data, $post_data['id']);
+        if ($update) {
+            $message = "Updated successfully";
+            $success = 1;
+                    // echo "<script>alert('successfully added');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+        } else {
+            $message = "Error,try again";
+            // echo "<script>alert('Error IN User  Adding ,try again');document.location='" . $_SERVER['HTTP_REFERER'] . "'</script>";
+        }
+        $return_arr = [
+            "success" => $success,
+            "messages" => $message
+        ];
+
+        echo json_encode($return_arr);
+        exit;
+    }
 	public function addRoutingParts_subcon()
 	{
 		$data = array(
@@ -5371,6 +5471,7 @@ class Welcome extends CommonController
 	public function update_p_q()
 	{
 
+        // pr("ok",1);
 		$id = $this->input->post('id');
 		$p_q_main_data = $this->Crud->get_data_by_id("p_q", $id, "id");
 
@@ -5620,6 +5721,7 @@ class Welcome extends CommonController
 	}
 	public function add_customer_parts_master()
 	{
+        // pr($this->input->post(),1);
 		$part_number = trim($this->input->post('part_number'));
 		$part_description = trim($this->input->post('part_description'));
 		$fg_rate = $this->input->post('fg_rate');
@@ -5642,12 +5744,14 @@ class Welcome extends CommonController
 			$data = array(
 				'part_number' => trim($part_number),
 				'part_description' => trim($part_description),
-				'fg_rate' => $fg_rate
+				'fg_rate' => $fg_rate,
+                "part_type" => $this->input->post("part_type"),
+                "scrap_category_id" => $this->input->post("scrap_category") > 0 ? $this->input->post("scrap_category"): 0,
 			);
-
+            
 			$inser_query = $this->CustomerPart->createCustomerPart($data);
-
 			if ($inser_query) {
+               
 				// $data = array(
 				// 	'success' => 'Data Added Successfully  !!',
 				// );
@@ -8650,6 +8754,7 @@ class Welcome extends CommonController
         $emailId = trim($this->input->post('emailId'));
         $discount = $this->input->post('discount');
         $discountType = $this->input->post('discountType');
+        $tds = $this->input->post('tds');
 
 		$data = array(
 			"customer_code" => $customerCode,
@@ -8707,6 +8812,7 @@ class Welcome extends CommonController
         				"created_id" => $this->user_id,
         				"date" => $this->current_date,
         				"time" => $this->current_time,
+                        "tds" => $tds > 0 ? $tds : 0,
         			);
         			$result = $this->Crud->insert_data("customer", $data);
         			if ($result) {
@@ -8757,7 +8863,8 @@ class Welcome extends CommonController
         $emailId = trim($this->input->post('emailId'));
         $discount = trim($this->input->post('discount'));
         $discountType = trim($this->input->post('discountType'));
-		// pr($_POST,1);	
+        $tds = $this->input->post('tds');
+		
 		$data = array(	
 			"customer_name" => $customerName,
 			"customer_code" => $customerCode,
@@ -8779,8 +8886,10 @@ class Welcome extends CommonController
             "distncFrmClnt3"=> $distance3,
             "emailId" => $emailId,
             "discount" => $discount,
-            "discountType" => $discountType
+            "discountType" => $discountType,
+            "tds" => $tds > 0 ? $tds : 0
 		);
+        // pr($data,1); 
         if(count(str_split($state_no)) > 2 || count(str_split($pos)) > 2 || count(str_split($paymentTerms)) > 2){
             $message = count(str_split($paymentTerms)) > 2 ? "Payment terms must be 2 digit" : (count(str_split($state_no)) > 2 ? "State no must be 2 digit" : "Pos must be 2 digit");
         }else{
@@ -9015,6 +9124,7 @@ class Welcome extends CommonController
                 "discount" => $discount,
                 "discount_type" => $discount_type
 			);
+            // pr($data,1);
 			$supplier_id = $this->input->post('supplier_id');
 			$result = $this->welcome_model->update_supplier_data($data,$supplier_id);
 			if ($result) {
@@ -10036,6 +10146,7 @@ class Welcome extends CommonController
 		$selected_customer_part_number = $this->input->post("selected_customer_part_number");
 		$data['selected_customer_part_number'] = $selected_customer_part_number;
 		if (!empty($selected_customer_part_number)) {
+
 			$data['operations_bom'] = $this->Crud->get_data_by_id("operations_bom", $selected_customer_part_number, "customer_part_number");
 		} else {
 			$data['operations_bom'] = array();
@@ -10043,8 +10154,10 @@ class Welcome extends CommonController
 			// $data['operations_bom'] = $role_management_data->result();
 
 		}
-
-		foreach ($operations_bom as $po) {
+        // pr($this->db->last_query(),1);
+        $data['customer_data'] = [];
+		foreach ($data['operations_bom'] as $po) {
+            // pr($po);
 			$current_stock = "";
 			$type = "";
 
@@ -10053,23 +10166,24 @@ class Welcome extends CommonController
 
 			if ($po->output_part_table_name == "inhouse_parts") {
 				$data['type'][$po->id] = "inhouse_parts";
-				$data['output_part_data'][$po->id] = $this->InhouseParts->getInhousePartById($po->output_part_id);
+				$output_part_data = $data['output_part_data'][$po->id] = $this->InhouseParts->getInhousePartById($po->output_part_id);
 				$data['current_stock'][$po->id] = $output_part_data[0]->production_qty;
 				$data['uom_data'][$po->id] = $this->Crud->get_data_by_id("uom", $output_part_data[0]->uom_id, "id");
 				$uom = $uom_data[0]->uom_name;
 			} else {
 				$data['type'][$po->id] = "customer_stock";
 				// echo "s";
-				// echo $po->output_part_id;
-				$data['output_part_data'][$po->id] = $this->Crud->get_data_by_id("customer_part", $po->output_part_id, "id");
-				$data['customer_parts_master_data'][$po->id] = $this->CustomerPart->getCustomerPartByPartNumber($output_part_data[0]->part_number);
-				// print_r($customer_parts_master_data);
+				// echo $po;
+				$output_part_data = $data['output_part_data'][$po->id] = $this->Crud->get_data_by_id("customer_part", $po->output_part_id, "id");
+				$customer_parts_master_data = $data['customer_parts_master_data'][$po->id] = $this->CustomerPart->getCustomerPartByPartNumber($output_part_data[0]->part_number);
+				// print_r($customer_parts_master_data[0]->fg_stock);
 				$data['current_stock'][$po->id]= $customer_parts_master_data[0]->fg_stock;
 				// $uom_data = $this->Crud->get_data_by_id("uom", $output_part_data[0]->upm, "id");
 				$uom = $output_part_data[0]->uom;
 				// print_r($output_part_data);
 			}
-		}
+		} 
+        // pr($data['current_stock'],1);
 
 		// print_r($data['operations_bom']);
 		// $this->load->view('header');
@@ -10140,6 +10254,7 @@ class Welcome extends CommonController
             "title" => "Value (Challan Qty)",
             "width" => "17%",
             "className" => "dt-center",
+            "orderable"=>false
         ];
        
         $column[] = [
@@ -10147,10 +10262,11 @@ class Welcome extends CommonController
             "title" => "Value (Remaining Qty)",
             "width" => "7%",
             "className" => "dt-center",
+            "orderable"=>false
         ];
 		
 		  
-		$date_filter = date("Y/m/01") ." - ". date("Y/m/d");
+		$date_filter = date("01/m/Y") ." - ". date("d/m/Y");
         $date_filter =  explode((" - "),$date_filter);
         $data['start_date'] = $date_filter[0];
         $data['end_date'] = $date_filter[1];
@@ -10175,7 +10291,7 @@ class Welcome extends CommonController
             'public/assets/images/images/no_data_found_new.png" height="150" width="150"><br> No Employee data found..!</div>';
         $data["is_top_searching_enable"] = true;
         $data["sorting_column"] = json_encode([]);
-        $data["page_length_arr"] = [[10,50,100,200], [10,50,100,200]];
+        $data["page_length_arr"] = [[10,50,100,200,500,1000,2500], [10,50,100,200,500,1000,2500]];
         $data["admin_url"] = base_url();
         $data["base_url"] = base_url();
         $data['customer_parts_data'] = $this->Crud->customQuery('SELECT id,part_number, part_description FROM `child_part`');
@@ -10209,8 +10325,8 @@ class Welcome extends CommonController
 		$data = $this->welcome_model->getSubConReportView($condition_arr,$post_data["search"]);
         // pr($data,1);
 		foreach ($data as $key => $val) {
-			$data[$key]['value_qty'] = $val['qty'] * $val['part_rate'];
-			$data[$key]['value_qty_remaning'] = $val['remaning_qty'] * $val['part_rate'];
+			$data[$key]['value_qty'] = number_format($val['qty'] * $val['part_rate'],2,".","");
+			$data[$key]['value_qty_remaning'] = number_format($val['remaning_qty'] * $val['part_rate'],2,".","");
 			$date1 = date_create(date('Y-m-d'));
 			$date2 = date_create($val['created_date']);
 			$diff = date_diff($date1, $date2);
@@ -10292,6 +10408,9 @@ class Welcome extends CommonController
 		$data['gst_structure'] = $this->Crud->read_data("gst_structure");
 		$data['customer_part_list'] = $this->Crud->read_data("customer_part");
 		$data['bom_list'] = $this->Crud->get_data_by_id("bom", $data['id'], "customer_part_id");
+        $configuration = $this->Crud->get_data_by_id_multiple_condition("global_configuration",$criteria);
+        $configuration = array_column($configuration, "config_value","config_name");
+        $data['TritonPurchaseOrderChange'] = isset($configuration['TritonPurchaseOrderChange']) && $configuration['TritonPurchaseOrderChange'] == "Yes" ? "Yes" : "No";
 		// $this->load->view('header');
 		$this->loadView('purchase/new_po', $data);
 		// $this->load->view('footer');
@@ -11077,7 +11196,8 @@ class Welcome extends CommonController
 		$fg_rate = $this->input->post('fg_rate');
 		
 		$data = array(
-			"part_description" => trim($part_description)
+			"part_description" => trim($part_description),
+            "scrap_category_id" => $this->input->post('scrap_category') > 0 ?  $this->input->post('scrap_category') : 0
 		);
 
 		$dataStock = array(
@@ -11178,9 +11298,7 @@ class Welcome extends CommonController
         if(count($category_list) == 0){
             $data = array(
                 "parent_id" => $post_data['parent_category_id'],
-                "category_name" => $category_name,
-                "updated_by" => $this->user_id,
-                "updated_date" => date("Y-m-d H:i:s") 
+                "category_name" => $category_name 
             );
             $update_result = $this->welcome_model->update_category($data, $category_id);
             if ($update_result) {
@@ -11226,4 +11344,68 @@ class Welcome extends CommonController
         echo json_encode($return);
         exit();
     }
+
+    /* scrap category master */
+    public function scrap_category(){
+        checkGroupAccess("scrap_category","list","Yes");
+        $data['scrap_category'] = $this->Crud->customQuery("SELECT s.* FROM scrap_category_master s" );
+        $this->loadView('admin/scrap_category',$data);
+        // pr($data,1);
+    }
+    public function add_update_scrap_category()
+    {
+        $post_data = $this->input->post();
+        $scrap_category = trim($post_data['scrap_category']);
+        if(isset($post_data['scrap_category_id'])){
+            $scrap_category_id = $post_data['scrap_category_id'];
+            $success = 0;
+            $messages = "Something went wrong.";
+            $customer_part_stock = $this->Crud->customQuery("SELECT sc.* FROM scrap_category_master sc WHERE sc.scrap_category = '$scrap_category' AND sc.scrap_category_master_id != $scrap_category_id" );
+            if(!$customer_part_stock){
+                $update_arr = [
+                    "scrap_category" => $scrap_category,
+                    "updated_by" => $this->session->userdata('user_id'),
+                    "updated_date" => date("Y-m-d H:i:s")
+                ];
+                $updated_row = $this->Common_admin_model->update("scrap_category_master", $update_arr, "scrap_category_master_id", $scrap_category_id);
+                if($updated_row > 0){
+                    $messages = "Scrap category updated sucessfully";
+                    $success = 1;
+                }
+            }else{
+                $messages = "Scrap category already exist";
+            }
+        }else{
+            $customer_part_stock = $this->Crud->customQuery("SELECT sc.* FROM scrap_category_master sc WHERE sc.scrap_category = '$scrap_category'" );
+            if(!$customer_part_stock){
+                $insert_data = [
+                    "scrap_category" => $scrap_category,
+                    "added_by" => $this->session->userdata('user_id'),
+                    "added_date" => date("Y-m-d H:i:s")
+                ];
+                $insert_id = $this->Common_admin_model->insert('scrap_category_master', $insert_data);
+                if($insert_id > 0){
+                    $messages = "Scrap category added sucessfully";
+                    $success = 1;
+                }
+            }else{
+                $messages = "Scrap category already exist";
+            }
+        }
+        $result = [];
+        $result['messages'] = $messages;
+        $result['success'] = $success;
+        echo json_encode($result);
+        exit();
+    }
+    public function get_transportor_data()
+    {
+        $id = $this->input->post("id");
+        $transporter = $this->Crud->get_data_by_id("transporter", $id, "id");
+        $vehicle_number = $transporter[0]->vehicle_number != null ? $transporter[0]->vehicle_number : "";
+        $return_arr['vehicle_number'] = $vehicle_number;
+        echo json_encode($return_arr);
+        exit();
+    }
+
 }
